@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 400" width="480" height="800">
+  <defs>
+    <!-- Window cutout gradient on connector housing -->
+    <linearGradient id="kp-slot-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#555555"/>
+      <stop offset="100%" stop-color="#888888"/>
+    </linearGradient>
+
+    <!-- Pin tip metallic gradient -->
+    <linearGradient id="kp-pin-tip" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d4af37"/>
+      <stop offset="50%" stop-color="#b0a084"/>
+      <stop offset="100%" stop-color="#85755b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ============================================================ -->
+  <!-- 1. FLEX RIBBON CABLE (Extending down from keypad to connector)-->
+  <!-- ============================================================ -->
+  <g id="ribbon-cable">
+    <!-- Semi-transparent flexible ribbon plastic substrate -->
+    <rect x="63" y="260" width="114" height="96" rx="2" fill="#cadee4" fill-opacity="0.55"/>
+
+    <!-- 7 Conductive copper/gold traces (Pitch 17.0px exactly) -->
+    <!-- x = 69, 86, 103, 120, 137, 154, 171 -->
+    <line x1="69" y1="260" x2="69" y2="354" stroke="#ecc98a" stroke-width="3.4" stroke-linecap="butt"/>
+    <line x1="86" y1="260" x2="86" y2="354" stroke="#ecc98a" stroke-width="3.4" stroke-linecap="butt"/>
+    <line x1="103" y1="260" x2="103" y2="354" stroke="#ecc98a" stroke-width="3.4" stroke-linecap="butt"/>
+    <line x1="120" y1="260" x2="120" y2="354" stroke="#ecc98a" stroke-width="3.4" stroke-linecap="butt"/>
+    <line x1="137" y1="260" x2="137" y2="354" stroke="#ecc98a" stroke-width="3.4" stroke-linecap="butt"/>
+    <line x1="154" y1="260" x2="154" y2="354" stroke="#ecc98a" stroke-width="3.4" stroke-linecap="butt"/>
+    <line x1="171" y1="260" x2="171" y2="354" stroke="#ecc98a" stroke-width="3.4" stroke-linecap="butt"/>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 2. MAIN KEYPAD BODY (3x4 Matrix Faceplate: Perfectly Centered)-->
+  <!-- ============================================================ -->
+  <g id="keypad-faceplate">
+    <!-- Outer dark matte casing -->
+    <rect x="4" y="4" width="232" height="272" rx="24" fill="#333333"/>
+
+    <!-- Inner double white border lines (Balanced top & bottom padding) -->
+    <rect x="12" y="12" width="216" height="256" rx="18" fill="none" stroke="#ffffff" stroke-width="1.3"/>
+    <rect x="17" y="17" width="206" height="246" rx="14" fill="none" stroke="#ffffff" stroke-width="1.3"/>
+
+    <!-- ============================================================ -->
+    <!-- 12 BUTTONS (ROW 1: 1, 2, 3) at y=37 -->
+    <!-- ============================================================ -->
+    <!-- Button 1 -->
+    <g transform="translate(42, 37)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">1</text>
+    </g>
+    <!-- Button 2 -->
+    <g transform="translate(98, 37)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">2</text>
+    </g>
+    <!-- Button 3 -->
+    <g transform="translate(154, 37)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">3</text>
+    </g>
+
+    <!-- ============================================================ -->
+    <!-- 12 BUTTONS (ROW 2: 4, 5, 6) at y=91 -->
+    <!-- ============================================================ -->
+    <!-- Button 4 -->
+    <g transform="translate(42, 91)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">4</text>
+    </g>
+    <!-- Button 5 -->
+    <g transform="translate(98, 91)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">5</text>
+    </g>
+    <!-- Button 6 -->
+    <g transform="translate(154, 91)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">6</text>
+    </g>
+
+    <!-- ============================================================ -->
+    <!-- 12 BUTTONS (ROW 3: 7, 8, 9) at y=145 -->
+    <!-- ============================================================ -->
+    <!-- Button 7 -->
+    <g transform="translate(42, 145)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">7</text>
+    </g>
+    <!-- Button 8 -->
+    <g transform="translate(98, 145)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">8</text>
+    </g>
+    <!-- Button 9 -->
+    <g transform="translate(154, 145)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">9</text>
+    </g>
+
+    <!-- ============================================================ -->
+    <!-- 12 BUTTONS (ROW 4: *, 0, #) at y=199 -->
+    <!-- ============================================================ -->
+    <!-- Button * (Red) -->
+    <g transform="translate(42, 199)">
+      <rect width="44" height="44" rx="9" fill="#c83737" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="35" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="34" font-weight="bold" text-anchor="middle">*</text>
+    </g>
+    <!-- Button 0 (Cyan) -->
+    <g transform="translate(98, 199)">
+      <rect width="44" height="44" rx="9" fill="#37abc8" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">0</text>
+    </g>
+    <!-- Button # (Red) -->
+    <g transform="translate(154, 199)">
+      <rect width="44" height="44" rx="9" fill="#c83737" stroke="#ffffff" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#dbe3e2" font-family="'Segoe UI', 'Droid Sans', Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle">#</text>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 3. BOTTOM CONNECTOR (Housing + 7 Short Pins Opsi B) -->
+  <!-- ============================================================ -->
+  <g id="bottom-connector">
+    <!-- Solid black housing box -->
+    <rect x="58" y="354" width="124" height="34" rx="2" fill="#333333"/>
+
+    <!-- 7 Contact windows on housing -->
+    <rect x="67.7" y="376" width="2.6" height="8" fill="url(#kp-slot-grad)"/>
+    <rect x="84.7" y="376" width="2.6" height="8" fill="url(#kp-slot-grad)"/>
+    <rect x="101.7" y="376" width="2.6" height="8" fill="url(#kp-slot-grad)"/>
+    <rect x="118.7" y="376" width="2.6" height="8" fill="url(#kp-slot-grad)"/>
+    <rect x="135.7" y="376" width="2.6" height="8" fill="url(#kp-slot-grad)"/>
+    <rect x="152.7" y="376" width="2.6" height="8" fill="url(#kp-slot-grad)"/>
+    <rect x="169.7" y="376" width="2.6" height="8" fill="url(#kp-slot-grad)"/>
+
+    <!-- 7 Short Pins with Round Tips (Opsi B) -->
+    <!-- Pitch exactly 17.0px: x = 69, 86, 103, 120, 137, 154, 171, y = 394.0 -->
+    <!-- Pin 1: R1 at x=69.0 -->
+    <g transform="translate(69.0, 0)">
+      <line x1="0" y1="388" x2="0" y2="393" stroke="#ecc98a" stroke-width="2.6" stroke-linecap="butt"/>
+      <circle cx="0" cy="394.0" r="2.4" fill="url(#kp-pin-tip)" stroke="#78716c" stroke-width="0.4"/>
+    </g>
+    <!-- Pin 2: R2 at x=86.0 -->
+    <g transform="translate(86.0, 0)">
+      <line x1="0" y1="388" x2="0" y2="393" stroke="#ecc98a" stroke-width="2.6" stroke-linecap="butt"/>
+      <circle cx="0" cy="394.0" r="2.4" fill="url(#kp-pin-tip)" stroke="#78716c" stroke-width="0.4"/>
+    </g>
+    <!-- Pin 3: R3 at x=103.0 -->
+    <g transform="translate(103.0, 0)">
+      <line x1="0" y1="388" x2="0" y2="393" stroke="#ecc98a" stroke-width="2.6" stroke-linecap="butt"/>
+      <circle cx="0" cy="394.0" r="2.4" fill="url(#kp-pin-tip)" stroke="#78716c" stroke-width="0.4"/>
+    </g>
+    <!-- Pin 4: R4 at x=120.0 -->
+    <g transform="translate(120.0, 0)">
+      <line x1="0" y1="388" x2="0" y2="393" stroke="#ecc98a" stroke-width="2.6" stroke-linecap="butt"/>
+      <circle cx="0" cy="394.0" r="2.4" fill="url(#kp-pin-tip)" stroke="#78716c" stroke-width="0.4"/>
+    </g>
+    <!-- Pin 5: C1 at x=137.0 -->
+    <g transform="translate(137.0, 0)">
+      <line x1="0" y1="388" x2="0" y2="393" stroke="#ecc98a" stroke-width="2.6" stroke-linecap="butt"/>
+      <circle cx="0" cy="394.0" r="2.4" fill="url(#kp-pin-tip)" stroke="#78716c" stroke-width="0.4"/>
+    </g>
+    <!-- Pin 6: C2 at x=154.0 -->
+    <g transform="translate(154.0, 0)">
+      <line x1="0" y1="388" x2="0" y2="393" stroke="#ecc98a" stroke-width="2.6" stroke-linecap="butt"/>
+      <circle cx="0" cy="394.0" r="2.4" fill="url(#kp-pin-tip)" stroke="#78716c" stroke-width="0.4"/>
+    </g>
+    <!-- Pin 7: C3 at x=171.0 -->
+    <g transform="translate(171.0, 0)">
+      <line x1="0" y1="388" x2="0" y2="393" stroke="#ecc98a" stroke-width="2.6" stroke-linecap="butt"/>
+      <circle cx="0" cy="394.0" r="2.4" fill="url(#kp-pin-tip)" stroke="#78716c" stroke-width="0.4"/>
+    </g>
+  </g>
+</svg>
