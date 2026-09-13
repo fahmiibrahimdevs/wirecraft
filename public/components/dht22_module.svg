@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 97.4 269.4" width="97.4" height="269.4">
+  <defs>
+    <!-- Filter bayangan -->
+    <filter id="dht-drop-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="dht-pin-shadow" x="-25%" y="-10%" width="150%" height="130%">
+      <feDropShadow dx="0.8" dy="1.5" stdDeviation="1.2" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+
+    <!-- Plastic Body Sensor Gradient (AOSONG AM2302) -->
+    <linearGradient id="dht-body-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="10%" stop-color="#f8fafc"/>
+      <stop offset="85%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+
+    <!-- Breakout PCB Gradient -->
+    <linearGradient id="dht-pcb-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#27272a"/>
+      <stop offset="50%" stop-color="#18181b"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+
+    <!-- Pin Metal Gradient -->
+    <linearGradient id="dht-pin-metal" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="25%" stop-color="#cbd5e1"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="75%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ================= SENSOR CASE (WHITE AOSONG AM2302) ================= -->
+  <g filter="url(#dht-drop-shadow)">
+    <!-- Top Hanging Tab -->
+    <path d="M 20 28 Q 20 4 48.7 4 Q 77.4 4 77.4 28 Z" fill="url(#dht-body-grad)" stroke="#94a3b8" stroke-width="0.75"/>
+    <!-- Top Mounting Hole -->
+    <circle cx="48.7" cy="17" r="7.5" fill="#09090b" stroke="#cbd5e1" stroke-width="1"/>
+
+    <!-- Main White Rectangular Sensor Housing -->
+    <rect x="3.7" y="27" width="90" height="135" rx="5" fill="url(#dht-body-grad)" stroke="#94a3b8" stroke-width="0.75"/>
+    <rect x="5.7" y="29" width="86" height="131" rx="4" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.8"/>
+
+    <!-- Left & Right Beveled Ribs Edge -->
+    <line x1="11" y1="30" x2="11" y2="135" stroke="#cbd5e1" stroke-width="1"/>
+    <line x1="86.4" y1="30" x2="86.4" y2="135" stroke="#cbd5e1" stroke-width="1"/>
+
+    <!-- Air Ventilation Louver Slots (Grid 5 baris x 4 kolom) -->
+    <!-- Kolom x: 19, 36, 53, 70 -->
+    <!-- Baris 1: y=38 -->
+    <rect x="18" y="38" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="35" y="38" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="52" y="38" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="69" y="38" width="10" height="13" rx="2" fill="#09090b"/>
+
+    <!-- Baris 2: y=57 -->
+    <rect x="18" y="57" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="35" y="57" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="52" y="57" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="69" y="57" width="10" height="13" rx="2" fill="#09090b"/>
+
+    <!-- Baris 3: y=76 -->
+    <rect x="18" y="76" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="35" y="76" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="52" y="76" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="69" y="76" width="10" height="13" rx="2" fill="#09090b"/>
+
+    <!-- Baris 4: y=95 -->
+    <rect x="18" y="95" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="35" y="95" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="52" y="95" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="69" y="95" width="10" height="13" rx="2" fill="#09090b"/>
+
+    <!-- Baris 5: y=114 -->
+    <rect x="18" y="114" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="35" y="114" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="52" y="114" width="10" height="13" rx="2" fill="#09090b"/>
+    <rect x="69" y="114" width="10" height="13" rx="2" fill="#09090b"/>
+
+    <!-- Internal mesh behind louvers -->
+    <rect x="15" y="36" width="67" height="94" rx="3" fill="none" stroke="#64748b" stroke-width="0.5" opacity="0.3"/>
+
+    <!-- Brand Silkscreen / Emboss Label -->
+    <text x="48.7" y="147" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#64748b" text-anchor="middle" letter-spacing="0.5">AOSONG AM2302</text>
+  </g>
+
+  <!-- ================= 4 SOLDER JOINTS DARI SENSOR KE PCB ================= -->
+  <g>
+    <circle cx="28" cy="164" r="3.5" fill="#94a3b8" stroke="#475569" stroke-width="0.6"/>
+    <circle cx="42" cy="164" r="3.5" fill="#94a3b8" stroke="#475569" stroke-width="0.6"/>
+    <circle cx="56" cy="164" r="3.5" fill="#94a3b8" stroke="#475569" stroke-width="0.6"/>
+    <circle cx="70" cy="164" r="3.5" fill="#94a3b8" stroke="#475569" stroke-width="0.6"/>
+  </g>
+
+  <!-- ================= BREAKOUT PCB (BLACK BOARD) ================= -->
+  <g filter="url(#dht-drop-shadow)">
+    <!-- PCB Substrate (x=11, y=166, width=75.4, height=82) -->
+    <rect x="11" y="166" width="75.4" height="82" rx="4" fill="url(#dht-pcb-grad)" stroke="#27272a" stroke-width="1"/>
+    <!-- Subtil border silkscreen -->
+    <rect x="13" y="168" width="71.4" height="78" rx="3" fill="none" stroke="#ffffff" stroke-width="0.6" opacity="0.2"/>
+
+    <!-- PCB Center Mounting Hole -->
+    <circle cx="48.7" cy="195" r="11" fill="#94a3b8" stroke="#cbd5e1" stroke-width="0.8"/>
+    <circle cx="48.7" cy="195" r="7.5" fill="#09090b" stroke="#475569" stroke-width="1"/>
+
+    <!-- Silkscreen Labels (+, OUT, -) -->
+    <g font-family="'JetBrains Mono', monospace, Arial" font-size="8" font-weight="bold" fill="#ffffff" opacity="0.95">
+      <text x="32.7" y="227" text-anchor="middle">+</text>
+      <text x="49.7" y="227" text-anchor="middle">OUT</text>
+      <text x="66.7" y="227" text-anchor="middle">-</text>
+    </g>
+
+    <!-- Silkscreen Box outline mengelilingi area header -->
+    <rect x="23.2" y="233" width="53.0" height="15.5" rx="2" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.85"/>
+  </g>
+
+  <!-- ================= BREAKAWAY PIN HEADER STRIP 3-PIN ================= -->
+  <!-- Pitch 17.0px: Pin 1(+)=32.7, Pin 2(OUT)=49.7, Pin 3(-)=66.7 -->
+  <!-- y Header: 234 .. 248 (H=14px), Pin menjulur sampai y=269.4 -->
+  <g id="pin-header-strip" filter="url(#dht-drop-shadow)">
+    <!-- 1. Badan Inti Plastik Hitam Yang Menghubungkan 3 Segmen -->
+    <rect x="24.2" y="234" width="51.0" height="14" rx="2" fill="#000000"/>
+
+    <!-- 2. Segmen Kubus Individual per Pin (16px x 14px, rx=3) -->
+    <!-- Segmen 1 (+, VCC, center 32.7) -->
+    <rect x="24.7" y="234" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+    <!-- Segmen 2 (OUT, DATA, center 49.7) -->
+    <rect x="41.7" y="234" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+    <!-- Segmen 3 (-, GND, center 66.7) -->
+    <rect x="58.7" y="234" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+
+    <!-- 3. Alur Breakaway Notch (V-Groove) Pemisah Antar Pin -->
+    <line x1="41.2" y1="233.5" x2="41.2" y2="248.5" stroke="#000000" stroke-width="1.4"/>
+    <line x1="41.2" y1="234.5" x2="41.2" y2="247.5" stroke="#18181b" stroke-width="0.6"/>
+
+    <line x1="58.2" y1="233.5" x2="58.2" y2="248.5" stroke="#000000" stroke-width="1.4"/>
+    <line x1="58.2" y1="234.5" x2="58.2" y2="247.5" stroke="#18181b" stroke-width="0.6"/>
+
+    <!-- 4. Highlight Chamfer 3D di Permukaan Atas Plastik -->
+    <path d="M 26.5 235 L 39.5 235 L 38.5 236.5 L 27.5 236.5 Z" fill="#52525b" opacity="0.8"/>
+    <path d="M 43.5 235 L 56.5 235 L 55.5 236.5 L 44.5 236.5 Z" fill="#52525b" opacity="0.8"/>
+    <path d="M 60.5 235 L 73.5 235 L 72.5 236.5 L 61.5 236.5 Z" fill="#52525b" opacity="0.8"/>
+
+    <!-- Lubang Tengah Pin Header (Socket Opening) -->
+    <rect x="30.7" y="239" width="4" height="4" rx="0.8" fill="#000000"/>
+    <rect x="47.7" y="239" width="4" height="4" rx="0.8" fill="#000000"/>
+    <rect x="64.7" y="239" width="4" height="4" rx="0.8" fill="#000000"/>
+  </g>
+
+  <!-- ================= 3 KAKI PIN SILINDER 3D PROPORSIONAL ================= -->
+  <!-- Dari y=242 turun melewati tepi PCB (y=248) sampai y=269.4 (panjang ~27px, menjulur ~21px) -->
+  <g id="male-pin-legs" filter="url(#dht-pin-shadow)">
+    <!-- Pin 1: + (x=32.7) -->
+    <rect x="31.2" y="242" width="3.0" height="25" rx="0.6" fill="url(#dht-pin-metal)"/>
+    <path d="M 31.2 267 L 32.7 269.4 L 34.2 267 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+
+    <!-- Pin 2: OUT (x=49.7) -->
+    <rect x="48.2" y="242" width="3.0" height="25" rx="0.6" fill="url(#dht-pin-metal)"/>
+    <path d="M 48.2 267 L 49.7 269.4 L 51.2 267 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+
+    <!-- Pin 3: - (x=66.7) -->
+    <rect x="65.2" y="242" width="3.0" height="25" rx="0.6" fill="url(#dht-pin-metal)"/>
+    <path d="M 65.2 267 L 66.7 269.4 L 68.2 267 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+  </g>
+</svg>
