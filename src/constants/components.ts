@@ -1045,7 +1045,7 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     height: 157.5,
     icon: 'Lightbulb',
     pins: [
-      { id: 'term_l', name: 'L (Fasa)', x: 18.6, y: 77.7, type: 'power', description: 'Terminal Sekrup Kiri (Fasa / Live)' },
+      { id: 'term_l', name: 'L (Fasa)', x: 20.0, y: 77.7, type: 'power', description: 'Terminal Sekrup Kiri (Fasa / Live)' },
       { id: 'term_n', name: 'N (Netral)', x: 151.4, y: 77.7, type: 'passive', description: 'Terminal Sekrup Kanan (Netral / Neutral)' },
     ],
   },
@@ -1063,7 +1063,7 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
       { id: 'socket_n', name: 'N (Colokan Netral)', x: 107.2, y: 79.3, type: 'passive', description: 'Lubang Colokan Kanan (Netral / Neutral - AC Return)' },
       { id: 'earth_top', name: 'PE (Arde Atas)', x: 85.0, y: 38.5, type: 'ground', description: 'Klip Pentanahan / Grounding Arde Atas' },
       { id: 'earth_bottom', name: 'PE (Arde Bawah)', x: 85.0, y: 119.2, type: 'ground', description: 'Klip Pentanahan / Grounding Arde Bawah' },
-      { id: 'term_l', name: 'L (Terminal Sekrup)', x: 16.4, y: 81.8, type: 'power', description: 'Terminal Sekrup Kabel Kiri (Fasa / Live)' },
+      { id: 'term_l', name: 'L (Terminal Sekrup)', x: 17.0, y: 81.8, type: 'power', description: 'Terminal Sekrup Kabel Kiri (Fasa / Live)' },
       { id: 'term_n', name: 'N (Terminal Sekrup)', x: 153.6, y: 81.8, type: 'passive', description: 'Terminal Sekrup Kabel Kanan (Netral / Neutral)' },
     ],
   },
