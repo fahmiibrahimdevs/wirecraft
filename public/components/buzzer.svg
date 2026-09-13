@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+<defs>
+  <radialGradient id="buzzerMatte" cx="48%" cy="46%" r="54%">
+    <stop offset="0%" stop-color="#4f5256" />
+    <stop offset="80%" stop-color="#43464a" />
+    <stop offset="100%" stop-color="#36383c" />
+  </radialGradient>
+</defs>
+
+<!-- Buzzer Body -->
+<circle cx="200.0" cy="200.0" r="196.0" fill="url(#buzzerMatte)" stroke="#26282b" stroke-width="4.0" />
+
+<!-- Center Sound Hole -->
+<circle cx="200.0" cy="200.0" r="44.0" fill="#b8bcc2" stroke="#8e939b" stroke-width="3.0" />
+
+<!-- Positive (+) Terminal Marker: Concentric Ring + Crosshair -->
+<g transform="translate(74.07, 200.0)">
+  <circle cx="0" cy="0" r="35.5" fill="none" stroke="#242629" stroke-width="5.5" />
+  <line x1="-27" y1="0" x2="27" y2="0" stroke="#242629" stroke-width="5.5" stroke-linecap="round" />
+  <line x1="0" y1="-27" x2="0" y2="27" stroke="#242629" stroke-width="5.5" stroke-linecap="round" />
+  <!-- Terminal Hole -->
+  <circle cx="0" cy="0" r="13.8" fill="#181a1d" stroke="#0f1012" stroke-width="3.5" />
+</g>
+
+<!-- Negative (-) Terminal Marker -->
+<g transform="translate(325.93, 200.0)">
+  <!-- Terminal Hole -->
+  <circle cx="0" cy="0" r="13.8" fill="#181a1d" stroke="#0f1012" stroke-width="3.5" />
+</g>
+
+</svg>

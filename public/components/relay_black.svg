@@ -1,0 +1,239 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 228" width="320" height="456">
+  <defs>
+    <!-- Matte Black PCB Gradient -->
+    <linearGradient id="pcb-black" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#282d36"/>
+      <stop offset="55%" stop-color="#191c22"/>
+      <stop offset="100%" stop-color="#0f1115"/>
+    </linearGradient>
+
+    <!-- Songle Relay Cube Matte Blue Gradient -->
+    <linearGradient id="relay-cube-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2575fc"/>
+      <stop offset="40%" stop-color="#1a62dc"/>
+      <stop offset="100%" stop-color="#124ab8"/>
+    </linearGradient>
+
+    <!-- Screw Terminal Block Plastic Gradient -->
+    <linearGradient id="terminal-blue-top" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="30%" stop-color="#2563eb"/>
+      <stop offset="70%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+
+    <!-- Brass Screw Gradient -->
+    <radialGradient id="brass-screw-top" cx="35%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="25%" stop-color="#facc15"/>
+      <stop offset="60%" stop-color="#a16207"/>
+      <stop offset="90%" stop-color="#713f12"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </radialGradient>
+
+    <!-- Cylindrical 3D Metallic Leg Gradient (Vertical) -->
+    <linearGradient id="metal-leg-cyl" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="20%" stop-color="#cbd5e1"/>
+      <stop offset="45%" stop-color="#ffffff"/>
+      <stop offset="75%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+
+    <!-- Silver Solder / Mounting Hole Pad -->
+    <radialGradient id="silver-pad" cx="45%" cy="45%" r="55%">
+      <stop offset="50%" stop-color="#cbd5e1"/>
+      <stop offset="85%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </radialGradient>
+
+    <!-- SMD LED Amber/Yellow Chip -->
+    <radialGradient id="led-smd-amber" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="40%" stop-color="#eab308"/>
+      <stop offset="80%" stop-color="#ca8a04"/>
+      <stop offset="100%" stop-color="#854d0e"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 1. PCB Matte Black Base Plate (x=10 to 150, y=6 to 204, w=140, h=198) -->
+  <rect x="10.5" y="6.5" width="139" height="197" rx="4" fill="url(#pcb-black)" stroke="#334155" stroke-width="1"/>
+  <rect x="12" y="8" width="136" height="194" rx="3" fill="none" stroke="#475569" stroke-width="0.5" opacity="0.35"/>
+
+  <!-- 4 Corner Mounting Holes (with Silver Annular Solder Rings) -->
+  <circle cx="24" cy="20" r="8" fill="url(#silver-pad)" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="24" cy="20" r="5" fill="#0b0f17"/>
+
+  <circle cx="136" cy="20" r="8" fill="url(#silver-pad)" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="136" cy="20" r="5" fill="#0b0f17"/>
+
+  <circle cx="24" cy="190" r="8" fill="url(#silver-pad)" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="24" cy="190" r="5" fill="#0b0f17"/>
+
+  <circle cx="136" cy="190" r="8" fill="url(#silver-pad)" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="136" cy="190" r="5" fill="#0b0f17"/>
+
+  <!-- 2. Silkscreen Labels for Screw Terminals (on Black PCB) -->
+  <g fill="#ffffff" opacity="0.95" font-family="'JetBrains Mono', system-ui, sans-serif" font-size="7" font-weight="bold">
+    <text x="59" y="14.5" text-anchor="middle">NC</text>
+    <text x="113" y="14.5" text-anchor="middle">NO</text>
+  </g>
+
+  <!-- 3. Blue Screw Terminal Block (Top Side) -->
+  <g>
+    <!-- Terminal Main Body -->
+    <rect x="45" y="17" width="84" height="36" rx="2.5" fill="url(#terminal-blue-top)" stroke="#172554" stroke-width="1"/>
+    <!-- Top Face Bevel -->
+    <polygon points="45,17 48,19 126,19 129,17" fill="#60a5fa" opacity="0.6"/>
+
+    <!-- Vertical Chamber Separators -->
+    <rect x="71.5" y="17" width="3" height="34" fill="#090d16" opacity="0.55"/>
+    <line x1="73" y1="17" x2="73" y2="51" stroke="#172554" stroke-width="1"/>
+    <rect x="99.5" y="17" width="3" height="34" fill="#090d16" opacity="0.55"/>
+    <line x1="101" y1="17" x2="101" y2="51" stroke="#172554" stroke-width="1"/>
+
+    <!-- Screw 1 (NC) at cx=59.0, cy=35.0 -->
+    <g transform="translate(59.0, 35.0)">
+      <circle cx="0" cy="0" r="11" fill="#090d16" stroke="#1e3a8a" stroke-width="0.8"/>
+      <circle cx="0" cy="0" r="9" fill="#172554"/>
+      <circle cx="0" cy="0" r="8" fill="url(#brass-screw-top)" stroke="#713f12" stroke-width="0.8"/>
+      <path d="M -5 -5 A 6.5 6.5 0 0 1 5 -5" fill="none" stroke="#fef08a" stroke-width="1" opacity="0.75"/>
+      <rect x="-1.3" y="-5.5" width="2.6" height="11" fill="#291804"/>
+      <rect x="-5.5" y="-1.3" width="11" height="2.6" fill="#291804"/>
+      <line x1="-1.3" y1="-5" x2="-1.3" y2="5" stroke="#fef08a" stroke-width="0.5" opacity="0.5"/>
+      <line x1="-5" y1="-1.3" x2="5" y2="-1.3" stroke="#fef08a" stroke-width="0.5" opacity="0.5"/>
+    </g>
+
+    <!-- Screw 2 (COM) at cx=86.0, cy=35.0 -->
+    <g transform="translate(86.0, 35.0)">
+      <circle cx="0" cy="0" r="11" fill="#090d16" stroke="#1e3a8a" stroke-width="0.8"/>
+      <circle cx="0" cy="0" r="9" fill="#172554"/>
+      <circle cx="0" cy="0" r="8" fill="url(#brass-screw-top)" stroke="#713f12" stroke-width="0.8"/>
+      <path d="M -5 -5 A 6.5 6.5 0 0 1 5 -5" fill="none" stroke="#fef08a" stroke-width="1" opacity="0.75"/>
+      <rect x="-1.3" y="-5.5" width="2.6" height="11" fill="#291804"/>
+      <rect x="-5.5" y="-1.3" width="11" height="2.6" fill="#291804"/>
+      <line x1="-1.3" y1="-5" x2="-1.3" y2="5" stroke="#fef08a" stroke-width="0.5" opacity="0.5"/>
+      <line x1="-5" y1="-1.3" x2="5" y2="-1.3" stroke="#fef08a" stroke-width="0.5" opacity="0.5"/>
+    </g>
+
+    <!-- Screw 3 (NO) at cx=113.0, cy=35.0 -->
+    <g transform="translate(113.0, 35.0)">
+      <circle cx="0" cy="0" r="11" fill="#090d16" stroke="#1e3a8a" stroke-width="0.8"/>
+      <circle cx="0" cy="0" r="9" fill="#172554"/>
+      <circle cx="0" cy="0" r="8" fill="url(#brass-screw-top)" stroke="#713f12" stroke-width="0.8"/>
+      <path d="M -5 -5 A 6.5 6.5 0 0 1 5 -5" fill="none" stroke="#fef08a" stroke-width="1" opacity="0.75"/>
+      <rect x="-1.3" y="-5.5" width="2.6" height="11" fill="#291804"/>
+      <rect x="-5.5" y="-1.3" width="11" height="2.6" fill="#291804"/>
+      <line x1="-1.3" y1="-5" x2="-1.3" y2="5" stroke="#fef08a" stroke-width="0.5" opacity="0.5"/>
+      <line x1="-5" y1="-1.3" x2="5" y2="-1.3" stroke="#fef08a" stroke-width="0.5" opacity="0.5"/>
+    </g>
+  </g>
+
+  <!-- 4. Blue Relay Cube (Center: x=44 to x=127, y=53 to y=157) -->
+  <g>
+    <!-- Drop Shadow under Cube -->
+    <rect x="46" y="55" width="83" height="104" rx="2.5" fill="#05070a" opacity="0.45"/>
+    <!-- Cube Main Body -->
+    <rect x="44" y="53" width="83" height="102" rx="2" fill="url(#relay-cube-blue)" stroke="#1d4ed8" stroke-width="1"/>
+    <!-- Bevel Highlights -->
+    <line x1="45" y1="54" x2="126" y2="54" stroke="#93c5fd" stroke-width="0.8" opacity="0.65"/>
+    <line x1="45" y1="54" x2="45" y2="153" stroke="#93c5fd" stroke-width="0.8" opacity="0.65"/>
+    <!-- Mold Line -->
+    <line x1="45" y1="88" x2="126" y2="88" stroke="#1d4ed8" stroke-width="0.5" opacity="0.4"/>
+  </g>
+
+  <!-- 5. Right Edge Silkscreen ("FE_SRly") -->
+  <g transform="translate(133, 148) rotate(-90)">
+    <text x="0" y="0" fill="#ffffff" opacity="0.9" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" letter-spacing="0.8">FE_SRly</text>
+  </g>
+
+  <!-- 6. Left Side Components (Diode, Transistor Q1, Resistor R1) -->
+  <g>
+    <!-- 1N4007 Flyback Diode (Through-Hole Cylinder) at y=52 to y=104 -->
+    <circle cx="28" cy="52" r="3.5" fill="url(#silver-pad)" stroke="#334155" stroke-width="0.6"/>
+    <circle cx="28" cy="104" r="3.5" fill="url(#silver-pad)" stroke="#334155" stroke-width="0.6"/>
+    <line x1="28" y1="52" x2="28" y2="62" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="28" y1="94" x2="28" y2="104" stroke="#94a3b8" stroke-width="1.8"/>
+    <rect x="22" y="62" width="12" height="32" rx="2" fill="#090d16" stroke="#1e293b" stroke-width="0.8"/>
+    <rect x="22" y="66" width="12" height="5" fill="#cbd5e1"/>
+
+    <!-- Transistor Q1 (SOT-23) at y=114 -->
+    <g transform="translate(22, 114)">
+      <rect x="0" y="0" width="14" height="11" rx="1" fill="#090d16" stroke="#1e293b" stroke-width="0.6"/>
+      <rect x="-2" y="1.5" width="2" height="2.5" fill="#94a3b8"/>
+      <rect x="-2" y="7" width="2" height="2.5" fill="#94a3b8"/>
+      <rect x="14" y="4" width="2" height="2.5" fill="#94a3b8"/>
+      <text x="18" y="0" fill="#ffffff" opacity="0.85" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="bold">Q1</text>
+    </g>
+
+    <!-- Resistor R1 (SMD 151) at y=134 -->
+    <g transform="translate(20, 134)">
+      <rect x="-1" y="-1" width="13" height="22" rx="1.5" fill="none" stroke="#ffffff" stroke-width="0.6" opacity="0.6"/>
+      <rect x="0" y="0" width="11" height="20" rx="1" fill="#090d16" stroke="#1e293b" stroke-width="0.5"/>
+      <rect x="0" y="0" width="11" height="4" fill="#94a3b8"/>
+      <rect x="0" y="16" width="11" height="4" fill="#94a3b8"/>
+      <g transform="translate(6, 10) rotate(-90)">
+        <text x="0" y="2" fill="#ffffff" font-family="monospace" font-size="5" font-weight="bold" text-anchor="middle">151</text>
+      </g>
+      <text x="14" y="13" fill="#ffffff" opacity="0.85" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="bold">R1</text>
+    </g>
+  </g>
+
+  <!-- 7. Bottom Side (ON_led & Clean Short Metallic Pins) -->
+  <g>
+    <!-- SMD LED (ON_led) at x=42, y=166 -->
+    <g transform="translate(42, 166)">
+      <rect x="0" y="0" width="16" height="8" rx="1" fill="#0f172a" stroke="#ffffff" stroke-width="0.6"/>
+      <rect x="0" y="0" width="3" height="8" fill="#94a3b8"/>
+      <rect x="13" y="0" width="3" height="8" fill="#94a3b8"/>
+      <rect x="4" y="1.5" width="8" height="5" rx="0.5" fill="url(#led-smd-amber)"/>
+      <text x="8" y="16" fill="#ffffff" opacity="0.85" font-family="system-ui, sans-serif" font-size="6" font-weight="bold" text-anchor="middle">ON_led</text>
+    </g>
+
+    <!-- Outer Silkscreen Enclosure Border -->
+    <rect x="68" y="163.5" width="56" height="19" rx="2" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.9"/>
+
+    <!-- Unified Breakaway Header Strip (3 Interconnected Segments with Individual Rounded Corners & V-Grooves) -->
+    <g id="header-housing-body">
+      <rect x="71" y="165" width="50" height="14" fill="#000000"/>
+      <!-- 3 Individual Cubes with Rounded Corners -->
+      <rect x="71" y="164.5" width="16" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="88" y="164.5" width="16" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="105" y="164.5" width="16" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <!-- Top Chamfer Facet Highlights -->
+      <path d="M 73.5 165.5 L 84.5 165.5 L 83.5 167.5 L 74.5 167.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 90.5 165.5 L 101.5 165.5 L 100.5 167.5 L 91.5 167.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 107.5 165.5 L 118.5 165.5 L 117.5 167.5 L 108.5 167.5 Z" fill="#52525b" opacity="0.8"/>
+      <!-- V-Groove Breakaway Notches -->
+      <line x1="87.5" y1="164.5" x2="87.5" y2="180.5" stroke="#000000" stroke-width="1.2"/>
+      <line x1="104.5" y1="164.5" x2="104.5" y2="180.5" stroke="#000000" stroke-width="1.2"/>
+    </g>
+
+    <!-- Silkscreen Pin Legends (S, +, -) placed cleanly below socket pads -->
+    <g fill="#ffffff" opacity="0.95" font-family="'JetBrains Mono', system-ui, sans-serif" font-size="7" font-weight="bold">
+      <text x="79.0" y="185" text-anchor="middle">S</text>
+      <text x="96.0" y="185" text-anchor="middle">+</text>
+      <text x="113.0" y="185" text-anchor="middle">-</text>
+    </g>
+
+    <!-- Clean Cylindrical 3D Metallic Pins (No Bulatan / Rings, Sleek & Compact) -->
+    <!-- Protrudes 18px past the bottom PCB edge (from y=172 to y=222) -->
+    <!-- Pin 1: S (Signal) at x=79.0 -->
+    <g transform="translate(79.0, 0)">
+      <rect x="-1.6" y="172" width="3.2" height="50" rx="0.8" fill="url(#metal-leg-cyl)" stroke="#475569" stroke-width="0.5"/>
+      <ellipse cx="0" cy="222" rx="1.6" ry="1.0" fill="#cbd5e1" stroke="#475569" stroke-width="0.5"/>
+    </g>
+
+    <!-- Pin 2: + (VCC) at x=96.0 -->
+    <g transform="translate(96.0, 0)">
+      <rect x="-1.6" y="172" width="3.2" height="50" rx="0.8" fill="url(#metal-leg-cyl)" stroke="#475569" stroke-width="0.5"/>
+      <ellipse cx="0" cy="222" rx="1.6" ry="1.0" fill="#cbd5e1" stroke="#475569" stroke-width="0.5"/>
+    </g>
+
+    <!-- Pin 3: - (GND) at x=113.0 -->
+    <g transform="translate(113.0, 0)">
+      <rect x="-1.6" y="172" width="3.2" height="50" rx="0.8" fill="url(#metal-leg-cyl)" stroke="#475569" stroke-width="0.5"/>
+      <ellipse cx="0" cy="222" rx="1.6" ry="1.0" fill="#cbd5e1" stroke="#475569" stroke-width="0.5"/>
+    </g>
+  </g>
+</svg>
