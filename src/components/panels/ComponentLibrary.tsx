@@ -1,0 +1,200 @@
+import React, { useState, useMemo } from 'react';
+import { COMPONENT_DEFINITIONS } from '../../constants/components';
+import { ComponentType } from '../../types/circuit';
+import {
+  Cpu,
+  Radio,
+  Grid,
+  Minimize2,
+  Sun,
+  CircleDot,
+  Sliders,
+  Radar,
+  Thermometer,
+  Tv,
+  Monitor,
+  Volume2,
+  RotateCw,
+  BatteryCharging,
+  ToggleLeft,
+  Clock,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Zap,
+  Lightbulb,
+  Plug,
+} from 'lucide-react';
+
+interface ComponentLibraryProps {
+  isOpen: boolean;
+  onToggle: () => void;
+  onAddComponent: (type: ComponentType) => void;
+}
+
+const CATEGORY_MAP: Record<string, string> = {
+  all: 'Semua',
+  microcontrollers: 'Mikrokontroler',
+  prototyping: 'Breadboard',
+  passives: 'Pasif',
+  outputs: 'Output & Aktuator',
+  sensors: 'Sensor',
+  displays: 'Layar / Display',
+  power: 'Daya / Power',
+};
+
+// Map string icon names to Lucide components
+const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
+  Cpu,
+  Radio,
+  Grid,
+  Minimize2,
+  Sun,
+  CircleDot,
+  Sliders,
+  Radar,
+  Thermometer,
+  Tv,
+  Monitor,
+  Volume2,
+  RotateCw,
+  BatteryCharging,
+  ToggleLeft,
+  Clock,
+  Zap,
+  Lightbulb,
+  Plug,
+};
+
+export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
+  isOpen,
+  onToggle,
+  onAddComponent,
+}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+
+  const filteredComponents = useMemo(() => {
+    return Object.values(COMPONENT_DEFINITIONS).filter((def) => {
+      if (def.type === 'push-button') return false;
+      const matchCategory = activeCategory === 'all' || def.category === activeCategory;
+      const matchSearch =
+        def.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        def.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchCategory && matchSearch;
+    });
+  }, [searchQuery, activeCategory]);
+
+  return (
+    <aside
+      className={`fixed top-14 bottom-0 left-0 z-30 transition-all duration-300 ease-in-out flex ${
+        isOpen ? 'w-80' : 'w-0'
+      }`}
+    >
+      {/* Main Drawer Panel */}
+      <div
+        className={`w-80 h-full bg-slate-900/95 backdrop-blur-md border-r border-slate-800 flex flex-col overflow-hidden transition-all duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-slate-800">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-sky-400" />
+              <h2 className="text-sm font-semibold text-slate-100">Katalog Komponen</h2>
+            </div>
+            <span className="text-[11px] font-mono text-slate-400 px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
+              {filteredComponents.length} part
+            </span>
+          </div>
+
+          {/* Search Box */}
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari Arduino, LED, Sensor..."
+              className="w-full bg-slate-950/70 border border-slate-800 focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/30 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 transition-all outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Category Pills */}
+        <div className="px-3 py-2 border-b border-slate-800/80 flex gap-1.5 overflow-x-auto no-scrollbar">
+          {Object.entries(CATEGORY_MAP).map(([catKey, catLabel]) => {
+            const isActive = activeCategory === catKey;
+            return (
+              <button
+                key={catKey}
+                onClick={() => setActiveCategory(catKey)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30 shadow-sm'
+                    : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                }`}
+              >
+                {catLabel}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Component List */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {filteredComponents.length === 0 ? (
+            <div className="text-center py-10 text-slate-500 text-xs">
+              Tidak ada komponen ditemukan
+            </div>
+          ) : (
+            filteredComponents.map((def) => {
+              const IconComp = ICON_MAP[def.icon] || Cpu;
+
+              return (
+                <div
+                  key={def.type}
+                  onClick={() => onAddComponent(def.type)}
+                  className="group relative bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 hover:border-sky-500/80 hover:ring-1 hover:ring-sky-500/30 rounded-xl p-3 cursor-pointer transition-all duration-200 flex items-start gap-3 shadow-sm"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-sky-400 group-hover:scale-105 transition-transform shrink-0">
+                    <IconComp className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-200 group-hover:text-sky-300 transition-colors truncate">
+                        {def.name}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-500 capitalize">
+                        {def.pins.length} pin
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">
+                      {def.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Footer Hint */}
+        <div className="p-3 border-t border-slate-800/80 text-[11px] text-slate-500 text-center">
+          Klik komponen untuk menambahkannya ke kanvas
+        </div>
+      </div>
+
+      {/* Toggle Tab Button */}
+      <button
+        onClick={onToggle}
+        title={isOpen ? 'Tutup Panel Komponen' : 'Buka Panel Komponen'}
+        className="self-center -ml-px bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-sky-400 py-3 px-1 rounded-r-md transition-colors cursor-pointer shadow-lg backdrop-blur-md"
+      >
+        {isOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+      </button>
+    </aside>
+  );
+};
