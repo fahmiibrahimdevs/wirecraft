@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #020617;
+    color: #f8fafc;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Custom dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+  }
+
+  code, kbd, samp, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Subtle dot-grid for circuit breadboard canvas */
+.bg-canvas-dots {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.15) 1.2px, transparent 1.2px);
+}
+
+.bg-canvas-grid {
+  background-image: 
+    linear-gradient(to right, rgba(51, 65, 85, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(51, 65, 85, 0.25) 1px, transparent 1px);
+}
+
+/* Subtle glass panels */
+.panel-glass {
+  background-color: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid #1e293b;
+}
+
+/* Pulse animation for active pin */
+@keyframes pin-pulse {
+  0%, 100% {
+    r: 7;
+    opacity: 0.9;
+  }
+  50% {
+    r: 9;
+    opacity: 0.4;
+  }
+}
+
+.animate-pin-target {
+  animation: pin-pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
