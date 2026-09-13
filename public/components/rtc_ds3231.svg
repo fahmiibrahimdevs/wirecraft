@@ -1,0 +1,419 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 258 153" width="516" height="306">
+  <defs>
+    <!-- PCB Deep Blue FR-4 Gradient (ZS-042 Dark Navy Blue) -->
+    <linearGradient id="ds3231-pcb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0e3a61"/>
+      <stop offset="50%" stop-color="#0a2a47"/>
+      <stop offset="100%" stop-color="#061c31"/>
+    </linearGradient>
+
+    <!-- Metallic Leg 3D Cylindrical Horizontal Gradient (Exact TM1637 Style) -->
+    <linearGradient id="ds3231-metal-leg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="20%" stop-color="#f1f5f9"/>
+      <stop offset="45%" stop-color="#ffffff"/>
+      <stop offset="70%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+
+    <!-- IC Chip Matte Dark Charcoal Gradient -->
+    <linearGradient id="ds3231-ic-body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#262c36"/>
+      <stop offset="50%" stop-color="#181d24"/>
+      <stop offset="100%" stop-color="#101318"/>
+    </linearGradient>
+
+    <!-- IC Metallic Gull-wing Lead Gradient -->
+    <linearGradient id="ds3231-ic-lead" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="50%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+
+    <!-- Silver Solder Pad Gradient -->
+    <linearGradient id="ds3231-silver-pad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="50%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+
+    <!-- SMD Glass Diode Gradient (Orange LL4148 style) -->
+    <linearGradient id="ds3231-diode-glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="35%" stop-color="#f97316"/>
+      <stop offset="70%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#9a3412"/>
+    </linearGradient>
+
+    <!-- SMD Ceramic Capacitor Brownish Gradient -->
+    <linearGradient id="ds3231-smd-cap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a88266"/>
+      <stop offset="50%" stop-color="#c4a482"/>
+      <stop offset="100%" stop-color="#8c684d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ============================================================ -->
+  <!-- 1. PCB BASE PLATE (Chamfered Octagonal Shape: x=20 to 238, y=4 to 149) -->
+  <!-- ============================================================ -->
+  <g id="pcb-plate">
+    <polygon
+      points="34,4 224,4 238,18 238,135 224,149 34,149 20,135 20,18"
+      fill="url(#ds3231-pcb)"
+      stroke="#0284c7"
+      stroke-width="1.2"
+    />
+    <polygon
+      points="35,6 223,6 236,19 236,134 223,147 35,147 22,134 22,19"
+      fill="none"
+      stroke="#38bdf8"
+      stroke-width="0.5"
+      opacity="0.2"
+    />
+
+    <!-- 3 Corner Mounting Holes -->
+    <g transform="translate(43, 19)">
+      <circle cx="0" cy="0" r="7.2" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.6"/>
+      <circle cx="0" cy="0" r="4.2" fill="#020617"/>
+    </g>
+    <g transform="translate(43, 134)">
+      <circle cx="0" cy="0" r="7.2" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.6"/>
+      <circle cx="0" cy="0" r="4.2" fill="#020617"/>
+    </g>
+    <g transform="translate(215, 19)">
+      <circle cx="0" cy="0" r="7.2" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.6"/>
+      <circle cx="0" cy="0" r="4.2" fill="#020617"/>
+    </g>
+
+    <!-- 2 Square Alignment Solder Pads -->
+    <g transform="translate(68, 76.5)">
+      <rect x="-4" y="-4" width="8" height="8" rx="0.8" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.5"/>
+      <circle cx="0" cy="0" r="2.0" fill="#020617"/>
+    </g>
+    <g transform="translate(178, 76.5)">
+      <rect x="-4" y="-4" width="8" height="8" rx="0.8" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.5"/>
+      <circle cx="0" cy="0" r="2.0" fill="#020617"/>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 2. SILKSCREEN GRAPHICS & SMD COMPONENTS (LEFT-CENTER) -->
+  <!-- ============================================================ -->
+  <g id="smd-passives">
+    <!-- 4 Vertical Silkscreen Enclosures (x=79 to 103) -->
+    <!-- Box 1: Power LED SMD (y=18 to 34) -->
+    <rect x="79" y="18" width="24" height="16" fill="none" stroke="#ffffff" stroke-width="1.2" rx="1"/>
+    <rect x="84.5" y="21.5" width="13" height="9" rx="1" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+    <rect x="88" y="23" width="6" height="6" rx="0.5" fill="#fef08a" stroke="#ca8a04" stroke-width="0.5"/>
+    <polygon points="84.5,21.5 86.5,21.5 86.5,30.5 84.5,30.5" fill="#cbd5e1"/>
+    <polygon points="95.5,21.5 97.5,21.5 97.5,30.5 95.5,30.5" fill="#cbd5e1"/>
+
+    <!-- Box 2: SMD Resistor (y=37 to 53) -->
+    <rect x="79" y="37" width="24" height="16" fill="none" stroke="#ffffff" stroke-width="1.2" rx="1"/>
+    <rect x="84.5" y="40.5" width="13" height="9" rx="1" fill="#090d16" stroke="#1e293b" stroke-width="0.5"/>
+    <rect x="84.5" y="40.5" width="2.5" height="9" fill="#cbd5e1"/>
+    <rect x="95" y="40.5" width="2.5" height="9" fill="#cbd5e1"/>
+    <text x="91" y="47" font-family="'JetBrains Mono', monospace" font-size="4.5" fill="#94a3b8" text-anchor="middle" font-weight="bold">103</text>
+
+    <!-- Box 3: SMD Capacitor (y=56 to 72) -->
+    <rect x="79" y="56" width="24" height="16" fill="none" stroke="#ffffff" stroke-width="1.2" rx="1"/>
+    <rect x="84.5" y="59.5" width="13" height="9" rx="1" fill="url(#ds3231-smd-cap)" stroke="#78350f" stroke-width="0.5"/>
+    <rect x="84.5" y="59.5" width="2.5" height="9" fill="#cbd5e1"/>
+    <rect x="95" y="59.5" width="2.5" height="9" fill="#cbd5e1"/>
+
+    <!-- Box 4: SMD Capacitor (y=75 to 91) -->
+    <rect x="79" y="75" width="24" height="16" fill="none" stroke="#ffffff" stroke-width="1.2" rx="1"/>
+    <rect x="84.5" y="78.5" width="13" height="9" rx="1" fill="url(#ds3231-smd-cap)" stroke="#78350f" stroke-width="0.5"/>
+    <rect x="84.5" y="78.5" width="2.5" height="9" fill="#cbd5e1"/>
+    <rect x="95" y="78.5" width="2.5" height="9" fill="#cbd5e1"/>
+
+    <!-- Box 5: Resistor Array 1 (y=94 to 118) -->
+    <rect x="79" y="94" width="24" height="24" fill="none" stroke="#ffffff" stroke-width="1.2" rx="1"/>
+    <g fill="#94a3b8" stroke="#334155" stroke-width="0.4">
+      <rect x="86" y="97.5" width="4" height="2.5" rx="0.5"/>
+      <rect x="92" y="97.5" width="4" height="2.5" rx="0.5"/>
+      <rect x="86" y="103" width="4" height="2.5" rx="0.5"/>
+      <rect x="92" y="103" width="4" height="2.5" rx="0.5"/>
+      <rect x="86" y="108.5" width="4" height="2.5" rx="0.5"/>
+      <rect x="92" y="108.5" width="4" height="2.5" rx="0.5"/>
+      <rect x="86" y="114" width="4" height="2.5" rx="0.5"/>
+      <rect x="92" y="114" width="4" height="2.5" rx="0.5"/>
+    </g>
+
+    <!-- Box 6: Resistor Array 2 (y=121 to 145) -->
+    <rect x="79" y="121" width="24" height="24" fill="none" stroke="#ffffff" stroke-width="1.2" rx="1"/>
+    <g fill="#94a3b8" stroke="#334155" stroke-width="0.4">
+      <rect x="86" y="124.5" width="4" height="2.5" rx="0.5"/>
+      <rect x="92" y="124.5" width="4" height="2.5" rx="0.5"/>
+      <rect x="86" y="130" width="4" height="2.5" rx="0.5"/>
+      <rect x="92" y="130" width="4" height="2.5" rx="0.5"/>
+      <rect x="86" y="135.5" width="4" height="2.5" rx="0.5"/>
+      <rect x="92" y="135.5" width="4" height="2.5" rx="0.5"/>
+      <rect x="86" y="141" width="4" height="2.5" rx="0.5"/>
+      <rect x="92" y="141" width="4" height="2.5" rx="0.5"/>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 3. IC 1: DS3231 REAL-TIME CLOCK (SO-16 PACKAGE, CENTER TOP) -->
+  <!-- ============================================================ -->
+  <g id="ic-ds3231" transform="translate(145, 51)">
+    <!-- 16 Gull-wing Solder Leads (8 top, 8 bottom) -->
+    <g fill="url(#ds3231-ic-lead)" stroke="#334155" stroke-width="0.4">
+      <rect x="-24.5" y="-30" width="3.2" height="7" rx="0.4"/>
+      <rect x="-17.5" y="-30" width="3.2" height="7" rx="0.4"/>
+      <rect x="-10.5" y="-30" width="3.2" height="7" rx="0.4"/>
+      <rect x="-3.5" y="-30" width="3.2" height="7" rx="0.4"/>
+      <rect x="3.5" y="-30" width="3.2" height="7" rx="0.4"/>
+      <rect x="10.5" y="-30" width="3.2" height="7" rx="0.4"/>
+      <rect x="17.5" y="-30" width="3.2" height="7" rx="0.4"/>
+      <rect x="24.5" y="-30" width="3.2" height="7" rx="0.4"/>
+      <rect x="-24.5" y="23" width="3.2" height="7" rx="0.4"/>
+      <rect x="-17.5" y="23" width="3.2" height="7" rx="0.4"/>
+      <rect x="-10.5" y="23" width="3.2" height="7" rx="0.4"/>
+      <rect x="-3.5" y="23" width="3.2" height="7" rx="0.4"/>
+      <rect x="3.5" y="23" width="3.2" height="7" rx="0.4"/>
+      <rect x="10.5" y="23" width="3.2" height="7" rx="0.4"/>
+      <rect x="17.5" y="23" width="3.2" height="7" rx="0.4"/>
+      <rect x="24.5" y="23" width="3.2" height="7" rx="0.4"/>
+    </g>
+
+    <!-- Main IC Package Body (w=60, h=48) -->
+    <rect x="-30" y="-24" width="60" height="48" rx="2" fill="url(#ds3231-ic-body)" stroke="#334155" stroke-width="0.8"/>
+    <circle cx="-29" cy="0" r="3.2" fill="#101318" stroke="#262c36" stroke-width="0.6"/>
+    <circle cx="-24" cy="-18" r="1.5" fill="#334155"/>
+
+    <text
+      x="0"
+      y="-1"
+      fill="#ffffff"
+      font-family="'Segoe UI', system-ui, -apple-system, sans-serif"
+      font-size="12.5"
+      font-weight="bold"
+      letter-spacing="0.5"
+      text-anchor="middle"
+    >DS3231</text>
+    <text
+      x="0"
+      y="11"
+      fill="#cbd5e1"
+      font-family="'Segoe UI', system-ui, -apple-system, sans-serif"
+      font-size="6.8"
+      opacity="0.9"
+      text-anchor="middle"
+    >real-time clock</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 4. COMPONENTS TO THE RIGHT OF DS3231 (DIODE & RESISTOR) -->
+  <!-- ============================================================ -->
+  <g transform="translate(184, 48)">
+    <rect x="-7.5" y="-18" width="15" height="36" rx="1" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+    <rect x="-4.5" y="-12" width="9" height="24" rx="2" fill="url(#ds3231-diode-glass)" stroke="#7c2d12" stroke-width="0.5"/>
+    <rect x="-4.5" y="-12" width="9" height="5" fill="#090d16" stroke="#1e293b" stroke-width="0.3"/>
+    <rect x="-2" y="-16" width="4" height="4" fill="#cbd5e1"/>
+    <rect x="-2" y="12" width="4" height="4" fill="#cbd5e1"/>
+  </g>
+
+  <g transform="translate(204, 30)">
+    <path d="M-13,-7 L10,-7 L10,7 L-13,7" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+    <rect x="-5" y="-4.5" width="10" height="9" rx="0.8" fill="#090d16" stroke="#1e293b" stroke-width="0.5"/>
+    <rect x="-5" y="-4.5" width="2" height="9" fill="#cbd5e1"/>
+    <rect x="3" y="-4.5" width="2" height="9" fill="#cbd5e1"/>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 5. IC 2: 24C32 EEPROM (SO-8 PACKAGE, BOTTOM CENTER) -->
+  <!-- ============================================================ -->
+  <g id="ic-24c32" transform="translate(131, 116)">
+    <g fill="url(#ds3231-ic-lead)" stroke="#334155" stroke-width="0.4">
+      <rect x="-12.5" y="-17" width="2.8" height="5.5" rx="0.3"/>
+      <rect x="-4.5" y="-17" width="2.8" height="5.5" rx="0.3"/>
+      <rect x="3.5" y="-17" width="2.8" height="5.5" rx="0.3"/>
+      <rect x="11.5" y="-17" width="2.8" height="5.5" rx="0.3"/>
+      <rect x="-12.5" y="11.5" width="2.8" height="5.5" rx="0.3"/>
+      <rect x="-4.5" y="11.5" width="2.8" height="5.5" rx="0.3"/>
+      <rect x="3.5" y="11.5" width="2.8" height="5.5" rx="0.3"/>
+      <rect x="11.5" y="11.5" width="2.8" height="5.5" rx="0.3"/>
+    </g>
+
+    <rect x="-16" y="-12" width="32" height="24" rx="1.5" fill="url(#ds3231-ic-body)" stroke="#334155" stroke-width="0.6"/>
+    <circle cx="-11" cy="-7" r="1.2" fill="#334155"/>
+
+    <text
+      x="0"
+      y="-1"
+      fill="#ffffff"
+      font-family="'Segoe UI', system-ui, -apple-system, sans-serif"
+      font-size="7.5"
+      font-weight="bold"
+      letter-spacing="0.3"
+      text-anchor="middle"
+    >24C32</text>
+    <text
+      x="0"
+      y="7"
+      fill="#94a3b8"
+      font-family="'Segoe UI', system-ui, -apple-system, sans-serif"
+      font-size="5"
+      text-anchor="middle"
+    >EEPROM</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 6. ADDRESS SOLDER JUMPERS A0, A1, A2 (BOTTOM RIGHT) -->
+  <!-- ============================================================ -->
+  <g id="address-jumpers" transform="translate(191, 115)">
+    <g transform="translate(-13, 0)">
+      <rect x="-3" y="-8" width="6" height="6" rx="0.6" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.5"/>
+      <rect x="-3" y="0" width="6" height="6" rx="0.6" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.5"/>
+      <text x="0" y="17" fill="#ffffff" font-family="'Segoe UI', system-ui, sans-serif" font-size="7" font-weight="bold" text-anchor="middle">A0</text>
+    </g>
+    <g transform="translate(0, 0)">
+      <rect x="-3" y="-8" width="6" height="6" rx="0.6" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.5"/>
+      <rect x="-3" y="0" width="6" height="6" rx="0.6" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.5"/>
+      <text x="0" y="17" fill="#ffffff" font-family="'Segoe UI', system-ui, sans-serif" font-size="7" font-weight="bold" text-anchor="middle">A1</text>
+    </g>
+    <g transform="translate(13, 0)">
+      <rect x="-3" y="-8" width="6" height="6" rx="0.6" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.5"/>
+      <rect x="-3" y="0" width="6" height="6" rx="0.6" fill="url(#ds3231-silver-pad)" stroke="#475569" stroke-width="0.5"/>
+      <text x="0" y="17" fill="#ffffff" font-family="'Segoe UI', system-ui, sans-serif" font-size="7" font-weight="bold" text-anchor="middle">A2</text>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 7. LEFT HEADER: 6-PIN MALE PIN HEADER (EXACT TM1637 STYLE) -->
+  <!-- ============================================================ -->
+  <g id="left-header-group">
+    <!-- Silkscreen Pin Labels on Left Side -->
+    <g fill="#ffffff" font-family="'Segoe UI', system-ui, sans-serif" font-size="7.5" font-weight="bold">
+      <text x="43" y="36.5">32K</text>
+      <text x="43" y="53.5">SQW</text>
+      <text x="43" y="70.5">SCL</text>
+      <text x="43" y="87.5">SDA</text>
+      <text x="43" y="104.5">VCC</text>
+      <text x="43" y="121.5">GND</text>
+    </g>
+
+    <!-- 1) Silkscreen Outer Enclosure Border (Exact TM1637 style) -->
+    <rect x="23" y="21.5" width="16" height="110" rx="2" fill="none" stroke="#93c5fd" stroke-width="1.8" opacity="0.95"/>
+
+    <!-- 2) Unified Breakaway Header Strip (6 Interconnected Segments with Individual Rounded Corners & V-Grooves) -->
+    <g id="left-housing-body">
+      <rect x="24" y="26" width="14" height="101" fill="#000000"/>
+      <!-- 6 Individual Cubes with Rounded Corners -->
+      <rect x="23.5" y="26" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="23.5" y="43" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="23.5" y="60" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="23.5" y="77" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="23.5" y="94" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="23.5" y="111" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <!-- Chamfer Facet Highlights -->
+      <path d="M 24 28.5 L 24 39.5 L 26.5 38.5 L 26.5 29.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 24 45.5 L 24 56.5 L 26.5 55.5 L 26.5 46.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 24 62.5 L 24 73.5 L 26.5 72.5 L 26.5 63.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 24 79.5 L 24 90.5 L 26.5 89.5 L 26.5 80.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 24 96.5 L 24 107.5 L 26.5 106.5 L 26.5 97.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 24 113.5 L 24 124.5 L 26.5 123.5 L 26.5 114.5 Z" fill="#52525b" opacity="0.8"/>
+      <!-- V-Groove Breakaway Notches -->
+      <line x1="23.5" y1="42.5" x2="38.5" y2="42.5" stroke="#000000" stroke-width="1.2"/>
+      <line x1="23.5" y1="59.5" x2="38.5" y2="59.5" stroke="#000000" stroke-width="1.2"/>
+      <line x1="23.5" y1="76.5" x2="38.5" y2="76.5" stroke="#000000" stroke-width="1.2"/>
+      <line x1="23.5" y1="93.5" x2="38.5" y2="93.5" stroke="#000000" stroke-width="1.2"/>
+      <line x1="23.5" y1="110.5" x2="38.5" y2="110.5" stroke="#000000" stroke-width="1.2"/>
+    </g>
+
+    <!-- 3) 6 Parallel 3D Metallic Pins (TM1637 Style: Rounded base inside housing to rounded tip outside) -->
+    <g id="left-pins-metal">
+      <!-- Pin 1: 32K at y=34.0 -->
+      <g transform="translate(0, 34.0)">
+        <rect x="1" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="1.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 2: SQW at y=51.0 -->
+      <g transform="translate(0, 51.0)">
+        <rect x="1" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="1.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 3: SCL at y=68.0 -->
+      <g transform="translate(0, 68.0)">
+        <rect x="1" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="1.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 4: SDA at y=85.0 -->
+      <g transform="translate(0, 85.0)">
+        <rect x="1" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="1.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 5: VCC at y=102.0 -->
+      <g transform="translate(0, 102.0)">
+        <rect x="1" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="1.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 6: GND at y=119.0 -->
+      <g transform="translate(0, 119.0)">
+        <rect x="1" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="1.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 8. RIGHT HEADER: 4-PIN MALE PIN HEADER (BREAKAWAY STRIP)     -->
+  <!-- ============================================================ -->
+  <g id="right-header-group">
+    <!-- Silkscreen Pin Labels on Right Side -->
+    <g fill="#ffffff" font-family="'Segoe UI', system-ui, sans-serif" font-size="7.5" font-weight="bold" text-anchor="end">
+      <text x="214" y="53.5">SCL</text>
+      <text x="214" y="70.5">SDA</text>
+      <text x="214" y="87.5">VCC</text>
+      <text x="214" y="104.5">GND</text>
+    </g>
+
+    <!-- 1) Silkscreen Outer Enclosure Border (Exact TM1637 style) -->
+    <rect x="219" y="38.5" width="16" height="76" rx="2" fill="none" stroke="#93c5fd" stroke-width="1.8" opacity="0.95"/>
+
+    <!-- 2) Unified Breakaway Header Strip (4 Interconnected Segments with Individual Rounded Corners & V-Grooves) -->
+    <g id="right-housing-body">
+      <rect x="220" y="43" width="14" height="67" fill="#000000"/>
+      <!-- 4 Individual Cubes with Rounded Corners -->
+      <rect x="219.5" y="43" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="219.5" y="60" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="219.5" y="77" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <rect x="219.5" y="94" width="15" height="16" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+      <!-- Chamfer Facet Highlights -->
+      <path d="M 234.5 45.5 L 234.5 56.5 L 232 55.5 L 232 46.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 234.5 62.5 L 234.5 73.5 L 232 72.5 L 232 63.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 234.5 79.5 L 234.5 90.5 L 232 89.5 L 232 80.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 234.5 96.5 L 234.5 107.5 L 232 106.5 L 232 97.5 Z" fill="#52525b" opacity="0.8"/>
+      <!-- V-Groove Breakaway Notches -->
+      <line x1="219.5" y1="59.5" x2="234.5" y2="59.5" stroke="#000000" stroke-width="1.2"/>
+      <line x1="219.5" y1="76.5" x2="234.5" y2="76.5" stroke="#000000" stroke-width="1.2"/>
+      <line x1="219.5" y1="93.5" x2="234.5" y2="93.5" stroke="#000000" stroke-width="1.2"/>
+    </g>
+
+    <!-- 3) 4 Parallel 3D Metallic Pins (TM1637 Style: Rounded base inside housing to rounded tip outside) -->
+    <g id="right-pins-metal">
+      <!-- Pin 1: SCL at y=51.0 -->
+      <g transform="translate(0, 51.0)">
+        <rect x="224" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="224.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 2: SDA at y=68.0 -->
+      <g transform="translate(0, 68.0)">
+        <rect x="224" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="224.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 3: VCC at y=85.0 -->
+      <g transform="translate(0, 85.0)">
+        <rect x="224" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="224.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 4: GND at y=102.0 -->
+      <g transform="translate(0, 102.0)">
+        <rect x="224" y="-2.0" width="33" height="4.0" rx="2.0" fill="#090d16"/>
+        <rect x="224.5" y="-1.5" width="32" height="3.0" rx="1.5" fill="url(#ds3231-metal-leg)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+    </g>
+  </g>
+</svg>
