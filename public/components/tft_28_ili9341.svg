@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 224 370" width="448" height="740">
+  <defs>
+    <!-- PCB Deep Crimson Red FR-4 Gradient (Exact Screenshot Match) -->
+    <linearGradient id="tft-pcb-red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#931919"/>
+      <stop offset="40%" stop-color="#831414"/>
+      <stop offset="100%" stop-color="#690d0d"/>
+    </linearGradient>
+
+    <!-- Metallic Leg 3D Cylindrical Vertical Gradient (Exact TM1637 Style) -->
+    <linearGradient id="tft-metal-pin-v" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="20%" stop-color="#f1f5f9"/>
+      <stop offset="45%" stop-color="#ffffff"/>
+      <stop offset="70%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+
+    <!-- Ribbon Cable Copper-Orange Gradient -->
+    <linearGradient id="tft-ribbon-cable" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="50%" stop-color="#9a3412"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </linearGradient>
+
+    <!-- Silver Solder Pad / Mounting Hole Gradient -->
+    <linearGradient id="tft-silver-hole" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#e2e8f0"/>
+      <stop offset="80%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ============================================================ -->
+  <!-- 1. PCB BASE BOARD (Red Crimson Plate: 224 x 340) -->
+  <!-- ============================================================ -->
+  <rect x="0" y="0" width="224" height="340" rx="4" fill="url(#tft-pcb-red)" stroke="#590d0d" stroke-width="1.2"/>
+
+  <!-- 4 Corner Mounting Holes (White/Silver Rings with Dark Holes) -->
+  <!-- Top-Left -->
+  <circle cx="18" cy="18" r="7.5" fill="url(#tft-silver-hole)" stroke="#64748b" stroke-width="0.6"/>
+  <circle cx="18" cy="18" r="4.0" fill="#020617"/>
+  <!-- Top-Right -->
+  <circle cx="206" cy="18" r="7.5" fill="url(#tft-silver-hole)" stroke="#64748b" stroke-width="0.6"/>
+  <circle cx="206" cy="18" r="4.0" fill="#020617"/>
+  <!-- Bottom-Left -->
+  <circle cx="18" cy="318" r="7.5" fill="url(#tft-silver-hole)" stroke="#64748b" stroke-width="0.6"/>
+  <circle cx="18" cy="318" r="4.0" fill="#020617"/>
+  <!-- Bottom-Right -->
+  <circle cx="206" cy="318" r="7.5" fill="url(#tft-silver-hole)" stroke="#64748b" stroke-width="0.6"/>
+  <circle cx="206" cy="318" r="4.0" fill="#020617"/>
+
+  <!-- Top Silkscreen Title: ILI9341 -->
+  <text
+    x="112"
+    y="23"
+    fill="#ffffff"
+    font-family="'Consolas', 'Courier New', monospace, sans-serif"
+    font-size="17"
+    font-weight="bold"
+    letter-spacing="0.5"
+    text-anchor="middle"
+  >ILI9341</text>
+
+  <!-- ============================================================ -->
+  <!-- 2. SCREEN BEZEL & GLASS LCD PANEL -->
+  <!-- ============================================================ -->
+  <!-- Soft White-Pinkish Bezel Frame (exact match to screenshot) -->
+  <rect x="18" y="34" width="188" height="250" rx="1.5" fill="#fcf4f6" stroke="#fbcfe8" stroke-width="0.8"/>
+
+  <!-- Deep Black Matte LCD Glass Display -->
+  <rect x="25" y="40" width="174" height="238" rx="1" fill="#050505"/>
+
+  <!-- Bottom Bezel Cutout / PCB exposure matching screenshot -->
+  <rect x="46" y="278" width="132" height="6" fill="url(#tft-pcb-red)"/>
+
+  <!-- Copper-Brown Ribbon Cable Connector (Bottom of display) -->
+  <rect x="70" y="282" width="84" height="15" rx="3" fill="url(#tft-ribbon-cable)" stroke="#78350f" stroke-width="0.8"/>
+
+  <!-- ============================================================ -->
+  <!-- 3. BOTTOM 9-PIN MALE PIN HEADER (BREAKAWAY STRIP 3D) -->
+  <!-- ============================================================ -->
+  <g id="bottom-header-group">
+    <!-- Silkscreen Pin Indicator "1" above Pin 1 & "9" above Pin 9 -->
+    <text x="44" y="305" fill="#ffffff" font-family="'JetBrains Mono', monospace, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" opacity="0.9">1</text>
+    <text x="180" y="305" fill="#ffffff" font-family="'JetBrains Mono', monospace, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" opacity="0.9">9</text>
+
+    <!-- 1) Silkscreen Outer Enclosure Border -->
+    <rect x="34.5" y="309" width="155.0" height="16" rx="2" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.9"/>
+
+    <!-- 2) Breakaway Header Strip Body (9 Modular Rounded Cubes with V-Grooves) -->
+    <g id="header-housing-body">
+      <!-- Continuous Black Core -->
+      <rect x="35.5" y="310" width="153.0" height="14" rx="2" fill="#000000"/>
+
+      <!-- 9 Individual Rounded Cube Segments (16px x 14px, rx=3) -->
+      <!-- Seg 1: VCC (44.0) -->
+      <rect x="36.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+      <!-- Seg 2: GND (61.0) -->
+      <rect x="53.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+      <!-- Seg 3: CS (78.0) -->
+      <rect x="70.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+      <!-- Seg 4: RESET (95.0) -->
+      <rect x="87.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+      <!-- Seg 5: DC (112.0) -->
+      <rect x="104.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+      <!-- Seg 6: MOSI (129.0) -->
+      <rect x="121.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+      <!-- Seg 7: SCK (146.0) -->
+      <rect x="138.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+      <!-- Seg 8: LED (163.0) -->
+      <rect x="155.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+      <!-- Seg 9: MISO (180.0) -->
+      <rect x="172.0" y="310" width="16" height="14" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.7"/>
+
+      <!-- 8 V-Groove Breakaway Notches -->
+      <line x1="52.5" y1="309.5" x2="52.5" y2="324.5" stroke="#000000" stroke-width="1.4"/>
+      <line x1="52.5" y1="310.5" x2="52.5" y2="323.5" stroke="#18181b" stroke-width="0.6"/>
+
+      <line x1="69.5" y1="309.5" x2="69.5" y2="324.5" stroke="#000000" stroke-width="1.4"/>
+      <line x1="69.5" y1="310.5" x2="69.5" y2="323.5" stroke="#18181b" stroke-width="0.6"/>
+
+      <line x1="86.5" y1="309.5" x2="86.5" y2="324.5" stroke="#000000" stroke-width="1.4"/>
+      <line x1="86.5" y1="310.5" x2="86.5" y2="323.5" stroke="#18181b" stroke-width="0.6"/>
+
+      <line x1="103.5" y1="309.5" x2="103.5" y2="324.5" stroke="#000000" stroke-width="1.4"/>
+      <line x1="103.5" y1="310.5" x2="103.5" y2="323.5" stroke="#18181b" stroke-width="0.6"/>
+
+      <line x1="120.5" y1="309.5" x2="120.5" y2="324.5" stroke="#000000" stroke-width="1.4"/>
+      <line x1="120.5" y1="310.5" x2="120.5" y2="323.5" stroke="#18181b" stroke-width="0.6"/>
+
+      <line x1="137.5" y1="309.5" x2="137.5" y2="324.5" stroke="#000000" stroke-width="1.4"/>
+      <line x1="137.5" y1="310.5" x2="137.5" y2="323.5" stroke="#18181b" stroke-width="0.6"/>
+
+      <line x1="154.5" y1="309.5" x2="154.5" y2="324.5" stroke="#000000" stroke-width="1.4"/>
+      <line x1="154.5" y1="310.5" x2="154.5" y2="323.5" stroke="#18181b" stroke-width="0.6"/>
+
+      <line x1="171.5" y1="309.5" x2="171.5" y2="324.5" stroke="#000000" stroke-width="1.4"/>
+      <line x1="171.5" y1="310.5" x2="171.5" y2="323.5" stroke="#18181b" stroke-width="0.6"/>
+
+      <!-- 3D Chamfer Facet Highlights -->
+      <path d="M 37.5 311 L 50.5 311 L 49.5 312.5 L 38.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 54.5 311 L 67.5 311 L 66.5 312.5 L 55.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 71.5 311 L 84.5 311 L 83.5 312.5 L 72.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 88.5 311 L 101.5 311 L 100.5 312.5 L 89.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 105.5 311 L 118.5 311 L 117.5 312.5 L 106.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 122.5 311 L 135.5 311 L 134.5 312.5 L 123.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 139.5 311 L 152.5 311 L 151.5 312.5 L 140.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 156.5 311 L 169.5 311 L 168.5 312.5 L 157.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+      <path d="M 173.5 311 L 186.5 311 L 185.5 312.5 L 174.5 312.5 Z" fill="#52525b" opacity="0.8"/>
+
+      <!-- Socket Openings -->
+      <rect x="42.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+      <rect x="59.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+      <rect x="76.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+      <rect x="93.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+      <rect x="110.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+      <rect x="127.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+      <rect x="144.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+      <rect x="161.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+      <rect x="178.0" y="315" width="4" height="4" rx="0.8" fill="#000000"/>
+    </g>
+
+    <!-- 3) 9 Parallel 3D Metallic Pins (Protruding downward 18px past PCB to y=358.0) -->
+    <!-- Pitch 17.0px exactly: x = 44, 61, 78, 95, 112, 129, 146, 163, 180 -->
+    <g id="header-pins-metal">
+      <!-- Pin 1: VCC at x=44.0 -->
+      <g transform="translate(44.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 2: GND at x=61.0 -->
+      <g transform="translate(61.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 3: CS at x=78.0 -->
+      <g transform="translate(78.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 4: RESET at x=95.0 -->
+      <g transform="translate(95.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 5: DC at x=112.0 -->
+      <g transform="translate(112.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 6: MOSI at x=129.0 -->
+      <g transform="translate(129.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 7: SCK at x=146.0 -->
+      <g transform="translate(146.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 8: LED at x=163.0 -->
+      <g transform="translate(163.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 9: MISO at x=180.0 -->
+      <g transform="translate(180.0, 0)">
+        <rect x="-1.5" y="318" width="3.0" height="40" rx="0.6" fill="url(#tft-metal-pin-v)"/>
+        <path d="M -1.5 355.5 L 0 358.0 L 1.5 355.5 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.3"/>
+      </g>
+    </g>
+  </g>
+</svg>
