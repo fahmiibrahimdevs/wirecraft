@@ -1,0 +1,368 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 316" width="520" height="632">
+  <defs>
+    <!-- Metallic Pin Vertical Gradient (Cylindrical Silver) -->
+    <linearGradient id="soil-metal-pin-v" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="25%" stop-color="#f8fafc"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="75%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+
+    <!-- Reference Bright Gold Sensor Tine Gradient -->
+    <linearGradient id="soil-gold-tine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d4c047"/>
+      <stop offset="25%" stop-color="#faee7d"/>
+      <stop offset="50%" stop-color="#fff59d"/>
+      <stop offset="75%" stop-color="#faee7d"/>
+      <stop offset="100%" stop-color="#c9b53b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ============================================================ -->
+  <!-- 1. JUMPER WIRES (From Probe to Comparator Module)            -->
+  <!-- ============================================================ -->
+  <g id="interconnecting-jumpers">
+    <!-- Blue/Black Jumper Wire (Outer: from probe pin 1 to comparator -) -->
+    <!-- Probe pin 1 at x=45.0, Comparator '-' at x=187.0 -->
+    <path
+      d="M 45 54 L 45 14 L 187 14 L 187 56"
+      fill="none"
+      stroke="#0044ff"
+      stroke-width="3.2"
+      stroke-linejoin="round"
+      stroke-linecap="square"
+    />
+
+    <!-- Red Jumper Wire (Inner: from probe pin 2 to comparator +) -->
+    <!-- Probe pin 2 at x=57.0, Comparator '+' at x=203.0 -->
+    <path
+      d="M 57 54 L 57 26 L 203 26 L 203 56"
+      fill="none"
+      stroke="#ee0000"
+      stroke-width="3.2"
+      stroke-linejoin="round"
+      stroke-linecap="square"
+    />
+
+    <!-- Crimp Connector Boots on Probe -->
+    <rect x="42.5" y="38" width="5" height="15" rx="1" fill="#9ca3af" stroke="#6b7280" stroke-width="0.5"/>
+    <rect x="54.5" y="38" width="5" height="15" rx="1" fill="#9ca3af" stroke="#6b7280" stroke-width="0.5"/>
+
+    <!-- Crimp Connector Boots on Comparator Module -->
+    <rect x="184.5" y="38" width="5" height="15" rx="1" fill="#9ca3af" stroke="#6b7280" stroke-width="0.5"/>
+    <rect x="200.5" y="38" width="5" height="15" rx="1" fill="#9ca3af" stroke="#6b7280" stroke-width="0.5"/>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 2. FC-28 SOIL MOISTURE FORK PROBE (Left Side, center x=51.0) -->
+  <!-- ============================================================ -->
+  <g id="fc28-probe">
+    <!-- 2 Bright Gold Sensor Tines -->
+    <!-- Left Tine (x: 21..44, center 32.5) -->
+    <path
+      d="M 21 104 L 44 104 L 44 246 L 32.5 284 L 21 246 Z"
+      fill="url(#soil-gold-tine)"
+      stroke="#c2ad2c"
+      stroke-width="0.8"
+    />
+    <!-- Right Tine (x: 58..81, center 69.5) -->
+    <path
+      d="M 58 104 L 81 104 L 81 246 L 69.5 284 L 58 246 Z"
+      fill="url(#soil-gold-tine)"
+      stroke="#c2ad2c"
+      stroke-width="0.8"
+    />
+
+    <!-- Sensor PCB Grid Pattern on Tines (White Interdigital Ladder) -->
+    <!-- Left Tine Pattern -->
+    <g stroke="#ffffff" stroke-linecap="round">
+      <line x1="32.5" y1="112" x2="32.5" y2="242" stroke-width="2.0"/>
+      <line x1="25" y1="120" x2="40" y2="120" stroke-width="2.4"/>
+      <circle cx="32.5" cy="130" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="25" y1="140" x2="40" y2="140" stroke-width="2.4"/>
+      <circle cx="32.5" cy="150" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="25" y1="160" x2="40" y2="160" stroke-width="2.4"/>
+      <circle cx="32.5" cy="170" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="25" y1="180" x2="40" y2="180" stroke-width="2.4"/>
+      <circle cx="32.5" cy="190" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="25" y1="200" x2="40" y2="200" stroke-width="2.4"/>
+      <circle cx="32.5" cy="210" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="25" y1="220" x2="40" y2="220" stroke-width="2.4"/>
+      <circle cx="32.5" cy="230" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="25" y1="240" x2="40" y2="240" stroke-width="2.4"/>
+    </g>
+
+    <!-- Right Tine Pattern -->
+    <g stroke="#ffffff" stroke-linecap="round">
+      <line x1="69.5" y1="112" x2="69.5" y2="242" stroke-width="2.0"/>
+      <line x1="62" y1="120" x2="77" y2="120" stroke-width="2.4"/>
+      <circle cx="69.5" cy="130" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="62" y1="140" x2="77" y2="140" stroke-width="2.4"/>
+      <circle cx="69.5" cy="150" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="62" y1="160" x2="77" y2="160" stroke-width="2.4"/>
+      <circle cx="69.5" cy="170" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="62" y1="180" x2="77" y2="180" stroke-width="2.4"/>
+      <circle cx="69.5" cy="190" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="62" y1="200" x2="77" y2="200" stroke-width="2.4"/>
+      <circle cx="69.5" cy="210" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="62" y1="220" x2="77" y2="220" stroke-width="2.4"/>
+      <circle cx="69.5" cy="230" r="1.5" fill="#ffffff" stroke="none"/>
+      <line x1="62" y1="240" x2="77" y2="240" stroke-width="2.4"/>
+    </g>
+
+    <!-- Black FR-4 Probe Head Plate with Arch Cutout -->
+    <path
+      d="M 20 54 
+         L 82 54 
+         A 6 6 0 0 1 88 60 
+         L 88 106 
+         L 81 106 
+         L 81 100 
+         L 58 100 
+         A 7 7 0 0 0 44 100 
+         L 21 100 
+         L 21 106 
+         L 14 106 
+         L 14 60 
+         A 6 6 0 0 1 20 54 Z"
+      fill="#000000"
+    />
+
+    <!-- 2 Pure White Mounting Holes (Symmetric at x=24 and x=78) -->
+    <circle cx="24" cy="67" r="6" fill="#ffffff" stroke="#9ca3af" stroke-width="0.8"/>
+    <circle cx="78" cy="67" r="6" fill="#ffffff" stroke="#9ca3af" stroke-width="0.8"/>
+
+    <!-- Silkscreen Label: FC-28 (Centered at x=51.0) -->
+    <text
+      x="51"
+      y="85"
+      fill="#ffffff"
+      font-family="'Segoe UI', Arial, sans-serif"
+      font-size="14"
+      font-weight="bold"
+      letter-spacing="0.5"
+      text-anchor="middle"
+    >FC-28</text>
+
+    <!-- Top 2-Pin Black Connector Block on Probe (Centered at x=51.0) -->
+    <rect x="40" y="50" width="22" height="6" rx="1" fill="#1f2937"/>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 3. LM393 COMPARATOR SIGNAL CONDITIONING MODULE                -->
+  <!-- Exactly matching Screenshot 203604.png (center x=195.0)      -->
+  <!-- ============================================================ -->
+  <g id="lm393-module">
+    <!-- Main PCB Plate (Dark Navy Blue #192738, width=90, x=150..240, centered at 195.0) -->
+    <rect x="150" y="48" width="90" height="232" rx="2.5" fill="#1b2a3c" stroke="#111c29" stroke-width="1.2"/>
+
+    <!-- ================= TOP 2-PIN INPUT HEADER (Centered at x=195.0) ================= -->
+    <!-- White Silkscreen Box (Centered: x=179..211, width=32, height=16) -->
+    <rect x="179" y="54" width="32" height="16" rx="1.5" fill="none" stroke="#ffffff" stroke-width="1.3"/>
+
+    <!-- 2 Green Through-Hole Solder Pads (Fritzing Exact Style) -->
+    <!-- Pad 1: '-' at x=187.0 -->
+    <circle cx="187" cy="62" r="4.5" fill="#16a34a" stroke="#15803d" stroke-width="0.8"/>
+    <circle cx="187" cy="62" r="2.0" fill="#09090b"/>
+    <!-- Pad 2: '+' at x=203.0 -->
+    <circle cx="203" cy="62" r="4.5" fill="#16a34a" stroke="#15803d" stroke-width="0.8"/>
+    <circle cx="203" cy="62" r="2.0" fill="#09090b"/>
+
+    <!-- '-' and '+' signs (Centered horizontally and vertically at y=62.0) -->
+    <text
+      x="171"
+      y="62"
+      fill="#ffffff"
+      font-family="'Segoe UI', Arial, sans-serif"
+      font-size="18"
+      font-weight="bold"
+      text-anchor="middle"
+      dominant-baseline="central"
+    >-</text>
+    <text
+      x="219"
+      y="62"
+      fill="#ffffff"
+      font-family="'Segoe UI', Arial, sans-serif"
+      font-size="16"
+      font-weight="bold"
+      text-anchor="middle"
+      dominant-baseline="central"
+    >+</text>
+
+    <!-- ================= TOP SMD COMPONENTS (4 Resistors in Chamfered Brackets) ================= -->
+    <!-- Symmetric pairs: Left pair (160, 174), Right pair (216, 230) -->
+    <!-- Chamfered White Brackets (Exact Screenshot Match) -->
+    <g fill="none" stroke="#ffffff" stroke-width="1.2">
+      <!-- Bracket 1 (x=156..166) -->
+      <path d="M 156 86 L 156 100 L 166 100 L 166 86"/>
+      <!-- Bracket 2 (x=170..180) -->
+      <path d="M 170 86 L 170 100 L 180 100 L 180 86"/>
+      <!-- Bracket 3 (x=210..220) -->
+      <path d="M 210 86 L 210 100 L 220 100 L 220 86"/>
+      <!-- Bracket 4 (x=224..234) -->
+      <path d="M 224 86 L 224 100 L 234 100 L 234 86"/>
+    </g>
+
+    <!-- 4 SMD Resistors inside brackets -->
+    <rect x="158.5" y="87" width="7" height="12" rx="0.5" fill="#2d2d2d" stroke="#9ca3af" stroke-width="1.2"/>
+    <rect x="172.5" y="87" width="7" height="12" rx="0.5" fill="#2d2d2d" stroke="#9ca3af" stroke-width="1.2"/>
+    <rect x="212.5" y="87" width="7" height="12" rx="0.5" fill="#2d2d2d" stroke="#9ca3af" stroke-width="1.2"/>
+    <rect x="226.5" y="87" width="7" height="12" rx="0.5" fill="#2d2d2d" stroke="#9ca3af" stroke-width="1.2"/>
+
+    <!-- ================= MIDDLE SECTION: IC ON LEFT, TRIMPOT ON RIGHT ================= -->
+    <!-- (Exact Screenshot 203604.png layout!) -->
+    <!-- Left: LM393 Dual Comparator IC (SOIC-8) -->
+    <g id="ic-lm393">
+      <!-- 8 Silver Pins -->
+      <g fill="#d1d5db">
+        <rect x="153" y="118" width="5" height="1.8"/>
+        <rect x="153" y="125" width="5" height="1.8"/>
+        <rect x="153" y="132" width="5" height="1.8"/>
+        <rect x="153" y="139" width="5" height="1.8"/>
+        <rect x="179" y="118" width="5" height="1.8"/>
+        <rect x="179" y="125" width="5" height="1.8"/>
+        <rect x="179" y="132" width="5" height="1.8"/>
+        <rect x="179" y="139" width="5" height="1.8"/>
+      </g>
+      <!-- IC Body -->
+      <rect x="157" y="115" width="23" height="29" rx="1" fill="#2d2d2d"/>
+      <!-- Pin 1 Dot -->
+      <circle cx="161" cy="138" r="1.3" fill="#52525b"/>
+    </g>
+
+    <!-- Right: 3296 Trimpot Potentiometer (with White Silkscreen Frame) -->
+    <g id="trimpot-blue">
+      <!-- White Silkscreen Frame -->
+      <rect x="191" y="114" width="37" height="37" rx="1.5" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+      <!-- Vivid Blue Body -->
+      <rect x="193" y="116" width="33" height="33" rx="1" fill="#0066cc"/>
+      <!-- Dark Grey Calibration Rotor Dial -->
+      <circle cx="209.5" cy="132.5" r="11.5" fill="#4b5563"/>
+      <!-- Cross '+' Adjustment Slot -->
+      <path d="M 209.5 125 L 209.5 140 M 202 132.5 L 217 132.5" stroke="#9ca3af" stroke-width="2.4" stroke-linecap="round"/>
+      <!-- White Dot Marker at bottom-right of Trimpot -->
+      <circle cx="221" cy="144" r="1.3" fill="#ffffff"/>
+    </g>
+
+    <!-- ================= 2 SMD RESISTORS BELOW IC & TRIMPOT ================= -->
+    <!-- Left SMD (under IC) -->
+    <rect x="160" y="159" width="16" height="8" rx="0.5" fill="#2d2d2d" stroke="#9ca3af" stroke-width="1.2"/>
+    <path d="M 157 156 L 157 170 L 179 170 L 179 156" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+
+    <!-- Right SMD (under Trimpot) -->
+    <rect x="210" y="159" width="16" height="8" rx="0.5" fill="#2d2d2d" stroke="#9ca3af" stroke-width="1.2"/>
+    <path d="M 207 156 L 207 170 L 229 170 L 229 156" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+
+    <!-- ================= LOWER SECTION: DO-LED, MOUNTING HOLE, PWR-LED ================= -->
+    <!-- 1) DO-LED on Left (with vertical label DO-LED) -->
+    <g id="do-led-group">
+      <path d="M 157 186 L 157 212 L 169 212 L 169 186" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+      <!-- SMD Body -->
+      <rect x="160" y="191" width="6" height="14" rx="0.5" fill="#2d2d2d" stroke="#9ca3af" stroke-width="1"/>
+      <circle cx="163" cy="198" r="1.6" fill="#facc15"/>
+      <!-- Vertical Text: DO-LED -->
+      <text
+        x="174"
+        y="199"
+        fill="#ffffff"
+        font-family="'Segoe UI', Arial, sans-serif"
+        font-size="6"
+        font-weight="bold"
+        text-anchor="middle"
+        transform="rotate(-90 174 199)"
+      >DO-LED</text>
+    </g>
+
+    <!-- 2) Large Central Mounting Hole (Exactly centered at x=195.0, y=199.0) -->
+    <circle cx="195" cy="199" r="13" fill="#ffffff" stroke="#9ca3af" stroke-width="2.5"/>
+
+    <!-- 3) PWR-LED on Right (with vertical label PWR-LED) -->
+    <g id="pwr-led-group">
+      <!-- Vertical Text: PWR-LED -->
+      <text
+        x="216"
+        y="199"
+        fill="#ffffff"
+        font-family="'Segoe UI', Arial, sans-serif"
+        font-size="6"
+        font-weight="bold"
+        text-anchor="middle"
+        transform="rotate(-90 216 199)"
+      >PWR-LED</text>
+      <!-- SMD Body -->
+      <rect x="224" y="191" width="6" height="14" rx="0.5" fill="#2d2d2d" stroke="#9ca3af" stroke-width="1"/>
+      <circle cx="227" cy="198" r="1.6" fill="#facc15"/>
+      <path d="M 221 186 L 221 212 L 233 212 L 233 186" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+    </g>
+
+    <!-- ============================================================ -->
+    <!-- 4. BOTTOM 4-PIN HEADER: AO, DO, GND, VCC                     -->
+    <!-- Exactly matching Screenshot 203604.png (center x=195.0)      -->
+    <!-- ============================================================ -->
+    <g id="comparator-output-pins">
+      <!-- Silkscreen Pin Labels (AO, DO, GND, VCC - Exactly centered above each pin) -->
+      <!-- Pin 1: AO at x=169.5 -->
+      <text x="169.5" y="240" fill="#ffffff" font-family="'Segoe UI', Arial, sans-serif" font-size="6.5" font-weight="bold" text-anchor="middle">AO</text>
+      <!-- Pin 2: DO at x=186.5 -->
+      <text x="186.5" y="240" fill="#ffffff" font-family="'Segoe UI', Arial, sans-serif" font-size="6.5" font-weight="bold" text-anchor="middle">DO</text>
+      <!-- Pin 3: GND at x=202.5 -->
+      <text x="202.5" y="240" fill="#ffffff" font-family="'Segoe UI', Arial, sans-serif" font-size="6.5" font-weight="bold" text-anchor="middle">GND</text>
+      <!-- Pin 4: VCC at x=221.5 -->
+      <text x="221.5" y="240" fill="#ffffff" font-family="'Segoe UI', Arial, sans-serif" font-size="6.5" font-weight="bold" text-anchor="middle">VCC</text>
+
+      <!-- 1) Outer Silkscreen Enclosure Border (Frame box with rounded corners) -->
+      <rect x="159" y="247" width="72" height="22" rx="2" fill="none" stroke="#ffffff" stroke-width="1.2"/>
+
+      <!-- 2) Unified Breakaway Header Strip (4 Interconnected Segments with Individual Rounded Corners & V-Grooves) -->
+      <g id="header-housing-body">
+        <!-- Connecting core body that unifies all 4 pin segments together -->
+        <rect x="161" y="251" width="68" height="14" fill="#000000"/>
+
+        <!-- Segment 1: AO (x: 161.5..177.5, center 169.5) -->
+        <rect x="161.5" y="249.5" width="16" height="17" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+        <!-- Segment 2: DO (x: 178.5..194.5, center 186.5) -->
+        <rect x="178.5" y="249.5" width="16" height="17" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+        <!-- Segment 3: GND (x: 195.5..211.5, center 203.5) -->
+        <rect x="195.5" y="249.5" width="16" height="17" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+        <!-- Segment 4: VCC (x: 212.5..228.5, center 220.5) -->
+        <rect x="212.5" y="249.5" width="16" height="17" rx="3" fill="#09090b" stroke="#27272a" stroke-width="0.6"/>
+
+        <!-- Top Chamfer Facet Highlights on each segment -->
+        <path d="M 164 250.5 L 175 250.5 L 174 253 L 165 253 Z" fill="#52525b" opacity="0.8"/>
+        <path d="M 181 250.5 L 192 250.5 L 191 253 L 182 253 Z" fill="#52525b" opacity="0.8"/>
+        <path d="M 198 250.5 L 209 250.5 L 208 253 L 199 253 Z" fill="#52525b" opacity="0.8"/>
+        <path d="M 215 250.5 L 226 250.5 L 225 253 L 216 253 Z" fill="#52525b" opacity="0.8"/>
+
+        <!-- V-Groove Breakaway Notches between segments -->
+        <line x1="178" y1="249.5" x2="178" y2="266.5" stroke="#000000" stroke-width="1.2"/>
+        <line x1="195" y1="249.5" x2="195" y2="266.5" stroke="#000000" stroke-width="1.2"/>
+        <line x1="212" y1="249.5" x2="212" y2="266.5" stroke="#000000" stroke-width="1.2"/>
+      </g>
+
+      <!-- 3) 4 Parallel 3D Metallic Pins (Ideal Proportional Length: tips at y=302.0) -->
+      <!-- Pitch 17.0px: x = 169.5, 186.5, 203.5, 220.5 -->
+      <!-- Pin 1: AO at x=169.5 -->
+      <g transform="translate(169.5, 0)">
+        <rect x="-1.8" y="255" width="3.6" height="47" rx="1.8" fill="#090d16"/>
+        <rect x="-1.4" y="255.5" width="2.8" height="46" rx="1.4" fill="url(#soil-metal-pin-v)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 2: DO at x=186.5 -->
+      <g transform="translate(186.5, 0)">
+        <rect x="-1.8" y="255" width="3.6" height="47" rx="1.8" fill="#090d16"/>
+        <rect x="-1.4" y="255.5" width="2.8" height="46" rx="1.4" fill="url(#soil-metal-pin-v)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 3: GND at x=203.5 -->
+      <g transform="translate(203.5, 0)">
+        <rect x="-1.8" y="255" width="3.6" height="47" rx="1.8" fill="#090d16"/>
+        <rect x="-1.4" y="255.5" width="2.8" height="46" rx="1.4" fill="url(#soil-metal-pin-v)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+      <!-- Pin 4: VCC at x=220.5 -->
+      <g transform="translate(220.5, 0)">
+        <rect x="-1.8" y="255" width="3.6" height="47" rx="1.8" fill="#090d16"/>
+        <rect x="-1.4" y="255.5" width="2.8" height="46" rx="1.4" fill="url(#soil-metal-pin-v)" stroke="#64748b" stroke-width="0.3"/>
+      </g>
+    </g>
+  </g>
+</svg>
