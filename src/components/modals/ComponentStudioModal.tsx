@@ -46,6 +46,8 @@ import {
   Box,
   Tag,
   Magnet,
+  Undo2,
+  Redo2,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -128,8 +130,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [snapToBreadboard, setSnapToBreadboard] = useState<boolean>(true);
   const [breadboardOffset, setBreadboardOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Tool mode: 'select-pin' | 'drag-image' | 'add-pin'
-  const [toolMode, setToolMode] = useState<'select-pin' | 'drag-image' | 'add-pin'>('select-pin');
+  // Tool mode: 'select-pin' | 'drag-image' | 'drag-all' | 'add-pin'
+  const [toolMode, setToolMode] = useState<'select-pin' | 'drag-image' | 'drag-all' | 'add-pin'>('select-pin');
 
   // Dragging states
   const [draggingPinId, setDraggingPinId] = useState<string | null>(null);
@@ -139,12 +141,26 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     mouseY: number;
     startX: number;
     startY: number;
+    initialPins: Pin[];
   }>({
     mouseX: 0,
     mouseY: 0,
     startX: 0,
     startY: 0,
+    initialPins: [],
   });
+
+  // Undo / Redo History Stack
+  const [history, setHistory] = useState<{
+    width: number;
+    height: number;
+    pins: Pin[];
+    imageOffset: { x: number; y: number };
+    imageDataUrl: string;
+    rawImageDataUrl: string;
+  }[]>([]);
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
+  const isUndoRedoActionRef = useRef<boolean>(false);
 
   // Multi-pin Generator state
   const [genCount, setGenCount] = useState<number>(6);
@@ -180,6 +196,92 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       }
     }
   }, [initialDefinition, isOpen]);
+
+  // Push snapshot to history stack
+  const pushSnapshot = useCallback(
+    (override?: {
+      width?: number;
+      height?: number;
+      pins?: Pin[];
+      imageOffset?: { x: number; y: number };
+      imageDataUrl?: string;
+      rawImageDataUrl?: string;
+    }) => {
+      if (isUndoRedoActionRef.current) return;
+      const snap = {
+        width: override?.width ?? width,
+        height: override?.height ?? height,
+        pins: override?.pins ? JSON.parse(JSON.stringify(override.pins)) : JSON.parse(JSON.stringify(pins)),
+        imageOffset: override?.imageOffset ? { ...override.imageOffset } : { ...imageOffset },
+        imageDataUrl: override?.imageDataUrl !== undefined ? override.imageDataUrl : imageDataUrl,
+        rawImageDataUrl: override?.rawImageDataUrl !== undefined ? override.rawImageDataUrl : rawImageDataUrl,
+      };
+      setHistory((prev) => {
+        const next = prev.slice(0, historyIndex + 1);
+        return [...next, snap];
+      });
+      setHistoryIndex((prev) => prev + 1);
+    },
+    [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, historyIndex]
+  );
+
+  // Initialize history when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const initSnap = {
+        width: initialDefinition?.width || width || 200,
+        height: initialDefinition?.height || height || 150,
+        pins: initialDefinition?.pins ? JSON.parse(JSON.stringify(initialDefinition.pins)) : JSON.parse(JSON.stringify(pins)),
+        imageOffset: initialDefinition?.imageOffset ? { ...initialDefinition.imageOffset } : { ...imageOffset },
+        imageDataUrl: (initialDefinition as any)?.imageUrl || imageDataUrl || '',
+        rawImageDataUrl: (initialDefinition as any)?.imageUrl || rawImageDataUrl || '',
+      };
+      setHistory([initSnap]);
+      setHistoryIndex(0);
+    }
+  }, [isOpen]);
+
+  // Undo Action
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      const targetIndex = historyIndex - 1;
+      const snap = history[targetIndex];
+      if (snap) {
+        isUndoRedoActionRef.current = true;
+        setWidth(snap.width);
+        setHeight(snap.height);
+        setPins(JSON.parse(JSON.stringify(snap.pins)));
+        setImageOffset({ ...snap.imageOffset });
+        setImageDataUrl(snap.imageDataUrl || '');
+        setRawImageDataUrl(snap.rawImageDataUrl || '');
+        setHistoryIndex(targetIndex);
+        setTimeout(() => {
+          isUndoRedoActionRef.current = false;
+        }, 50);
+      }
+    }
+  }, [history, historyIndex]);
+
+  // Redo Action
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const targetIndex = historyIndex + 1;
+      const snap = history[targetIndex];
+      if (snap) {
+        isUndoRedoActionRef.current = true;
+        setWidth(snap.width);
+        setHeight(snap.height);
+        setPins(JSON.parse(JSON.stringify(snap.pins)));
+        setImageOffset({ ...snap.imageOffset });
+        setImageDataUrl(snap.imageDataUrl || '');
+        setRawImageDataUrl(snap.rawImageDataUrl || '');
+        setHistoryIndex(targetIndex);
+        setTimeout(() => {
+          isUndoRedoActionRef.current = false;
+        }, 50);
+      }
+    }
+  }, [history, historyIndex]);
 
   // Convert screen client coordinates to logical component coordinates
   const getLogicalCoords = useCallback(
@@ -444,10 +546,28 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
   // Image Offset Nudge (Moves ONLY the image visual)
   const nudgeImage = (dx: number, dy: number) => {
-    setImageOffset((prev) => ({
-      x: Math.round((prev.x + dx) * 10) / 10,
-      y: Math.round((prev.y + dy) * 10) / 10,
+    const newOffset = {
+      x: Math.round((imageOffset.x + dx) * 10) / 10,
+      y: Math.round((imageOffset.y + dy) * 10) / 10,
+    };
+    setImageOffset(newOffset);
+    pushSnapshot({ imageOffset: newOffset });
+  };
+
+  // Nudge All (Moves both Image and Pins together)
+  const nudgeAll = (dx: number, dy: number) => {
+    const newOffset = {
+      x: Math.round((imageOffset.x + dx) * 10) / 10,
+      y: Math.round((imageOffset.y + dy) * 10) / 10,
+    };
+    const newPins = pins.map((p) => ({
+      ...p,
+      x: Math.round((p.x + dx) * 10) / 10,
+      y: Math.round((p.y + dy) * 10) / 10,
     }));
+    setImageOffset(newOffset);
+    setPins(newPins);
+    pushSnapshot({ imageOffset: newOffset, pins: newPins });
   };
 
   // Fit Bounding Box directly to image
@@ -457,14 +577,14 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const shiftY = imageOffset.y;
 
     // Normalize pins so their relative position on the image is preserved
-    setPins((prevPins) =>
-      prevPins.map((p) => ({
-        ...p,
-        x: Math.round((p.x - shiftX) * 10) / 10,
-        y: Math.round((p.y - shiftY) * 10) / 10,
-      }))
-    );
+    const newPins = pins.map((p) => ({
+      ...p,
+      x: Math.round((p.x - shiftX) * 10) / 10,
+      y: Math.round((p.y - shiftY) * 10) / 10,
+    }));
+    setPins(newPins);
     setImageOffset({ x: 0, y: 0 });
+    pushSnapshot({ imageOffset: { x: 0, y: 0 }, pins: newPins });
   };
 
   // Rotate component, image, and pins 90 degrees clockwise (R / Space Shortcut)
@@ -473,17 +593,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const oldHeight = height;
 
     // 1. Swap Canvas Dimensions
-    setWidth(oldHeight);
-    setHeight(oldWidth);
+    const newW = oldHeight;
+    const newH = oldWidth;
+    setWidth(newW);
+    setHeight(newH);
 
     // 2. Rotate All Pins Mathematically (x' = oldHeight - y, y' = x)
-    setPins((prevPins) =>
-      prevPins.map((p) => ({
-        ...p,
-        x: Math.round((oldHeight - p.y) * 10) / 10,
-        y: Math.round(p.x * 10) / 10,
-      }))
-    );
+    const newPins = pins.map((p) => ({
+      ...p,
+      x: Math.round((oldHeight - p.y) * 10) / 10,
+      y: Math.round(p.x * 10) / 10,
+    }));
+    setPins(newPins);
 
     // 3. Rotate Image Pixels on Offscreen Canvas
     const sourceImgUrl = imageDataUrl || rawImageDataUrl;
@@ -503,18 +624,35 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           setImageDataUrl(rotatedDataUrl);
           setRawImageDataUrl(rotatedDataUrl);
           setOriginalImageSize({ width: img.naturalHeight, height: img.naturalWidth });
+          pushSnapshot({
+            width: newW,
+            height: newH,
+            pins: newPins,
+            imageOffset: { x: 0, y: 0 },
+            imageDataUrl: rotatedDataUrl,
+            rawImageDataUrl: rotatedDataUrl,
+          });
         }
       };
       img.src = sourceImgUrl;
+    } else {
+      pushSnapshot({
+        width: newW,
+        height: newH,
+        pins: newPins,
+        imageOffset: { x: 0, y: 0 },
+      });
     }
 
     // 4. Reset Image Offset
     setImageOffset({ x: 0, y: 0 });
-  }, [width, height, imageDataUrl, rawImageDataUrl]);
+  }, [width, height, pins, imageDataUrl, rawImageDataUrl, pushSnapshot]);
 
   // Pin Dragging Mouse Event Listeners (UNCONSTRAINED - Can drag anywhere to match module pads!)
   useEffect(() => {
     if (!draggingPinId) return;
+
+    let finalPins = pins;
 
     const handleWindowMouseMove = (e: MouseEvent) => {
       const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
@@ -529,15 +667,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         finalY = Math.round(rawY * 10) / 10;
       }
 
-      setPins((prevPins) =>
-        prevPins.map((p) =>
-          p.id === draggingPinId ? { ...p, x: finalX, y: finalY } : p
-        )
+      finalPins = pins.map((p) =>
+        p.id === draggingPinId ? { ...p, x: finalX, y: finalY } : p
       );
+      setPins(finalPins);
     };
 
     const handleWindowMouseUp = () => {
       setDraggingPinId(null);
+      pushSnapshot({ pins: finalPins });
     };
 
     window.addEventListener('mousemove', handleWindowMouseMove);
@@ -552,11 +690,16 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     snapToBreadboard,
     breadboardOffset.x,
     breadboardOffset.y,
+    pins,
+    pushSnapshot,
   ]);
 
-  // Image Dragging Mouse Event Listeners (Moves ONLY image independently)
+  // Image / All Dragging Mouse Event Listeners
   useEffect(() => {
     if (!isDraggingImage) return;
+
+    let latestOffset = imageOffset;
+    let latestPins = pins;
 
     const handleWindowMouseMove = (e: MouseEvent) => {
       const deltaX = (e.clientX - imageDragStart.mouseX) / zoom;
@@ -573,11 +716,25 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         newY = Math.round(newY * 10) / 10;
       }
 
-      setImageOffset({ x: newX, y: newY });
+      const diffX = newX - imageDragStart.startX;
+      const diffY = newY - imageDragStart.startY;
+
+      latestOffset = { x: newX, y: newY };
+      setImageOffset(latestOffset);
+
+      if (toolMode === 'drag-all' && imageDragStart.initialPins.length > 0) {
+        latestPins = imageDragStart.initialPins.map((p) => ({
+          ...p,
+          x: Math.round((p.x + diffX) * 10) / 10,
+          y: Math.round((p.y + diffY) * 10) / 10,
+        }));
+        setPins(latestPins);
+      }
     };
 
     const handleWindowMouseUp = () => {
       setIsDraggingImage(false);
+      pushSnapshot({ imageOffset: latestOffset, pins: latestPins });
     };
 
     window.addEventListener('mousemove', handleWindowMouseMove);
@@ -586,21 +743,25 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       window.removeEventListener('mousemove', handleWindowMouseMove);
       window.removeEventListener('mouseup', handleWindowMouseUp);
     };
-  }, [isDraggingImage, imageDragStart, zoom, snapToBreadboard, breadboardOffset.x, breadboardOffset.y]);
+  }, [isDraggingImage, imageDragStart, zoom, snapToBreadboard, breadboardOffset.x, breadboardOffset.y, toolMode, pushSnapshot, imageOffset, pins]);
 
   // Handle Pin Mouse Down to start dragging pin
   const handlePinMouseDown = (e: React.MouseEvent, pinId: string) => {
     if (e.button !== 0) return; // Left click only
+    if (toolMode === 'drag-all') {
+      handleImageMouseDown(e);
+      return;
+    }
     e.stopPropagation();
     e.preventDefault();
     setSelectedPinId(pinId);
     setDraggingPinId(pinId);
   };
 
-  // Handle Image Mouse Down to start dragging component image
+  // Handle Image Mouse Down to start dragging component image or all
   const handleImageMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if (toolMode === 'drag-image') {
+    if (toolMode === 'drag-image' || toolMode === 'drag-all') {
       e.stopPropagation();
       e.preventDefault();
       setIsDraggingImage(true);
@@ -609,6 +770,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         mouseY: e.clientY,
         startX: imageOffset.x,
         startY: imageOffset.y,
+        initialPins: [...pins],
       });
     }
   };
@@ -632,8 +794,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         description: `Pin ${pins.length + 1}`,
       };
 
-      setPins((prev) => [...prev, newPin]);
+      const nextPins = [...pins, newPin];
+      setPins(nextPins);
       setSelectedPinId(newId);
+      pushSnapshot({ pins: nextPins });
     }
   };
 
@@ -642,14 +806,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
   const updateSelectedPin = (fields: Partial<Pin>) => {
     if (!selectedPinId) return;
-    setPins(
-      pins.map((p) => {
-        if (p.id === selectedPinId) {
-          return { ...p, ...fields };
-        }
-        return p;
-      })
-    );
+    const nextPins = pins.map((p) => {
+      if (p.id === selectedPinId) {
+        return { ...p, ...fields };
+      }
+      return p;
+    });
+    setPins(nextPins);
   };
 
   const deletePin = (id: string) => {
@@ -658,6 +821,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     if (selectedPinId === id) {
       setSelectedPinId(remaining.length > 0 ? remaining[0].id : null);
     }
+    pushSnapshot({ pins: remaining });
   };
 
   // Micro-nudge pin with keyboard arrow keys
@@ -665,10 +829,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     if (!selectedPin) return;
     const newX = Math.round((selectedPin.x + dx) * 10) / 10;
     const newY = Math.round((selectedPin.y + dy) * 10) / 10;
-    updateSelectedPin({ x: newX, y: newY });
+    const nextPins = pins.map((p) => (p.id === selectedPinId ? { ...p, x: newX, y: newY } : p));
+    setPins(nextPins);
+    pushSnapshot({ pins: nextPins });
   };
 
-  // Keyboard navigation & Shortcuts (R / Space for Rotate, Arrows for Nudge)
+  // Keyboard navigation & Shortcuts (R / Space for Rotate, Ctrl+Z Undo, Ctrl+Y Redo, Arrows for Nudge)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -676,8 +842,31 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Shortcut: R or Space to Rotate 90° Clockwise
-      if (e.key === 'r' || e.key === 'R' || e.key === ' ' || e.code === 'Space') {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+
+      // Undo / Redo Shortcuts inside Studio
+      if (isCmdOrCtrl && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+        return;
+      } else if (isCmdOrCtrl && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        handleRedo();
+        return;
+      }
+
+      // If user presses Ctrl+R or Cmd+R, DO NOT INTERCEPT (allow browser refresh!)
+      if (isCmdOrCtrl) {
+        return;
+      }
+
+      // Shortcut: R or Space to Rotate 90° Clockwise (ONLY when no modifier is pressed!)
+      if (!e.altKey && (e.key === 'r' || e.key === 'R' || e.key === ' ' || e.code === 'Space')) {
         e.preventDefault();
         handleRotateClockwise();
         return;
@@ -685,8 +874,21 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
       const step = e.shiftKey ? 5.0 : e.altKey ? 0.1 : 1.0;
 
-      if (toolMode === 'drag-image') {
-        // Nudge image with arrow keys
+      if (toolMode === 'drag-all') {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          nudgeAll(0, -step);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          nudgeAll(0, step);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          nudgeAll(-step, 0);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          nudgeAll(step, 0);
+        }
+      } else if (toolMode === 'drag-image') {
         if (e.key === 'ArrowUp') {
           e.preventDefault();
           nudgeImage(0, -step);
@@ -701,7 +903,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           nudgeImage(step, 0);
         }
       } else if (selectedPin) {
-        // Nudge pin with arrow keys
         if (e.key === 'ArrowUp') {
           e.preventDefault();
           nudgePin(0, -step);
@@ -725,7 +926,20 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, selectedPin, selectedPinId, toolMode, width, height, handleRotateClockwise]);
+  }, [
+    isOpen,
+    selectedPin,
+    selectedPinId,
+    toolMode,
+    width,
+    height,
+    handleRotateClockwise,
+    handleUndo,
+    handleRedo,
+    pins,
+    imageOffset,
+    pushSnapshot,
+  ]);
 
   // Generate multi-pin / DIP Row
   const handleGeneratePinRow = () => {
@@ -1280,13 +1494,33 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           <div className="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
             {/* Canvas Toolbar - Sleek Pro Single-Line Bar */}
             <div className="min-h-[46px] bg-slate-950/90 backdrop-blur-md border-b border-slate-800 px-4 py-1.5 flex items-center justify-between z-10 gap-3 overflow-x-auto no-scrollbar select-none">
-              {/* Primary Tool Mode Switch & Rotate */}
+              {/* Primary Tool Mode Switch, Undo/Redo & Rotate */}
               <div className="flex items-center gap-2 shrink-0">
+                {/* Undo / Redo Buttons */}
+                <div className="flex bg-slate-900/90 p-0.5 rounded-xl border border-slate-800 shadow-inner">
+                  <button
+                    onClick={handleUndo}
+                    disabled={historyIndex <= 0}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors"
+                    title="Undo (Ctrl+Z)"
+                  >
+                    <Undo2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={handleRedo}
+                    disabled={historyIndex >= history.length - 1}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors"
+                    title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
+                  >
+                    <Redo2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
                 {/* Segmented Control */}
                 <div className="flex bg-slate-900/90 p-0.5 rounded-xl border border-slate-800 shadow-inner">
                   <button
                     onClick={() => setToolMode('select-pin')}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                       toolMode === 'select-pin'
                         ? 'bg-sky-500 text-slate-950 shadow-md'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
@@ -1299,20 +1533,33 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
                   <button
                     onClick={() => setToolMode('drag-image')}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                       toolMode === 'drag-image'
                         ? 'bg-amber-400 text-slate-950 shadow-md'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
                     }`}
-                    title="Geser Gambar Modul untuk dicocokkan ke pin / breadboard"
+                    title="Geser Gambar Modul saja untuk dicocokkan ke pin / breadboard"
                   >
                     <ImageIcon className="w-3.5 h-3.5" />
                     <span>Geser Gambar</span>
                   </button>
 
                   <button
+                    onClick={() => setToolMode('drag-all')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      toolMode === 'drag-all'
+                        ? 'bg-purple-500 text-white shadow-md'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                    }`}
+                    title="Geser Gambar dan Pin bersamaan"
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Geser Semua</span>
+                  </button>
+
+                  <button
                     onClick={() => setToolMode('add-pin')}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                       toolMode === 'add-pin'
                         ? 'bg-emerald-500 text-slate-950 shadow-md'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
@@ -1443,13 +1690,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             {/* SVG Interactive Canvas */}
             <div
               className={`flex-1 overflow-hidden relative bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] ${
-                toolMode === 'drag-image' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'
+                toolMode === 'drag-image' || toolMode === 'drag-all' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'
               }`}
               onMouseDown={(e) => {
                 if (e.button === 1 || e.altKey) {
                   setIsPanning(true);
                   setStartPanPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-                } else if (toolMode === 'drag-image') {
+                } else if (toolMode === 'drag-image' || toolMode === 'drag-all') {
                   handleImageMouseDown(e);
                 }
               }}
@@ -1544,7 +1791,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       height={height}
                       preserveAspectRatio="none"
                       className={`transition-opacity duration-150 ${
-                        toolMode === 'drag-image' ? 'cursor-grab active:cursor-grabbing hover:opacity-90' : ''
+                        toolMode === 'drag-image' || toolMode === 'drag-all' ? 'cursor-grab active:cursor-grabbing hover:opacity-90' : ''
                       }`}
                       onMouseDown={handleImageMouseDown}
                     />

@@ -237,15 +237,10 @@ export default function App() {
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [studioEditDef, setStudioEditDef] = useState<ComponentDefinition | null>(null);
 
-  // Global Keyboard Shortcuts (Ctrl+Z Undo, Ctrl+Y / Ctrl+Shift+Z Redo)
+  // Global Keyboard Shortcuts (Ctrl+Z Undo, Ctrl+Y / Ctrl+Shift+Z Redo, R/Space Rotate)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const activeTag = (document.activeElement?.tagName || '').toLowerCase();
-      if (
-        activeTag === 'input' ||
-        activeTag === 'textarea' ||
-        (document.activeElement as HTMLElement)?.isContentEditable
-      ) {
+      if (['input', 'textarea', 'select'].includes((e.target as HTMLElement)?.tagName.toLowerCase())) {
         return;
       }
 
@@ -262,12 +257,49 @@ export default function App() {
       } else if (isCmdOrCtrl && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         redo();
+      } else if (
+        !isCmdOrCtrl &&
+        !e.altKey &&
+        (e.key === 'r' || e.key === 'R' || e.key === ' ' || e.code === 'Space')
+      ) {
+        // Rotate selected component on Home canvas (R / Space)
+        if (
+          selectedComponentId &&
+          !isStudioOpen &&
+          !isCodeModalOpen &&
+          !isBomModalOpen &&
+          !isPresetsModalOpen
+        ) {
+          e.preventDefault();
+          const rotations: (0 | 90 | 180 | 270)[] = [0, 90, 180, 270];
+          const comp = components.find((c) => c.id === selectedComponentId);
+          if (comp) {
+            const currentIndex = rotations.indexOf(comp.rotation);
+            const nextRotation = rotations[(currentIndex + 1) % 4]!;
+            commit((prev) => ({
+              ...prev,
+              components: prev.components.map((c) =>
+                c.id === selectedComponentId ? { ...c, rotation: nextRotation } : c
+              ),
+            }));
+          }
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo]);
+  }, [
+    undo,
+    redo,
+    commit,
+    selectedComponentId,
+    components,
+    isStudioOpen,
+    isCodeModalOpen,
+    isBomModalOpen,
+    isPresetsModalOpen,
+  ]);
 
   // Add Component to Canvas
   const handleAddComponent = (type: ComponentType) => {
