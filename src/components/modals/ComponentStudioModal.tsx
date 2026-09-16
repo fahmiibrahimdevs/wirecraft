@@ -931,17 +931,24 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setImageOffset(nextOffset);
 
     // 3. Rotate All Pins mathematically around the component's relative box
-    const newPins = pins.map((p) => {
-      const relX = p.x - imageOffset.x;
-      const relY = p.y - imageOffset.y;
-      const relXRot = oldHeight - relY;
-      const relYRot = relX;
-      return {
-        ...p,
-        x: Math.round((newOffsetX + relXRot) * 10) / 10,
-        y: Math.round((newOffsetY + relYRot) * 10) / 10,
-      };
-    });
+    // When toolMode === 'drag-image' (Geser Gambar), pins STAY in place and ONLY the image rotates!
+    // When toolMode === 'drag-all' / 'select-pin' / others, ALL pins rotate together with the image!
+    const shouldRotatePins = toolMode !== 'drag-image';
+
+    const newPins = shouldRotatePins
+      ? pins.map((p) => {
+          const relX = p.x - imageOffset.x;
+          const relY = p.y - imageOffset.y;
+          const relXRot = oldHeight - relY;
+          const relYRot = relX;
+          return {
+            ...p,
+            x: Math.round((newOffsetX + relXRot) * 10) / 10,
+            y: Math.round((newOffsetY + relYRot) * 10) / 10,
+          };
+        })
+      : pins;
+
     setPins(newPins);
 
     // 4. Rotate Image (Pure Lossless Vector for SVG, High-Quality Canvas for Bitmaps)
@@ -998,7 +1005,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         imageOffset: nextOffset,
       });
     }
-  }, [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, pushSnapshot]);
+  }, [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, toolMode, pushSnapshot]);
 
   // Pin Dragging Mouse Event Listeners (UNCONSTRAINED - Can drag anywhere to match module pads!)
   useEffect(() => {
@@ -1782,10 +1789,14 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   <button
                     onClick={handleRotateClockwise}
                     className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold flex items-center gap-1 transition-colors"
-                    title="Putar 90° Searah Jarum Jam (Shortcut: Tombol R atau Spasi)"
+                    title={
+                      toolMode === 'drag-image'
+                        ? 'Putar Gambar Saja 90° (Pin tidak ikut berputar)'
+                        : 'Putar Semua (Gambar + Pin) 90°'
+                    }
                   >
-                    <RotateCw className="w-3 h-3 text-sky-400" />
-                    <span>90°</span>
+                    <RotateCw className={`w-3 h-3 ${toolMode === 'drag-image' ? 'text-amber-400' : 'text-sky-400'}`} />
+                    <span>{toolMode === 'drag-image' ? 'Putar Gbr' : '90°'}</span>
                   </button>
                 </div>
               </div>
@@ -2092,11 +2103,21 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 {/* Rotate Button */}
                 <button
                   onClick={handleRotateClockwise}
-                  className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-300 hover:text-sky-300 text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 cursor-pointer"
-                  title="Putar Komponen & Gambar 90° (Shortcut: Tombol R atau Spasi)"
+                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 cursor-pointer ${
+                    toolMode === 'drag-image'
+                      ? 'bg-amber-500/15 border-amber-500/50 text-amber-300 hover:bg-amber-500/25'
+                      : 'bg-slate-900 hover:bg-slate-800 border-slate-800 hover:border-sky-500/40 text-slate-300 hover:text-sky-300'
+                  }`}
+                  title={
+                    toolMode === 'drag-image'
+                      ? 'Putar Gambar Saja 90° (Pin TIDAK ikut berputar karena Mode Geser Gambar aktif)'
+                      : 'Putar Semua (Gambar + Pin + Bodi) 90° (Shortcut: Tombol R)'
+                  }
                 >
-                  <RotateCw className="w-3.5 h-3.5 text-sky-400" />
-                  <span className="hidden sm:inline">Putar 90°</span>
+                  <RotateCw className={`w-3.5 h-3.5 ${toolMode === 'drag-image' ? 'text-amber-400' : 'text-sky-400'}`} />
+                  <span className="hidden sm:inline">
+                    {toolMode === 'drag-image' ? 'Putar Gambar' : 'Putar 90°'}
+                  </span>
                   <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-slate-950 text-slate-400 rounded border border-slate-800">
                     R
                   </span>
