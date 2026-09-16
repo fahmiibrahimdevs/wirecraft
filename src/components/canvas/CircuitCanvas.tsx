@@ -1,6 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { CircuitComponent, Wire, Pin, WirePoint, WireRouting } from '../../types/circuit';
 import { COMPONENT_DEFINITIONS } from '../../constants/components';
+import { getAllComponentDefinitions, CUSTOM_COMPONENTS_EVENT } from '../../utils/customComponents';
 import { getPinWorldPosition, generateWirePath, snapToGrid, getAutoPinColor, getAutoWireColor } from '../../utils/geometry';
 import { sortWiresForRendering } from '../../utils/orthogonalRouter';
 import { ComponentSvg } from './ComponentSvg';
@@ -79,11 +80,22 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     screenY: number;
   } | null>(null);
 
+  // Custom Component Unified Definitions state
+  const [allDefs, setAllDefs] = useState<Record<string, any>>(() => getAllComponentDefinitions());
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setAllDefs(getAllComponentDefinitions());
+    };
+    window.addEventListener(CUSTOM_COMPONENTS_EVENT, handleUpdate);
+    return () => window.removeEventListener(CUSTOM_COMPONENTS_EVENT, handleUpdate);
+  }, []);
+
   // Memoized pin world coordinate map: O(1) instant lookup for all wires and hit-testing
   const pinWorldMap = useMemo(() => {
     const map = new Map<string, WirePoint>();
     for (const comp of components) {
-      const def = COMPONENT_DEFINITIONS[comp.type];
+      const def = allDefs[comp.type] || COMPONENT_DEFINITIONS[comp.type];
       if (!def) continue;
       for (const pin of def.pins) {
         const pos = getPinWorldPosition(comp.x, comp.y, def.width, def.height, comp.rotation, pin);
@@ -91,7 +103,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       }
     }
     return map;
-  }, [components]);
+  }, [components, allDefs]);
 
   // Memoized sorted components to prevent expensive array sort on every render/mousemove
   const sortedComponents = useMemo(() => {
@@ -236,7 +248,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
       // 1. Breadboard-to-Breadboard Seamless Interlocking Docking
       if (draggingComp && isBreadboardType(draggingComp.type)) {
-        const thisDef = COMPONENT_DEFINITIONS[draggingComp.type];
+        const thisDef = allDefs[draggingComp.type] || COMPONENT_DEFINITIONS[draggingComp.type];
         const otherBreadboards = breadboards.filter((b) => b.id !== draggingCompId);
         if (thisDef && otherBreadboards.length > 0) {
           let bestSnapDist = Infinity;
@@ -245,7 +257,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           let didSnapBB = false;
 
           for (const otherBB of otherBreadboards) {
-            const otherDef = COMPONENT_DEFINITIONS[otherBB.type];
+            const otherDef = allDefs[otherBB.type] || COMPONENT_DEFINITIONS[otherBB.type];
             if (!otherDef) continue;
 
             // Snap vertically (Below otherBB)
@@ -308,7 +320,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       // 2. Component-to-Breadboard Magnetic Snapping:
       // Test all component pins against breadboard holes for effortless, pixel-perfect alignment
       if (draggingComp && !isBreadboardType(draggingComp.type) && breadboards.length > 0) {
-        const def = COMPONENT_DEFINITIONS[draggingComp.type];
+        const def = allDefs[draggingComp.type] || COMPONENT_DEFINITIONS[draggingComp.type];
         if (def && def.pins.length > 0) {
           let closestDist = Infinity;
           let bestDx = 0;
@@ -326,7 +338,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
             );
 
             for (const bb of breadboards) {
-              const bbDef = COMPONENT_DEFINITIONS[bb.type];
+              const bbDef = allDefs[bb.type] || COMPONENT_DEFINITIONS[bb.type];
               if (!bbDef) continue;
 
               // Spatial Bounding Box Culling:
@@ -400,7 +412,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       let minDistance = 16;
 
       for (const comp of components) {
-        const def = COMPONENT_DEFINITIONS[comp.type];
+        const def = allDefs[comp.type] || COMPONENT_DEFINITIONS[comp.type];
         if (!def) continue;
 
         // Quick bounding box check before looping pins
@@ -751,7 +763,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
             {components
               .filter((c) => c.type === 'sensor-ct-coil')
               .map((comp) => {
-                const def = COMPONENT_DEFINITIONS[comp.type];
+                const def = allDefs[comp.type] || COMPONENT_DEFINITIONS[comp.type];
                 if (!def) return null;
                 return (
                   <g

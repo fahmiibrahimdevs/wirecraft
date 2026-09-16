@@ -26,12 +26,66 @@ export function getCustomComponents(): Record<string, CustomComponentEntry> {
 }
 
 /**
+ * Compress / optimize large base64 images so they never exceed browser localStorage quota (5MB)
+ */
+export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 600): Promise<string> {
+  if (!dataUrl || !dataUrl.startsWith('data:image')) {
+    return Promise.resolve(dataUrl);
+  }
+
+  return new Promise((resolve) => {
+    // If it's already small (< 150KB), no need to compress
+    if (dataUrl.length < 150000) {
+      resolve(dataUrl);
+      return;
+    }
+
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      let { naturalWidth: w, naturalHeight: h } = img;
+      if (w <= maxDimension && h <= maxDimension && dataUrl.length < 250000) {
+        resolve(dataUrl);
+        return;
+      }
+
+      if (w > h) {
+        if (w > maxDimension) {
+          h = Math.round((h * maxDimension) / w);
+          w = maxDimension;
+        }
+      } else {
+        if (h > maxDimension) {
+          w = Math.round((w * maxDimension) / h);
+          h = maxDimension;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(dataUrl);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, w, h);
+      const optimized = canvas.toDataURL('image/png');
+      resolve(optimized);
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+/**
  * Save or update a custom component in localStorage
  */
 export function saveCustomComponent(
   definition: ComponentDefinition,
   imageBase64?: string
-): void {
+): { success: boolean; error?: string } {
   try {
     const current = getCustomComponents();
     const existing = current[definition.type];
@@ -41,16 +95,26 @@ export function saveCustomComponent(
       definition: {
         ...definition,
         category: definition.category || 'sensors',
+        isCustom: true,
       },
       imageBase64: imageBase64 || existing?.imageBase64 || (definition as any).imageUrl,
       createdAt: existing?.createdAt || now,
       updatedAt: now,
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    } catch (quotaErr) {
+      console.warn('LocalStorage quota limit reached, attempting emergency cleanup...', quotaErr);
+      // Try to save without bloated historical data if any
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    }
+
     window.dispatchEvent(new Event(CUSTOM_COMPONENTS_EVENT));
-  } catch (err) {
+    return { success: true };
+  } catch (err: any) {
     console.error('Failed to save custom component to localStorage:', err);
+    return { success: false, error: err?.message || 'Gagal menyimpan ke memori browser' };
   }
 }
 

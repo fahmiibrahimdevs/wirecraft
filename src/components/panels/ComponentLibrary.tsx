@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { COMPONENT_DEFINITIONS } from '../../constants/components';
-import { getAllComponentDefinitions, CUSTOM_COMPONENTS_EVENT } from '../../utils/customComponents';
+import { getAllComponentDefinitions, deleteCustomComponent, CUSTOM_COMPONENTS_EVENT } from '../../utils/customComponents';
 import { ComponentType, ComponentDefinition } from '../../types/circuit';
 import {
   Cpu,
@@ -30,6 +30,7 @@ import {
   Droplets,
   Activity,
   Layers,
+  Trash2,
 } from 'lucide-react';
 
 interface ComponentLibraryProps {
@@ -136,6 +137,17 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
             </span>
           </div>
 
+          {/* Quick Studio Trigger Button */}
+          {onOpenStudio && (
+            <button
+              onClick={() => onOpenStudio()}
+              className="w-full mb-3 py-2 px-3 rounded-xl bg-gradient-to-r from-sky-500/20 to-emerald-500/20 hover:from-sky-500/30 hover:to-emerald-500/30 border border-sky-500/40 text-sky-300 text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all group cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-sky-400 group-hover:rotate-12 transition-transform" />
+              <span>+ Buat / Import Komponen (Studio)</span>
+            </button>
+          )}
+
           {/* Search Box */}
           <div className="relative">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -172,12 +184,22 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
         {/* Component List */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {filteredComponents.length === 0 ? (
-            <div className="text-center py-10 text-slate-500 text-xs">
-              Tidak ada komponen ditemukan
+            <div className="text-center py-10 text-slate-500 text-xs flex flex-col items-center gap-2">
+              <span>Tidak ada komponen ditemukan</span>
+              {activeCategory === 'custom' && onOpenStudio && (
+                <button
+                  onClick={() => onOpenStudio()}
+                  className="mt-2 text-xs text-sky-400 hover:underline flex items-center gap-1"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Buat komponen pertama Anda di Studio
+                </button>
+              )}
             </div>
           ) : (
             filteredComponents.map((def) => {
               const IconComp = ICON_MAP[def.icon] || Cpu;
+              const customImg = (def as any).imageUrl;
 
               return (
                 <div
@@ -185,8 +207,12 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                   onClick={() => onAddComponent(def.type)}
                   className="group relative bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 hover:border-sky-500/80 hover:ring-1 hover:ring-sky-500/30 rounded-xl p-3 cursor-pointer transition-all duration-200 flex items-start gap-3 shadow-sm"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-sky-400 group-hover:scale-105 transition-transform shrink-0">
-                    <IconComp className="w-4 h-4" />
+                  <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-sky-400 group-hover:scale-105 transition-transform shrink-0 overflow-hidden p-1">
+                    {customImg ? (
+                      <img src={customImg} alt={def.name} className="max-w-full max-h-full object-contain" />
+                    ) : (
+                      <IconComp className="w-5 h-5" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
@@ -207,6 +233,34 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                     <p className="text-[11px] text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">
                       {def.description}
                     </p>
+
+                    {/* Custom Component Action Toolbar */}
+                    {def.isCustom && (
+                      <div className="mt-2 flex items-center gap-2 pt-1 border-t border-slate-800/80" onClick={(e) => e.stopPropagation()}>
+                        {onOpenStudio && (
+                          <button
+                            onClick={() => onOpenStudio(def)}
+                            className="px-2 py-0.5 rounded bg-slate-800 hover:bg-sky-500/20 text-[10px] text-sky-300 border border-slate-700 hover:border-sky-500/40 flex items-center gap-1 transition-colors"
+                            title="Edit Komponen di Component Studio"
+                          >
+                            <Sliders className="w-3 h-3" />
+                            <span>Edit</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Hapus komponen kustom "${def.name}"?`)) {
+                              deleteCustomComponent(def.type);
+                            }
+                          }}
+                          className="px-2 py-0.5 rounded bg-slate-800 hover:bg-rose-500/20 text-[10px] text-slate-400 hover:text-rose-300 border border-slate-700 hover:border-rose-500/40 flex items-center gap-1 transition-colors"
+                          title="Hapus Komponen Kustom dari Library"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Hapus</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

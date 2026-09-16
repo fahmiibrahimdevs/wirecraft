@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Pin, PinType, ComponentDefinition } from '../../types/circuit';
 import {
   saveCustomComponent,
+  optimizeImageForStorage,
   getCustomComponents,
   generateTypeScriptCode,
   exportComponentJson,
@@ -795,12 +796,20 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   };
 
   // Save component definition
-  const handleSaveComponent = () => {
+  const handleSaveComponent = async () => {
     const definition = getNormalizedDefinition();
-    saveCustomComponent(definition, imageDataUrl);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
-    onComponentSaved?.(definition.type);
+    let imgToSave = imageDataUrl;
+    if (imgToSave) {
+      imgToSave = await optimizeImageForStorage(imgToSave, 600);
+    }
+    const res = saveCustomComponent(definition, imgToSave);
+    if (res.success) {
+      setSaveSuccess(true);
+      onComponentSaved?.(definition.type);
+      setTimeout(() => setSaveSuccess(false), 3500);
+    } else {
+      alert(`Gagal menyimpan: ${res.error || 'Memori browser penuh'}`);
+    }
   };
 
   // Copy TypeScript code
@@ -933,6 +942,27 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Floating Success Notification Banner */}
+        {saveSuccess && (
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-950/95 border border-emerald-500/50 text-emerald-100 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-4 backdrop-blur-md animate-in fade-in slide-in-from-top-3">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+              <Check className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-emerald-100">Komponen Berhasil Disimpan!</span>
+              <span className="text-[11px] text-emerald-300/80">
+                Telah masuk ke <b>Katalog Komponen (Tab &apos;Custom Studio&apos;)</b> dan ditambahkan ke kanvas.
+              </span>
+            </div>
+            <button
+              onClick={onClose}
+              className="ml-2 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition-all hover:scale-105 cursor-pointer shrink-0"
+            >
+              Lihat di Kanvas
+            </button>
+          </div>
+        )}
 
         {/* 2. Main Studio Workspace (3 Columns) */}
         <div className="flex-1 flex overflow-hidden">
