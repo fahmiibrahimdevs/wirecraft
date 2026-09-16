@@ -7,35 +7,91 @@ export const CUSTOM_COMPONENTS_EVENT = 'wirecraft_custom_components_updated';
 export interface CustomComponentEntry {
   definition: ComponentDefinition;
   imageBase64?: string;
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
 
+// In-memory runtime cache for custom components
+let memoryCache: Record<string, CustomComponentEntry> = {};
+let isServerLoaded = false;
+
 /**
- * Get all user-created custom components from localStorage
+ * Load saved components from localStorage into memory cache as initial state
  */
-export function getCustomComponents(): Record<string, CustomComponentEntry> {
+function initFromLocalStorage(): void {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw);
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+    if (raw) {
+      memoryCache = JSON.parse(raw);
+    }
   } catch (err) {
     console.error('Failed to parse custom components from localStorage:', err);
-    return {};
   }
 }
 
+initFromLocalStorage();
+
 /**
- * Compress / optimize large base64 images so they never exceed browser localStorage quota (5MB)
+ * Fetch permanent custom components from server API / public file
  */
-export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 600): Promise<string> {
+export async function loadServerCustomComponents(): Promise<Record<string, CustomComponentEntry>> {
+  try {
+    // 1. Try server API first
+    let res = await fetch('/api/custom-components').catch(() => null);
+
+    // 2. If API is not available (e.g. static CDN host), try static public JSON file
+    if (!res || !res.ok) {
+      res = await fetch('/custom-components/components.json').catch(() => null);
+    }
+
+    if (res && res.ok) {
+      const data = await res.json();
+      if (data && typeof data === 'object') {
+        // Merge server data with local cache
+        memoryCache = { ...memoryCache, ...data };
+        isServerLoaded = true;
+
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryCache));
+          } catch {}
+          window.dispatchEvent(new Event(CUSTOM_COMPONENTS_EVENT));
+        }
+        return memoryCache;
+      }
+    }
+  } catch (err) {
+    console.warn('Server custom components fetch skipped, using local cache:', err);
+  }
+  return memoryCache;
+}
+
+// Auto-trigger background server load on start
+if (typeof window !== 'undefined') {
+  loadServerCustomComponents();
+}
+
+/**
+ * Get all custom components from in-memory cache and localStorage
+ */
+export function getCustomComponents(): Record<string, CustomComponentEntry> {
+  if (!isServerLoaded && typeof window !== 'undefined') {
+    initFromLocalStorage();
+  }
+  return memoryCache;
+}
+
+/**
+ * Compress / optimize large base64 images
+ */
+export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 800): Promise<string> {
   if (!dataUrl || !dataUrl.startsWith('data:image')) {
     return Promise.resolve(dataUrl);
   }
 
   return new Promise((resolve) => {
-    // If it's already small (< 150KB), no need to compress
-    if (dataUrl.length < 150000) {
+    if (dataUrl.length < 200000) {
       resolve(dataUrl);
       return;
     }
@@ -44,7 +100,7 @@ export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 
     img.crossOrigin = 'Anonymous';
     img.onload = () => {
       let { naturalWidth: w, naturalHeight: h } = img;
-      if (w <= maxDimension && h <= maxDimension && dataUrl.length < 250000) {
+      if (w <= maxDimension && h <= maxDimension && dataUrl.length < 300000) {
         resolve(dataUrl);
         return;
       }
@@ -80,57 +136,99 @@ export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 
 }
 
 /**
- * Save or update a custom component in localStorage
+ * Save or update a custom component permanently to server and local cache
  */
 export function saveCustomComponent(
   definition: ComponentDefinition,
   imageBase64?: string
 ): { success: boolean; error?: string } {
   try {
-    const current = getCustomComponents();
-    const existing = current[definition.type];
+    const existing = memoryCache[definition.type];
     const now = new Date().toISOString();
+    const safeId = definition.type.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const imagePublicPath = `/components/${safeId}.png`;
 
-    current[definition.type] = {
-      definition: {
-        ...definition,
-        category: definition.category || 'sensors',
-        isCustom: true,
-      },
-      imageBase64: imageBase64 || existing?.imageBase64 || (definition as any).imageUrl,
+    const updatedDef: ComponentDefinition = {
+      ...definition,
+      category: definition.category || 'sensors',
+      isCustom: true,
+      imageUrl: imageBase64?.startsWith('data:') ? imagePublicPath : (definition as any).imageUrl || imagePublicPath,
+    };
+
+    const entry: CustomComponentEntry = {
+      definition: updatedDef,
+      imageBase64: imageBase64 || existing?.imageBase64,
+      imageUrl: updatedDef.imageUrl,
       createdAt: existing?.createdAt || now,
       updatedAt: now,
     };
 
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
-    } catch (quotaErr) {
-      console.warn('LocalStorage quota limit reached, attempting emergency cleanup...', quotaErr);
-      // Try to save without bloated historical data if any
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    memoryCache[definition.type] = entry;
+
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryCache));
+      } catch (quotaErr) {
+        console.warn('LocalStorage quota limit reached:', quotaErr);
+      }
+      window.dispatchEvent(new Event(CUSTOM_COMPONENTS_EVENT));
+
+      // Asynchronously persist permanently to server disk
+      fetch('/api/custom-components', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          definition: updatedDef,
+          imageBase64: imageBase64,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.success && data?.imageUrl) {
+            memoryCache[definition.type] = {
+              ...memoryCache[definition.type]!,
+              definition: { ...updatedDef, imageUrl: data.imageUrl },
+              imageUrl: data.imageUrl,
+            };
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryCache));
+            } catch {}
+            window.dispatchEvent(new Event(CUSTOM_COMPONENTS_EVENT));
+          }
+        })
+        .catch((err) => {
+          console.warn('Permanent server save background notice:', err);
+        });
     }
 
-    window.dispatchEvent(new Event(CUSTOM_COMPONENTS_EVENT));
     return { success: true };
   } catch (err: any) {
-    console.error('Failed to save custom component to localStorage:', err);
-    return { success: false, error: err?.message || 'Gagal menyimpan ke memori browser' };
+    console.error('Failed to save custom component:', err);
+    return { success: false, error: err?.message || 'Gagal menyimpan komponen' };
   }
 }
 
 /**
- * Delete a custom component from localStorage
+ * Delete a custom component permanently from server and local cache
  */
 export function deleteCustomComponent(typeId: string): void {
   try {
-    const current = getCustomComponents();
-    if (current[typeId]) {
-      delete current[typeId];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    if (memoryCache[typeId]) {
+      delete memoryCache[typeId];
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryCache));
+      } catch {}
       window.dispatchEvent(new Event(CUSTOM_COMPONENTS_EVENT));
+
+      // Asynchronously delete from server disk
+      fetch(`/api/custom-components?type=${encodeURIComponent(typeId)}`, {
+        method: 'DELETE',
+      }).catch((err) => console.warn('Server delete error:', err));
     }
   } catch (err) {
-    console.error('Failed to delete custom component from localStorage:', err);
+    console.error('Failed to delete custom component:', err);
   }
 }
 
@@ -144,8 +242,7 @@ export function getAllComponentDefinitions(): Record<string, ComponentDefinition
   Object.values(custom).forEach((entry) => {
     merged[entry.definition.type] = {
       ...entry.definition,
-      // If imageBase64 exists, attach it as property
-      imageUrl: entry.imageBase64 || (entry.definition as any).imageUrl,
+      imageUrl: entry.definition.imageUrl || entry.imageUrl || entry.imageBase64,
     } as any;
   });
 
@@ -224,7 +321,7 @@ export function importComponentJson(jsonStr: string): boolean {
   try {
     const item = JSON.parse(jsonStr) as CustomComponentEntry;
     if (item?.definition?.type) {
-      saveCustomComponent(item.definition, item.imageBase64);
+      saveCustomComponent(item.definition, item.imageBase64 || item.imageUrl);
       return true;
     }
   } catch (err) {
@@ -232,3 +329,4 @@ export function importComponentJson(jsonStr: string): boolean {
   }
   return false;
 }
+
