@@ -24,6 +24,7 @@ import {
   ZoomOut,
   Maximize2,
   RotateCcw,
+  RotateCw,
   Layers,
   ArrowUp,
   ArrowDown,
@@ -438,6 +439,51 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }));
   };
 
+  // Rotate component, image, and pins 90 degrees clockwise (R / Space Shortcut)
+  const handleRotateClockwise = useCallback(() => {
+    const oldWidth = width;
+    const oldHeight = height;
+
+    // 1. Swap Canvas Dimensions
+    setWidth(oldHeight);
+    setHeight(oldWidth);
+
+    // 2. Rotate All Pins Mathematically (x' = oldHeight - y, y' = x)
+    setPins((prevPins) =>
+      prevPins.map((p) => ({
+        ...p,
+        x: Math.round((oldHeight - p.y) * 10) / 10,
+        y: Math.round(p.x * 10) / 10,
+      }))
+    );
+
+    // 3. Rotate Image Pixels on Offscreen Canvas
+    const sourceImgUrl = imageDataUrl || rawImageDataUrl;
+    if (sourceImgUrl) {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalHeight;
+        canvas.height = img.naturalWidth;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate((90 * Math.PI) / 180);
+          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+          const rotatedDataUrl = canvas.toDataURL('image/png');
+          setImageDataUrl(rotatedDataUrl);
+          setRawImageDataUrl(rotatedDataUrl);
+          setOriginalImageSize({ width: img.naturalHeight, height: img.naturalWidth });
+        }
+      };
+      img.src = sourceImgUrl;
+    }
+
+    // 4. Reset Image Offset
+    setImageOffset({ x: 0, y: 0 });
+  }, [width, height, imageDataUrl, rawImageDataUrl]);
+
   // Pin Dragging Mouse Event Listeners
   useEffect(() => {
     if (!draggingPinId) return;
@@ -599,11 +645,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     updateSelectedPin({ x: newX, y: newY });
   };
 
-  // Keyboard navigation & nudging
+  // Keyboard navigation & Shortcuts (R / Space for Rotate, Arrows for Nudge)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       if (['input', 'textarea', 'select'].includes((e.target as HTMLElement)?.tagName.toLowerCase())) {
+        return;
+      }
+
+      // Shortcut: R or Space to Rotate 90° Clockwise
+      if (e.key === 'r' || e.key === 'R' || e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        handleRotateClockwise();
         return;
       }
 
@@ -649,7 +702,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, selectedPin, selectedPinId, toolMode, width, height]);
+  }, [isOpen, selectedPin, selectedPinId, toolMode, width, height, handleRotateClockwise]);
 
   // Generate multi-pin / DIP Row
   const handleGeneratePinRow = () => {
@@ -976,12 +1029,20 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               )}
             </div>
 
-            {/* Dimension & Image Positioning Controls */}
+            {/* Dimension, Rotation & Image Positioning Controls */}
             <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-800">
-              <label className="text-xs font-semibold text-slate-200 flex items-center justify-between">
-                <span>2. Ukuran & Posisi Gambar</span>
-                <span className="text-[10px] text-sky-400 font-mono">17px pitch</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-200">2. Ukuran & Posisi Gambar</label>
+                {/* Rotate 90 deg button */}
+                <button
+                  onClick={handleRotateClockwise}
+                  className="px-2 py-1 rounded bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-[11px] font-semibold flex items-center gap-1 transition-colors"
+                  title="Putar 90° Searah Jarum Jam (Shortcut: Tombol R atau Spasi)"
+                >
+                  <RotateCw className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Putar 90° (R)</span>
+                </button>
+              </div>
 
               {/* Width & Height */}
               <div className="grid grid-cols-2 gap-2">
@@ -1150,7 +1211,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           <div className="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
             {/* Canvas Toolbar */}
             <div className="h-11 bg-slate-900/95 border-b border-slate-800 px-4 flex items-center justify-between z-10 flex-wrap gap-2">
-              {/* Primary Tool Mode Switch */}
+              {/* Primary Tool Mode Switch & Rotate Button */}
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setToolMode('select-pin')}
@@ -1189,6 +1250,21 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Tambah Pin
+                </button>
+
+                <div className="h-4 w-px bg-slate-700 mx-0.5" />
+
+                {/* Rotate 90 deg Toolbar Button */}
+                <button
+                  onClick={handleRotateClockwise}
+                  className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-500/20 border border-slate-700 hover:border-sky-500/40 text-slate-200 hover:text-sky-300 text-xs font-medium flex items-center gap-1.5 transition-all"
+                  title="Putar Komponen & Gambar 90° (Shortcut: Tombol R atau Spasi)"
+                >
+                  <RotateCw className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Putar 90°</span>
+                  <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-slate-900 text-slate-400 rounded border border-slate-700">
+                    R / Spasi
+                  </span>
                 </button>
               </div>
 
@@ -1480,12 +1556,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
                 <Info className="w-3.5 h-3.5 text-sky-400" />
                 <span>
-                  {toolMode === 'drag-image' ? (
-                    <b>Mode Geser Gambar:</b>
-                  ) : (
-                    <b>Mode Geser Pin:</b>
-                  )}{' '}
-                  Tarik langsung dengan mouse • <b>Arrow Keys:</b> Nudge 1px (Shift: 5px, Alt: 0.1px)
+                  <b>Drag:</b> Mouse • <b>Putar 90°:</b> Tombol <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> atau <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">Spasi</kbd> • <b>Nudge:</b> Arrow Keys
                 </span>
               </div>
             </div>
