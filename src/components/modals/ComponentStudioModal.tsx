@@ -35,6 +35,9 @@ import {
   Info,
   Sliders,
   Move,
+  ShieldCheck,
+  Globe,
+  Undo,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -74,13 +77,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   onComponentSaved,
   initialDefinition,
 }) => {
-  // Image state
+  // Image state (raw original preserved for non-destructive re-runs)
+  const [rawImageDataUrl, setRawImageDataUrl] = useState<string>('');
   const [imageDataUrl, setImageDataUrl] = useState<string>('');
   const [originalImageSize, setOriginalImageSize] = useState<{ width: number; height: number }>({
     width: 200,
     height: 200,
   });
-  const [bgTolerance, setBgTolerance] = useState<number>(25);
+  const [bgTolerance, setBgTolerance] = useState<number>(20);
+  const [bgAlgorithm, setBgAlgorithm] = useState<'flood-fill' | 'global'>('flood-fill');
   const [isProcessingBg, setIsProcessingBg] = useState<boolean>(false);
 
   // Component metadata
@@ -143,6 +148,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       setPins(initialDefinition.pins || []);
       if ((initialDefinition as any).imageUrl) {
         setImageDataUrl((initialDefinition as any).imageUrl);
+        setRawImageDataUrl((initialDefinition as any).imageUrl);
       }
     }
   }, [initialDefinition, isOpen]);
@@ -184,6 +190,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const img = new Image();
       img.onload = () => {
         setOriginalImageSize({ width: img.naturalWidth, height: img.naturalHeight });
+        setRawImageDataUrl(dataUrl);
         setImageDataUrl(dataUrl);
 
         // Auto calculate initial logical dimensions
@@ -213,9 +220,17 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     e.target.value = '';
   };
 
-  // Magic Background Remover (Removes solid background colors / white canvas)
+  // Reset to original image (Undo background removal)
+  const handleResetToOriginal = () => {
+    if (rawImageDataUrl) {
+      setImageDataUrl(rawImageDataUrl);
+    }
+  };
+
+  // Magic Background Remover with Flood Fill (Protects internal silkscreen / white markings!)
   const handleMagicRemoveBackground = () => {
-    if (!imageDataUrl || isProcessingBg) return;
+    const sourceImage = rawImageDataUrl || imageDataUrl;
+    if (!sourceImage || isProcessingBg) return;
     setIsProcessingBg(true);
 
     const img = new Image();
@@ -223,8 +238,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     img.onload = () => {
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
+        const W = img.naturalWidth;
+        const H = img.naturalHeight;
+        canvas.width = W;
+        canvas.height = H;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           setIsProcessingBg(false);
@@ -232,43 +249,145 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         }
 
         ctx.drawImage(img, 0, 0);
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const imgData = ctx.getImageData(0, 0, W, H);
         const data = imgData.data;
 
-        // Sample top-left corner color as primary background reference
-        const bgR = data[0];
-        const bgG = data[1];
-        const bgB = data[2];
+        // Sample background reference from 4 corners
+        const c00 = 0;
+        const c10 = (W - 1) * 4;
+        const c01 = (H - 1) * W * 4;
+        const c11 = ((H - 1) * W + (W - 1)) * 4;
 
-        // Max possible Euclidean distance in RGB is sqrt(255^2 * 3) ~= 441.67
+        const bgR = Math.round((data[c00] + data[c10] + data[c01] + data[c11]) / 4);
+        const bgG = Math.round((data[c00 + 1] + data[c10 + 1] + data[c01 + 1] + data[c11 + 1]) / 4);
+        const bgB = Math.round((data[c00 + 2] + data[c10 + 2] + data[c01 + 2] + data[c11 + 2]) / 4);
+
+        // Max Euclidean distance in RGB
         const maxDist = (bgTolerance / 100) * 441.67;
-        const fadeRange = maxDist * 0.25; // Anti-aliasing threshold
+        const fadeRange = maxDist * 0.22;
 
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const a = data[i + 3];
+        const checkIsBg = (r: number, g: number, b: number, a: number) => {
+          if (a === 0) return true;
+          const distCorner = Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2);
+          const distWhite = Math.sqrt((r - 255) ** 2 + (g - 255) ** 2 + (b - 255) ** 2);
+          return Math.min(distCorner, distWhite) <= maxDist;
+        };
 
-          if (a === 0) continue;
+        if (bgAlgorithm === 'flood-fill') {
+          // --- FLOOD FILL / EDGE BFS ALGORITHM (SILKSCREEN SAFE) ---
+          // visited: 0 = unvisited (internal / untouched), 1 = outer background (remove), 2 = foreground / boundary
+          const visited = new Uint8Array(W * H);
+          const qx = new Int32Array(W * H);
+          const qy = new Int32Array(W * H);
+          let head = 0;
+          let tail = 0;
 
-          // Distance to top-left corner color
-          const distCorner = Math.sqrt(
-            (r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2
-          );
+          // Helper to enqueue
+          const enqueue = (x: number, y: number) => {
+            const idx = y * W + x;
+            if (visited[idx] !== 0) return;
+            const p = idx * 4;
+            if (checkIsBg(data[p], data[p + 1], data[p + 2], data[p + 3])) {
+              visited[idx] = 1;
+              qx[tail] = x;
+              qy[tail] = y;
+              tail++;
+            } else {
+              visited[idx] = 2; // Hit component boundary on edge
+            }
+          };
 
-          // Distance to pure white
-          const distWhite = Math.sqrt(
-            (r - 255) ** 2 + (g - 255) ** 2 + (b - 255) ** 2
-          );
+          // Seed with all 4 outer borders of the image
+          for (let x = 0; x < W; x++) {
+            enqueue(x, 0);
+            enqueue(x, H - 1);
+          }
+          for (let y = 0; y < H; y++) {
+            enqueue(0, y);
+            enqueue(W - 1, y);
+          }
 
-          const dist = Math.min(distCorner, distWhite);
+          // BFS propagation through contiguous outer background
+          while (head < tail) {
+            const cx = qx[head];
+            const cy = qy[head];
+            head++;
 
-          if (dist < maxDist - fadeRange) {
-            data[i + 3] = 0;
-          } else if (dist < maxDist) {
-            const alphaFactor = (dist - (maxDist - fadeRange)) / fadeRange;
-            data[i + 3] = Math.round(a * alphaFactor);
+            // 4-directional neighbor expansion
+            const neighbors = [
+              [cx + 1, cy],
+              [cx - 1, cy],
+              [cx, cy + 1],
+              [cx, cy - 1],
+            ];
+
+            for (let i = 0; i < 4; i++) {
+              const nx = neighbors[i][0];
+              const ny = neighbors[i][1];
+
+              if (nx >= 0 && nx < W && ny >= 0 && ny < H) {
+                const nIdx = ny * W + nx;
+                if (visited[nIdx] === 0) {
+                  const p = nIdx * 4;
+                  if (checkIsBg(data[p], data[p + 1], data[p + 2], data[p + 3])) {
+                    visited[nIdx] = 1;
+                    qx[tail] = nx;
+                    qy[tail] = ny;
+                    tail++;
+                  } else {
+                    visited[nIdx] = 2; // Component edge boundary
+                  }
+                }
+              }
+            }
+          }
+
+          // Erase ONLY the outer flood-filled background
+          for (let y = 0; y < H; y++) {
+            for (let x = 0; x < W; x++) {
+              const idx = y * W + x;
+              const p = idx * 4;
+
+              if (visited[idx] === 1) {
+                // Outer background: set alpha = 0
+                data[p + 3] = 0;
+              } else if (visited[idx] === 2) {
+                // Component boundary pixel touching background: apply soft anti-aliasing
+                const r = data[p];
+                const g = data[p + 1];
+                const b = data[p + 2];
+                const dist = Math.min(
+                  Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2),
+                  Math.sqrt((r - 255) ** 2 + (g - 255) ** 2 + (b - 255) ** 2)
+                );
+                if (dist < maxDist) {
+                  const factor = Math.max(0.1, (dist - (maxDist - fadeRange)) / fadeRange);
+                  data[p + 3] = Math.round(data[p + 3] * factor);
+                }
+              }
+              // visited === 0 (Internal silkscreen, IC text, internal traces): 100% untouched!
+            }
+          }
+        } else {
+          // --- GLOBAL CHROMA REMOVAL ---
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const a = data[i + 3];
+
+            if (a === 0) continue;
+
+            const distCorner = Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2);
+            const distWhite = Math.sqrt((r - 255) ** 2 + (g - 255) ** 2 + (b - 255) ** 2);
+            const dist = Math.min(distCorner, distWhite);
+
+            if (dist < maxDist - fadeRange) {
+              data[i + 3] = 0;
+            } else if (dist < maxDist) {
+              const alphaFactor = (dist - (maxDist - fadeRange)) / fadeRange;
+              data[i + 3] = Math.round(a * alphaFactor);
+            }
           }
         }
 
@@ -281,7 +400,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         setIsProcessingBg(false);
       }
     };
-    img.src = imageDataUrl;
+    img.src = sourceImage;
   };
 
   // Dimension scaling handlers
@@ -546,7 +665,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             setHeight(def.height || 150);
             setPins(def.pins || []);
             if (item.imageBase64 || def.imageUrl) {
-              setImageDataUrl(item.imageBase64 || def.imageUrl);
+              const imgUrl = item.imageBase64 || def.imageUrl;
+              setRawImageDataUrl(imgUrl);
+              setImageDataUrl(imgUrl);
             }
           }
         } catch (err) {
@@ -652,7 +773,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <label className="text-xs font-semibold text-slate-200 flex items-center justify-between">
                 <span>1. Visual Asset Image</span>
                 {imageDataUrl && (
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-400 font-mono">
                     {originalImageSize.width} × {originalImageSize.height} px
                   </span>
                 )}
@@ -685,40 +806,89 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       alt="Component Preview"
                       className="max-h-full max-w-full object-contain"
                     />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute bottom-2 right-2 px-2 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-[10px] text-slate-200 border border-slate-600 shadow"
-                    >
-                      Ganti
-                    </button>
+                    <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                      {rawImageDataUrl && rawImageDataUrl !== imageDataUrl && (
+                        <button
+                          onClick={handleResetToOriginal}
+                          className="px-2 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-[10px] text-amber-300 border border-slate-600 shadow flex items-center gap-1"
+                          title="Kembalikan gambar asli sebelum remove bg"
+                        >
+                          <Undo className="w-3 h-3" />
+                          Reset
+                        </button>
+                      )}
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-2 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-[10px] text-slate-200 border border-slate-600 shadow"
+                      >
+                        Ganti
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Magic Background Remover */}
-                  <div className="p-2.5 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col gap-2">
+                  {/* Magic Background Remover with Flood Fill & Silkscreen Protection */}
+                  <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex flex-col gap-2.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-slate-300 flex items-center gap-1.5">
+                      <span className="font-semibold text-slate-200 flex items-center gap-1.5">
                         <Wand2 className="w-3.5 h-3.5 text-amber-400" />
                         Auto Remove Background
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">{bgTolerance}%</span>
+                      <span className="text-[10px] text-sky-400 font-mono font-bold">{bgTolerance}%</span>
                     </div>
 
-                    <input
-                      type="range"
-                      min="5"
-                      max="80"
-                      value={bgTolerance}
-                      onChange={(e) => setBgTolerance(Number(e.target.value))}
-                      className="w-full accent-sky-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
-                    />
+                    {/* Mode Algorithm Selector */}
+                    <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setBgAlgorithm('flood-fill')}
+                        className={`py-1 px-1.5 rounded flex items-center justify-center gap-1 transition-all ${
+                          bgAlgorithm === 'flood-fill'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                        title="Hanya hapus background luar yang menyentuh pinggir foto. Silkscreen/sablon putih di dalam board AMAN!"
+                      >
+                        <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <span>Tepi Luar (Aman)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setBgAlgorithm('global')}
+                        className={`py-1 px-1.5 rounded flex items-center justify-center gap-1 transition-all ${
+                          bgAlgorithm === 'global'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                        title="Hapus semua warna putih di seluruh gambar (termasuk bagian dalam)"
+                      >
+                        <Globe className="w-3 h-3 text-amber-400 shrink-0" />
+                        <span>Global (Semua)</span>
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                        <span>Toleransi Warna</span>
+                        <span>{bgTolerance <= 15 ? 'Ketat' : bgTolerance <= 35 ? 'Sedang' : 'Tinggi'}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="5"
+                        max="70"
+                        value={bgTolerance}
+                        onChange={(e) => setBgTolerance(Number(e.target.value))}
+                        className="w-full accent-sky-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                      />
+                    </div>
 
                     <button
                       onClick={handleMagicRemoveBackground}
                       disabled={isProcessingBg}
-                      className="w-full py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                      className="w-full py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      {isProcessingBg ? 'Memproses...' : 'Hapus Background'}
+                      {isProcessingBg ? 'Memproses...' : 'Hapus Background Luar'}
                     </button>
                   </div>
                 </div>
