@@ -33,6 +33,8 @@ import {
   EyeOff,
   Cpu,
   Info,
+  Sliders,
+  Move,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -78,6 +80,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     width: 200,
     height: 200,
   });
+  const [bgTolerance, setBgTolerance] = useState<number>(25);
+  const [isProcessingBg, setIsProcessingBg] = useState<boolean>(false);
 
   // Component metadata
   const [typeId, setTypeId] = useState<string>('custom-module-1');
@@ -106,6 +110,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [snapToBreadboard, setSnapToBreadboard] = useState<boolean>(true);
   const [breadboardOffset, setBreadboardOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  // Pin Dragging State
+  const [draggingPinId, setDraggingPinId] = useState<string | null>(null);
+
   // Tool mode: 'select' | 'add-pin'
   const [toolMode, setToolMode] = useState<'select' | 'add-pin'>('select');
 
@@ -115,170 +122,45 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [genOrientation, setGenOrientation] = useState<'vertical' | 'horizontal'>('vertical');
   const [genPrefix, setGenPrefix] = useState<string>('p');
 
-  // Copy feedback
+  // Feedback states
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
   // Refs
   const canvasRef = useRef<SVGSVGElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const jsonInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize or load definition
+  // Load initial definition if provided
   useEffect(() => {
     if (initialDefinition) {
       setTypeId(initialDefinition.type);
       setName(initialDefinition.name);
       setCategory(initialDefinition.category || 'sensors');
       setDescription(initialDefinition.description || '');
-      setWidth(initialDefinition.width || 200);
-      setHeight(initialDefinition.height || 150);
+      setWidth(initialDefinition.width);
+      setHeight(initialDefinition.height);
       setPins(initialDefinition.pins || []);
       if ((initialDefinition as any).imageUrl) {
         setImageDataUrl((initialDefinition as any).imageUrl);
       }
-      if (initialDefinition.pins?.length > 0) {
-        setSelectedPinId(initialDefinition.pins[0].id);
-      }
     }
-  }, [initialDefinition]);
+  }, [initialDefinition, isOpen]);
 
-  // Handle image upload
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      if (result) {
-        const img = new Image();
-        img.onload = () => {
-          setOriginalImageSize({ width: img.width, height: img.height });
-          setImageDataUrl(result);
-          // Suggest appropriate logical width/height keeping 17.0px pitch proportions
-          const initialW = 200;
-          const initialH = (200 * img.height) / img.width;
-          setWidth(Math.round(initialW * 10) / 10);
-          setHeight(Math.round(initialH * 10) / 10);
-        };
-        img.src = result;
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Magic Background Remover (Client-side HTML5 Canvas)
-  const [bgTolerance, setBgTolerance] = useState<number>(30);
-  const [isProcessingBg, setIsProcessingBg] = useState<boolean>(false);
-
-  const handleMagicRemoveBackground = () => {
-    if (!imageDataUrl) return;
-    setIsProcessingBg(true);
-
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        setIsProcessingBg(false);
-        return;
-      }
-
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
-      const w = canvas.width;
-      const h = canvas.height;
-
-      // Sample border color (top-left)
-      const targetR = data[0];
-      const targetG = data[1];
-      const targetB = data[2];
-
-      const visited = new Uint8Array(w * h);
-      const queue: [number, number][] = [];
-
-      // Add all boundary pixels to queue
-      for (let x = 0; x < w; x++) {
-        queue.push([x, 0]);
-        queue.push([x, h - 1]);
-        visited[x] = 1;
-        visited[(h - 1) * w + x] = 1;
-      }
-      for (let y = 0; y < h; y++) {
-        queue.push([0, y]);
-        queue.push([w - 1, y]);
-        visited[y * w] = 1;
-        visited[y * w + (w - 1)] = 1;
-      }
-
-      const threshold = bgTolerance * 2.5;
-
-      let head = 0;
-      while (head < queue.length) {
-        const [cx, cy] = queue[head++];
-        const idx = (cy * w + cx) * 4;
-        const r = data[idx];
-        const g = data[idx + 1];
-        const b = data[idx + 2];
-
-        // Color distance to sample or check if near-white
-        const dist = Math.sqrt(
-          (r - targetR) ** 2 + (g - targetG) ** 2 + (b - targetB) ** 2
-        );
-        const isNearWhite = r > 240 && g > 240 && b > 240;
-
-        if (dist <= threshold || isNearWhite) {
-          data[idx + 3] = 0; // Make transparent
-
-          // 4-neighbor flood
-          const neighbors = [
-            [cx - 1, cy],
-            [cx + 1, cy],
-            [cx, cy - 1],
-            [cx, cy + 1],
-          ];
-          for (const [nx, ny] of neighbors) {
-            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-              const nidx = ny * w + nx;
-              if (!visited[nidx]) {
-                visited[nidx] = 1;
-                queue.push([nx, ny]);
-              }
-            }
-          }
-        }
-      }
-
-      ctx.putImageData(imgData, 0, 0);
-      setImageDataUrl(canvas.toDataURL('image/png'));
-      setIsProcessingBg(false);
-    };
-    img.src = imageDataUrl;
-  };
-
-  // Dimension scaling handlers
-  const handleWidthChange = (newW: number) => {
-    if (newW <= 10) return;
-    setWidth(newW);
-    if (lockAspectRatio && originalImageSize.width > 0) {
-      const newH = (newW * originalImageSize.height) / originalImageSize.width;
-      setHeight(Math.round(newH * 10) / 10);
-    }
-  };
-
-  const handleHeightChange = (newH: number) => {
-    if (newH <= 10) return;
-    setHeight(newH);
-    if (lockAspectRatio && originalImageSize.height > 0) {
-      const newW = (newH * originalImageSize.width) / originalImageSize.height;
-      setWidth(Math.round(newW * 10) / 10);
-    }
-  };
+  // Convert screen client coordinates to logical component coordinates
+  const getLogicalCoords = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!canvasRef.current) return { x: 0, y: 0 };
+      const rect = canvasRef.current.getBoundingClientRect();
+      const screenX = clientX - rect.left;
+      const screenY = clientY - rect.top;
+      // Account for <g transform="translate(pan.x + 120, pan.y + 80) scale(zoom)">
+      const rawX = (screenX - (pan.x + 120)) / zoom;
+      const rawY = (screenY - (pan.y + 80)) / zoom;
+      return { x: rawX, y: rawY };
+    },
+    [pan.x, pan.y, zoom]
+  );
 
   // Snap to nearest 17.0px breadboard hole
   const snapCoordinate = (coord: number, offset: number = 0): number => {
@@ -289,39 +171,222 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     return Math.round(snapped * 10) / 10;
   };
 
-  // Canvas click to add or select pin
+  // Handle File Upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (!dataUrl) return;
+
+      const img = new Image();
+      img.onload = () => {
+        setOriginalImageSize({ width: img.naturalWidth, height: img.naturalHeight });
+        setImageDataUrl(dataUrl);
+
+        // Auto calculate initial logical dimensions
+        const aspect = img.naturalWidth / img.naturalHeight;
+        let initW = 200;
+        let initH = Math.round((initW / aspect) * 10) / 10;
+
+        if (initH > 260) {
+          initH = 220;
+          initW = Math.round((initH * aspect) * 10) / 10;
+        }
+
+        setWidth(initW);
+        setHeight(initH);
+
+        // Auto suggest typeId and name if untouched
+        const baseName = file.name.replace(/\.[^/.]+$/, '').trim();
+        if (typeId === 'custom-module-1' || !typeId) {
+          const slug = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          setTypeId(slug || 'custom-module');
+          setName(baseName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()));
+        }
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  // Magic Background Remover (Removes solid background colors / white canvas)
+  const handleMagicRemoveBackground = () => {
+    if (!imageDataUrl || isProcessingBg) return;
+    setIsProcessingBg(true);
+
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setIsProcessingBg(false);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+
+        // Sample top-left corner color as primary background reference
+        const bgR = data[0];
+        const bgG = data[1];
+        const bgB = data[2];
+
+        // Max possible Euclidean distance in RGB is sqrt(255^2 * 3) ~= 441.67
+        const maxDist = (bgTolerance / 100) * 441.67;
+        const fadeRange = maxDist * 0.25; // Anti-aliasing threshold
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
+
+          if (a === 0) continue;
+
+          // Distance to top-left corner color
+          const distCorner = Math.sqrt(
+            (r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2
+          );
+
+          // Distance to pure white
+          const distWhite = Math.sqrt(
+            (r - 255) ** 2 + (g - 255) ** 2 + (b - 255) ** 2
+          );
+
+          const dist = Math.min(distCorner, distWhite);
+
+          if (dist < maxDist - fadeRange) {
+            data[i + 3] = 0;
+          } else if (dist < maxDist) {
+            const alphaFactor = (dist - (maxDist - fadeRange)) / fadeRange;
+            data[i + 3] = Math.round(a * alphaFactor);
+          }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        const cleanedDataUrl = canvas.toDataURL('image/png');
+        setImageDataUrl(cleanedDataUrl);
+      } catch (err) {
+        console.error('Magic background removal failed:', err);
+      } finally {
+        setIsProcessingBg(false);
+      }
+    };
+    img.src = imageDataUrl;
+  };
+
+  // Dimension scaling handlers
+  const handleWidthChange = (newWidth: number) => {
+    if (newWidth <= 0) return;
+    setWidth(newWidth);
+    if (lockAspectRatio && originalImageSize.width > 0) {
+      const newHeight = Math.round((newWidth * (originalImageSize.height / originalImageSize.width)) * 10) / 10;
+      setHeight(newHeight);
+    }
+  };
+
+  const handleHeightChange = (newHeight: number) => {
+    if (newHeight <= 0) return;
+    setHeight(newHeight);
+    if (lockAspectRatio && originalImageSize.height > 0) {
+      const newWidth = Math.round((newHeight * (originalImageSize.width / originalImageSize.height)) * 10) / 10;
+      setWidth(newWidth);
+    }
+  };
+
+  // Pin Dragging Mouse Event Listeners (Global window tracking for buttery smooth drag)
+  useEffect(() => {
+    if (!draggingPinId) return;
+
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
+      let finalX = rawX;
+      let finalY = rawY;
+
+      if (snapToBreadboard) {
+        finalX = snapCoordinate(rawX, breadboardOffset.x % 17);
+        finalY = snapCoordinate(rawY, breadboardOffset.y % 17);
+      } else {
+        finalX = Math.round(rawX * 10) / 10;
+        finalY = Math.round(rawY * 10) / 10;
+      }
+
+      finalX = Math.max(0, Math.min(width, finalX));
+      finalY = Math.max(0, Math.min(height, finalY));
+
+      setPins((prevPins) =>
+        prevPins.map((p) =>
+          p.id === draggingPinId ? { ...p, x: finalX, y: finalY } : p
+        )
+      );
+    };
+
+    const handleWindowMouseUp = () => {
+      setDraggingPinId(null);
+    };
+
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseup', handleWindowMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowMouseUp);
+    };
+  }, [
+    draggingPinId,
+    getLogicalCoords,
+    snapToBreadboard,
+    breadboardOffset.x,
+    breadboardOffset.y,
+    width,
+    height,
+  ]);
+
+  // Handle Pin Mouse Down to start dragging
+  const handlePinMouseDown = (e: React.MouseEvent, pinId: string) => {
+    if (e.button !== 0) return; // Left click only
+    e.stopPropagation();
+    e.preventDefault();
+    setSelectedPinId(pinId);
+    setDraggingPinId(pinId);
+  };
+
+  // Canvas click to add new pin
   const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (isPanning) return;
-    if (!canvasRef.current) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const clientX = e.clientX - rect.left;
-    const clientY = e.clientY - rect.top;
-
-    // Convert screen px to component logical coordinates
-    const rawX = (clientX - pan.x) / zoom;
-    const rawY = (clientY - pan.y) / zoom;
+    if (isPanning || draggingPinId) return;
+    const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
 
     // Check bounds
-    if (rawX < -10 || rawX > width + 10 || rawY < -10 || rawY > height + 10) {
+    if (rawX < -15 || rawX > width + 15 || rawY < -15 || rawY > height + 15) {
       return;
     }
 
     if (toolMode === 'add-pin') {
-      const finalX = snapToBreadboard ? snapCoordinate(rawX, breadboardOffset.x % 17) : Math.round(rawX * 10) / 10;
-      const finalY = snapToBreadboard ? snapCoordinate(rawY, breadboardOffset.y % 17) : Math.round(rawY * 10) / 10;
+      let finalX = snapToBreadboard ? snapCoordinate(rawX, breadboardOffset.x % 17) : Math.round(rawX * 10) / 10;
+      let finalY = snapToBreadboard ? snapCoordinate(rawY, breadboardOffset.y % 17) : Math.round(rawY * 10) / 10;
+
+      finalX = Math.max(0, Math.min(width, finalX));
+      finalY = Math.max(0, Math.min(height, finalY));
 
       const newId = `pin_${pins.length + 1}`;
       const newPin: Pin = {
         id: newId,
         name: `Pin ${pins.length + 1}`,
-        x: Math.max(0, Math.min(width, finalX)),
-        y: Math.max(0, Math.min(height, finalY)),
+        x: finalX,
+        y: finalY,
         type: 'digital',
         description: `Pin ${pins.length + 1}`,
       };
 
-      setPins([...pins, newPin]);
+      setPins((prev) => [...prev, newPin]);
       setSelectedPinId(newId);
     }
   };
@@ -360,7 +425,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen || !selectedPin) return;
-      if (['input', 'textarea'].includes((e.target as HTMLElement)?.tagName.toLowerCase())) {
+      if (['input', 'textarea', 'select'].includes((e.target as HTMLElement)?.tagName.toLowerCase())) {
         return;
       }
 
@@ -461,6 +526,38 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
+  // Import / Export JSON
+  const handleImportJsonFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (text) {
+        try {
+          const item = JSON.parse(text);
+          if (item?.definition) {
+            const def = item.definition;
+            setTypeId(def.type || 'custom-module');
+            setName(def.name || 'Modul Kustom');
+            setCategory(def.category || 'sensors');
+            setDescription(def.description || '');
+            setWidth(def.width || 200);
+            setHeight(def.height || 150);
+            setPins(def.pins || []);
+            if (item.imageBase64 || def.imageUrl) {
+              setImageDataUrl(item.imageBase64 || def.imageUrl);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to import json:', err);
+        }
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -470,7 +567,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         <div className="h-14 bg-slate-950/90 border-b border-slate-800 px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400">
-              <Sparkles className="w-4 h-4" />
+              <Sliders className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
               <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
@@ -486,15 +583,44 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Import JSON */}
+            <input
+              type="file"
+              ref={jsonInputRef}
+              onChange={handleImportJsonFile}
+              accept=".json"
+              className="hidden"
+            />
+            <button
+              onClick={() => jsonInputRef.current?.click()}
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors"
+              title="Buka File JSON Komponen"
+            >
+              <FolderOpen className="w-3.5 h-3.5 text-sky-400" />
+              <span>Import JSON</span>
+            </button>
+
+            {/* Export JSON */}
+            <button
+              onClick={() => exportComponentJson(typeId)}
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors"
+              title="Export Definisi JSON Komponen"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Export JSON</span>
+            </button>
+
+            {/* Copy TS Code */}
             <button
               onClick={handleCopyCode}
               className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors"
               title="Copy TypeScript Definition Code"
             >
-              {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
               {copiedCode ? 'Tersalin!' : 'Copy TS Code'}
             </button>
 
+            {/* Save Button */}
             <button
               onClick={handleSaveComponent}
               className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all ${
@@ -507,6 +633,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               {saveSuccess ? 'Tersimpan di Library!' : 'Simpan ke Library'}
             </button>
 
+            {/* Close Button */}
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-100 flex items-center justify-center transition-colors ml-2"
@@ -523,7 +650,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             {/* Upload Box */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-200 flex items-center justify-between">
-                <span>1. Upload Visual Asset</span>
+                <span>1. Visual Asset Image</span>
                 {imageDataUrl && (
                   <span className="text-[10px] text-slate-400">
                     {originalImageSize.width} × {originalImageSize.height} px
@@ -591,7 +718,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       className="w-full py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      {isProcessingBg ? 'Memproses...' : 'Hapus Background Putih'}
+                      {isProcessingBg ? 'Memproses...' : 'Hapus Background'}
                     </button>
                   </div>
                 </div>
@@ -657,7 +784,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Modul Sensor Ultrasonik..."
+                  placeholder="Modul Sensor..."
                   className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:border-sky-500 focus:outline-none"
                 />
               </div>
@@ -690,20 +817,21 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             </div>
           </div>
 
-          {/* Center Canvas: Interactive Pin Visualizer */}
+          {/* Center Canvas: Interactive Pin Visualizer & Snapper */}
           <div className="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
             {/* Canvas Toolbar */}
             <div className="h-11 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setToolMode('select')}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                  className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     toolMode === 'select'
                       ? 'bg-sky-500 text-slate-950'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                   }`}
                 >
-                  Pilih & Geser Pin
+                  <Move className="w-3.5 h-3.5" />
+                  Pilih & Geser Pin (Drag)
                 </button>
                 <button
                   onClick={() => setToolMode('add-pin')}
@@ -714,7 +842,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   }`}
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Klik untuk Tambah Pin
+                  Klik Canvas Tambah Pin
                 </button>
               </div>
 
@@ -797,13 +925,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 onClick={handleCanvasClick}
               >
                 <g transform={`translate(${pan.x + 120}, ${pan.y + 80}) scale(${zoom})`}>
-                  {/* Optional Breadboard Background Overlay */}
+                  {/* Breadboard Hole Grid Overlay (17.0px standard pitch) */}
                   {showBreadboard && (
-                    <g opacity={0.35} pointerEvents="none">
-                      {/* Draw breadboard hole grid (pitch = 17.0px) */}
-                      {Array.from({ length: Math.ceil(height / 17) + 4 }).map((_, r) => (
+                    <g opacity={0.4} pointerEvents="none">
+                      {Array.from({ length: Math.ceil(height / 17) + 6 }).map((_, r) => (
                         <React.Fragment key={`row-${r}`}>
-                          {Array.from({ length: Math.ceil(width / 17) + 4 }).map((_, c) => {
+                          {Array.from({ length: Math.ceil(width / 17) + 6 }).map((_, c) => {
                             const hx = c * 17.0 + breadboardOffset.x;
                             const hy = r * 17.0 + breadboardOffset.y;
                             return (
@@ -849,21 +976,32 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     />
                   )}
 
-                  {/* Render Pins */}
-                  {pins.map((pin, idx) => {
+                  {/* Render Pins with Live Grab & Drag */}
+                  {pins.map((pin) => {
                     const isSelected = pin.id === selectedPinId;
+                    const isDragging = pin.id === draggingPinId;
                     const typeDef = PIN_TYPES.find((t) => t.type === pin.type) || PIN_TYPES[0];
 
                     return (
                       <g
                         key={pin.id}
                         transform={`translate(${pin.x}, ${pin.y})`}
-                        className="cursor-pointer"
+                        style={{ pointerEvents: 'all' }}
+                        onMouseDown={(e) => handlePinMouseDown(e, pin.id)}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedPinId(pin.id);
                         }}
                       >
+                        {/* Invisible Large Hit Area Circle for Easy Grabbing */}
+                        <circle
+                          cx={0}
+                          cy={0}
+                          r={14}
+                          fill="transparent"
+                          className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
+                        />
+
                         {/* Selected Glowing Ring */}
                         {isSelected && (
                           <circle
@@ -887,10 +1025,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                           fill={typeDef.color}
                           stroke="#ffffff"
                           strokeWidth={1.8}
+                          className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
                         />
 
                         {/* Center Dot */}
-                        <circle cx={0} cy={0} r={1.8} fill="#ffffff" />
+                        <circle cx={0} cy={0} r={1.8} fill="#ffffff" pointerEvents="none" />
 
                         {/* Pin Label Tag */}
                         <g transform="translate(0, -12)" pointerEvents="none">
@@ -901,7 +1040,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                             height={12}
                             rx={3}
                             fill="#020617"
-                            fillOpacity={0.85}
+                            fillOpacity={0.88}
                             stroke={isSelected ? '#38bdf8' : '#475569'}
                             strokeWidth={1}
                           />
@@ -927,7 +1066,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-400 flex items-center gap-2 pointer-events-none">
                 <Info className="w-3.5 h-3.5 text-sky-400" />
                 <span>
-                  <b>Klik Canvas:</b> Tambah Pin • <b>Arrow Keys:</b> Nudge 1px (Shift: 5px, Alt: 0.1px)
+                  <b>Drag Pin:</b> Tarik langsung dengan mouse • <b>Arrow Keys:</b> Nudge 1px (Shift: 5px, Alt: 0.1px)
                 </span>
               </div>
             </div>
@@ -1082,24 +1221,28 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <button
                       onClick={() => nudgePin(-0.5, 0)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      title="Nudge Kiri (-0.5px)"
                     >
                       <ArrowLeft className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgePin(0, -0.5)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      title="Nudge Atas (-0.5px)"
                     >
                       <ArrowUp className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgePin(0, 0.5)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      title="Nudge Bawah (+0.5px)"
                     >
                       <ArrowDown className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgePin(0.5, 0)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      title="Nudge Kanan (+0.5px)"
                     >
                       <ArrowRight className="w-3 h-3" />
                     </button>
@@ -1119,7 +1262,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               </div>
             ) : (
               <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 text-center text-xs text-slate-500">
-                Pilih pin pada canvas atau klik pada gambar untuk membuat pin baru.
+                Pilih pin pada canvas untuk mengedit atau drag pin langsung dengan cursor mouse.
               </div>
             )}
 
@@ -1138,7 +1281,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               </div>
 
               <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 max-h-48">
-                {pins.map((pin, idx) => {
+                {pins.map((pin) => {
                   const isSelected = pin.id === selectedPinId;
                   const typeDef = PIN_TYPES.find((t) => t.type === pin.type) || PIN_TYPES[0];
 
