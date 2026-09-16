@@ -137,13 +137,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     mouseY: number;
     startX: number;
     startY: number;
-    initialPins: Pin[];
   }>({
     mouseX: 0,
     mouseY: 0,
     startX: 0,
     startY: 0,
-    initialPins: [],
   });
 
   // Multi-pin Generator state
@@ -442,20 +440,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }
   };
 
-  // Image Offset Nudge
+  // Image Offset Nudge (Moves ONLY the image visual)
   const nudgeImage = (dx: number, dy: number) => {
     setImageOffset((prev) => ({
       x: Math.round((prev.x + dx) * 10) / 10,
       y: Math.round((prev.y + dy) * 10) / 10,
     }));
-    // Also shift pins along with image nudge
-    setPins((prevPins) =>
-      prevPins.map((p) => ({
-        ...p,
-        x: Math.round((p.x + dx) * 10) / 10,
-        y: Math.round((p.y + dy) * 10) / 10,
-      }))
-    );
   };
 
   // Fit Bounding Box directly to image
@@ -562,7 +552,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     breadboardOffset.y,
   ]);
 
-  // Image Dragging Mouse Event Listeners (Moves both image & pins together)
+  // Image Dragging Mouse Event Listeners (Moves ONLY image independently)
   useEffect(() => {
     if (!isDraggingImage) return;
 
@@ -581,21 +571,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         newY = Math.round(newY * 10) / 10;
       }
 
-      const diffX = newX - imageDragStart.startX;
-      const diffY = newY - imageDragStart.startY;
-
       setImageOffset({ x: newX, y: newY });
-
-      // Move existing pins together with the image during drag
-      if (imageDragStart.initialPins.length > 0) {
-        setPins(
-          imageDragStart.initialPins.map((p) => ({
-            ...p,
-            x: Math.round((p.x + diffX) * 10) / 10,
-            y: Math.round((p.y + diffY) * 10) / 10,
-          }))
-        );
-      }
     };
 
     const handleWindowMouseUp = () => {
@@ -631,7 +607,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         mouseY: e.clientY,
         startX: imageOffset.x,
         startY: imageOffset.y,
-        initialPins: [...pins],
       });
     }
   };
@@ -1465,35 +1440,35 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   {showBreadboard && (
                     <g opacity={breadboardOpacity} pointerEvents="none">
                       {breadboardType === 'half' ? (
-                        /* Photorealistic Half Breadboard (400 Tie-Point) with Exact 17px Pitch */
-                        <g transform={`translate(${breadboardOffset.x - 30}, ${breadboardOffset.y - 20})`}>
+                        /* Photorealistic Half Breadboard (400 Tie-Point) with Exact 17px Pitch & Aligned Hole Centers */
+                        <g transform={`translate(${breadboardOffset.x + 8.216667}, ${breadboardOffset.y})`}>
                           <image
                             href="/components/breadboard_half.svg"
                             x={0}
                             y={0}
-                            width={595.6}
-                            height={340.0}
+                            width={578.554}
+                            height={357.0}
                             preserveAspectRatio="none"
                           />
                         </g>
                       ) : breadboardType === 'mini' ? (
-                        /* Photorealistic Mini Breadboard (170 Tie-Point) */
-                        <g transform={`translate(${breadboardOffset.x - 20}, ${breadboardOffset.y - 15})`}>
+                        /* Photorealistic Mini Breadboard (170 Tie-Point) with Exact 17px Pitch */
+                        <g transform={`translate(${breadboardOffset.x - 0.288}, ${breadboardOffset.y - 8.63})`}>
                           <image
                             href="/components/breadboard_mini.svg"
                             x={0}
                             y={0}
-                            width={340.0}
-                            height={260.0}
+                            width={306.56}
+                            height={238.27}
                             preserveAspectRatio="none"
                           />
                         </g>
                       ) : (
                         /* Clean 17px Cyan Grid Overlay */
                         <g opacity={0.4}>
-                          {Array.from({ length: Math.ceil(height / 17) + 6 }).map((_, r) => (
+                          {Array.from({ length: Math.max(22, Math.ceil(height / 17) + 8) }).map((_, r) => (
                             <React.Fragment key={`row-${r}`}>
-                              {Array.from({ length: Math.ceil(width / 17) + 6 }).map((_, c) => {
+                              {Array.from({ length: Math.max(35, Math.ceil(width / 17) + 12) }).map((_, c) => {
                                 const hx = c * 17.0 + breadboardOffset.x;
                                 const hy = r * 17.0 + breadboardOffset.y;
                                 return (
