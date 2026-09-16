@@ -1,7 +1,8 @@
 import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { CircuitComponent, Wire, Pin, WirePoint, WireRouting } from '../../types/circuit';
 import { COMPONENT_DEFINITIONS } from '../../constants/components';
-import { getPinWorldPosition, generateWirePath, snapToGrid } from '../../utils/geometry';
+import { getPinWorldPosition, generateWirePath, snapToGrid, getAutoPinColor, getAutoWireColor } from '../../utils/geometry';
+import { sortWiresForRendering } from '../../utils/orthogonalRouter';
 import { ComponentSvg } from './ComponentSvg';
 import { WireSvg } from './WireSvg';
 
@@ -11,6 +12,7 @@ interface CircuitCanvasProps {
   selectedComponentId: string | null;
   selectedWireId: string | null;
   currentWireColor: string;
+  onSelectWireColor?: (color: string) => void;
   wireRouting: WireRouting;
   snapGrid: boolean;
   onSelectComponent: (id: string | null) => void;
@@ -32,6 +34,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   selectedComponentId,
   selectedWireId,
   currentWireColor,
+  onSelectWireColor,
   wireRouting,
   snapGrid,
   onSelectComponent,
@@ -65,6 +68,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     fromPin: Pin;
     currentPoint: WirePoint;
     waypoints: WirePoint[];
+    color: string;
   } | null>(null);
 
   // Pin Hover Tooltip state
@@ -98,7 +102,16 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         type === 'breadboard-full'
       )
         return 0;
-      if (type === 'arduino-uno' || type === 'esp32' || type === 'battery-9v') return 1;
+      if (
+        type === 'arduino-uno' ||
+        type === 'arduino-nano' ||
+        type === 'esp32' ||
+        type === 'esp32-38p-cp2102' ||
+        type === 'esp32-c3-supermini' ||
+        type === 'wemos-d1-mini' ||
+        type === 'battery-9v'
+      )
+        return 1;
       return 2; // leds, resistors, sensors, buttons, etc.
     };
     return [...components].sort((a, b) => getOrder(a.type) - getOrder(b.type));
@@ -136,12 +149,22 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         return;
       }
 
+      const finalColor = getAutoWireColor(
+        drawingWire.fromPin,
+        targetPin,
+        drawingWire.color || currentWireColor
+      );
+
+      if (onSelectWireColor) {
+        onSelectWireColor(finalColor);
+      }
+
       onAddWire({
         fromComponentId: drawingWire.fromComponentId,
         fromPinId: drawingWire.fromPin.id,
         toComponentId: targetCompId,
         toPinId: targetPin.id,
-        color: currentWireColor,
+        color: finalColor,
         routing: wireRouting,
         waypoints: drawingWire.waypoints,
       });
@@ -149,7 +172,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       setDrawingWire(null);
       setHoveredPinInfo(null);
     },
-    [drawingWire, onAddWire, currentWireColor, wireRouting]
+    [drawingWire, onAddWire, currentWireColor, wireRouting, onSelectWireColor]
   );
 
   // Handle Mouse Down on Canvas (Pan or Deselect)
@@ -211,53 +234,126 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
       let snappedToBreadboard = false;
 
-      // Smart Magnetic Breadboard Snapping:
-      // Snap Pin 1 directly to the nearest breadboard hole with spatial culling
+      // 1. Breadboard-to-Breadboard Seamless Interlocking Docking
+      if (draggingComp && isBreadboardType(draggingComp.type)) {
+        const thisDef = COMPONENT_DEFINITIONS[draggingComp.type];
+        const otherBreadboards = breadboards.filter((b) => b.id !== draggingCompId);
+        if (thisDef && otherBreadboards.length > 0) {
+          let bestSnapDist = Infinity;
+          let snapX = newX;
+          let snapY = newY;
+          let didSnapBB = false;
+
+          for (const otherBB of otherBreadboards) {
+            const otherDef = COMPONENT_DEFINITIONS[otherBB.type];
+            if (!otherDef) continue;
+
+            // Snap vertically (Below otherBB)
+            const snapY_below = otherBB.y + otherDef.height;
+            if (Math.abs(newY - snapY_below) < 28 && Math.abs(newX - otherBB.x) < 35) {
+              const d = Math.hypot(newX - otherBB.x, newY - snapY_below);
+              if (d < bestSnapDist) {
+                bestSnapDist = d;
+                snapX = otherBB.x;
+                snapY = snapY_below;
+                didSnapBB = true;
+              }
+            }
+
+            // Snap vertically (Above otherBB)
+            const snapY_above = otherBB.y - thisDef.height;
+            if (Math.abs(newY - snapY_above) < 28 && Math.abs(newX - otherBB.x) < 35) {
+              const d = Math.hypot(newX - otherBB.x, newY - snapY_above);
+              if (d < bestSnapDist) {
+                bestSnapDist = d;
+                snapX = otherBB.x;
+                snapY = snapY_above;
+                didSnapBB = true;
+              }
+            }
+
+            // Snap horizontally (Right of otherBB)
+            const snapX_right = otherBB.x + otherDef.width;
+            if (Math.abs(newX - snapX_right) < 28 && Math.abs(newY - otherBB.y) < 35) {
+              const d = Math.hypot(newX - snapX_right, newY - otherBB.y);
+              if (d < bestSnapDist) {
+                bestSnapDist = d;
+                snapX = snapX_right;
+                snapY = otherBB.y;
+                didSnapBB = true;
+              }
+            }
+
+            // Snap horizontally (Left of otherBB)
+            const snapX_left = otherBB.x - thisDef.width;
+            if (Math.abs(newX - snapX_left) < 28 && Math.abs(newY - otherBB.y) < 35) {
+              const d = Math.hypot(newX - snapX_left, newY - otherBB.y);
+              if (d < bestSnapDist) {
+                bestSnapDist = d;
+                snapX = snapX_left;
+                snapY = otherBB.y;
+                didSnapBB = true;
+              }
+            }
+          }
+
+          if (didSnapBB) {
+            newX = snapX;
+            newY = snapY;
+            snappedToBreadboard = true;
+          }
+        }
+      }
+
+      // 2. Component-to-Breadboard Magnetic Snapping:
+      // Test all component pins against breadboard holes for effortless, pixel-perfect alignment
       if (draggingComp && !isBreadboardType(draggingComp.type) && breadboards.length > 0) {
         const def = COMPONENT_DEFINITIONS[draggingComp.type];
         if (def && def.pins.length > 0) {
-          const p1Candidate = getPinWorldPosition(
-            newX,
-            newY,
-            def.width,
-            def.height,
-            draggingComp.rotation,
-            def.pins[0]
-          );
-
           let closestDist = Infinity;
           let bestDx = 0;
           let bestDy = 0;
 
-          for (const bb of breadboards) {
-            const bbDef = COMPONENT_DEFINITIONS[bb.type];
-            if (!bbDef) continue;
+          // Check pins of the component
+          for (const pin of def.pins) {
+            const pCandidate = getPinWorldPosition(
+              newX,
+              newY,
+              def.width,
+              def.height,
+              draggingComp.rotation,
+              pin
+            );
 
-            // Spatial Bounding Box Culling:
-            // Skip breadboard entirely if cursor is more than 35px outside the board
-            if (
-              p1Candidate.x < bb.x - 35 ||
-              p1Candidate.x > bb.x + bbDef.width + 35 ||
-              p1Candidate.y < bb.y - 35 ||
-              p1Candidate.y > bb.y + bbDef.height + 35
-            ) {
-              continue;
-            }
+            for (const bb of breadboards) {
+              const bbDef = COMPONENT_DEFINITIONS[bb.type];
+              if (!bbDef) continue;
 
-            for (const bbPin of bbDef.pins) {
-              const bbWorldX = bb.x + bbPin.x;
-              const bbWorldY = bb.y + bbPin.y;
-
-              // Fast Manhattan pre-filter before sqrt
-              if (Math.abs(p1Candidate.x - bbWorldX) > 22 || Math.abs(p1Candidate.y - bbWorldY) > 22) {
+              // Spatial Bounding Box Culling:
+              if (
+                pCandidate.x < bb.x - 25 ||
+                pCandidate.x > bb.x + bbDef.width + 25 ||
+                pCandidate.y < bb.y - 25 ||
+                pCandidate.y > bb.y + bbDef.height + 25
+              ) {
                 continue;
               }
 
-              const dist = Math.hypot(p1Candidate.x - bbWorldX, p1Candidate.y - bbWorldY);
-              if (dist < closestDist) {
-                closestDist = dist;
-                bestDx = bbWorldX - p1Candidate.x;
-                bestDy = bbWorldY - p1Candidate.y;
+              for (const bbPin of bbDef.pins) {
+                const bbWorldX = bb.x + bbPin.x;
+                const bbWorldY = bb.y + bbPin.y;
+
+                // Fast Manhattan pre-filter before sqrt
+                if (Math.abs(pCandidate.x - bbWorldX) > 20 || Math.abs(pCandidate.y - bbWorldY) > 20) {
+                  continue;
+                }
+
+                const dist = Math.hypot(pCandidate.x - bbWorldX, pCandidate.y - bbWorldY);
+                if (dist < closestDist) {
+                  closestDist = dist;
+                  bestDx = bbWorldX - pCandidate.x;
+                  bestDy = bbWorldY - pCandidate.y;
+                }
               }
             }
           }
@@ -429,11 +525,18 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         const pinPos = getPinCoords(compId, pin.id);
         if (!pinPos) return;
 
+        const autoColor = getAutoPinColor(pin);
+        const activeColor = autoColor || currentWireColor;
+        if (autoColor && onSelectWireColor) {
+          onSelectWireColor(autoColor);
+        }
+
         setDrawingWire({
           fromComponentId: compId,
           fromPin: pin,
           currentPoint: pinPos,
           waypoints: [],
+          color: activeColor,
         });
         onSelectComponent(null);
         onSelectWire(null);
@@ -442,7 +545,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         finishWireConnection(compId, pin);
       }
     },
-    [drawingWire, getPinCoords, onSelectComponent, onSelectWire, finishWireConnection]
+    [drawingWire, getPinCoords, onSelectComponent, onSelectWire, finishWireConnection, currentWireColor, onSelectWireColor]
   );
 
   // Pin MouseUp (Supports Drag-and-Drop connection: click & drag from Pin A, release on Pin B)
@@ -517,6 +620,11 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onDeleteSelected, onSelectComponent, onSelectWire]);
 
+  // Sort wires so jumping wires are on top, newer wires on top, and selected wire on the very top
+  const sortedWires = useMemo(() => {
+    return sortWiresForRendering(wires, getPinCoords, selectedWireId);
+  }, [wires, getPinCoords, selectedWireId]);
+
   return (
     <div
       ref={containerRef}
@@ -543,10 +651,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{ overflow: 'visible' }}
       >
-        <g
-          transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}
-          style={{ willChange: isPanning || draggingCompId ? 'transform' : 'auto' }}
-        >
+        <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
           {/* 1. Components Layer (Breadboards at base, then MCUs, then mounted components) */}
           <g id="components-layer" className="pointer-events-auto">
             {sortedComponents.map((comp) => (
@@ -577,7 +682,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
           {/* 2. Wires Layer (Jumper wires ALWAYS render ON TOP of breadboard & boards!) */}
           <g id="wires-layer" className={drawingWire ? "pointer-events-none" : "pointer-events-auto"}>
-            {wires.map((wire) => {
+            {sortedWires.map((wire) => {
               const start = getPinCoords(wire.fromComponentId, wire.fromPinId);
               const end = getPinCoords(wire.toComponentId, wire.toPinId);
               if (!start || !end) return null;
@@ -606,6 +711,13 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
               const start = getPinCoords(drawingWire.fromComponentId, drawingWire.fromPin.id);
               if (!start) return null;
               const pathD = generateWirePath(start, drawingWire.currentPoint, wireRouting, drawingWire.waypoints);
+              const previewColor = hoveredPinInfo
+                ? getAutoWireColor(
+                    drawingWire.fromPin,
+                    hoveredPinInfo.pin,
+                    drawingWire.color || currentWireColor
+                  )
+                : drawingWire.color || currentWireColor;
 
               return (
                 <g className="pointer-events-none">
@@ -613,7 +725,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                   <path
                     d={pathD}
                     fill="none"
-                    stroke={currentWireColor}
+                    stroke={previewColor}
                     strokeWidth="3.2"
                     strokeLinecap="round"
                     strokeDasharray="6 4"
@@ -624,7 +736,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                     cx={drawingWire.currentPoint.x}
                     cy={drawingWire.currentPoint.y}
                     r="4"
-                    fill={currentWireColor}
+                    fill={previewColor}
                     stroke="#020617"
                     strokeWidth="1.5"
                     className="pointer-events-none"
@@ -632,6 +744,29 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                 </g>
               );
             })()}
+          </g>
+
+          {/* 3. Foreground Overlay Layer (e.g. CT Coil front lip/arch covering wires passing through donut hole!) */}
+          <g id="foreground-overlays-layer" className="pointer-events-none">
+            {components
+              .filter((c) => c.type === 'sensor-ct-coil')
+              .map((comp) => {
+                const def = COMPONENT_DEFINITIONS[comp.type];
+                if (!def) return null;
+                return (
+                  <g
+                    key={`fg-${comp.id}`}
+                    transform={`translate(${comp.x}, ${comp.y}) rotate(${comp.rotation || 0} ${def.width / 2} ${def.height / 2})`}
+                  >
+                    <image
+                      href="/components/ct_coil_front.png"
+                      width={def.width}
+                      height={def.height}
+                      preserveAspectRatio="none"
+                    />
+                  </g>
+                );
+              })}
           </g>
         </g>
       </svg>

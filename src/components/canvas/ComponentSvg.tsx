@@ -71,6 +71,16 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
   // Render component visual - using real PNG/SVG image assets where available!
   const renderVisual = () => {
     switch (component.type) {
+      case 'arduino-nano':
+        return (
+          <image
+            href="/components/arduino_nano.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
       case 'arduino-uno':
         return (
           <image
@@ -85,6 +95,86 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
         return (
           <image
             href="/components/ESP32_30P.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'pzem-004t':
+        return (
+          <image
+            href="/components/pzem_004t.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-ct-coil':
+        return (
+          <image
+            href="/components/ct_coil.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'esp32-38p-cp2102':
+        return (
+          <image
+            href="/components/esp32_38p_cp2102.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'esp32-c3-supermini':
+        return (
+          <image
+            href="/components/esp32_c3_supermini.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'wemos-d1-mini':
+        return (
+          <image
+            href="/components/wemos_d1_mini.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'nodemcu-v1':
+        return (
+          <image
+            href="/components/nodemcu_v1.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'nodemcu-ch340':
+        return (
+          <image
+            href="/components/nodemcu_ch340.png"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'ftdi-ft232rl':
+        return (
+          <image
+            href="/components/ftdi_ft232rl.png"
             width={width}
             height={height}
             preserveAspectRatio="none"
@@ -855,18 +945,26 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
 
       case 'sensor-dht11':
         return (
-          <g>
-            <rect x="0" y="0" width={width} height={height - 14} rx="4" fill="#0284c7" stroke="#0369a1" strokeWidth="1.5" />
-            {Array.from({ length: 4 }).map((_, r) => (
-              <g key={`dht-grille-${r}`}>
-                <rect x="12" y={14 + r * 10} width="36" height="4" rx="1.5" fill="#0369a1" />
-              </g>
-            ))}
-            <text x="30" y="66" fill="#ffffff" fontSize="8" fontWeight="bold" textAnchor="middle">DHT11</text>
-            {[12, 24, 36, 48].map((px, i) => (
-              <line key={`dht-pin-${i}`} x1={px} y1={height - 14} x2={px} y2={height - 2} stroke="#94a3b8" strokeWidth="2.5" />
-            ))}
-          </g>
+          <image
+            href="/components/sensor_dht11.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-dht11-module':
+        return (
+          <image
+            href="/components/sensor_dht11_module.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
         );
 
       case 'sensor-dht22':
@@ -893,10 +991,46 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
+      case 'sensor-ds18b20':
+        return (
+          <image
+            href="/components/sensor_ds18b20.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-ds18b20-module':
+        return (
+          <image
+            href="/components/sensor_ds18b20_module.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
       case 'sensor-rfid-rc522':
         return (
           <image
             href="/components/rfid_rc522.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sd-card-module':
+        return (
+          <image
+            href="/components/sdcard_module.png"
             x="0"
             y="0"
             width={width}
@@ -917,10 +1051,202 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
+      case 'sensor-tds':
+        return (
+          <image
+            href="/components/sensor_tds.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-ph4502c':
+        return (
+          <image
+            href="/components/sensor_ph4502c.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-pt100':
+        return (
+          <image
+            href="/components/sensor_pt100.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'transmitter-rtd-pt100':
+        return (
+          <image
+            href="/components/transmitter_rtd_pt100.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-max31865':
+        return (
+          <image
+            href="/components/sensor_max31865.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-ldr-module':
+        return (
+          <image
+            href="/components/sensor_ldr_module.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-ir-obstacle':
+        return (
+          <image
+            href="/components/sensor_ir_obstacle.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-touch-ttp223':
+        return (
+          <image
+            href="/components/sensor_touch_ttp223.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-vibration-sw420':
+        return (
+          <image
+            href="/components/sensor_vibration_sw420.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'level-converter-4ch-blue':
+        return (
+          <image
+            href="/components/level_converter_4ch_blue.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'level-converter-8ch-red':
+        return (
+          <image
+            href="/components/level_converter_8ch_red.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'level-converter-4ch-red':
+        return (
+          <image
+            href="/components/level_converter_4ch_red.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-ads1115':
+        return (
+          <image
+            href="/components/sensor_ads1115.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'sensor-jsn-sr04t':
+        return (
+          <image
+            href="/components/sensor_jsn_sr04t.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'module-sim800l':
+        return (
+          <image
+            href="/components/module_sim800l.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
       case 'buzzer':
         return (
           <image
             href="/components/buzzer.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'speaker':
+        return (
+          <image
+            href="/components/speaker.png"
             x="0"
             y="0"
             width={width}
@@ -1063,6 +1389,42 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
+      case 'buck-converter-lm2596s-mh':
+        return (
+          <image
+            href="/components/buck_lm2596s_mh.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'buck-converter-xl4015-display':
+        return (
+          <image
+            href="/components/step_down_xl4015_display.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
+      case 'buck-converter-xl4015':
+        return (
+          <image
+            href="/components/step_down_xl4015.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
       case 'psu-smps-12v':
         return (
           <image
@@ -1115,6 +1477,18 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
         );
       }
 
+      case 'dfplayer-mini':
+        return (
+          <image
+            href="/components/dfplayer_mini.png"
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            preserveAspectRatio="none"
+          />
+        );
+
       default:
         return (
           <rect x="0" y="0" width={width} height={height} rx="4" fill="#1e293b" stroke="#334155" />
@@ -1156,17 +1530,31 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
         {def.pins.map((pin) => {
           const isStartPin = activeWireStartPinId === pin.id;
           const isTargetPin = activeWireTargetPinId === pin.id;
-          const isEsp = component.type === 'esp32';
+          const isEsp =
+            component.type === 'esp32' ||
+            component.type === 'esp32-38p-cp2102' ||
+            component.type === 'esp32-c3-supermini';
+          const isWemos = component.type === 'wemos-d1-mini';
           const isLed = component.type === 'led';
           const isResistor = component.type === 'resistor';
           const isPot = component.type === 'potentiometer';
           const isUltrasonic = component.type === 'sensor-ultrasonic';
           const isDht =
             component.type === 'sensor-dht11' ||
+            component.type === 'sensor-dht11-module' ||
             component.type === 'sensor-dht22' ||
             component.type === 'sensor-dht22-module';
+          const isDs18b20 =
+            component.type === 'sensor-ds18b20' ||
+            component.type === 'sensor-ds18b20-module';
           const isRfid = component.type === 'sensor-rfid-rc522';
+          const isSdCard = component.type === 'sd-card-module';
           const isSoilMoisture = component.type === 'sensor-soil-moisture';
+          const isTds = component.type === 'sensor-tds';
+          const isPh = component.type === 'sensor-ph4502c';
+          const isPt100 = component.type === 'sensor-pt100';
+          const isRtdTx = component.type === 'transmitter-rtd-pt100';
+          const isMax31865 = component.type === 'sensor-max31865';
           const isLcd =
             component.type === 'display-lcd1602' ||
             component.type === 'display-lcd1602-i2c' ||
@@ -1174,6 +1562,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             component.type === 'display-lcd2004-i2c';
           const isOled = component.type === 'display-oled';
           const isBuzzer = component.type === 'buzzer';
+          const isSpeaker = component.type === 'speaker';
           const isTm1637 = component.type === 'display-tm1637';
           const isServo = component.type === 'servo';
           const isRelay = component.type === 'relay';
@@ -1182,15 +1571,33 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           const isRtc = component.type === 'rtc-ds3231';
           const isTft = component.type === 'display-tft-28' || component.type === 'display-tft-28-touch';
           const isKeypad = component.type === 'keypad-3x4' || component.type === 'keypad-4x4';
+          const isPzem = component.type === 'pzem-004t';
+          const isCtCoil = component.type === 'sensor-ct-coil';
+          const isNodeMcu = component.type === 'nodemcu-v1' || component.type === 'nodemcu-ch340';
+          const isLevelConverter =
+            component.type === 'level-converter-4ch-blue' ||
+            component.type === 'level-converter-8ch-red' ||
+            component.type === 'level-converter-4ch-red';
+          const isAds1115 = component.type === 'sensor-ads1115';
+          const isJsnSr04t = component.type === 'sensor-jsn-sr04t';
+          const isSim800l = component.type === 'module-sim800l';
           const pinRadius = isBreadboard
             ? 2.8
-            : isEsp
-            ? 3.8
-            : isResistor
+            : isEsp || isWemos || isNodeMcu
+            ? 3.4
+            : isRtdTx || (isMax31865 && pin.y < 50)
+            ? 5.0
+            : isPt100
+            ? 4.5
+            : isPzem
+            ? 3.2
+            : isCtCoil
+            ? 3.0
+            : isResistor || isSpeaker
             ? 3.2
             : isLed
             ? 2.5
-            : isPot || isUltrasonic || isDht || isRfid || isSoilMoisture || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRelayRed || isRtc || isTft || isKeypad
+            : isPot || isUltrasonic || isDht || isDs18b20 || isRfid || isSdCard || isSoilMoisture || isTds || isPh || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRelayRed || isRtc || isTft || isKeypad || isMax31865 || isLevelConverter || isAds1115 || isJsnSr04t || isSim800l || component.type === 'sensor-ldr-module' || component.type === 'sensor-ir-obstacle' || component.type === 'sensor-touch-ttp223' || component.type === 'sensor-vibration-sw420'
             ? 2.8
             : isLcd
             ? 3.6
@@ -1211,66 +1618,105 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
               <circle
                 cx="0"
                 cy="0"
-                r={isBreadboard ? 7.5 : isLed || isResistor || isPot || isUltrasonic || isDht || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRtc ? 9 : 12}
+                r={pin.id === 'ac_pass' ? 18 : isBreadboard ? 7.5 : isLed || isResistor || isPot || isUltrasonic || isDht || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRtc ? 9 : 12}
                 fill="#ffffff"
                 opacity="0.001"
                 style={{ pointerEvents: 'all' }}
               />
 
-              {/* Visual Pin indicator on the graphic */}
-              <circle
-                cx="0"
-                cy="0"
-                r={pinRadius}
-                fill={
-                  isStartPin
-                    ? '#38bdf8'
-                    : isTargetPin
-                    ? '#10b981'
-                    : isBreadboard
-                    ? pin.type === 'power'
-                      ? 'rgba(239, 68, 68, 0.4)'
+              {/* Special guide ring for CT center hole pass-through */}
+              {pin.id === 'ac_pass' ? (
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="14"
+                  fill={isStartPin ? 'rgba(56, 189, 248, 0.2)' : isTargetPin ? 'rgba(16, 185, 129, 0.2)' : 'rgba(2, 6, 23, 0.2)'}
+                  stroke={isStartPin ? '#38bdf8' : isTargetPin ? '#34d399' : 'rgba(56, 189, 248, 0.45)'}
+                  strokeWidth="1.5"
+                  strokeDasharray="3 3"
+                  className="transition-all hover:stroke-sky-400 hover:stroke-2"
+                />
+              ) : (
+                <circle
+                  cx="0"
+                  cy="0"
+                  r={pinRadius}
+                  fill={
+                    isStartPin
+                      ? '#38bdf8'
+                      : isTargetPin
+                      ? '#10b981'
+                      : isBreadboard
+                      ? pin.type === 'power'
+                        ? 'rgba(239, 68, 68, 0.4)'
+                        : pin.type === 'ground'
+                        ? 'rgba(56, 189, 248, 0.4)'
+                        : 'rgba(30, 41, 59, 0.35)'
+                      : isResistor
+                      ? '#475569'
+                      : isLed
+                      ? 'rgba(148, 163, 184, 0.7)'
+                      : pin.type === 'power'
+                      ? 'rgba(239, 68, 68, 0.3)'
                       : pin.type === 'ground'
-                      ? 'rgba(56, 189, 248, 0.4)'
-                      : 'rgba(30, 41, 59, 0.35)'
-                    : isResistor
-                    ? '#475569'
-                    : isLed
-                    ? 'rgba(148, 163, 184, 0.7)'
-                    : isPot || isUltrasonic || isDht || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRtc
-                    ? 'rgba(100, 116, 139, 0.5)'
-                    : isLcd
-                    ? 'rgba(15, 23, 42, 0.65)'
-                    : 'rgba(30, 41, 59, 0.6)'
-                }
-                stroke={
-                  isStartPin
-                    ? '#38bdf8'
-                    : isTargetPin
-                    ? '#34d399'
-                    : pin.type === 'power'
-                    ? '#ef4444'
-                    : pin.type === 'ground'
-                    ? '#38bdf8'
-                    : pin.type === 'pwm'
-                    ? '#f97316'
-                    : isBreadboard
-                    ? 'rgba(148, 163, 184, 0.4)'
-                    : isResistor
-                    ? '#1e293b'
-                    : isLed
-                    ? '#cbd5e1'
-                    : isPot || isUltrasonic || isDht || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRtc
-                    ? '#334155'
-                    : isLcd
-                    ? '#64748b'
-                    : '#94a3b8'
-                }
-                strokeWidth={isBreadboard || isLed || isPot || isUltrasonic || isDht || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRtc ? 1 : isResistor || isLcd ? 1.2 : 1.5}
-                className={`transition-all duration-150 group-hover/pin:scale-140 group-hover/pin:stroke-sky-400 group-hover/pin:fill-sky-500/50 ${
-                  isTargetPin ? 'scale-140 stroke-emerald-400 fill-emerald-500/60' : ''
-                }`}
-              />
+                      ? 'rgba(56, 189, 248, 0.3)'
+                      : pin.type === 'i2c'
+                      ? 'rgba(192, 132, 252, 0.3)'
+                      : pin.type === 'spi'
+                      ? 'rgba(234, 179, 8, 0.3)'
+                      : pin.type === 'uart'
+                      ? 'rgba(6, 182, 212, 0.3)'
+                      : pin.type === 'analog'
+                      ? 'rgba(34, 197, 94, 0.3)'
+                      : pin.type === 'pwm'
+                      ? 'rgba(249, 115, 22, 0.3)'
+                      : isPot || isUltrasonic || isDht || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRtc
+                      ? 'rgba(100, 116, 139, 0.5)'
+                      : isLcd
+                      ? 'rgba(15, 23, 42, 0.65)'
+                      : 'rgba(30, 41, 59, 0.6)'
+                  }
+                  stroke={
+                    isStartPin
+                      ? '#38bdf8'
+                      : isTargetPin
+                      ? '#34d399'
+                      : isBreadboard
+                      ? pin.type === 'power'
+                        ? '#ef4444'
+                        : pin.type === 'ground'
+                        ? '#38bdf8'
+                        : 'rgba(148, 163, 184, 0.4)'
+                      : isResistor
+                      ? '#1e293b'
+                      : isLed
+                      ? '#cbd5e1'
+                      : pin.type === 'power'
+                      ? '#ef4444'
+                      : pin.type === 'ground'
+                      ? '#38bdf8'
+                      : pin.type === 'i2c'
+                      ? '#c084fc'
+                      : pin.type === 'spi'
+                      ? '#eab308'
+                      : pin.type === 'uart'
+                      ? '#06b6d4'
+                      : pin.type === 'analog'
+                      ? '#22c55e'
+                      : pin.type === 'pwm'
+                      ? '#f97316'
+                      : isPot || isUltrasonic || isDht || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRtc
+                      ? '#64748b'
+                      : isLcd
+                      ? '#334155'
+                      : '#475569'
+                  }
+                  strokeWidth={
+                    isStartPin || isTargetPin ? 2 : isBreadboard ? 1 : 1.5
+                  }
+                  className="transition-all group-hover/pin:scale-125 group-hover/pin:stroke-white group-hover/pin:stroke-2"
+                />
+              )}
 
               {/* Glowing pin indicator when starting wire from this pin */}
               {isStartPin && (

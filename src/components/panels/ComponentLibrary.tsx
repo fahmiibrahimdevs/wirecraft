@@ -25,6 +25,9 @@ import {
   Zap,
   Lightbulb,
   Plug,
+  HardDrive,
+  Droplets,
+  Activity,
 } from 'lucide-react';
 
 interface ComponentLibraryProps {
@@ -65,6 +68,9 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   Zap,
   Lightbulb,
   Plug,
+  HardDrive,
+  Droplets,
+  Activity,
 };
 
 export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({

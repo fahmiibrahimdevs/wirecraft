@@ -194,3 +194,135 @@ export function formatResistance(ohms: number): string {
   }
   return `${ohms}Ω`;
 }
+
+/**
+ * Determines standard electronics wire color based on pin type and name / protocol.
+ */
+export function getAutoPinColor(pin: Pin): string | null {
+  const pid = pin.id.toLowerCase();
+  const pname = pin.name.toLowerCase();
+  const pdesc = (pin.description || '').toLowerCase();
+
+  // 1. Ground: Black (#1e293b)
+  if (
+    pin.type === 'ground' ||
+    pid.includes('gnd') ||
+    pname.includes('gnd') ||
+    pid.startsWith('cable_earth') ||
+    pid === 'ct_neg' ||
+    pname === '-'
+  ) {
+    return '#1e293b';
+  }
+
+  // 2. Power: Red (#ef4444)
+  if (
+    pin.type === 'power' ||
+    pid.includes('vcc') ||
+    pid.includes('vin') ||
+    pid.includes('5v') ||
+    pid.includes('3v3') ||
+    pid.includes('3.3v') ||
+    pid.includes('cable_l') ||
+    pid === 'ct_pos' ||
+    pname.includes('vcc') ||
+    pname.includes('vin') ||
+    pname.includes('5v') ||
+    pname.includes('3v3') ||
+    pname.includes('3.3v') ||
+    pname === '+'
+  ) {
+    return '#ef4444';
+  }
+
+  // 3. Clock (SCL / SCK / CLK): Yellow (#eab308)
+  if (
+    pid.includes('scl') ||
+    pname.includes('scl') ||
+    pdesc.includes('scl') ||
+    pid.includes('sck') ||
+    pname.includes('sck') ||
+    pid.includes('clk') ||
+    pname.includes('clk')
+  ) {
+    return '#eab308';
+  }
+
+  // 4. I2C Data (SDA): Purple (#a855f7)
+  if (pid.includes('sda') || pname.includes('sda') || pdesc.includes('sda') || pin.type === 'i2c') {
+    return '#a855f7';
+  }
+
+  // 5. SPI (MOSI / MISO / CS / SS): Yellow (#eab308)
+  if (
+    pin.type === 'spi' ||
+    pid.includes('mosi') ||
+    pname.includes('mosi') ||
+    pid.includes('miso') ||
+    pname.includes('miso') ||
+    pdesc.includes('spi') ||
+    pid.includes('vspi') ||
+    pid.includes('hspi') ||
+    pid.includes('cs') ||
+    pid.includes('ss')
+  ) {
+    return '#eab308';
+  }
+
+  // 6. UART Serial (TX / RX): Cyan / Teal (#06b6d4)
+  if (
+    pin.type === 'uart' ||
+    pid.includes('tx') ||
+    pid.includes('rx') ||
+    pname.includes('tx') ||
+    pname.includes('rx')
+  ) {
+    return '#06b6d4';
+  }
+
+  // 7. Analog Input: Emerald / Green (#10b981)
+  if (
+    pin.type === 'analog' ||
+    (pid.startsWith('a') && /^a\d+$/.test(pid)) ||
+    pdesc.includes('adc') ||
+    pid.includes('dac')
+  ) {
+    return '#10b981';
+  }
+
+  // 8. PWM Output: Amber / Orange (#f97316)
+  if (pin.type === 'pwm' || pdesc.includes('pwm')) {
+    return '#f97316';
+  }
+
+  return null;
+}
+
+/**
+ * Returns the smart auto wire color for a connection between fromPin and optional toPin,
+ * with fallback to currently selected user color.
+ */
+export function getAutoWireColor(
+  fromPin: Pin,
+  toPin?: Pin | null,
+  fallbackColor = '#38bdf8'
+): string {
+  const fromColor = getAutoPinColor(fromPin);
+  const toColor = toPin ? getAutoPinColor(toPin) : null;
+
+  // If starting from a specific pin (e.g. 5V, GND, SDA), prioritize start pin color
+  if (fromColor) {
+    // If fromPin is generic / passive (like breadboard row) but toPin is specific (e.g. GND), adopt target color!
+    if ((fromPin.type === 'generic' || fromPin.type === 'passive') && toColor) {
+      return toColor;
+    }
+    return fromColor;
+  }
+
+  // If start pin is generic, adopt target pin color if target has one
+  if (toColor) {
+    return toColor;
+  }
+
+  return fallbackColor;
+}

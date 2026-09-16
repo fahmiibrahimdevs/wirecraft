@@ -23,10 +23,18 @@ export const CodeEditorModal: React.FC<CodeEditorModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    const uno = components.find((c) => c.type === 'arduino-uno' || c.type === 'esp32');
+    const uno = components.find(
+      (c) =>
+        c.type === 'arduino-uno' ||
+        c.type === 'arduino-nano' ||
+        c.type === 'esp32' ||
+        c.type === 'esp32-38p-cp2102' ||
+        c.type === 'esp32-c3-supermini' ||
+        c.type === 'wemos-d1-mini'
+    );
     if (!uno) {
-      setCode(`// Belum ada mikrokontroler (Arduino Uno / ESP32) di kanvas.
-// Tambahkan Arduino Uno atau ESP32 dari katalog untuk men-generate kode otomatis.
+      setCode(`// Belum ada mikrokontroler (Arduino Nano / Uno / ESP32) di kanvas.
+// Tambahkan mikrokontroler dari katalog untuk men-generate kode otomatis.
 
 void setup() {
   Serial.begin(9600);
@@ -62,6 +70,12 @@ void loop() {
     let hasKeypad = false;
     let is4x4 = false;
     let hasSoilMoisture = false;
+    let hasMax31865 = false;
+    let hasAds1115 = false;
+    let hasLdr = false;
+    let hasIrObstacle = false;
+    let hasTouch = false;
+    let hasVibration = false;
 
     // Scan connections
     connectedToUno.forEach((w) => {
@@ -77,7 +91,7 @@ void loop() {
         pinDeclarations.push(`const int LED_PIN = ${pinUpper.replace('D', '')}; // Terhubung ke LED`);
         setupLines.push(`  pinMode(LED_PIN, OUTPUT);`);
         loopLines.push(`  digitalWrite(LED_PIN, HIGH);\n  delay(1000);\n  digitalWrite(LED_PIN, LOW);\n  delay(1000);`);
-      } else if (targetComp.type === 'sensor-ultrasonic') {
+      } else if (targetComp.type === 'sensor-ultrasonic' || targetComp.type === 'sensor-jsn-sr04t') {
         hasUltrasonic = true;
       } else if (targetComp.type === 'servo') {
         hasServo = true;
@@ -91,6 +105,18 @@ void loop() {
         hasRfid = true;
       } else if (targetComp.type === 'sensor-soil-moisture') {
         hasSoilMoisture = true;
+      } else if (targetComp.type === 'sensor-max31865') {
+        hasMax31865 = true;
+      } else if (targetComp.type === 'sensor-ads1115') {
+        hasAds1115 = true;
+      } else if (targetComp.type === 'sensor-ldr' || targetComp.type === 'sensor-ldr-module') {
+        hasLdr = true;
+      } else if (targetComp.type === 'sensor-ir-obstacle') {
+        hasIrObstacle = true;
+      } else if (targetComp.type === 'sensor-touch-ttp223') {
+        hasTouch = true;
+      } else if (targetComp.type === 'sensor-vibration-sw420') {
+        hasVibration = true;
       } else if (
         targetComp.type === 'display-lcd1602' ||
         targetComp.type === 'display-lcd1602-i2c' ||
@@ -272,6 +298,79 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);`);
   Serial.println(soilDigitalState == LOW ? "Basah (Lembab)" : "Kering");
 
   delay(1000);`);
+    }
+
+    if (hasMax31865) {
+      includeLines.push('#include <Adafruit_MAX31865.h>');
+      pinDeclarations.push('// Modul MAX31865 RTD PT100/PT1000 (Hardware SPI: CS=10)\n// Rref = 430.0 ohm (PT100) atau 4300.0 ohm (PT1000)\nAdafruit_MAX31865 maxRtd = Adafruit_MAX31865(10);\n#define RREF      430.0\n#define RNOMINAL  100.0');
+      setupLines.push('  maxRtd.begin(MAX31865_3WIRE); // Gunakan MAX31865_2WIRE, MAX31865_3WIRE, atau MAX31865_4WIRE');
+      loopLines.push(`  // Membaca Suhu Presisi RTD PT100
+  float rtdTemp = maxRtd.temperature(RNOMINAL, RREF);
+  Serial.print("Suhu RTD: ");
+  Serial.print(rtdTemp);
+  Serial.println(" *C");
+  delay(1000);`);
+    }
+
+    if (hasAds1115) {
+      includeLines.push('#include <Wire.h>');
+      includeLines.push('#include <Adafruit_ADS1X15.h>');
+      pinDeclarations.push('Adafruit_ADS1115 ads; // Inisialisasi ADS1115 ADC (I2C Addr: 0x48)');
+      setupLines.push('  if (!ads.begin()) {\n    Serial.println("Gagal menemukan modul ADS1115!");\n  }');
+      loopLines.push(`  // Membaca ADC 16-Bit ADS1115 (Channel A0 - A3)
+  int16_t adc0 = ads.readADC_SingleEnded(0);
+  float volts0 = ads.computeVolts(adc0);
+  Serial.print("ADS1115 A0: "); Serial.print(adc0);
+  Serial.print(" ("); Serial.print(volts0, 4); Serial.println(" V)");
+  delay(500);`);
+    }
+
+    if (hasLdr) {
+      pinDeclarations.push('const int LDR_ANALOG_PIN = A0;  // Pin Analog LDR (AO)\nconst int LDR_DIGITAL_PIN = 7;  // Pin Digital LDR (DO)');
+      setupLines.push('  pinMode(LDR_DIGITAL_PIN, INPUT);');
+      loopLines.push(`  // Membaca Sensor Cahaya LDR
+  int ldrAnalog = analogRead(LDR_ANALOG_PIN);
+  int ldrState = digitalRead(LDR_DIGITAL_PIN);
+  Serial.print("Intensitas Cahaya LDR: ");
+  Serial.print(ldrAnalog);
+  Serial.print(" | Status Digital: ");
+  Serial.println(ldrState == LOW ? "Terang" : "Gelap");
+  delay(1000);`);
+    }
+
+    if (hasIrObstacle) {
+      pinDeclarations.push('const int IR_OBSTACLE_PIN = 4; // Pin Output Sensor IR Obstacle (OUT)');
+      setupLines.push('  pinMode(IR_OBSTACLE_PIN, INPUT);');
+      loopLines.push(`  // Deteksi Rintangan IR Obstacle (Active LOW)
+  int obstacleState = digitalRead(IR_OBSTACLE_PIN);
+  if (obstacleState == LOW) {
+    Serial.println("Rintangan Terdeteksi!");
+  } else {
+    Serial.println("Jalur Bersih (Tidak ada rintangan)");
+  }
+  delay(500);`);
+    }
+
+    if (hasTouch) {
+      pinDeclarations.push('const int TOUCH_PIN = 3; // Pin Output Sensor Sentuh TTP223 (SIG/IO)');
+      setupLines.push('  pinMode(TOUCH_PIN, INPUT);');
+      loopLines.push(`  // Deteksi Sentuhan TTP223 (Active HIGH)
+  int touchState = digitalRead(TOUCH_PIN);
+  if (touchState == HIGH) {
+    Serial.println("Tombol Sentuh Ditekan! (Touch Active)");
+  }
+  delay(200);`);
+    }
+
+    if (hasVibration) {
+      pinDeclarations.push('const int VIBRATION_PIN = 2; // Pin Digital SW-420 (DO)');
+      setupLines.push('  pinMode(VIBRATION_PIN, INPUT);');
+      loopLines.push(`  // Deteksi Getaran Sensor SW-420
+  int vibrationState = digitalRead(VIBRATION_PIN);
+  if (vibrationState == HIGH) {
+    Serial.println("Getaran Terdeteksi!");
+  }
+  delay(200);`);
     }
 
     // Default if no specific peripheral mapped

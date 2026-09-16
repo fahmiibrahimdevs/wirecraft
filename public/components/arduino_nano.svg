@@ -1,0 +1,446 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 138 300" width="138" height="300">
+  <defs>
+    <!-- PCB Teal Gradient -->
+    <linearGradient id="nanoPcb" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f7694" />
+      <stop offset="40%" stop-color="#0e708d" />
+      <stop offset="100%" stop-color="#0b5b73" />
+    </linearGradient>
+
+    <!-- Metal Solder Pad Gradient -->
+    <radialGradient id="goldSolderPad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#d4af37" />
+      <stop offset="65%" stop-color="#b89127" />
+      <stop offset="100%" stop-color="#8c6d18" />
+    </radialGradient>
+
+    <!-- Silver Solder Ring Gradient -->
+    <radialGradient id="silverRing" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f1f5f9" />
+      <stop offset="70%" stop-color="#cbd5e1" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </radialGradient>
+
+    <!-- Metal USB Shield Gradient -->
+    <linearGradient id="usbShieldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e2e8f0" />
+      <stop offset="15%" stop-color="#f8fafc" />
+      <stop offset="45%" stop-color="#e2e8f0" />
+      <stop offset="80%" stop-color="#cbd5e1" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+
+    <!-- Brass ICSP Pin Header -->
+    <linearGradient id="brassPin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eab308" />
+      <stop offset="40%" stop-color="#ca8a04" />
+      <stop offset="100%" stop-color="#854d0e" />
+    </linearGradient>
+
+    <!-- ATmega328P Chip Body Gradient -->
+    <linearGradient id="chipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- SMD LED Body Gradient -->
+    <linearGradient id="smdLed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef9c3" />
+      <stop offset="50%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fde047" />
+    </linearGradient>
+  </defs>
+
+  <!-- 1. PCB Base Board (Teal-Blue with Rounded Corners) -->
+  <rect x="0" y="0" width="138" height="300" rx="10" ry="10" fill="url(#nanoPcb)" stroke="#064e62" stroke-width="1.2" />
+
+  <!-- Corner Mounting Holes (4 drill holes) -->
+  <circle cx="10" cy="9" r="6.5" fill="#ffffff" />
+  <circle cx="128" cy="9" r="6.5" fill="#ffffff" />
+  <circle cx="10" cy="285" r="6.5" fill="#ffffff" />
+
+  <!-- 2. ICSP Header (Top Center 2x3 Pins) -->
+  <rect x="40" y="1" width="58" height="38" rx="3" fill="#1e293b" stroke="#0f172a" stroke-width="1" />
+  <!-- ICSP 6 Pin Sockets with Brass Pins -->
+  <g fill="#334155" stroke="#0f172a" stroke-width="0.8">
+    <!-- Row 1 -->
+    <rect x="46" y="6" width="10" height="10" rx="1" />
+    <rect x="64" y="6" width="10" height="10" rx="1" />
+    <rect x="82" y="6" width="10" height="10" rx="1" />
+    <!-- Row 2 -->
+    <rect x="46" y="22" width="10" height="10" rx="1" />
+    <rect x="64" y="22" width="10" height="10" rx="1" />
+    <rect x="82" y="22" width="10" height="10" rx="1" />
+  </g>
+  <!-- Brass Pins -->
+  <g fill="url(#brassPin)" stroke="#713f12" stroke-width="0.5">
+    <rect x="48" y="8" width="6" height="6" />
+    <rect x="66" y="8" width="6" height="6" />
+    <rect x="84" y="8" width="6" height="6" />
+    <rect x="48" y="24" width="6" height="6" />
+    <rect x="66" y="24" width="6" height="6" />
+    <rect x="84" y="24" width="6" height="6" />
+  </g>
+  <!-- Pin 1 Marker and ICSP Label -->
+  <text x="34" y="20" font-family="monospace, sans-serif" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle" transform="rotate(-90, 34, 20)">ICSP</text>
+  <text x="104" y="14" font-family="sans-serif" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
+
+  <!-- Silkscreen Header Text -->
+  <text x="69" y="46" font-family="sans-serif" font-size="8" font-weight="bold" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">ARDUINO</text>
+  <text x="69" y="56" font-family="sans-serif" font-size="8" font-weight="bold" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">NANO</text>
+  <text x="69" y="67" font-family="sans-serif" font-size="7.5" font-weight="bold" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">V3.0</text>
+
+  <!-- Vertical Silkscreen: ARDUINO.CC -->
+  <text x="43" y="116" font-family="sans-serif" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle" transform="rotate(-90, 43, 116)" letter-spacing="0.8">ARDUINO.CC</text>
+
+  <!-- 3. SMD LEDs (TX, RX, PWR, L) -->
+  <!-- LED TX -->
+  <g transform="translate(27, 82)">
+    <text x="5" y="-3" font-family="sans-serif" font-size="5" font-weight="bold" fill="#ffffff" text-anchor="middle">TX</text>
+    <rect x="0" y="0" width="10" height="15" rx="1" fill="url(#smdLed)" stroke="#94a3b8" stroke-width="0.5" />
+    <path d="M2,3 Q8,8 2,12" stroke="#a1a1aa" stroke-width="0.5" fill="none" />
+  </g>
+  <!-- LED RX -->
+  <g transform="translate(48, 82)">
+    <text x="5" y="-3" font-family="sans-serif" font-size="5" font-weight="bold" fill="#ffffff" text-anchor="middle">RX</text>
+    <rect x="0" y="0" width="10" height="15" rx="1" fill="url(#smdLed)" stroke="#94a3b8" stroke-width="0.5" />
+    <path d="M2,3 Q8,8 2,12" stroke="#a1a1aa" stroke-width="0.5" fill="none" />
+  </g>
+  <!-- LED PWR -->
+  <g transform="translate(74, 82)">
+    <text x="5" y="-3" font-family="sans-serif" font-size="5" font-weight="bold" fill="#ffffff" text-anchor="middle">PWR</text>
+    <rect x="0" y="0" width="10" height="15" rx="1" fill="url(#smdLed)" stroke="#94a3b8" stroke-width="0.5" />
+    <path d="M2,3 Q8,8 2,12" stroke="#a1a1aa" stroke-width="0.5" fill="none" />
+  </g>
+  <!-- LED L -->
+  <g transform="translate(101, 82)">
+    <text x="5" y="-3" font-family="sans-serif" font-size="5" font-weight="bold" fill="#ffffff" text-anchor="middle">L</text>
+    <rect x="0" y="0" width="10" height="15" rx="1" fill="url(#smdLed)" stroke="#94a3b8" stroke-width="0.5" />
+    <path d="M2,3 Q8,8 2,12" stroke="#a1a1aa" stroke-width="0.5" fill="none" />
+  </g>
+
+  <!-- 4. Reset Button (Center) -->
+  <g transform="translate(57, 115)">
+    <text x="12" y="-4" font-family="sans-serif" font-size="6" font-weight="bold" fill="#ffffff" text-anchor="middle">RST</text>
+    <!-- Metal Tactile Body -->
+    <rect x="0" y="0" width="24" height="16" rx="2" fill="#cbd5e1" stroke="#94a3b8" stroke-width="0.8" />
+    <!-- Center Dark Plunger -->
+    <circle cx="12" cy="8" r="5.5" fill="#1e293b" stroke="#0f172a" stroke-width="0.8" />
+  </g>
+
+  <!-- 5. ATmega328P Microcontroller (Diamond 45-deg rotated package) -->
+  <g transform="translate(69, 185)">
+    <!-- 32 IC Pins around 4 edges -->
+    <g stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round">
+      <!-- Top-Left & Bottom-Right pins (rotated -45 deg) -->
+      <g transform="rotate(45)">
+        <rect x="-25" y="-25" width="50" height="50" fill="url(#chipGrad)" stroke="#334155" stroke-width="1" />
+        <circle cx="-18" cy="-18" r="1.8" fill="#475569" /> <!-- Pin 1 dot -->
+        <text x="0" y="-2" font-family="sans-serif" font-size="4.5" font-weight="bold" fill="#64748b" text-anchor="middle">MEGA328P</text>
+        <text x="0" y="4" font-family="sans-serif" font-size="4" fill="#475569" text-anchor="middle">-AU</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Silkscreen: USA 2009 -->
+  <text x="42" y="228" font-family="sans-serif" font-size="7" font-weight="bold" fill="#ffffff" text-anchor="middle">USA</text>
+  <text x="96" y="228" font-family="sans-serif" font-size="7" font-weight="bold" fill="#ffffff" text-anchor="middle">2009</text>
+
+  <!-- 6. Mini-B USB Port (Bottom Center) -->
+  <!-- Top 5 pin contacts -->
+  <g fill="#475569">
+    <rect x="55" y="234" width="3" height="6" rx="0.5" />
+    <rect x="61" y="234" width="3" height="6" rx="0.5" />
+    <rect x="67" y="234" width="3" height="6" rx="0.5" />
+    <rect x="73" y="234" width="3" height="6" rx="0.5" />
+    <rect x="79" y="234" width="3" height="6" rx="0.5" />
+  </g>
+  <!-- USB Side Mounting Solder Tabs -->
+  <rect x="27" y="233" width="15" height="16" rx="1" fill="#cbd5e1" stroke="#94a3b8" stroke-width="0.8" />
+  <rect x="96" y="233" width="15" height="16" rx="1" fill="#cbd5e1" stroke="#94a3b8" stroke-width="0.8" />
+  <rect x="27" y="287" width="15" height="14" rx="1" fill="#cbd5e1" stroke="#94a3b8" stroke-width="0.8" />
+  <rect x="96" y="287" width="15" height="14" rx="1" fill="#cbd5e1" stroke="#94a3b8" stroke-width="0.8" />
+
+  <!-- USB Metal Shell -->
+  <path d="M 39 240 L 99 240 L 99 300 L 39 300 Z" fill="url(#usbShieldGrad)" stroke="#64748b" stroke-width="1.2" />
+  <!-- USB Inner Cavity & Shape Geometry -->
+  <rect x="49" y="247" width="40" height="3" rx="0.5" fill="#1e293b" />
+  <path d="M 61 262 L 77 262 L 77 296 L 68 296 L 68 274 L 70 274 L 70 268 L 68 268 L 68 296 L 61 296 Z" fill="#1e293b" />
+  <rect x="45" y="269" width="4" height="20" rx="1" fill="#1e293b" />
+  <rect x="53" y="269" width="3.5" height="24" rx="1" fill="#1e293b" />
+  <rect x="81" y="269" width="3.5" height="24" rx="1" fill="#1e293b" />
+  <rect x="89" y="269" width="4" height="20" rx="1" fill="#1e293b" />
+
+  <!-- 7. 30 Solder Pads (15 Left, 15 Right) & Precision Silkscreen Labels -->
+
+  <!-- Left Pad 1: TX1 -->
+  <g transform="translate(18, 31.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="33.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">TX1</text>
+
+  <!-- Right Pad 1: VIN -->
+  <g transform="translate(120, 31.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="33.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">VIN</text>
+
+  <!-- Left Pad 2: RX0 -->
+  <g transform="translate(18, 48.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="50.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">RX0</text>
+
+  <!-- Right Pad 2: GND -->
+  <g transform="translate(120, 48.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="50.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">GND</text>
+
+  <!-- Left Pad 3: RST -->
+  <g transform="translate(18, 65.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="67.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">RST</text>
+
+  <!-- Right Pad 3: RST -->
+  <g transform="translate(120, 65.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="67.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">RST</text>
+
+  <!-- Left Pad 4: GND -->
+  <g transform="translate(18, 82.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="84.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">GND</text>
+
+  <!-- Right Pad 4: 5V -->
+  <g transform="translate(120, 82.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="84.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">5V</text>
+
+  <!-- Left Pad 5: D2 -->
+  <g transform="translate(18, 99.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="101.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D2</text>
+
+  <!-- Right Pad 5: A7 -->
+  <g transform="translate(120, 99.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="101.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">A7</text>
+
+  <!-- Left Pad 6: D3* -->
+  <g transform="translate(18, 116.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="118.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D3*</text>
+
+  <!-- Right Pad 6: A6 -->
+  <g transform="translate(120, 116.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="118.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">A6</text>
+
+  <!-- Left Pad 7: D4 -->
+  <g transform="translate(18, 133.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="135.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D4</text>
+
+  <!-- Right Pad 7: A5 -->
+  <g transform="translate(120, 133.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="135.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">A5</text>
+
+  <!-- Left Pad 8: D5* -->
+  <g transform="translate(18, 150.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="152.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D5*</text>
+
+  <!-- Right Pad 8: A4 -->
+  <g transform="translate(120, 150.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="152.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">A4</text>
+
+  <!-- Left Pad 9: D6* -->
+  <g transform="translate(18, 167.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="169.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D6*</text>
+
+  <!-- Right Pad 9: A3 -->
+  <g transform="translate(120, 167.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="169.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">A3</text>
+
+  <!-- Left Pad 10: D7 -->
+  <g transform="translate(18, 184.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="186.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D7</text>
+
+  <!-- Right Pad 10: A2 -->
+  <g transform="translate(120, 184.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="186.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">A2</text>
+
+  <!-- Left Pad 11: D8 -->
+  <g transform="translate(18, 201.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="203.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D8</text>
+
+  <!-- Right Pad 11: A1 -->
+  <g transform="translate(120, 201.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="203.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">A1</text>
+
+  <!-- Left Pad 12: D9* -->
+  <g transform="translate(18, 218.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="220.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D9*</text>
+
+  <!-- Right Pad 12: A0 -->
+  <g transform="translate(120, 218.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="220.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">A0</text>
+
+  <!-- Left Pad 13: D10* -->
+  <g transform="translate(18, 235.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="237.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D10*</text>
+
+  <!-- Right Pad 13: REF -->
+  <g transform="translate(120, 235.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="237.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">REF</text>
+
+  <!-- Left Pad 14: D11* -->
+  <g transform="translate(18, 252.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="254.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D11*</text>
+
+  <!-- Right Pad 14: 3V3 -->
+  <g transform="translate(120, 252.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="254.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">3V3</text>
+
+  <!-- Left Pad 15: D12 -->
+  <g transform="translate(18, 269.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="26" y="271.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="start">D12</text>
+
+  <!-- Right Pad 15: D13 -->
+  <g transform="translate(120, 269.0)">
+    <circle cx="0" cy="0" r="6.4" fill="url(#goldSolderPad)" />
+    <circle cx="0" cy="0" r="5.2" fill="url(#silverRing)" stroke="#94a3b8" stroke-width="0.5" />
+    <rect x="-2.6" y="-2.6" width="5.2" height="5.2" rx="1" fill="#f8fafc" />
+    <circle cx="0" cy="0" r="1.8" fill="#334155" />
+  </g>
+  <text x="112" y="271.5" font-family="sans-serif" font-size="6.2" font-weight="bold" fill="#ffffff" text-anchor="end">D13</text>
+</svg>

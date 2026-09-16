@@ -4,6 +4,7 @@ import {
   Point,
   liveWireRegistry,
   cleanAndSimplifyWaypoints,
+  getEffectiveWaypoints,
   createRoundedOrthogonalPathWithJumps,
 } from '../../utils/orthogonalRouter';
 import { generateWirePath } from '../../utils/geometry';
@@ -60,52 +61,9 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
   const [livePoints, setLivePoints] = useState<Point[] | null>(null);
 
   // Derive initial/effective waypoints
-  let basePoints: Point[];
-  if (livePoints) {
-    basePoints = livePoints;
-  } else if (wire.waypoints && wire.waypoints.length >= 2) {
-    const pts = wire.waypoints.map((p) => ({ ...p }));
-
-    // Seamlessly preserve orthogonality when connected components move
-    const wasStartH = Math.abs(pts[0]!.y - pts[1]!.y) <= 2;
-    pts[0] = { ...startPoint };
-    if (pts.length > 2) {
-      if (wasStartH) {
-        pts[1]!.y = startPoint.y;
-      } else {
-        pts[1]!.x = startPoint.x;
-      }
-    }
-
-    const lastIdx = pts.length - 1;
-    const wasEndH = Math.abs(pts[lastIdx]!.y - pts[lastIdx - 1]!.y) <= 2;
-    pts[lastIdx] = { ...endPoint };
-    if (pts.length > 2) {
-      if (wasEndH) {
-        pts[lastIdx - 1]!.y = endPoint.y;
-      } else {
-        pts[lastIdx - 1]!.x = endPoint.x;
-      }
-    }
-
-    basePoints = cleanAndSimplifyWaypoints(pts);
-  } else {
-    // Default smart orthogonal routing between start and end
-    const dx = endPoint.x - startPoint.x;
-    const dy = endPoint.y - startPoint.y;
-
-    if (Math.abs(dx) < 2 || Math.abs(dy) < 2) {
-      basePoints = [startPoint, endPoint];
-    } else {
-      const midX = Math.round(((startPoint.x + endPoint.x) / 2) / 10) * 10;
-      basePoints = [
-        startPoint,
-        { x: midX, y: startPoint.y },
-        { x: midX, y: endPoint.y },
-        endPoint,
-      ];
-    }
-  }
+  const basePoints: Point[] = livePoints
+    ? livePoints
+    : getEffectiveWaypoints(wire, startPoint, endPoint);
 
   const waypoints =
     wire.routing === 'orthogonal'
@@ -343,20 +301,31 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         if (!dragState) setIsHovered(false);
       }}
     >
-      {/* 1. Selection & Hover Glow */}
-      {isActive && (
+      {/* 1. Selection & Hover Outline (Clean Matte, Zero-Neon) */}
+      {isSelected ? (
         <path
           d={pathD}
           fill="none"
-          stroke="#38bdf8"
-          strokeWidth={isSelected ? 8 : 6}
+          stroke="#ffffff"
+          strokeWidth="6.5"
+          strokeDasharray="6 4"
           strokeLinecap="round"
           strokeLinejoin="round"
-          opacity={isSelected ? 0.7 : 0.4}
-          className={isSelected ? 'animate-pulse' : ''}
-          filter="drop-shadow(0 0 6px rgba(56, 189, 248, 0.7))"
+          opacity="0.8"
+          className="pointer-events-none"
         />
-      )}
+      ) : isHovered ? (
+        <path
+          d={pathD}
+          fill="none"
+          stroke="#94a3b8"
+          strokeWidth="5.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.35"
+          className="pointer-events-none"
+        />
+      ) : null}
 
       {/* 2. Outer Border / Casing - Uses contrast slate outline for dark/black wires */}
       <path
@@ -476,11 +445,10 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
                   cx={p.x}
                   cy={p.y}
                   r={4.5}
-                  fill="#020617"
+                  fill="#0f172a"
                   stroke="#38bdf8"
                   strokeWidth={2}
                   className="pointer-events-none"
-                  style={{ filter: 'drop-shadow(0 0 4px rgba(56, 189, 248, 0.8))' }}
                 />
               </g>
             );

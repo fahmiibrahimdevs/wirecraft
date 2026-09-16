@@ -1,3 +1,5 @@
+import { Wire, WirePoint } from '../types/circuit';
+
 export interface Point {
   x: number;
   y: number;
@@ -311,4 +313,166 @@ export function computeDefaultOrthogonalWaypoints(
     tStub,
     target,
   ]);
+}
+
+// Derive effective waypoints between two endpoints
+export function getEffectiveWaypoints(
+  wire: Wire,
+  startPoint: WirePoint,
+  endPoint: WirePoint
+): Point[] {
+  if (wire.waypoints && wire.waypoints.length >= 2) {
+    const pts = wire.waypoints.map((p) => ({ ...p }));
+
+    const wasStartH = Math.abs(pts[0]!.y - pts[1]!.y) <= 2;
+    pts[0] = { ...startPoint };
+    if (pts.length > 2) {
+      if (wasStartH) {
+        pts[1]!.y = startPoint.y;
+      } else {
+        pts[1]!.x = startPoint.x;
+      }
+    }
+
+    const lastIdx = pts.length - 1;
+    const wasEndH = Math.abs(pts[lastIdx]!.y - pts[lastIdx - 1]!.y) <= 2;
+    pts[lastIdx] = { ...endPoint };
+    if (pts.length > 2) {
+      if (wasEndH) {
+        pts[lastIdx - 1]!.y = endPoint.y;
+      } else {
+        pts[lastIdx - 1]!.x = endPoint.x;
+      }
+    }
+
+    return cleanAndSimplifyWaypoints(pts);
+  }
+
+  const dx = endPoint.x - startPoint.x;
+  const dy = endPoint.y - startPoint.y;
+
+  if (Math.abs(dx) < 2 || Math.abs(dy) < 2) {
+    return [startPoint, endPoint];
+  }
+
+  const midX = Math.round(((startPoint.x + endPoint.x) / 2) / 10) * 10;
+  return cleanAndSimplifyWaypoints([
+    startPoint,
+    { x: midX, y: startPoint.y },
+    { x: midX, y: endPoint.y },
+    endPoint,
+  ]);
+}
+
+// Returns true if Wire A has vertical segments that jump over horizontal segments of Wire B
+export function doesWireJumpOver(
+  waypointsA: Point[],
+  waypointsB: Point[],
+  cornerRadius = 8,
+  jumpRadius = 6
+): boolean {
+  const cleanA = cleanAndSimplifyWaypoints(waypointsA);
+  const segsB = extractHorizontalSegments('b', waypointsB);
+  if (cleanA.length < 2 || segsB.length === 0) return false;
+
+  const safeMargin = cornerRadius + jumpRadius + 2;
+
+  for (let i = 0; i < cleanA.length - 1; i++) {
+    const p1 = cleanA[i]!;
+    const p2 = cleanA[i + 1]!;
+    const isV = Math.abs(p1.x - p2.x) <= 1.5;
+    if (!isV) continue;
+
+    const segX = p1.x;
+    const minY = Math.min(p1.y, p2.y);
+    const maxY = Math.max(p1.y, p2.y);
+
+    for (const cross of segsB) {
+      const isIntersectingX = segX > cross.minX + 6 && segX < cross.maxX - 6;
+      const isIntersectingY = cross.y >= minY + safeMargin && cross.y <= maxY - safeMargin;
+      if (isIntersectingX && isIntersectingY) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// Sort wires so that jumping wires render on top of jumped-over wires,
+// while newer wires remain on top and selected wire is on the very top.
+export function sortWiresForRendering(
+  wires: Wire[],
+  getPinCoords: (compId: string, pinId: string) => WirePoint | null,
+  selectedWireId?: string | null
+): Wire[] {
+  if (wires.length <= 1) return wires;
+
+  // 1. Calculate effective waypoints for each wire
+  const wireData = wires.map((w, index) => {
+    const start = getPinCoords(w.fromComponentId, w.fromPinId);
+    const end = getPinCoords(w.toComponentId, w.toPinId);
+    const waypoints = start && end ? getEffectiveWaypoints(w, start, end) : [];
+    return { wire: w, index, waypoints };
+  });
+
+  // 2. Build dependency graph:
+  // If Wire A jumps over Wire B, then Wire B must be rendered BEFORE Wire A (B -> A).
+  const mustRenderAfter = new Map<string, Set<string>>();
+  wires.forEach((w) => mustRenderAfter.set(w.id, new Set()));
+
+  for (let i = 0; i < wireData.length; i++) {
+    for (let j = 0; j < wireData.length; j++) {
+      if (i === j) continue;
+      const a = wireData[i]!;
+      const b = wireData[j]!;
+      if (a.wire.routing === 'orthogonal' && doesWireJumpOver(a.waypoints, b.waypoints)) {
+        mustRenderAfter.get(a.wire.id)?.add(b.wire.id);
+      }
+    }
+  }
+
+  // 3. Topological sort preserving original wire order as tie-breaker
+  const visited = new Set<string>();
+  const result: Wire[] = [];
+  const sortedByOriginalIndex = [...wireData].sort((a, b) => a.index - b.index);
+
+  function visit(id: string, pathStack = new Set<string>()) {
+    if (visited.has(id)) return;
+    if (pathStack.has(id)) {
+      // Break cycles safely
+      return;
+    }
+    pathStack.add(id);
+
+    const prereqs = mustRenderAfter.get(id);
+    if (prereqs) {
+      prereqs.forEach((prereqId) => {
+        if (!visited.has(prereqId)) {
+          visit(prereqId, new Set(pathStack));
+        }
+      });
+    }
+
+    visited.add(id);
+    const item = wireData.find((d) => d.wire.id === id);
+    if (item) {
+      result.push(item.wire);
+    }
+  }
+
+  sortedByOriginalIndex.forEach((item) => {
+    visit(item.wire.id);
+  });
+
+  // 4. If a wire is selected, ensure it renders on the very top of all wires
+  if (selectedWireId) {
+    const selIdx = result.findIndex((w) => w.id === selectedWireId);
+    if (selIdx !== -1) {
+      const [selected] = result.splice(selIdx, 1);
+      if (selected) result.push(selected);
+    }
+  }
+
+  return result;
 }

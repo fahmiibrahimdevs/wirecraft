@@ -1,0 +1,15 @@
+[Unit]
+Description=Wirecraft - Interactive Circuit & IoT Electronics Simulator
+After=network.target
+
+[Service]
+Type=simple
+User=midpc
+WorkingDirectory=/home/midpc/Projects/wirecraft
+Environment="PATH=/home/midpc/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/midpc/.bun/bin/bun run dev
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

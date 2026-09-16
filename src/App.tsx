@@ -56,6 +56,21 @@ const INITIAL_STATE: HistoryState = {
   ],
   wires: [
     {
+      id: 'w-led-gnd',
+      fromComponentId: 'led-demo',
+      fromPinId: 'cathode',
+      toComponentId: 'uno-demo',
+      toPinId: 'gnd_top',
+      color: '#1e293b',
+      routing: 'orthogonal',
+      waypoints: [
+        { x: 604.8, y: 216.0 },
+        { x: 604.8, y: 50 },
+        { x: 228.6, y: 50 },
+        { x: 228.6, y: 131.5 },
+      ],
+    },
+    {
       id: 'w-uno-r',
       fromComponentId: 'uno-demo',
       fromPinId: 'd13',
@@ -72,21 +87,6 @@ const INITIAL_STATE: HistoryState = {
       toPinId: 'anode',
       color: '#ef4444',
       routing: 'orthogonal',
-    },
-    {
-      id: 'w-led-gnd',
-      fromComponentId: 'led-demo',
-      fromPinId: 'cathode',
-      toComponentId: 'uno-demo',
-      toPinId: 'gnd_top',
-      color: '#1e293b',
-      routing: 'orthogonal',
-      waypoints: [
-        { x: 604.8, y: 216.0 },
-        { x: 604.8, y: 50 },
-        { x: 228.6, y: 50 },
-        { x: 228.6, y: 131.5 },
-      ],
     },
     {
       id: 'w-cross-demo',
@@ -544,6 +544,7 @@ export default function App() {
           selectedComponentId={selectedComponentId}
           selectedWireId={selectedWireId}
           currentWireColor={currentWireColor}
+          onSelectWireColor={setCurrentWireColor}
           wireRouting={wireRouting}
           snapGrid={snapGrid}
           onSelectComponent={setSelectedComponentId}
