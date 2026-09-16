@@ -373,6 +373,97 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }
   };
 
+  // Helper: Trim transparent outer margins to wrap module body with exact bounds
+  const trimCanvasTransparent = (canvas: HTMLCanvasElement, alphaThreshold = 15): {
+    trimmedDataUrl: string;
+    cropX: number;
+    cropY: number;
+    cropW: number;
+    cropH: number;
+    originalW: number;
+    originalH: number;
+  } => {
+    const W = canvas.width;
+    const H = canvas.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx || W === 0 || H === 0) {
+      return {
+        trimmedDataUrl: canvas.toDataURL('image/png'),
+        cropX: 0,
+        cropY: 0,
+        cropW: W,
+        cropH: H,
+        originalW: W,
+        originalH: H,
+      };
+    }
+
+    const imgData = ctx.getImageData(0, 0, W, H);
+    const data = imgData.data;
+
+    let minX = W;
+    let minY = H;
+    let maxX = -1;
+    let maxY = -1;
+
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const alpha = data[(y * W + x) * 4 + 3];
+        if (alpha > alphaThreshold) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    // If entire image is transparent or already tight
+    if (maxX < minX || maxY < minY || (minX === 0 && minY === 0 && maxX === W - 1 && maxY === H - 1)) {
+      return {
+        trimmedDataUrl: canvas.toDataURL('image/png'),
+        cropX: 0,
+        cropY: 0,
+        cropW: W,
+        cropH: H,
+        originalW: W,
+        originalH: H,
+      };
+    }
+
+    const cropW = maxX - minX + 1;
+    const cropH = maxY - minY + 1;
+
+    const croppedCanvas = document.createElement('canvas');
+    croppedCanvas.width = cropW;
+    croppedCanvas.height = cropH;
+    const croppedCtx = croppedCanvas.getContext('2d');
+    if (!croppedCtx) {
+      return {
+        trimmedDataUrl: canvas.toDataURL('image/png'),
+        cropX: 0,
+        cropY: 0,
+        cropW: W,
+        cropH: H,
+        originalW: W,
+        originalH: H,
+      };
+    }
+
+    croppedCtx.drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+    const trimmedDataUrl = croppedCanvas.toDataURL('image/png');
+
+    return {
+      trimmedDataUrl,
+      cropX: minX,
+      cropY: minY,
+      cropW,
+      cropH,
+      originalW: W,
+      originalH: H,
+    };
+  };
+
   // Magic Background Remover with Flood Fill (Protects internal silkscreen / white markings!)
   const handleMagicRemoveBackground = () => {
     const sourceImage = rawImageDataUrl || imageDataUrl;
@@ -529,8 +620,43 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         }
 
         ctx.putImageData(imgData, 0, 0);
-        const cleanedDataUrl = canvas.toDataURL('image/png');
+
+        // Auto-Trim Transparent Outer Padding to perfectly wrap module body!
+        const trimResult = trimCanvasTransparent(canvas, 15);
+        const cleanedDataUrl = trimResult.trimmedDataUrl;
+
         setImageDataUrl(cleanedDataUrl);
+        setRawImageDataUrl(cleanedDataUrl);
+        setOriginalImageSize({ width: trimResult.cropW, height: trimResult.cropH });
+
+        let nextHeight = height;
+        if (lockAspectRatio && trimResult.cropW > 0) {
+          nextHeight = Math.round((width * (trimResult.cropH / trimResult.cropW)) * 10) / 10;
+          setHeight(nextHeight);
+        }
+
+        let nextPins = pins;
+        if (pins.length > 0 && (trimResult.cropX > 0 || trimResult.cropY > 0)) {
+          const scaleX = width / trimResult.originalW;
+          const scaleY = height / trimResult.originalH;
+          const shiftX = trimResult.cropX * scaleX;
+          const shiftY = trimResult.cropY * scaleY;
+          nextPins = pins.map((p) => ({
+            ...p,
+            x: Math.round((p.x - shiftX) * 10) / 10,
+            y: Math.round((p.y - shiftY) * 10) / 10,
+          }));
+          setPins(nextPins);
+        }
+
+        pushSnapshot({
+          width: width,
+          height: nextHeight,
+          pins: nextPins,
+          imageOffset: imageOffset,
+          imageDataUrl: cleanedDataUrl,
+          rawImageDataUrl: cleanedDataUrl,
+        });
       } catch (err) {
         console.error('Magic background removal failed:', err);
       } finally {
@@ -538,6 +664,63 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       }
     };
     img.src = sourceImage;
+  };
+
+  // Manual / Quick Auto-Crop Transparent Padding to Component Body
+  const handleAutoCropToContent = () => {
+    const source = imageDataUrl || rawImageDataUrl;
+    if (!source) return;
+
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+
+      const trimResult = trimCanvasTransparent(canvas, 15);
+      if (trimResult.cropW === img.naturalWidth && trimResult.cropH === img.naturalHeight) {
+        return; // Already tightly cropped
+      }
+
+      const finalDataUrl = trimResult.trimmedDataUrl;
+      setImageDataUrl(finalDataUrl);
+      setRawImageDataUrl(finalDataUrl);
+      setOriginalImageSize({ width: trimResult.cropW, height: trimResult.cropH });
+
+      let nextHeight = height;
+      if (lockAspectRatio && trimResult.cropW > 0) {
+        nextHeight = Math.round((width * (trimResult.cropH / trimResult.cropW)) * 10) / 10;
+        setHeight(nextHeight);
+      }
+
+      let nextPins = pins;
+      if (pins.length > 0 && (trimResult.cropX > 0 || trimResult.cropY > 0)) {
+        const scaleX = width / trimResult.originalW;
+        const scaleY = height / trimResult.originalH;
+        const shiftX = trimResult.cropX * scaleX;
+        const shiftY = trimResult.cropY * scaleY;
+        nextPins = pins.map((p) => ({
+          ...p,
+          x: Math.round((p.x - shiftX) * 10) / 10,
+          y: Math.round((p.y - shiftY) * 10) / 10,
+        }));
+        setPins(nextPins);
+      }
+
+      pushSnapshot({
+        width: width,
+        height: nextHeight,
+        pins: nextPins,
+        imageOffset: imageOffset,
+        imageDataUrl: finalDataUrl,
+        rawImageDataUrl: finalDataUrl,
+      });
+    };
+    img.src = source;
   };
 
   // Dimension scaling handlers
@@ -1323,14 +1506,27 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       />
                     </div>
 
-                    <button
-                      onClick={handleMagicRemoveBackground}
-                      disabled={isProcessingBg}
-                      className="w-full py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      {isProcessingBg ? 'Memproses...' : 'Hapus Background Luar'}
-                    </button>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button
+                        onClick={handleMagicRemoveBackground}
+                        disabled={isProcessingBg}
+                        className="py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                        title="Hapus background luar dan otomatis pangkas (crop) ke batas fisik bodi modul"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>{isProcessingBg ? 'Memproses...' : 'Hapus BG'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleAutoCropToContent}
+                        className="py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                        title="Pangkas (crop) sisa area transparan di pinggir agar ukuran mm pas ke bodi modul"
+                      >
+                        <Crop className="w-3.5 h-3.5" />
+                        <span>Crop Bodi</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
