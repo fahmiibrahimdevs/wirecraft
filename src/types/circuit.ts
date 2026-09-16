@@ -1,7 +1,6 @@
 export type ComponentType =
   | 'arduino-uno'
   | 'arduino-nano'
-  | 'esp32'
   | 'esp32-38p-cp2102'
   | 'esp32-c3-supermini'
   | 'wemos-d1-mini'

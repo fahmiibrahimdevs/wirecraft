@@ -106,8 +106,8 @@ const PRESET_CIRCUITS: PresetItem[] = [
     components: [
       {
         id: 'esp-1',
-        type: 'esp32',
-        name: 'ESP32 DevKit V1',
+        type: 'esp32-30p',
+        name: 'ESP32 DevKit V1 (30-Pin)',
         label: 'ESP32_1',
         x: 120,
         y: 160,
@@ -139,7 +139,7 @@ const PRESET_CIRCUITS: PresetItem[] = [
       {
         id: 'w_oled_vcc',
         fromComponentId: 'esp-1',
-        fromPinId: '3v3',
+        fromPinId: 'pin_16',
         toComponentId: 'oled-1',
         toPinId: 'vcc',
         color: '#ef4444',
@@ -148,7 +148,7 @@ const PRESET_CIRCUITS: PresetItem[] = [
       {
         id: 'w_oled_gnd',
         fromComponentId: 'esp-1',
-        fromPinId: 'gnd2',
+        fromPinId: 'pin_17',
         toComponentId: 'oled-1',
         toPinId: 'gnd',
         color: '#1e293b',
@@ -157,7 +157,7 @@ const PRESET_CIRCUITS: PresetItem[] = [
       {
         id: 'w_oled_scl',
         fromComponentId: 'esp-1',
-        fromPinId: 'd22',
+        fromPinId: 'pin_29',
         toComponentId: 'oled-1',
         toPinId: 'scl',
         color: '#eab308',
@@ -166,7 +166,7 @@ const PRESET_CIRCUITS: PresetItem[] = [
       {
         id: 'w_oled_sda',
         fromComponentId: 'esp-1',
-        fromPinId: 'd21',
+        fromPinId: 'pin_26',
         toComponentId: 'oled-1',
         toPinId: 'sda',
         color: '#a855f7',
@@ -175,7 +175,7 @@ const PRESET_CIRCUITS: PresetItem[] = [
       {
         id: 'w_dht_vcc',
         fromComponentId: 'esp-1',
-        fromPinId: '3v3',
+        fromPinId: 'pin_16',
         toComponentId: 'dht-1',
         toPinId: 'vcc',
         color: '#ef4444',
@@ -184,7 +184,7 @@ const PRESET_CIRCUITS: PresetItem[] = [
       {
         id: 'w_dht_data',
         fromComponentId: 'esp-1',
-        fromPinId: 'd4',
+        fromPinId: 'pin_20',
         toComponentId: 'dht-1',
         toPinId: 'data',
         color: '#38bdf8',
@@ -193,7 +193,7 @@ const PRESET_CIRCUITS: PresetItem[] = [
       {
         id: 'w_dht_gnd',
         fromComponentId: 'esp-1',
-        fromPinId: 'gnd2',
+        fromPinId: 'pin_17',
         toComponentId: 'dht-1',
         toPinId: 'gnd',
         color: '#1e293b',

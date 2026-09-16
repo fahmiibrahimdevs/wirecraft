@@ -117,9 +117,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       if (
         type === 'arduino-uno' ||
         type === 'arduino-nano' ||
-        type === 'esp32' ||
-        type === 'esp32-38p-cp2102' ||
-        type === 'esp32-c3-supermini' ||
+        type.startsWith('esp32') ||
         type === 'wemos-d1-mini' ||
         type === 'battery-9v'
       )

@@ -27,9 +27,7 @@ export const CodeEditorModal: React.FC<CodeEditorModalProps> = ({
       (c) =>
         c.type === 'arduino-uno' ||
         c.type === 'arduino-nano' ||
-        c.type === 'esp32' ||
-        c.type === 'esp32-38p-cp2102' ||
-        c.type === 'esp32-c3-supermini' ||
+        c.type.startsWith('esp32') ||
         c.type === 'wemos-d1-mini'
     );
     if (!uno) {

@@ -264,5 +264,263 @@
     "imageUrl": "/components/lm2596s.png",
     "createdAt": "2026-09-16T16:43:46.870Z",
     "updatedAt": "2026-09-16T22:43:39.423Z"
+  },
+  "esp32-30p": {
+    "definition": {
+      "type": "esp32-30p",
+      "name": "ESP32 DevKit V1 (30-Pin)",
+      "category": "microcontrollers",
+      "description": "Modul mikrokontroler IoT bertenaga SoC Espressif ESP32 dual-core Xtensa 32-bit 240MHz dengan konektivitas WiFi 802.11 b/g/n & Bluetooth 4.2 BLE, 30 pin header DIP ramah breadboard (pitch 17.0px), port Micro-USB, tombol EN & BOOT, serta regulator 3.3V terintegrasi.",
+      "width": 354.1,
+      "height": 188.7,
+      "pins": [
+        {
+          "id": "p_1",
+          "name": "VIN (5V)",
+          "x": 76,
+          "y": 9,
+          "type": "power",
+          "description": "Tegangan Masukan Daya Utama (+5V DC via USB / Regulator Eksternal)"
+        },
+        {
+          "id": "p_2",
+          "name": "GND",
+          "x": 93,
+          "y": 9,
+          "type": "ground",
+          "description": "Ground Referensi Daya & Sinyal (0V)"
+        },
+        {
+          "id": "p_3",
+          "name": "D13",
+          "x": 110,
+          "y": 9,
+          "type": "spi",
+          "description": "GPIO13 / HSPI_MOSI / ADC2_CH4 / Touch4"
+        },
+        {
+          "id": "p_4",
+          "name": "D12",
+          "x": 127,
+          "y": 9,
+          "type": "spi",
+          "description": "GPIO12 / HSPI_MISO / ADC2_CH5 / Touch5 (Strapping Pin)"
+        },
+        {
+          "id": "p_5",
+          "name": "D14",
+          "x": 144,
+          "y": 9,
+          "type": "spi",
+          "description": "GPIO14 / HSPI_CLK / ADC2_CH6 / Touch6"
+        },
+        {
+          "id": "p_6",
+          "name": "D27",
+          "x": 161,
+          "y": 9,
+          "type": "digital",
+          "description": "GPIO27 / ADC2_CH7 / Touch7"
+        },
+        {
+          "id": "p_7",
+          "name": "D26",
+          "x": 178,
+          "y": 9,
+          "type": "analog",
+          "description": "GPIO26 / DAC2 / ADC2_CH9"
+        },
+        {
+          "id": "p_8",
+          "name": "D25",
+          "x": 195,
+          "y": 9,
+          "type": "analog",
+          "description": "GPIO25 / DAC1 / ADC2_CH8"
+        },
+        {
+          "id": "p_9",
+          "name": "D33",
+          "x": 212,
+          "y": 9,
+          "type": "digital",
+          "description": "GPIO33 / ADC1_CH5 / Touch8 / RTC"
+        },
+        {
+          "id": "p_10",
+          "name": "D32",
+          "x": 229,
+          "y": 9,
+          "type": "digital",
+          "description": "GPIO32 / ADC1_CH4 / Touch9 / RTC"
+        },
+        {
+          "id": "p_11",
+          "name": "D35",
+          "x": 246,
+          "y": 9,
+          "type": "digital",
+          "description": "GPIO35 / ADC1_CH7 (Input Only, tanpa pull-up/down)"
+        },
+        {
+          "id": "p_12",
+          "name": "D34",
+          "x": 263,
+          "y": 9,
+          "type": "digital",
+          "description": "GPIO34 / ADC1_CH6 (Input Only, tanpa pull-up/down)"
+        },
+        {
+          "id": "p_13",
+          "name": "VN",
+          "x": 280,
+          "y": 9,
+          "type": "analog",
+          "description": "GPIO39 / SENSOR_VN / ADC1_CH3 (Input Only)"
+        },
+        {
+          "id": "p_14",
+          "name": "VP",
+          "x": 297,
+          "y": 9,
+          "type": "analog",
+          "description": "GPIO36 / SENSOR_VP / ADC1_CH0 (Input Only)"
+        },
+        {
+          "id": "p_15",
+          "name": "EN",
+          "x": 314,
+          "y": 9,
+          "type": "generic",
+          "description": "Chip Enable / Reset Pin (Active LOW)"
+        },
+        {
+          "id": "pin_16",
+          "name": "3V3",
+          "x": 76,
+          "y": 179,
+          "type": "power",
+          "description": "Keluaran Tegangan Teratur +3.3V DC (Maks. 600mA dari LDO internal)"
+        },
+        {
+          "id": "pin_17",
+          "name": "GND",
+          "x": 93,
+          "y": 179,
+          "type": "ground",
+          "description": "Ground Referensi Daya & Sinyal (0V)"
+        },
+        {
+          "id": "pin_18",
+          "name": "D15",
+          "x": 110,
+          "y": 179,
+          "type": "spi",
+          "description": "GPIO15 / HSPI_CS / ADC2_CH3 / Touch3 (Strapping Pin)"
+        },
+        {
+          "id": "pin_19",
+          "name": "D2",
+          "x": 127,
+          "y": 179,
+          "type": "digital",
+          "description": "GPIO2 / ADC2_CH2 / Touch2 / Onboard LED (Strapping Pin)"
+        },
+        {
+          "id": "pin_20",
+          "name": "D4",
+          "x": 144,
+          "y": 179,
+          "type": "digital",
+          "description": "GPIO4 / ADC2_CH0 / Touch0"
+        },
+        {
+          "id": "pin_21",
+          "name": "RX2",
+          "x": 161,
+          "y": 179,
+          "type": "uart",
+          "description": "GPIO16 / UART2_RXD"
+        },
+        {
+          "id": "pin_22",
+          "name": "TX2",
+          "x": 178,
+          "y": 179,
+          "type": "uart",
+          "description": "GPIO17 / UART2_TXD"
+        },
+        {
+          "id": "pin_23",
+          "name": "D5",
+          "x": 195,
+          "y": 179,
+          "type": "spi",
+          "description": "GPIO5 / VSPI_SS (Strapping Pin)"
+        },
+        {
+          "id": "pin_24",
+          "name": "D18",
+          "x": 212,
+          "y": 179,
+          "type": "spi",
+          "description": "GPIO18 / VSPI_SCK"
+        },
+        {
+          "id": "pin_25",
+          "name": "D19",
+          "x": 229,
+          "y": 179,
+          "type": "spi",
+          "description": "GPIO19 / VSPI_MISO"
+        },
+        {
+          "id": "pin_26",
+          "name": "D21",
+          "x": 246,
+          "y": 179,
+          "type": "i2c",
+          "description": "GPIO21 / I2C_SDA"
+        },
+        {
+          "id": "pin_27",
+          "name": "RXD",
+          "x": 263,
+          "y": 179,
+          "type": "uart",
+          "description": "GPIO3 / UART0_RXD (Serial Monitor RX / Upload Debug)"
+        },
+        {
+          "id": "pin_28",
+          "name": "TXD",
+          "x": 280,
+          "y": 179,
+          "type": "uart",
+          "description": "GPIO1 / UART0_TXD (Serial Monitor TX / Upload Debug)"
+        },
+        {
+          "id": "pin_29",
+          "name": "D22",
+          "x": 297,
+          "y": 179,
+          "type": "i2c",
+          "description": "GPIO22 / I2C_SCL"
+        },
+        {
+          "id": "pin_30",
+          "name": "D23",
+          "x": 314,
+          "y": 179,
+          "type": "spi",
+          "description": "GPIO23 / VSPI_MOSI"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/esp32-30p.svg",
+      "isCustom": true
+    },
+    "imageUrl": "/components/esp32-30p.svg",
+    "createdAt": "2026-09-16T23:26:41.072Z",
+    "updatedAt": "2026-09-16T23:26:41.072Z"
   }
 }

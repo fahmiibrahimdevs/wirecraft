@@ -94,15 +94,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      case 'esp32':
-        return (
-          <image
-            href="/components/ESP32_30P.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
 
       case 'pzem-004t':
         return (
@@ -1514,10 +1505,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
         {def.pins.map((pin) => {
           const isStartPin = activeWireStartPinId === pin.id;
           const isTargetPin = activeWireTargetPinId === pin.id;
-          const isEsp =
-            component.type === 'esp32' ||
-            component.type === 'esp32-38p-cp2102' ||
-            component.type === 'esp32-c3-supermini';
+          const isEsp = component.type.startsWith('esp32');
           const isWemos = component.type === 'wemos-d1-mini';
           const isLed = component.type === 'led';
           const isResistor = component.type === 'resistor';

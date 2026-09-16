@@ -308,46 +308,7 @@ function createBreadboardFullPins(): Pin[] {
   return pins;
 }
 
-// Generate ESP32 DevKit V1 (30-Pin, 15x15 DIP) pins mapped with precision to ESP32_30P.png
-function createEsp32Pins(): Pin[] {
-  const topPinsData = [
-    { id: 'vin', name: 'VIN (5V)', x: 65.9, y: 9.8, type: 'power' as const, description: '5V Power Input (USB VBUS / External 5V)' },
-    { id: 'gnd_top', name: 'GND', x: 82.9, y: 9.8, type: 'ground' as const, description: 'Power Ground (0V)' },
-    { id: 'd13', name: 'D13', x: 99.9, y: 9.8, type: 'spi' as const, description: 'GPIO13 / HSPI MOSI / Touch4 / ADC2_CH4' },
-    { id: 'd12', name: 'D12', x: 116.9, y: 9.8, type: 'spi' as const, description: 'GPIO12 / HSPI MISO / Touch5 / ADC2_CH5' },
-    { id: 'd14', name: 'D14', x: 133.9, y: 9.8, type: 'spi' as const, description: 'GPIO14 / HSPI CLK / Touch6 / ADC2_CH6' },
-    { id: 'd27', name: 'D27', x: 150.9, y: 9.8, type: 'digital' as const, description: 'GPIO27 / Touch7 / ADC2_CH7' },
-    { id: 'd26', name: 'D26', x: 167.9, y: 9.8, type: 'analog' as const, description: 'GPIO26 / DAC2 / ADC2_CH9' },
-    { id: 'd25', name: 'D25', x: 184.9, y: 9.8, type: 'analog' as const, description: 'GPIO25 / DAC1 / ADC2_CH8' },
-    { id: 'd33', name: 'D33', x: 201.9, y: 9.8, type: 'analog' as const, description: 'GPIO33 / Touch8 / ADC1_CH5' },
-    { id: 'd32', name: 'D32', x: 218.9, y: 9.8, type: 'analog' as const, description: 'GPIO32 / Touch9 / ADC1_CH4' },
-    { id: 'd35', name: 'D35', x: 235.9, y: 9.8, type: 'analog' as const, description: 'GPIO35 / ADC1_CH7 (Input Only)' },
-    { id: 'd34', name: 'D34', x: 252.9, y: 9.8, type: 'analog' as const, description: 'GPIO34 / ADC1_CH6 (Input Only)' },
-    { id: 'vn', name: 'VN (D39)', x: 269.9, y: 9.8, type: 'analog' as const, description: 'GPIO39 / ADC1_CH3 / SENSOR_VN (Input Only)' },
-    { id: 'vp', name: 'VP (D36)', x: 286.9, y: 9.8, type: 'analog' as const, description: 'GPIO36 / ADC1_CH0 / SENSOR_VP (Input Only)' },
-    { id: 'en', name: 'EN', x: 303.9, y: 9.8, type: 'generic' as const, description: 'Enable / Reset (CHIP_PU, Active Low)' },
-  ];
 
-  const botPinsData = [
-    { id: '3v3', name: '3V3', x: 65.9, y: 179.8, type: 'power' as const, description: '3.3V Power Output (dari LDO Onboard)' },
-    { id: 'gnd_bot', name: 'GND', x: 82.9, y: 179.8, type: 'ground' as const, description: 'Power Ground (0V)' },
-    { id: 'd15', name: 'D15', x: 99.9, y: 179.8, type: 'spi' as const, description: 'GPIO15 / HSPI CS / Touch3 / ADC2_CH3' },
-    { id: 'd2', name: 'D2', x: 116.9, y: 179.8, type: 'digital' as const, description: 'GPIO2 / Onboard Blue LED / Touch2' },
-    { id: 'd4', name: 'D4', x: 133.9, y: 179.8, type: 'analog' as const, description: 'GPIO4 / Touch0 / ADC2_CH0' },
-    { id: 'rx2', name: 'RX2 (D16)', x: 150.9, y: 179.8, type: 'uart' as const, description: 'GPIO16 / UART2 RX' },
-    { id: 'tx2', name: 'TX2 (D17)', x: 167.9, y: 179.8, type: 'uart' as const, description: 'GPIO17 / UART2 TX' },
-    { id: 'd5', name: 'D5', x: 184.9, y: 179.8, type: 'digital' as const, description: 'GPIO5 / VSPI CS' },
-    { id: 'd18', name: 'D18', x: 201.9, y: 179.8, type: 'spi' as const, description: 'GPIO18 / VSPI SCK' },
-    { id: 'd19', name: 'D19', x: 218.9, y: 179.8, type: 'spi' as const, description: 'GPIO19 / VSPI MISO' },
-    { id: 'd21', name: 'D21 (SDA)', x: 235.9, y: 179.8, type: 'i2c' as const, description: 'GPIO21 / I2C SDA' },
-    { id: 'rx0', name: 'RX0 (D3)', x: 252.9, y: 179.8, type: 'uart' as const, description: 'GPIO3 / UART0 RX / USB Serial' },
-    { id: 'tx0', name: 'TX0 (D1)', x: 269.9, y: 179.8, type: 'uart' as const, description: 'GPIO1 / UART0 TX / USB Serial' },
-    { id: 'd22', name: 'D22 (SCL)', x: 286.9, y: 179.8, type: 'i2c' as const, description: 'GPIO22 / I2C SCL' },
-    { id: 'd23', name: 'D23', x: 303.9, y: 179.8, type: 'spi' as const, description: 'GPIO23 / VSPI MOSI' },
-  ];
-
-  return [...topPinsData, ...botPinsData];
-}
 
 // Generate ESP32 DevKit 38-Pin (CP2102 / ESP-WROOM-32D) layout mapped to official 2D visual
 function createEsp32_38P_CP2102Pins(): Pin[] {
@@ -790,16 +751,6 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'esp32': {
-    type: 'esp32',
-    name: 'ESP32 DevKit V1 (30-Pin)',
-    category: 'microcontrollers',
-    description: 'Modul WiFi & Bluetooth 30-pin dual-core Xtensa ESP-WROOM-32 (15x15 DIP) dengan pitch breadboard presisi 17.0px dan rentang Row A ke Row I (170.0px).',
-    width: 345.0,
-    height: 189.8,
-    icon: 'Radio',
-    pins: createEsp32Pins(),
-  },
 
   'esp32-38p-cp2102': {
     type: 'esp32-38p-cp2102',
