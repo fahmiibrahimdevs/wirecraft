@@ -48,6 +48,7 @@ import {
   Magnet,
   Undo2,
   Redo2,
+  Hand,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -227,6 +228,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [startPanPos, setStartPanPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isSpacePressed, setIsSpacePressed] = useState<boolean>(false);
+  const hasMovedPanRef = useRef<boolean>(false);
 
   // Breadboard overlay & snapping helpers
   const [showBreadboard, setShowBreadboard] = useState<boolean>(true);
@@ -235,8 +238,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [snapToBreadboard, setSnapToBreadboard] = useState<boolean>(true);
   const [breadboardOffset, setBreadboardOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Tool mode: 'select-pin' | 'drag-image' | 'drag-all' | 'add-pin'
-  const [toolMode, setToolMode] = useState<'select-pin' | 'drag-image' | 'drag-all' | 'add-pin'>('select-pin');
+  // Tool mode: 'select-pin' | 'drag-image' | 'drag-all' | 'add-pin' | 'pan'
+  const [toolMode, setToolMode] = useState<'select-pin' | 'drag-image' | 'drag-all' | 'add-pin' | 'pan'>('select-pin');
 
   // Dragging states
   const [draggingPinId, setDraggingPinId] = useState<string | null>(null);
@@ -1106,7 +1109,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
   // Canvas click to add new pin (Unconstrained)
   const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (isPanning || draggingPinId || isDraggingImage) return;
+    if (isPanning || draggingPinId || isDraggingImage || hasMovedPanRef.current) return;
     const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
 
     if (toolMode === 'add-pin') {
@@ -1194,10 +1197,17 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Shortcut: R or Space to Rotate 90° Clockwise (ONLY when no modifier is pressed!)
-      if (!e.altKey && (e.key === 'r' || e.key === 'R' || e.key === ' ' || e.code === 'Space')) {
+      // Shortcut: R to Rotate 90° Clockwise
+      if (!e.altKey && (e.key === 'r' || e.key === 'R')) {
         e.preventDefault();
         handleRotateClockwise();
+        return;
+      }
+
+      // Space key for Hand/Pan tool
+      if (!isCmdOrCtrl && (e.code === 'Space' || e.key === ' ')) {
+        e.preventDefault();
+        setIsSpacePressed(true);
         return;
       }
 
@@ -1253,8 +1263,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space' || e.key === ' ') {
+        setIsSpacePressed(false);
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, [
     isOpen,
     selectedPin,
@@ -1269,6 +1289,30 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     imageOffset,
     pushSnapshot,
   ]);
+
+  // Smooth global canvas pan dragging (continues smoothly even when cursor leaves canvas)
+  useEffect(() => {
+    if (!isPanning) return;
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      hasMovedPanRef.current = true;
+      setPan({
+        x: e.clientX - startPanPos.x,
+        y: e.clientY - startPanPos.y,
+      });
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsPanning(false);
+    };
+
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isPanning, startPanPos]);
 
   // Generate multi-pin / DIP Row
   const handleGeneratePinRow = () => {
@@ -1980,6 +2024,19 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <Plus className="w-3.5 h-3.5" />
                     <span>Tambah Pin</span>
                   </button>
+
+                  <button
+                    onClick={() => setToolMode('pan')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      toolMode === 'pan'
+                        ? 'bg-sky-400 text-slate-950 shadow-md'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                    }`}
+                    title="Geser / Pan kanvas secara leluasa (atau tahan Spasi / klik background)"
+                  >
+                    <Hand className="w-3.5 h-3.5" />
+                    <span>Geser Kanvas</span>
+                  </button>
                 </div>
 
                 {/* Rotate Button */}
@@ -2104,24 +2161,46 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
             {/* SVG Interactive Canvas */}
             <div
-              className={`flex-1 overflow-hidden relative bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] ${
-                toolMode === 'drag-image' || toolMode === 'drag-all' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'
+              className={`flex-1 overflow-hidden relative bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] select-none ${
+                isPanning
+                  ? 'cursor-grabbing'
+                  : isSpacePressed || toolMode === 'pan'
+                  ? 'cursor-grab'
+                  : toolMode === 'drag-image' || toolMode === 'drag-all'
+                  ? 'cursor-grab active:cursor-grabbing'
+                  : toolMode === 'add-pin'
+                  ? 'cursor-crosshair'
+                  : 'cursor-grab'
               }`}
               onWheel={handleCanvasWheel}
               onMouseDown={(e) => {
-                if (e.button === 1 || e.altKey || (e.button === 0 && e.shiftKey)) {
+                hasMovedPanRef.current = false;
+                // Middle click, space pressed, alt/shift, pan tool
+                if (
+                  e.button === 1 ||
+                  isSpacePressed ||
+                  e.altKey ||
+                  toolMode === 'pan' ||
+                  (e.button === 0 && e.shiftKey)
+                ) {
+                  e.preventDefault();
                   setIsPanning(true);
                   setStartPanPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-                } else if (toolMode === 'drag-image' || toolMode === 'drag-all') {
+                  return;
+                }
+
+                // If in drag-image or drag-all mode
+                if (toolMode === 'drag-image' || toolMode === 'drag-all') {
                   handleImageMouseDown(e);
+                  return;
+                }
+
+                // Left click on canvas to pan (when not adding a pin)
+                if (e.button === 0 && toolMode !== 'add-pin') {
+                  setIsPanning(true);
+                  setStartPanPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
                 }
               }}
-              onMouseMove={(e) => {
-                if (isPanning) {
-                  setPan({ x: e.clientX - startPanPos.x, y: e.clientY - startPanPos.y });
-                }
-              }}
-              onMouseUp={() => setIsPanning(false)}
             >
               <svg
                 ref={canvasRef}
@@ -2356,7 +2435,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
                 <Info className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 <span>
-                  <b>Scroll:</b> Zoom In/Out • <b>Alt / Middle Click:</b> Geser Kanvas • <b>Putar:</b> <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> / <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">Spasi</kbd>
+                  <b>Tarik Background / Spasi:</b> Geser Kanvas • <b>Scroll:</b> Zoom • <b>Hover Pin:</b> Callout • <b>Putar:</b> <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd>
                 </span>
               </div>
             </div>
