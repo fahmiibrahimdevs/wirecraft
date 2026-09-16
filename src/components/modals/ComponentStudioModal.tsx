@@ -1057,6 +1057,36 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setDraggingPinId(pinId);
   };
 
+  // Handle Mouse Wheel Zoom centered on cursor position
+  const handleCanvasWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    // Zoom factor: smooth exponential for trackpad pinch (ctrlKey), responsive for mouse wheel
+    let zoomFactor = 1;
+    if (e.ctrlKey) {
+      zoomFactor = Math.exp(-e.deltaY * 0.01);
+    } else {
+      zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
+    }
+
+    const newZoom = Math.min(Math.max(zoom * zoomFactor, 0.3), 6.0);
+    if (Math.abs(newZoom - zoom) < 0.001) return;
+
+    const offsetX = 120;
+    const offsetY = 80;
+
+    const newPan = {
+      x: mouseX - offsetX - (mouseX - (pan.x + offsetX)) * (newZoom / zoom),
+      y: mouseY - offsetY - (mouseY - (pan.y + offsetY)) * (newZoom / zoom),
+    };
+
+    setZoom(Number(newZoom.toFixed(3)));
+    setPan(newPan);
+  };
+
   // Handle Image Mouse Down to start dragging component image or all
   const handleImageMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
@@ -2077,8 +2107,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               className={`flex-1 overflow-hidden relative bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] ${
                 toolMode === 'drag-image' || toolMode === 'drag-all' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'
               }`}
+              onWheel={handleCanvasWheel}
               onMouseDown={(e) => {
-                if (e.button === 1 || e.altKey) {
+                if (e.button === 1 || e.altKey || (e.button === 0 && e.shiftKey)) {
                   setIsPanning(true);
                   setStartPanPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
                 } else if (toolMode === 'drag-image' || toolMode === 'drag-all') {
@@ -2323,9 +2354,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
               {/* Instructions badge */}
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
-                <Info className="w-3.5 h-3.5 text-sky-400" />
+                <Info className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 <span>
-                  <b>Drag:</b> Mouse • <b>Hover Pin:</b> Munculkan Callout • <b>Putar 90°:</b> Tombol <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> atau <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">Spasi</kbd>
+                  <b>Scroll:</b> Zoom In/Out • <b>Alt / Middle Click:</b> Geser Kanvas • <b>Putar:</b> <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> / <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">Spasi</kbd>
                 </span>
               </div>
             </div>
