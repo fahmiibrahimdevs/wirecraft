@@ -93,6 +93,96 @@ export const mmToPx = (mm: number, decimals = 1): number => {
   return Number((mm * PX_PER_MM).toFixed(decimals));
 };
 
+export interface CalloutGeometry {
+  dir: 'top' | 'bottom' | 'left' | 'right';
+  p0: { x: number; y: number };
+  p1: { x: number; y: number };
+  p2: { x: number; y: number };
+  badgeX: number;
+  badgeY: number;
+  badgeW: number;
+  badgeH: number;
+}
+
+export const getPinCalloutGeometry = (
+  pin: { x: number; y: number; name: string },
+  imageOffset: { x: number; y: number },
+  compWidth: number,
+  compHeight: number
+): CalloutGeometry => {
+  const centerX = imageOffset.x + compWidth / 2;
+  const centerY = imageOffset.y + compHeight / 2;
+
+  // Calculate distances to 4 bounding box edges of the component
+  const dTop = Math.abs(pin.y - imageOffset.y);
+  const dBottom = Math.abs(imageOffset.y + compHeight - pin.y);
+  const dLeft = Math.abs(pin.x - imageOffset.x);
+  const dRight = Math.abs(imageOffset.x + compWidth - pin.x);
+
+  const minDist = Math.min(dTop, dBottom, dLeft, dRight);
+  let dir: 'top' | 'bottom' | 'left' | 'right' = 'top';
+  if (minDist === dBottom) dir = 'bottom';
+  else if (minDist === dLeft) dir = 'left';
+  else if (minDist === dRight) dir = 'right';
+  else dir = 'top';
+
+  const isRightHalf = pin.x >= centerX;
+  const isBottomHalf = pin.y >= centerY;
+
+  const charWidth = 6.8;
+  const padX = 7;
+  const badgeW = Math.max(30, Math.round(pin.name.length * charWidth + padX * 2 + 6));
+  const badgeH = 15;
+
+  let p0 = { x: 0, y: 0 };
+  let p1 = { x: 0, y: 0 };
+  let p2 = { x: 0, y: 0 };
+  let badgeX = 0;
+  let badgeY = 0;
+
+  if (dir === 'top') {
+    p0 = { x: 0, y: -5.5 };
+    const sx = isRightHalf ? 1 : -1;
+    p1 = { x: sx * 8, y: -16 };
+    p2 = { x: sx * 16, y: -16 };
+    badgeX = p2.x + (sx * badgeW) / 2;
+    badgeY = -16;
+  } else if (dir === 'bottom') {
+    p0 = { x: 0, y: 5.5 };
+    const sx = isRightHalf ? 1 : -1;
+    p1 = { x: sx * 8, y: 16 };
+    p2 = { x: sx * 16, y: 16 };
+    badgeX = p2.x + (sx * badgeW) / 2;
+    badgeY = 16;
+  } else if (dir === 'left') {
+    p0 = { x: -5.5, y: 0 };
+    const sy = isBottomHalf ? 1 : -1;
+    p1 = { x: -12, y: sy * 7 };
+    p2 = { x: -18, y: sy * 7 };
+    badgeX = p2.x - badgeW / 2;
+    badgeY = p2.y;
+  } else {
+    // right
+    p0 = { x: 5.5, y: 0 };
+    const sy = isBottomHalf ? 1 : -1;
+    p1 = { x: 12, y: sy * 7 };
+    p2 = { x: 18, y: sy * 7 };
+    badgeX = p2.x + badgeW / 2;
+    badgeY = p2.y;
+  }
+
+  return {
+    dir,
+    p0,
+    p1,
+    p2,
+    badgeX,
+    badgeY,
+    badgeW,
+    badgeH,
+  };
+};
+
 export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   isOpen,
   onClose,
@@ -1896,7 +1986,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   <span>{unit === 'mm' ? 'Snap 2.54mm' : 'Snap 17px'}</span>
                 </button>
 
-                {/* Pin Labels Toggle Button */}
+                {/* Pin Callout Toggle Button */}
                 <button
                   onClick={() => setAlwaysShowLabels(!alwaysShowLabels)}
                   className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-sm shrink-0 cursor-pointer ${
@@ -1904,10 +1994,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       ? 'bg-sky-500/15 border-sky-500/40 text-sky-300'
                       : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300'
                   }`}
-                  title={alwaysShowLabels ? 'Label selalu tampil' : 'Label hanya tampil saat pin di-hover (Default)'}
+                  title={alwaysShowLabels ? 'Callout selalu tampil' : 'Callout tampil saat pin di-hover / dipilih (Default)'}
                 >
                   <Tag className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Label</span>
+                  <span>Callout</span>
                 </button>
 
                 {/* Breadboard Capsule */}
@@ -2092,95 +2182,142 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     />
                   )}
 
-                  {/* Render Pins with Live Grab & Drag (Free unconstrained positioning!) */}
-                  {pins.map((pin) => {
-                    const isSelected = pin.id === selectedPinId;
-                    const isHovered = pin.id === hoveredPinId;
-                    const isDragging = pin.id === draggingPinId;
-                    const shouldShowLabel = isHovered || isSelected || isDragging || alwaysShowLabels;
-                    const typeDef = PIN_TYPES.find((t) => t.type === pin.type) || PIN_TYPES[0];
+                  {/* Render Pins & Smart Elbow Callouts with Live Grab & Drag */}
+                  {pins
+                    .slice()
+                    .sort((a, b) => {
+                      if (a.id === selectedPinId) return 1;
+                      if (b.id === selectedPinId) return -1;
+                      if (a.id === hoveredPinId) return 1;
+                      if (b.id === hoveredPinId) return -1;
+                      return 0;
+                    })
+                    .map((pin) => {
+                      const isSelected = pin.id === selectedPinId;
+                      const isHovered = pin.id === hoveredPinId;
+                      const isDragging = pin.id === draggingPinId;
+                      const shouldShowLabel = isHovered || isSelected || isDragging || alwaysShowLabels;
+                      const typeDef = PIN_TYPES.find((t) => t.type === pin.type) || PIN_TYPES[0];
+                      const callout = getPinCalloutGeometry(pin, imageOffset, width, height);
+                      const badgeColor = isSelected ? '#38bdf8' : isHovered ? '#38bdf8' : typeDef.color;
+                      const strokeW = isSelected ? 1.6 : isHovered ? 1.4 : 1.1;
 
-                    return (
-                      <g
-                        key={pin.id}
-                        transform={`translate(${pin.x}, ${pin.y})`}
-                        style={{ pointerEvents: 'all' }}
-                        onMouseEnter={() => setHoveredPinId(pin.id)}
-                        onMouseLeave={() => setHoveredPinId(null)}
-                        onMouseDown={(e) => handlePinMouseDown(e, pin.id)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedPinId(pin.id);
-                        }}
-                      >
-                        {/* Invisible Large Hit Area Circle for Easy Grabbing & Hover */}
-                        <circle
-                          cx={0}
-                          cy={0}
-                          r={14}
-                          fill="transparent"
-                          className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-                        />
-
-                        {/* Selected Glowing Ring */}
-                        {isSelected && (
+                      return (
+                        <g
+                          key={pin.id}
+                          transform={`translate(${pin.x}, ${pin.y})`}
+                          style={{ pointerEvents: 'all' }}
+                          onMouseEnter={() => setHoveredPinId(pin.id)}
+                          onMouseLeave={() => setHoveredPinId(null)}
+                          onMouseDown={(e) => handlePinMouseDown(e, pin.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPinId(pin.id);
+                          }}
+                        >
+                          {/* Invisible Large Hit Area Circle for Easy Grabbing & Hover */}
                           <circle
                             cx={0}
                             cy={0}
-                            r={10}
-                            fill="none"
-                            stroke="#38bdf8"
-                            strokeWidth={2}
-                            strokeDasharray="3 3"
-                            className="animate-spin"
-                            style={{ animationDuration: '4s' }}
+                            r={14}
+                            fill="transparent"
+                            className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
                           />
-                        )}
 
-                        {/* Outer Pin Body */}
-                        <circle
-                          cx={0}
-                          cy={0}
-                          r={5.5}
-                          fill={typeDef.color}
-                          stroke="#ffffff"
-                          strokeWidth={1.8}
-                          className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-                        />
-
-                        {/* Center Dot */}
-                        <circle cx={0} cy={0} r={1.8} fill="#ffffff" pointerEvents="none" />
-
-                        {/* Pin Label Tag - SHOWN ONLY ON HOVER / SELECTION / DRAGGING (OR IF ALWAYS TOGGLE IS ON) */}
-                        {shouldShowLabel && (
-                          <g transform="translate(0, -13)" pointerEvents="none" className="transition-opacity duration-150">
-                            <rect
-                              x={-(pin.name.length * 3.5 + 6)}
-                              y={-7}
-                              width={pin.name.length * 7 + 12}
-                              height={14}
-                              rx={3.5}
-                              fill="#020617"
-                              fillOpacity={0.92}
-                              stroke={isSelected ? '#38bdf8' : isHovered ? '#0ea5e9' : '#475569'}
-                              strokeWidth={isSelected ? 1.5 : 1}
+                          {/* Selected Glowing Ring */}
+                          {isSelected && (
+                            <circle
+                              cx={0}
+                              cy={0}
+                              r={10}
+                              fill="none"
+                              stroke="#38bdf8"
+                              strokeWidth={2}
+                              strokeDasharray="3 3"
+                              className="animate-spin"
+                              style={{ animationDuration: '4s' }}
                             />
-                            <text
-                              x={0}
-                              y={3.5}
-                              fill="#f8fafc"
-                              fontSize={8.5}
-                              fontWeight="bold"
-                              textAnchor="middle"
-                              fontFamily="monospace"
+                          )}
+
+                          {/* Outer Pin Body */}
+                          <circle
+                            cx={0}
+                            cy={0}
+                            r={5.5}
+                            fill={typeDef.color}
+                            stroke="#ffffff"
+                            strokeWidth={1.8}
+                            className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
+                          />
+
+                          {/* Center Dot */}
+                          <circle cx={0} cy={0} r={1.8} fill="#ffffff" pointerEvents="none" />
+
+                          {/* Smart Directional Elbow Callout Annotation */}
+                          {shouldShowLabel && (
+                            <g
+                              pointerEvents="none"
+                              className="transition-all duration-150"
+                              style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.65))' }}
                             >
-                              {pin.name}
-                            </text>
-                          </g>
-                        )}
-                      </g>
-                    );
-                  })}
+                              {/* 1. Leader Line (Elbow) */}
+                              <path
+                                d={`M ${callout.p0.x} ${callout.p0.y} L ${callout.p1.x} ${callout.p1.y} L ${callout.p2.x} ${callout.p2.y}`}
+                                fill="none"
+                                stroke={badgeColor}
+                                strokeWidth={strokeW}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                opacity={0.95}
+                              />
+
+                              {/* 2. Anchor Dot on Pin Pad Rim */}
+                              <circle
+                                cx={callout.p0.x}
+                                cy={callout.p0.y}
+                                r={1.6}
+                                fill={badgeColor}
+                              />
+
+                              {/* 3. Callout Badge Box */}
+                              <rect
+                                x={callout.badgeX - callout.badgeW / 2}
+                                y={callout.badgeY - callout.badgeH / 2}
+                                width={callout.badgeW}
+                                height={callout.badgeH}
+                                rx={3.5}
+                                fill="#020617"
+                                fillOpacity={0.96}
+                                stroke={badgeColor}
+                                strokeWidth={strokeW}
+                              />
+
+                              {/* 4. Mini Pin Type Color Dot inside Badge */}
+                              <circle
+                                cx={callout.badgeX - callout.badgeW / 2 + 5.5}
+                                cy={callout.badgeY}
+                                r={2}
+                                fill={typeDef.color}
+                              />
+
+                              {/* 5. Pin Label Text */}
+                              <text
+                                x={callout.badgeX + 3}
+                                y={callout.badgeY + 3.2}
+                                fill="#f8fafc"
+                                fontSize={8.5}
+                                fontWeight="bold"
+                                textAnchor="middle"
+                                fontFamily="monospace"
+                                letterSpacing="0.02em"
+                              >
+                                {pin.name}
+                              </text>
+                            </g>
+                          )}
+                        </g>
+                      );
+                    })}
                 </g>
               </svg>
 
@@ -2188,7 +2325,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
                 <Info className="w-3.5 h-3.5 text-sky-400" />
                 <span>
-                  <b>Drag:</b> Mouse • <b>Hover Pin:</b> Munculkan Label • <b>Putar 90°:</b> Tombol <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> atau <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">Spasi</kbd>
+                  <b>Drag:</b> Mouse • <b>Hover Pin:</b> Munculkan Callout • <b>Putar 90°:</b> Tombol <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> atau <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">Spasi</kbd>
                 </span>
               </div>
             </div>

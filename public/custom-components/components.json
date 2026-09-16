@@ -1,1 +1,68 @@
-{}
+{
+  "tp4056": {
+    "definition": {
+      "type": "tp4056",
+      "name": "TP4056",
+      "category": "power",
+      "description": "IC pengisi daya baterai Li-Ion linier satu sel (3,7V) yang bekerja dengan arus konstan/tegangan konstan (CC/CV)",
+      "width": 106.4,
+      "height": 194.1,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "IN+",
+          "x": 95,
+          "y": 12,
+          "type": "power",
+          "description": "Pin 1"
+        },
+        {
+          "id": "pin_2",
+          "name": "IN-",
+          "x": 10,
+          "y": 12,
+          "type": "power",
+          "description": "Pin 2"
+        },
+        {
+          "id": "pin_3",
+          "name": "OUT+",
+          "x": 95,
+          "y": 180,
+          "type": "power",
+          "description": "Pin 3"
+        },
+        {
+          "id": "pin_4",
+          "name": "OUT-",
+          "x": 10,
+          "y": 181,
+          "type": "power",
+          "description": "Pin 4"
+        },
+        {
+          "id": "pin_5",
+          "name": "B+",
+          "x": 75,
+          "y": 180,
+          "type": "power",
+          "description": "Pin 5"
+        },
+        {
+          "id": "pin_6",
+          "name": "B-",
+          "x": 31,
+          "y": 181,
+          "type": "power",
+          "description": "Pin 6"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/tp4056.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/tp4056.png",
+    "createdAt": "2026-09-16T16:11:45.310Z",
+    "updatedAt": "2026-09-16T16:11:45.310Z"
+  }
+}
