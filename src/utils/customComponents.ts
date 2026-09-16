@@ -83,10 +83,90 @@ export function getCustomComponents(): Record<string, CustomComponentEntry> {
 }
 
 /**
+ * Pure Lossless Vector 90° Clockwise Rotation for SVG data URLs and strings.
+ * Preserves infinite crisp vector quality without ever rasterizing to low-res canvas pixels.
+ */
+export function rotateSvgDataUrl(svgDataUrlOrString: string): string {
+  try {
+    let svgText = '';
+    if (svgDataUrlOrString.startsWith('data:image/svg+xml;base64,')) {
+      const base64 = svgDataUrlOrString.split(';base64,')[1];
+      svgText = atob(base64);
+    } else if (svgDataUrlOrString.startsWith('data:image/svg+xml')) {
+      const encoded = svgDataUrlOrString.replace(/^data:image\/svg\+xml;?(charset=utf-8)?,?/, '');
+      svgText = decodeURIComponent(encoded);
+    } else {
+      svgText = svgDataUrlOrString;
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgText, 'image/svg+xml');
+    const svgEl = doc.querySelector('svg');
+    if (!svgEl) return svgDataUrlOrString;
+
+    // 1. Get original viewBox or calculate from width/height
+    let minX = 0;
+    let minY = 0;
+    let width = 0;
+    let height = 0;
+
+    const viewBoxAttr = svgEl.getAttribute('viewBox');
+    if (viewBoxAttr) {
+      const parts = viewBoxAttr.trim().split(/[\s,]+/).map(Number);
+      if (parts.length === 4 && !parts.some(isNaN)) {
+        minX = parts[0];
+        minY = parts[1];
+        width = parts[2];
+        height = parts[3];
+      }
+    }
+
+    if (width === 0 || height === 0) {
+      const wAttr = svgEl.getAttribute('width') || '200';
+      const hAttr = svgEl.getAttribute('height') || '200';
+      width = parseFloat(wAttr) || 200;
+      height = parseFloat(hAttr) || 200;
+    }
+
+    // 2. Compute rotated geometry (90 deg clockwise around origin)
+    // Original (x, y) -> (-y, x) -> translated by (minY + height, -minX)
+    const newVbW = height;
+    const newVbH = width;
+    const newViewBox = `0 0 ${newVbW} ${newVbH}`;
+
+    svgEl.setAttribute('viewBox', newViewBox);
+    svgEl.setAttribute('width', `${newVbW}`);
+    svgEl.setAttribute('height', `${newVbH}`);
+
+    // 3. Wrap all existing child elements into a single rotated group
+    const wrapper = doc.createElementNS('http://www.w3.org/2000/svg', 'g');
+    wrapper.setAttribute('transform', `translate(${minY + height}, ${-minX}) rotate(90)`);
+
+    while (svgEl.firstChild) {
+      wrapper.appendChild(svgEl.firstChild);
+    }
+    svgEl.appendChild(wrapper);
+
+    // 4. Serialize back to clean data URL
+    const serializer = new XMLSerializer();
+    const rotatedSvg = serializer.serializeToString(doc);
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(rotatedSvg)}`;
+  } catch (err) {
+    console.error('Failed to rotate SVG in vector mode:', err);
+    return svgDataUrlOrString;
+  }
+}
+
+/**
  * Compress / optimize large base64 images
  */
 export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 800): Promise<string> {
   if (!dataUrl || !dataUrl.startsWith('data:image')) {
+    return Promise.resolve(dataUrl);
+  }
+
+  // Pure SVG vectors should NEVER be rasterized to canvas
+  if (dataUrl.startsWith('data:image/svg')) {
     return Promise.resolve(dataUrl);
   }
 

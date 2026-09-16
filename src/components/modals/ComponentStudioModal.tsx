@@ -7,6 +7,7 @@ import {
   generateTypeScriptCode,
   exportComponentJson,
   importComponentJson,
+  rotateSvgDataUrl,
 } from '../../utils/customComponents';
 import {
   Upload,
@@ -425,15 +426,47 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const dataUrl = event.target?.result as string;
       if (!dataUrl) return;
 
+      const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+      let svgW = 0;
+      let svgH = 0;
+
+      if (isSvg) {
+        try {
+          let svgText = '';
+          if (dataUrl.startsWith('data:image/svg+xml;base64,')) {
+            svgText = atob(dataUrl.split(';base64,')[1]);
+          } else {
+            svgText = decodeURIComponent(dataUrl.replace(/^data:image\/svg\+xml;?(charset=utf-8)?,?/, ''));
+          }
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(svgText, 'image/svg+xml');
+          const svgEl = doc.querySelector('svg');
+          if (svgEl) {
+            const vb = svgEl.getAttribute('viewBox');
+            if (vb) {
+              const parts = vb.trim().split(/[\s,]+/).map(Number);
+              if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+                svgW = parts[2];
+                svgH = parts[3];
+              }
+            }
+          }
+        } catch {
+          // fallback to img natural size
+        }
+      }
+
       const img = new Image();
       img.onload = () => {
-        setOriginalImageSize({ width: img.naturalWidth, height: img.naturalHeight });
+        const natW = svgW > 0 ? svgW : img.naturalWidth;
+        const natH = svgH > 0 ? svgH : img.naturalHeight;
+        setOriginalImageSize({ width: Math.round(natW), height: Math.round(natH) });
         setRawImageDataUrl(dataUrl);
         setImageDataUrl(dataUrl);
         setImageOffset({ x: 0, y: 0 });
 
         // Auto calculate initial logical dimensions
-        const aspect = img.naturalWidth / img.naturalHeight;
+        const aspect = natW / natH;
         let initW = 200;
         let initH = Math.round((initW / aspect) * 10) / 10;
 
@@ -911,35 +944,52 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     });
     setPins(newPins);
 
-    // 4. Rotate Image Pixels on Offscreen Canvas
+    // 4. Rotate Image (Pure Lossless Vector for SVG, High-Quality Canvas for Bitmaps)
     const sourceImgUrl = imageDataUrl || rawImageDataUrl;
     if (sourceImgUrl) {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalHeight;
-        canvas.height = img.naturalWidth;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.translate(canvas.width / 2, canvas.height / 2);
-          ctx.rotate((90 * Math.PI) / 180);
-          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
-          const rotatedDataUrl = canvas.toDataURL('image/png');
-          setImageDataUrl(rotatedDataUrl);
-          setRawImageDataUrl(rotatedDataUrl);
-          setOriginalImageSize({ width: img.naturalHeight, height: img.naturalWidth });
-          pushSnapshot({
-            width: newW,
-            height: newH,
-            pins: newPins,
-            imageOffset: nextOffset,
-            imageDataUrl: rotatedDataUrl,
-            rawImageDataUrl: rotatedDataUrl,
-          });
-        }
-      };
-      img.src = sourceImgUrl;
+      if (sourceImgUrl.startsWith('data:image/svg+xml') || sourceImgUrl.includes('<svg')) {
+        const rotatedSvg = rotateSvgDataUrl(sourceImgUrl);
+        setImageDataUrl(rotatedSvg);
+        setRawImageDataUrl(rotatedSvg);
+        setOriginalImageSize((prev) => ({ width: prev.height, height: prev.width }));
+        pushSnapshot({
+          width: newW,
+          height: newH,
+          pins: newPins,
+          imageOffset: nextOffset,
+          imageDataUrl: rotatedSvg,
+          rawImageDataUrl: rotatedSvg,
+        });
+      } else {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalHeight;
+          canvas.height = img.naturalWidth;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          if (ctx) {
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((90 * Math.PI) / 180);
+            ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+            const rotatedDataUrl = canvas.toDataURL('image/png');
+            setImageDataUrl(rotatedDataUrl);
+            setRawImageDataUrl(rotatedDataUrl);
+            setOriginalImageSize({ width: img.naturalHeight, height: img.naturalWidth });
+            pushSnapshot({
+              width: newW,
+              height: newH,
+              pins: newPins,
+              imageOffset: nextOffset,
+              imageDataUrl: rotatedDataUrl,
+              rawImageDataUrl: rotatedDataUrl,
+            });
+          }
+        };
+        img.src = sourceImgUrl;
+      }
     } else {
       pushSnapshot({
         width: newW,

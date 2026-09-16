@@ -78,17 +78,32 @@ function handleCustomComponentsMiddleware(
         const safeId = definition.type.replace(/[^a-zA-Z0-9_-]/g, '_');
         let imagePublicPath = definition.imageUrl || '';
 
-        // If imageBase64 is provided, write binary file to disk permanently
+        // If imageBase64 is provided, write image file to disk permanently
         if (imageBase64 && typeof imageBase64 === 'string' && imageBase64.startsWith('data:image')) {
-          const matches = imageBase64.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
-          if (matches) {
-            const rawExt = matches[1].toLowerCase();
-            const ext = rawExt === 'jpeg' ? 'jpg' : rawExt === 'svg+xml' ? 'svg' : rawExt;
-            const filename = `${safeId}.${ext}`;
+          if (imageBase64.startsWith('data:image/svg+xml')) {
+            const filename = `${safeId}.svg`;
             const filepath = path.join(componentsDir, filename);
-            const buffer = Buffer.from(matches[2], 'base64');
-            fs.writeFileSync(filepath, buffer);
+            let svgContent = '';
+            if (imageBase64.includes(';base64,')) {
+              const base64Data = imageBase64.split(';base64,')[1];
+              svgContent = Buffer.from(base64Data, 'base64').toString('utf-8');
+            } else {
+              const encoded = imageBase64.replace(/^data:image\/svg\+xml;?(charset=utf-8)?,?/, '');
+              svgContent = decodeURIComponent(encoded);
+            }
+            fs.writeFileSync(filepath, svgContent, 'utf-8');
             imagePublicPath = `/components/${filename}`;
+          } else {
+            const matches = imageBase64.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+            if (matches) {
+              const rawExt = matches[1].toLowerCase();
+              const ext = rawExt === 'jpeg' ? 'jpg' : rawExt;
+              const filename = `${safeId}.${ext}`;
+              const filepath = path.join(componentsDir, filename);
+              const buffer = Buffer.from(matches[2], 'base64');
+              fs.writeFileSync(filepath, buffer);
+              imagePublicPath = `/components/${filename}`;
+            }
           }
         }
 
