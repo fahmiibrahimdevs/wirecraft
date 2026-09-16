@@ -42,6 +42,7 @@ import {
   Image as ImageIcon,
   AlignCenter,
   Compass,
+  Box,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -128,11 +129,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   // Dragging states
   const [draggingPinId, setDraggingPinId] = useState<string | null>(null);
   const [isDraggingImage, setIsDraggingImage] = useState<boolean>(false);
-  const [imageDragStart, setImageDragStart] = useState<{ mouseX: number; mouseY: number; startX: number; startY: number }>({
+  const [imageDragStart, setImageDragStart] = useState<{
+    mouseX: number;
+    mouseY: number;
+    startX: number;
+    startY: number;
+    initialPins: Pin[];
+  }>({
     mouseX: 0,
     mouseY: 0,
     startX: 0,
     startY: 0,
+    initialPins: [],
   });
 
   // Multi-pin Generator state
@@ -437,6 +445,31 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       x: Math.round((prev.x + dx) * 10) / 10,
       y: Math.round((prev.y + dy) * 10) / 10,
     }));
+    // Also shift pins along with image nudge
+    setPins((prevPins) =>
+      prevPins.map((p) => ({
+        ...p,
+        x: Math.round((p.x + dx) * 10) / 10,
+        y: Math.round((p.y + dy) * 10) / 10,
+      }))
+    );
+  };
+
+  // Fit Bounding Box directly to image
+  const handleFitBoxToImage = () => {
+    if (imageOffset.x === 0 && imageOffset.y === 0) return;
+    const shiftX = imageOffset.x;
+    const shiftY = imageOffset.y;
+
+    // Normalize pins so their relative position on the image is preserved
+    setPins((prevPins) =>
+      prevPins.map((p) => ({
+        ...p,
+        x: Math.round((p.x - shiftX) * 10) / 10,
+        y: Math.round((p.y - shiftY) * 10) / 10,
+      }))
+    );
+    setImageOffset({ x: 0, y: 0 });
   };
 
   // Rotate component, image, and pins 90 degrees clockwise (R / Space Shortcut)
@@ -484,7 +517,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setImageOffset({ x: 0, y: 0 });
   }, [width, height, imageDataUrl, rawImageDataUrl]);
 
-  // Pin Dragging Mouse Event Listeners
+  // Pin Dragging Mouse Event Listeners (UNCONSTRAINED - Can drag anywhere to match module pads!)
   useEffect(() => {
     if (!draggingPinId) return;
 
@@ -500,9 +533,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         finalX = Math.round(rawX * 10) / 10;
         finalY = Math.round(rawY * 10) / 10;
       }
-
-      finalX = Math.max(-50, Math.min(width + 50, finalX));
-      finalY = Math.max(-50, Math.min(height + 50, finalY));
 
       setPins((prevPins) =>
         prevPins.map((p) =>
@@ -527,11 +557,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     snapToBreadboard,
     breadboardOffset.x,
     breadboardOffset.y,
-    width,
-    height,
   ]);
 
-  // Image Dragging Mouse Event Listeners
+  // Image Dragging Mouse Event Listeners (Moves both image & pins together)
   useEffect(() => {
     if (!isDraggingImage) return;
 
@@ -550,7 +578,21 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         newY = Math.round(newY * 10) / 10;
       }
 
+      const diffX = newX - imageDragStart.startX;
+      const diffY = newY - imageDragStart.startY;
+
       setImageOffset({ x: newX, y: newY });
+
+      // Move existing pins together with the image during drag
+      if (imageDragStart.initialPins.length > 0) {
+        setPins(
+          imageDragStart.initialPins.map((p) => ({
+            ...p,
+            x: Math.round((p.x + diffX) * 10) / 10,
+            y: Math.round((p.y + diffY) * 10) / 10,
+          }))
+        );
+      }
     };
 
     const handleWindowMouseUp = () => {
@@ -586,11 +628,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         mouseY: e.clientY,
         startX: imageOffset.x,
         startY: imageOffset.y,
+        initialPins: [...pins],
       });
     }
   };
 
-  // Canvas click to add new pin
+  // Canvas click to add new pin (Unconstrained)
   const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
     if (isPanning || draggingPinId || isDraggingImage) return;
     const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
@@ -707,8 +750,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   // Generate multi-pin / DIP Row
   const handleGeneratePinRow = () => {
     if (genCount < 1) return;
-    const startX = selectedPin ? selectedPin.x : 17.0;
-    const startY = selectedPin ? selectedPin.y : 17.0;
+    const startX = selectedPin ? selectedPin.x : (imageOffset.x + 17.0);
+    const startY = selectedPin ? selectedPin.y : (imageOffset.y + 17.0);
 
     const newGeneratedPins: Pin[] = [];
     for (let i = 0; i < genCount; i++) {
@@ -731,46 +774,61 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }
   };
 
-  // Save component definition
-  const handleSaveComponent = () => {
+  // Helper to get auto-normalized component definition (Origin at 0,0)
+  const getNormalizedDefinition = (): ComponentDefinition => {
     const cleanTypeId = typeId.trim().toLowerCase().replace(/\s+/g, '-');
-    const definition: ComponentDefinition = {
+
+    // Calculate bounding box enclosing both the image and all pins
+    const xs = [imageOffset.x, imageOffset.x + width, ...pins.map((p) => p.x)];
+    const ys = [imageOffset.y, imageOffset.y + height, ...pins.map((p) => p.y)];
+
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    const maxX = Math.max(...xs);
+    const maxY = Math.max(...ys);
+
+    const normWidth = Math.max(20, Math.round((maxX - minX) * 10) / 10);
+    const normHeight = Math.max(20, Math.round((maxY - minY) * 10) / 10);
+
+    const normPins = pins.map((p) => ({
+      ...p,
+      x: Math.round((p.x - minX) * 10) / 10,
+      y: Math.round((p.y - minY) * 10) / 10,
+    }));
+
+    const normOffset = {
+      x: Math.round((imageOffset.x - minX) * 10) / 10,
+      y: Math.round((imageOffset.y - minY) * 10) / 10,
+    };
+
+    return {
       type: cleanTypeId,
       name: name.trim() || 'Modul Kustom',
       category: category || 'sensors',
       description: description.trim() || 'Modul kustom',
-      width: Math.round(width * 10) / 10,
-      height: Math.round(height * 10) / 10,
-      pins,
+      width: normWidth,
+      height: normHeight,
+      pins: normPins,
       icon: icon || 'Cpu',
       imageUrl: imageDataUrl,
-      imageOffset: (imageOffset.x !== 0 || imageOffset.y !== 0) ? imageOffset : undefined,
+      imageOffset: (normOffset.x !== 0 || normOffset.y !== 0) ? normOffset : undefined,
       isCustom: true,
     };
+  };
 
+  // Save component definition
+  const handleSaveComponent = () => {
+    const definition = getNormalizedDefinition();
     saveCustomComponent(definition, imageDataUrl);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 2500);
-    onComponentSaved?.(cleanTypeId);
+    onComponentSaved?.(definition.type);
   };
 
   // Copy TypeScript code
   const handleCopyCode = () => {
-    const cleanTypeId = typeId.trim().toLowerCase().replace(/\s+/g, '-');
-    const definition: ComponentDefinition = {
-      type: cleanTypeId,
-      name: name.trim() || 'Modul Kustom',
-      category: category || 'sensors',
-      description: description.trim() || 'Modul kustom',
-      width: Math.round(width * 10) / 10,
-      height: Math.round(height * 10) / 10,
-      pins,
-      icon: icon || 'Cpu',
-      imageOffset: (imageOffset.x !== 0 || imageOffset.y !== 0) ? imageOffset : undefined,
-      isCustom: true,
-    };
-
-    const code = generateTypeScriptCode(definition, `${cleanTypeId.replace(/-/g, '_')}.png`);
+    const definition = getNormalizedDefinition();
+    const code = generateTypeScriptCode(definition, `${definition.type.replace(/-/g, '_')}.png`);
     navigator.clipboard.writeText(code);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
@@ -1078,7 +1136,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 <span className="text-xs text-slate-300">Kunci Rasio Aspek (Aspect Ratio)</span>
               </label>
 
-              {/* Image Offset X & Y with Nudge Controls */}
+              {/* Image Offset X & Y with Nudge & Fit Box Controls */}
               <div className="p-2.5 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col gap-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-300 font-medium flex items-center gap-1.5">
@@ -1086,10 +1144,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     Posisi Offset Gambar
                   </span>
                   <button
-                    onClick={() => setImageOffset({ x: 0, y: 0 })}
-                    className="text-[10px] text-sky-400 hover:underline"
+                    onClick={handleFitBoxToImage}
+                    className="text-[10px] text-sky-400 hover:text-sky-300 font-medium hover:underline flex items-center gap-1"
+                    title="Paskan Bounding Box ke Gambar dan nolkan offset"
                   >
-                    Reset (0,0)
+                    <Box className="w-3 h-3" />
+                    Paskan Box
                   </button>
                 </div>
 
@@ -1436,14 +1496,14 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     </g>
                   )}
 
-                  {/* Component Border Box (Defines component dimensions in library) */}
+                  {/* Component Border Box - Follows Image Position */}
                   <rect
-                    x={0}
-                    y={0}
+                    x={imageOffset.x}
+                    y={imageOffset.y}
                     width={width}
                     height={height}
                     fill="#0f172a"
-                    fillOpacity={0.5}
+                    fillOpacity={0.4}
                     stroke="#38bdf8"
                     strokeWidth={1.5}
                     strokeDasharray="4 4"
@@ -1466,7 +1526,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     />
                   )}
 
-                  {/* Render Pins with Live Grab & Drag */}
+                  {/* Render Pins with Live Grab & Drag (Free unconstrained positioning!) */}
                   {pins.map((pin) => {
                     const isSelected = pin.id === selectedPinId;
                     const isDragging = pin.id === draggingPinId;
