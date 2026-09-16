@@ -114,5 +114,155 @@
     "imageUrl": "/components/xl4015-display.png",
     "createdAt": "2026-09-16T16:29:00.266Z",
     "updatedAt": "2026-09-16T16:29:00.266Z"
+  },
+  "xl4015": {
+    "definition": {
+      "type": "xl4015",
+      "name": "Step-Down XL4015 5A (CV-CC)",
+      "category": "power",
+      "description": "Modul DC-DC Step-Down Buck Converter XL4015 5A Constant Voltage / Constant Current dengan dual multiturn trimpot (CV/CC), proteksi arus lebih hingga 5A, dan terminal sekrup.",
+      "width": 361.4,
+      "height": 153.9,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "IN+",
+          "x": 20.8,
+          "y": 63.4,
+          "type": "power",
+          "description": "Pin 1"
+        },
+        {
+          "id": "pin_2",
+          "name": "IN-",
+          "x": 20.2,
+          "y": 92.5,
+          "type": "power",
+          "description": "Pin 2"
+        },
+        {
+          "id": "pin_3",
+          "name": "OUT+",
+          "x": 340.9,
+          "y": 64,
+          "type": "power",
+          "description": "Pin 3"
+        },
+        {
+          "id": "pin_4",
+          "name": "OUT-",
+          "x": 340.5,
+          "y": 93,
+          "type": "power",
+          "description": "Pin 4"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/xl4015.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/xl4015.png",
+    "createdAt": "2026-09-16T16:35:20.984Z",
+    "updatedAt": "2026-09-16T16:35:20.984Z"
+  },
+  "lm2596s-display": {
+    "definition": {
+      "type": "lm2596s-display",
+      "name": "Buck Converter LM2596S (MH Display)",
+      "category": "power",
+      "description": "Modul Step-Down Buck Converter LM2596S MH dengan voltmeter digital LED 3-digit, tombol switch on/off, dan terminal sekrup.",
+      "width": 441.7,
+      "height": 240.9,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "VIN+",
+          "x": 19.2,
+          "y": 100.5,
+          "type": "power",
+          "description": "Pin 1"
+        },
+        {
+          "id": "pin_2",
+          "name": "VIN-",
+          "x": 19.2,
+          "y": 140,
+          "type": "power",
+          "description": "Pin 2"
+        },
+        {
+          "id": "pin_3",
+          "name": "VOUT+",
+          "x": 422,
+          "y": 100,
+          "type": "power",
+          "description": "Pin 3"
+        },
+        {
+          "id": "pin_4",
+          "name": "VOUT-",
+          "x": 422,
+          "y": 138.9,
+          "type": "power",
+          "description": "Pin 4"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/lm2596s-display.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/lm2596s-display.png",
+    "createdAt": "2026-09-16T16:40:52.205Z",
+    "updatedAt": "2026-09-16T16:40:52.205Z"
+  },
+  "lm2596s": {
+    "definition": {
+      "type": "lm2596s",
+      "name": "Buck Converter LM2596S",
+      "category": "power",
+      "description": "Modul penurun tegangan DC-DC Step-Down Buck Converter berbasis IC LM2596S dengan trimpot multiturn presisi.",
+      "width": 289.1,
+      "height": 140.6,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "IN+",
+          "x": 10.3,
+          "y": 10,
+          "type": "power",
+          "description": "Pin 1"
+        },
+        {
+          "id": "pin_2",
+          "name": "IN-",
+          "x": 9.8,
+          "y": 129.4,
+          "type": "power",
+          "description": "Pin 2"
+        },
+        {
+          "id": "pin_3",
+          "name": "OUT+",
+          "x": 277,
+          "y": 10,
+          "type": "power",
+          "description": "Pin 3"
+        },
+        {
+          "id": "pin_4",
+          "name": "OUT-",
+          "x": 277,
+          "y": 128.9,
+          "type": "power",
+          "description": "Pin 4"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/lm2596s.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/lm2596s.png",
+    "createdAt": "2026-09-16T16:43:46.870Z",
+    "updatedAt": "2026-09-16T16:43:46.870Z"
   }
 }

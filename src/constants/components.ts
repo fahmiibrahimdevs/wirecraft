@@ -1780,54 +1780,6 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'buck-converter-lm2596s': {
-    type: 'buck-converter-lm2596s',
-    name: 'Buck Converter LM2596S',
-    category: 'power',
-    description: 'Modul penurun tegangan DC-DC Step-Down Buck Converter berbasis IC LM2596S dengan trimpot multiturn presisi.',
-    width: 300.0,
-    height: 146.7,
-    icon: 'Zap',
-    pins: [
-      { id: 'in_plus', name: 'IN+', x: 11.3, y: 11.3, type: 'power', description: 'Input Voltage Positive (+3.2V - 40V DC)' },
-      { id: 'in_minus', name: 'IN-', x: 11.3, y: 135.0, type: 'ground', description: 'Input Ground (0V)' },
-      { id: 'out_plus', name: 'OUT+', x: 288.3, y: 11.3, type: 'power', description: 'Output Voltage Positive (+1.25V - 35V DC)' },
-      { id: 'out_minus', name: 'OUT-', x: 288.3, y: 135.0, type: 'ground', description: 'Output Ground (0V)' },
-    ],
-  },
-
-  'buck-converter-lm2596s-mh': {
-    type: 'buck-converter-lm2596s-mh',
-    name: 'Buck Converter LM2596S (MH Display)',
-    category: 'power',
-    description: 'Modul Step-Down Buck Converter LM2596S MH dengan voltmeter digital LED 3-digit, tombol switch on/off, dan terminal sekrup.',
-    width: 320.0,
-    height: 163.0,
-    icon: 'Zap',
-    pins: [
-      { id: 'in_plus', name: 'IN+', x: 13.8, y: 67.5, type: 'power', description: 'Tegangan Masukan Positif (+4.0V - 40V DC)' },
-      { id: 'in_minus', name: 'IN-', x: 13.8, y: 94.5, type: 'ground', description: 'Ground Masukan (0V)' },
-      { id: 'out_plus', name: 'OUT+', x: 305.0, y: 67.5, type: 'power', description: 'Tegangan Keluaran Teratur Positif (+1.25V - 37V DC)' },
-      { id: 'out_minus', name: 'OUT-', x: 305.0, y: 94.5, type: 'ground', description: 'Ground Keluaran (0V)' },
-    ],
-  },
-
-  'buck-converter-xl4015': {
-    type: 'buck-converter-xl4015',
-    name: 'Step-Down XL4015 5A (CV-CC)',
-    category: 'power',
-    description: 'Modul DC-DC Step-Down Buck Converter XL4015 5A Constant Voltage / Constant Current dengan dual multiturn trimpot (CV/CC), proteksi arus lebih hingga 5A, dan terminal sekrup.',
-    width: 300.0,
-    height: 127.7,
-    icon: 'Zap',
-    pins: [
-      { id: 'in_plus', name: 'IN+ (VIN)', x: 16.0, y: 54.6, type: 'power', description: 'Tegangan Masukan Positif (+4.0V - 38V DC)' },
-      { id: 'in_minus', name: 'IN- (GND)', x: 16.0, y: 76.2, type: 'ground', description: 'Ground Masukan (0V)' },
-      { id: 'out_plus', name: 'OUT+ (VOUT)', x: 284.0, y: 54.6, type: 'power', description: 'Tegangan Keluaran Teratur Positif (+1.25V - 36V DC)' },
-      { id: 'out_minus', name: 'OUT- (GND)', x: 284.0, y: 76.2, type: 'ground', description: 'Ground Keluaran (0V)' },
-    ],
-  },
-
   'psu-smps-12v': {
     type: 'psu-smps-12v',
     name: 'PSU SMPS 12V (Switching)',

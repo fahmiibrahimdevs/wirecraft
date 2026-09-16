@@ -53,8 +53,6 @@ export type ComponentType =
   | 'keypad-3x4'
   | 'keypad-4x4'
   | 'battery-9v'
-  | 'buck-converter-lm2596s'
-  | 'buck-converter-lm2596s-mh'
   | 'psu-smps-12v'
   | 'fitting-lamp'
   | 'ac-outlet'
@@ -74,7 +72,6 @@ export type ComponentType =
   | 'sensor-ads1115'
   | 'sensor-jsn-sr04t'
   | 'module-sim800l'
-  | 'buck-converter-xl4015'
   | (string & {});
 
 export type PinType = 'power' | 'ground' | 'digital' | 'analog' | 'pwm' | 'i2c' | 'spi' | 'uart' | 'passive' | 'generic';

@@ -1380,42 +1380,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           </g>
         );
 
-      case 'buck-converter-lm2596s':
-        return (
-          <image
-            href="/components/buck_lm2596s.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'buck-converter-lm2596s-mh':
-        return (
-          <image
-            href="/components/buck_lm2596s_mh.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'buck-converter-xl4015':
-        return (
-          <image
-            href="/components/step_down_xl4015.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'psu-smps-12v':
         return (
           <image
