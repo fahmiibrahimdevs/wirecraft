@@ -1,6 +1,7 @@
 import React from 'react';
 import { CircuitComponent, Wire, WireRouting } from '../../types/circuit';
 import { COMPONENT_DEFINITIONS, WIRE_COLORS } from '../../constants/components';
+import { getAllComponentDefinitions } from '../../utils/customComponents';
 import { formatResistance, getResistor5BandColors } from '../../utils/geometry';
 import {
   RotateCw,
@@ -199,7 +200,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
 
   // 1. If Component is Selected
   if (selectedComponent) {
-    const def = COMPONENT_DEFINITIONS[selectedComponent.type];
+    const allDefs = getAllComponentDefinitions();
+    const def = allDefs[selectedComponent.type] || COMPONENT_DEFINITIONS[selectedComponent.type];
     const compWires = allWires.filter(
       (w) => w.fromComponentId === selectedComponent.id || w.toComponentId === selectedComponent.id
     );

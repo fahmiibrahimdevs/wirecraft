@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { COMPONENT_DEFINITIONS } from '../../constants/components';
-import { ComponentType } from '../../types/circuit';
+import { getAllComponentDefinitions, CUSTOM_COMPONENTS_EVENT } from '../../utils/customComponents';
+import { ComponentType, ComponentDefinition } from '../../types/circuit';
 import {
   Cpu,
   Radio,
@@ -28,16 +29,19 @@ import {
   HardDrive,
   Droplets,
   Activity,
+  Layers,
 } from 'lucide-react';
 
 interface ComponentLibraryProps {
   isOpen: boolean;
   onToggle: () => void;
   onAddComponent: (type: ComponentType) => void;
+  onOpenStudio?: (editDef?: ComponentDefinition) => void;
 }
 
 const CATEGORY_MAP: Record<string, string> = {
   all: 'Semua',
+  custom: 'Custom Studio',
   microcontrollers: 'Mikrokontroler',
   prototyping: 'Breadboard',
   passives: 'Pasif',
@@ -71,26 +75,42 @@ const ICON_MAP: Record<string, React.FC<{ className?: string }>> = {
   HardDrive,
   Droplets,
   Activity,
+  Layers,
 };
 
 export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
   isOpen,
   onToggle,
   onAddComponent,
+  onOpenStudio,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [componentDefs, setComponentDefs] = useState<Record<string, ComponentDefinition>>(() =>
+    getAllComponentDefinitions()
+  );
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setComponentDefs(getAllComponentDefinitions());
+    };
+    window.addEventListener(CUSTOM_COMPONENTS_EVENT, handleUpdate);
+    return () => window.removeEventListener(CUSTOM_COMPONENTS_EVENT, handleUpdate);
+  }, []);
 
   const filteredComponents = useMemo(() => {
-    return Object.values(COMPONENT_DEFINITIONS).filter((def) => {
+    return Object.values(componentDefs).filter((def) => {
       if (def.type === 'push-button') return false;
-      const matchCategory = activeCategory === 'all' || def.category === activeCategory;
+      const matchCategory =
+        activeCategory === 'all' ||
+        def.category === activeCategory ||
+        (activeCategory === 'custom' && def.isCustom);
       const matchSearch =
         def.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         def.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchCategory && matchSearch;
     });
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery, activeCategory, componentDefs]);
 
   return (
     <aside
@@ -170,10 +190,17 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-200 group-hover:text-sky-300 transition-colors truncate">
-                        {def.name}
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-500 capitalize">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="text-xs font-semibold text-slate-200 group-hover:text-sky-300 transition-colors truncate">
+                          {def.name}
+                        </span>
+                        {def.isCustom && (
+                          <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
+                            Custom
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-mono text-slate-500 capitalize shrink-0 ml-1">
                         {def.pins.length} pin
                       </span>
                     </div>

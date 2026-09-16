@@ -75,7 +75,8 @@ export type ComponentType =
   | 'sensor-jsn-sr04t'
   | 'module-sim800l'
   | 'buck-converter-xl4015-display'
-  | 'buck-converter-xl4015';
+  | 'buck-converter-xl4015'
+  | (string & {});
 
 export type PinType = 'power' | 'ground' | 'digital' | 'analog' | 'pwm' | 'i2c' | 'spi' | 'uart' | 'passive' | 'generic';
 
@@ -111,6 +112,7 @@ export interface CircuitComponent {
     oledTitle?: string;
     capacitance?: string; // e.g. "10uF", "100nF"
     servoAngle?: number; // 0 - 180
+    customImage?: string;
     [key: string]: any;
   };
 }
@@ -136,13 +138,15 @@ export interface Wire {
 export interface ComponentDefinition {
   type: ComponentType;
   name: string;
-  category: 'microcontrollers' | 'prototyping' | 'passives' | 'outputs' | 'sensors' | 'displays' | 'power';
+  category: 'microcontrollers' | 'prototyping' | 'passives' | 'outputs' | 'sensors' | 'displays' | 'power' | 'custom' | string;
   description: string;
   width: number;
   height: number;
   pins: Pin[];
   defaultProps?: Record<string, any>;
   icon: string; // Lucide icon name or svg tag
+  imageUrl?: string;
+  isCustom?: boolean;
 }
 
 export interface CircuitProject {

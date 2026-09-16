@@ -17,6 +17,7 @@ import {
   Spline,
   Undo2,
   Redo2,
+  Sliders,
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -40,6 +41,7 @@ interface TopBarProps {
   onOpenPresets: () => void;
   onOpenCodeEditor: () => void;
   onOpenBom: () => void;
+  onOpenStudio?: () => void;
   onExportPng: () => void;
   onExportJson: () => void;
   onImportJson: (file: File) => void;
@@ -67,6 +69,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onOpenPresets,
   onOpenCodeEditor,
   onOpenBom,
+  onOpenStudio,
   onExportPng,
   onExportJson,
   onImportJson,
@@ -134,6 +137,20 @@ export const TopBar: React.FC<TopBarProps> = ({
           <Sparkles className="w-3.5 h-3.5 text-sky-400" />
           <span className="hidden md:inline">Contoh Rangkaian</span>
         </button>
+
+        {/* Component Studio (Admin Mode) Button */}
+        {onOpenStudio && (
+          <button
+            onClick={onOpenStudio}
+            className="flex items-center gap-1.5 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 hover:border-sky-400 text-sky-400 hover:text-sky-300 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-sm"
+          >
+            <Sliders className="w-3.5 h-3.5 text-sky-400" />
+            <span className="hidden md:inline">Component Studio</span>
+            <span className="text-[9px] font-mono font-bold px-1 py-0.1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+              Admin
+            </span>
+          </button>
+        )}
 
         {/* Undo & Redo Controls */}
         <div className="flex items-center bg-slate-950/80 border border-slate-800 rounded-lg p-0.5 text-xs">

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { CircuitComponent, Wire, ComponentType, WireRouting, WirePoint, CircuitProject } from './types/circuit';
+import { CircuitComponent, Wire, ComponentType, WireRouting, WirePoint, CircuitProject, ComponentDefinition } from './types/circuit';
 import { COMPONENT_DEFINITIONS } from './constants/components';
+import { getAllComponentDefinitions } from './utils/customComponents';
 import { CircuitCanvas } from './components/canvas/CircuitCanvas';
 import { ComponentLibrary } from './components/panels/ComponentLibrary';
 import { PropertiesInspector } from './components/panels/PropertiesInspector';
@@ -8,6 +9,7 @@ import { TopBar } from './components/navigation/TopBar';
 import { CodeEditorModal } from './components/modals/CodeEditorModal';
 import { BomModal } from './components/modals/BomModal';
 import { PresetsModal } from './components/modals/PresetsModal';
+import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
 import { useCircuitHistory, HistoryState } from './hooks/useCircuitHistory';
 import { toPng } from 'html-to-image';
 
@@ -232,6 +234,8 @@ export default function App() {
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [isBomModalOpen, setIsBomModalOpen] = useState(false);
   const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
+  const [isStudioOpen, setIsStudioOpen] = useState(false);
+  const [studioEditDef, setStudioEditDef] = useState<ComponentDefinition | null>(null);
 
   // Global Keyboard Shortcuts (Ctrl+Z Undo, Ctrl+Y / Ctrl+Shift+Z Redo)
   useEffect(() => {
@@ -267,7 +271,8 @@ export default function App() {
 
   // Add Component to Canvas
   const handleAddComponent = (type: ComponentType) => {
-    const def = COMPONENT_DEFINITIONS[type];
+    const allDefs = getAllComponentDefinitions();
+    const def = allDefs[type] || COMPONENT_DEFINITIONS[type];
     if (!def) return;
 
     const count = components.filter((c) => c.type === type).length + 1;
@@ -522,6 +527,10 @@ export default function App() {
         onOpenPresets={() => setIsPresetsModalOpen(true)}
         onOpenCodeEditor={() => setIsCodeModalOpen(true)}
         onOpenBom={() => setIsBomModalOpen(true)}
+        onOpenStudio={() => {
+          setStudioEditDef(null);
+          setIsStudioOpen(true);
+        }}
         onExportPng={handleExportPng}
         onExportJson={handleExportJson}
         onImportJson={handleImportJson}
@@ -535,6 +544,10 @@ export default function App() {
           isOpen={isLibraryOpen}
           onToggle={() => setIsLibraryOpen((prev) => !prev)}
           onAddComponent={handleAddComponent}
+          onOpenStudio={(def) => {
+            setStudioEditDef(def || null);
+            setIsStudioOpen(true);
+          }}
         />
 
         {/* Interactive Infinite Circuit Canvas */}
@@ -598,6 +611,16 @@ export default function App() {
         isOpen={isPresetsModalOpen}
         onClose={() => setIsPresetsModalOpen(false)}
         onLoadPreset={handleLoadPreset}
+      />
+
+      {/* Component Studio (Admin Mode) Modal */}
+      <ComponentStudioModal
+        isOpen={isStudioOpen}
+        onClose={() => setIsStudioOpen(false)}
+        initialDefinition={studioEditDef}
+        onComponentSaved={(typeId) => {
+          handleAddComponent(typeId);
+        }}
       />
     </div>
   );

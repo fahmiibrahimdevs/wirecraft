@@ -1,6 +1,7 @@
 import React from 'react';
 import { CircuitComponent, Pin } from '../../types/circuit';
 import { COMPONENT_DEFINITIONS } from '../../constants/components';
+import { getAllComponentDefinitions } from '../../utils/customComponents';
 import { getResistor5BandColors } from '../../utils/geometry';
 
 interface ComponentSvgProps {
@@ -54,6 +55,7 @@ const getButtonColors = (colorName = 'green', pressed = false) => {
 const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
   component,
   isSelected,
+  isHovered,
   activeWireStartPinId,
   activeWireTargetPinId,
   onPinMouseDown,
@@ -61,7 +63,8 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
   onPinMouseEnter,
   onPinMouseLeave,
 }) => {
-  const def = COMPONENT_DEFINITIONS[component.type];
+  const allDefs = getAllComponentDefinitions();
+  const def = allDefs[component.type] || COMPONENT_DEFINITIONS[component.type];
   if (!def) return null;
 
   const { width, height } = def;
@@ -1489,10 +1492,37 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      default:
+      default: {
+        const customImg = (def as any)?.imageUrl || component.customProps?.customImage;
+        if (customImg) {
+          return (
+            <image
+              href={customImg}
+              x="0"
+              y="0"
+              width={width}
+              height={height}
+              preserveAspectRatio="none"
+            />
+          );
+        }
         return (
-          <rect x="0" y="0" width={width} height={height} rx="4" fill="#1e293b" stroke="#334155" />
+          <g>
+            <rect x="0" y="0" width={width} height={height} rx="4" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.5" />
+            <text
+              x={width / 2}
+              y={height / 2}
+              fill="#94a3b8"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {def.name}
+            </text>
+          </g>
         );
+      }
     }
   };
 
