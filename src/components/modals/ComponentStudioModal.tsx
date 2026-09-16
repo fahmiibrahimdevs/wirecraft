@@ -43,6 +43,7 @@ import {
   AlignCenter,
   Compass,
   Box,
+  Tag,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -106,9 +107,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [lockAspectRatio, setLockAspectRatio] = useState<boolean>(true);
   const [imageOffset, setImageOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Pins state
+  // Pins state & Hover state
   const [pins, setPins] = useState<Pin[]>([]);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+  const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
+  const [alwaysShowLabels, setAlwaysShowLabels] = useState<boolean>(false);
 
   // Canvas / Viewport state
   const [zoom, setZoom] = useState<number>(1.8);
@@ -1328,8 +1331,24 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </button>
               </div>
 
-              {/* Breadboard Overlay & Snapping Controls */}
+              {/* Breadboard Overlay & Pin Label Visibility Controls */}
               <div className="flex items-center gap-3">
+                {/* Pin Labels Toggle (Hover vs Always) */}
+                <label
+                  className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300"
+                  title="Tampilkan label nama pin hanya saat di-hover (Default) atau selalu tampil"
+                >
+                  <input
+                    type="checkbox"
+                    checked={alwaysShowLabels}
+                    onChange={(e) => setAlwaysShowLabels(e.target.checked)}
+                    className="rounded border-slate-700 bg-slate-900 text-sky-500 w-3.5 h-3.5"
+                  />
+                  <span>Selalu Tampilkan Label</span>
+                </label>
+
+                <div className="h-4 w-px bg-slate-700" />
+
                 {/* Breadboard Toggle */}
                 <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
                   <input
@@ -1529,7 +1548,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   {/* Render Pins with Live Grab & Drag (Free unconstrained positioning!) */}
                   {pins.map((pin) => {
                     const isSelected = pin.id === selectedPinId;
+                    const isHovered = pin.id === hoveredPinId;
                     const isDragging = pin.id === draggingPinId;
+                    const shouldShowLabel = isHovered || isSelected || isDragging || alwaysShowLabels;
                     const typeDef = PIN_TYPES.find((t) => t.type === pin.type) || PIN_TYPES[0];
 
                     return (
@@ -1537,13 +1558,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         key={pin.id}
                         transform={`translate(${pin.x}, ${pin.y})`}
                         style={{ pointerEvents: 'all' }}
+                        onMouseEnter={() => setHoveredPinId(pin.id)}
+                        onMouseLeave={() => setHoveredPinId(null)}
                         onMouseDown={(e) => handlePinMouseDown(e, pin.id)}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedPinId(pin.id);
                         }}
                       >
-                        {/* Invisible Large Hit Area Circle for Easy Grabbing */}
+                        {/* Invisible Large Hit Area Circle for Easy Grabbing & Hover */}
                         <circle
                           cx={0}
                           cy={0}
@@ -1581,31 +1604,33 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         {/* Center Dot */}
                         <circle cx={0} cy={0} r={1.8} fill="#ffffff" pointerEvents="none" />
 
-                        {/* Pin Label Tag */}
-                        <g transform="translate(0, -12)" pointerEvents="none">
-                          <rect
-                            x={-(pin.name.length * 3.5 + 6)}
-                            y={-6}
-                            width={pin.name.length * 7 + 12}
-                            height={12}
-                            rx={3}
-                            fill="#020617"
-                            fillOpacity={0.88}
-                            stroke={isSelected ? '#38bdf8' : '#475569'}
-                            strokeWidth={1}
-                          />
-                          <text
-                            x={0}
-                            y={3}
-                            fill="#f8fafc"
-                            fontSize={8}
-                            fontWeight="bold"
-                            textAnchor="middle"
-                            fontFamily="monospace"
-                          >
-                            {pin.name}
-                          </text>
-                        </g>
+                        {/* Pin Label Tag - SHOWN ONLY ON HOVER / SELECTION / DRAGGING (OR IF ALWAYS TOGGLE IS ON) */}
+                        {shouldShowLabel && (
+                          <g transform="translate(0, -13)" pointerEvents="none" className="transition-opacity duration-150">
+                            <rect
+                              x={-(pin.name.length * 3.5 + 6)}
+                              y={-7}
+                              width={pin.name.length * 7 + 12}
+                              height={14}
+                              rx={3.5}
+                              fill="#020617"
+                              fillOpacity={0.92}
+                              stroke={isSelected ? '#38bdf8' : isHovered ? '#0ea5e9' : '#475569'}
+                              strokeWidth={isSelected ? 1.5 : 1}
+                            />
+                            <text
+                              x={0}
+                              y={3.5}
+                              fill="#f8fafc"
+                              fontSize={8.5}
+                              fontWeight="bold"
+                              textAnchor="middle"
+                              fontFamily="monospace"
+                            >
+                              {pin.name}
+                            </text>
+                          </g>
+                        )}
                       </g>
                     );
                   })}
@@ -1616,7 +1641,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
                 <Info className="w-3.5 h-3.5 text-sky-400" />
                 <span>
-                  <b>Drag:</b> Mouse • <b>Putar 90°:</b> Tombol <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> atau <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">Spasi</kbd> • <b>Nudge:</b> Arrow Keys
+                  <b>Drag:</b> Mouse • <b>Hover Pin:</b> Munculkan Label • <b>Putar 90°:</b> Tombol <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> atau <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">Spasi</kbd>
                 </span>
               </div>
             </div>
@@ -1839,6 +1864,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <div
                       key={pin.id}
                       onClick={() => setSelectedPinId(pin.id)}
+                      onMouseEnter={() => setHoveredPinId(pin.id)}
+                      onMouseLeave={() => setHoveredPinId(null)}
                       className={`px-2.5 py-1.5 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
                         isSelected
                           ? 'bg-sky-500/15 border-sky-500/50 text-sky-200'
