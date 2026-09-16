@@ -613,15 +613,29 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setWidth(newW);
     setHeight(newH);
 
-    // 2. Rotate All Pins Mathematically (x' = oldHeight - y, y' = x)
-    const newPins = pins.map((p) => ({
-      ...p,
-      x: Math.round((oldHeight - p.y) * 10) / 10,
-      y: Math.round(p.x * 10) / 10,
-    }));
+    // 2. Compute New Image Offset around the center of the component
+    const centerX = imageOffset.x + oldWidth / 2;
+    const centerY = imageOffset.y + oldHeight / 2;
+    const newOffsetX = Math.round((centerX - newW / 2) * 10) / 10;
+    const newOffsetY = Math.round((centerY - newH / 2) * 10) / 10;
+    const nextOffset = { x: newOffsetX, y: newOffsetY };
+    setImageOffset(nextOffset);
+
+    // 3. Rotate All Pins mathematically around the component's relative box
+    const newPins = pins.map((p) => {
+      const relX = p.x - imageOffset.x;
+      const relY = p.y - imageOffset.y;
+      const relXRot = oldHeight - relY;
+      const relYRot = relX;
+      return {
+        ...p,
+        x: Math.round((newOffsetX + relXRot) * 10) / 10,
+        y: Math.round((newOffsetY + relYRot) * 10) / 10,
+      };
+    });
     setPins(newPins);
 
-    // 3. Rotate Image Pixels on Offscreen Canvas
+    // 4. Rotate Image Pixels on Offscreen Canvas
     const sourceImgUrl = imageDataUrl || rawImageDataUrl;
     if (sourceImgUrl) {
       const img = new Image();
@@ -643,7 +657,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             width: newW,
             height: newH,
             pins: newPins,
-            imageOffset: { x: 0, y: 0 },
+            imageOffset: nextOffset,
             imageDataUrl: rotatedDataUrl,
             rawImageDataUrl: rotatedDataUrl,
           });
@@ -655,13 +669,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         width: newW,
         height: newH,
         pins: newPins,
-        imageOffset: { x: 0, y: 0 },
+        imageOffset: nextOffset,
       });
     }
-
-    // 4. Reset Image Offset
-    setImageOffset({ x: 0, y: 0 });
-  }, [width, height, pins, imageDataUrl, rawImageDataUrl, pushSnapshot]);
+  }, [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, pushSnapshot]);
 
   // Pin Dragging Mouse Event Listeners (UNCONSTRAINED - Can drag anywhere to match module pads!)
   useEffect(() => {
@@ -2288,7 +2299,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         <span className="text-[10px] font-mono text-slate-500">({pin.id})</span>
                       </div>
                       <span className="text-[10px] font-mono text-slate-400">
-                        {pin.x.toFixed(1)}, {pin.y.toFixed(1)}
+                        {unit === 'mm'
+                          ? `${pxToMm(pin.x, 1)}, ${pxToMm(pin.y, 1)}`
+                          : `${pin.x.toFixed(1)}, ${pin.y.toFixed(1)}`}
                       </span>
                     </div>
                   );
