@@ -45,6 +45,7 @@ import {
   Compass,
   Box,
   Tag,
+  Magnet,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -1277,151 +1278,150 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
           {/* Center Canvas: Interactive Pin & Image Visualizer */}
           <div className="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
-            {/* Canvas Toolbar */}
-            <div className="h-11 bg-slate-900/95 border-b border-slate-800 px-4 flex items-center justify-between z-10 flex-wrap gap-2">
-              {/* Primary Tool Mode Switch & Rotate Button */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setToolMode('select-pin')}
-                  className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    toolMode === 'select-pin'
-                      ? 'bg-sky-500 text-slate-950 font-semibold shadow-sm'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                  title="Klik dan geser pin"
-                >
-                  <Move className="w-3.5 h-3.5" />
-                  Pilih & Geser Pin
-                </button>
+            {/* Canvas Toolbar - Sleek Pro Single-Line Bar */}
+            <div className="min-h-[46px] bg-slate-950/90 backdrop-blur-md border-b border-slate-800 px-4 py-1.5 flex items-center justify-between z-10 gap-3 overflow-x-auto no-scrollbar select-none">
+              {/* Primary Tool Mode Switch & Rotate */}
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Segmented Control */}
+                <div className="flex bg-slate-900/90 p-0.5 rounded-xl border border-slate-800 shadow-inner">
+                  <button
+                    onClick={() => setToolMode('select-pin')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      toolMode === 'select-pin'
+                        ? 'bg-sky-500 text-slate-950 shadow-md'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                    }`}
+                    title="Pilih & Geser Pin di kanvas"
+                  >
+                    <Move className="w-3.5 h-3.5" />
+                    <span>Geser Pin</span>
+                  </button>
 
-                <button
-                  onClick={() => setToolMode('drag-image')}
-                  className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    toolMode === 'drag-image'
-                      ? 'bg-amber-400 text-slate-950 font-semibold shadow-sm'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                  title="Klik dan drag gambar komponen di canvas untuk mencocokkan ke breadboard"
-                >
-                  <ImageIcon className="w-3.5 h-3.5" />
-                  Geser Gambar (Drag Visual)
-                </button>
+                  <button
+                    onClick={() => setToolMode('drag-image')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      toolMode === 'drag-image'
+                        ? 'bg-amber-400 text-slate-950 shadow-md'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                    }`}
+                    title="Geser Gambar Modul untuk dicocokkan ke pin / breadboard"
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span>Geser Gambar</span>
+                  </button>
 
-                <button
-                  onClick={() => setToolMode('add-pin')}
-                  className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    toolMode === 'add-pin'
-                      ? 'bg-emerald-500 text-slate-950 font-semibold shadow-sm'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                  title="Klik di kanvas untuk menambahkan pin baru"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Tambah Pin
-                </button>
+                  <button
+                    onClick={() => setToolMode('add-pin')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      toolMode === 'add-pin'
+                        ? 'bg-emerald-500 text-slate-950 shadow-md'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                    }`}
+                    title="Klik kanvas untuk menambah pin baru"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tambah Pin</span>
+                  </button>
+                </div>
 
-                <div className="h-4 w-px bg-slate-700 mx-0.5" />
-
-                {/* Rotate 90 deg Toolbar Button */}
+                {/* Rotate Button */}
                 <button
                   onClick={handleRotateClockwise}
-                  className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-sky-500/20 border border-slate-700 hover:border-sky-500/40 text-slate-200 hover:text-sky-300 text-xs font-medium flex items-center gap-1.5 transition-all"
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-300 hover:text-sky-300 text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 cursor-pointer"
                   title="Putar Komponen & Gambar 90° (Shortcut: Tombol R atau Spasi)"
                 >
                   <RotateCw className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Putar 90°</span>
-                  <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-slate-900 text-slate-400 rounded border border-slate-700">
-                    R / Spasi
+                  <span className="hidden sm:inline">Putar 90°</span>
+                  <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-slate-950 text-slate-400 rounded border border-slate-800">
+                    R
                   </span>
                 </button>
               </div>
 
-              {/* Breadboard Overlay & Pin Label Visibility Controls */}
-              <div className="flex items-center gap-3">
-                {/* Pin Labels Toggle (Hover vs Always) */}
-                <label
-                  className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300"
-                  title="Tampilkan label nama pin hanya saat di-hover (Default) atau selalu tampil"
+              {/* Guides, Overlays & Zoom */}
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Magnet Snap Toggle Button */}
+                <button
+                  onClick={() => setSnapToBreadboard(!snapToBreadboard)}
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-sm shrink-0 cursor-pointer ${
+                    snapToBreadboard
+                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300'
+                  }`}
+                  title="Kunci posisi pin tepat di lubang breadboard (Pitch 17px)"
                 >
-                  <input
-                    type="checkbox"
-                    checked={alwaysShowLabels}
-                    onChange={(e) => setAlwaysShowLabels(e.target.checked)}
-                    className="rounded border-slate-700 bg-slate-900 text-sky-500 w-3.5 h-3.5"
-                  />
-                  <span>Selalu Tampilkan Label</span>
-                </label>
+                  <Magnet className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Snap 17px</span>
+                </button>
 
-                <div className="h-4 w-px bg-slate-700" />
+                {/* Pin Labels Toggle Button */}
+                <button
+                  onClick={() => setAlwaysShowLabels(!alwaysShowLabels)}
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-sm shrink-0 cursor-pointer ${
+                    alwaysShowLabels
+                      ? 'bg-sky-500/15 border-sky-500/40 text-sky-300'
+                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300'
+                  }`}
+                  title={alwaysShowLabels ? 'Label selalu tampil' : 'Label hanya tampil saat pin di-hover (Default)'}
+                >
+                  <Tag className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Label</span>
+                </button>
 
-                {/* Breadboard Toggle */}
-                <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
-                  <input
-                    type="checkbox"
-                    checked={showBreadboard}
-                    onChange={(e) => setShowBreadboard(e.target.checked)}
-                    className="rounded border-slate-700 bg-slate-900 text-sky-500 w-3.5 h-3.5"
-                  />
-                  <span>Overlay Breadboard</span>
-                </label>
-
-                {/* Breadboard Type Dropdown */}
-                {showBreadboard && (
-                  <select
-                    value={breadboardType}
-                    onChange={(e) => setBreadboardType(e.target.value as any)}
-                    className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded px-2 py-0.5"
-                  >
-                    <option value="half">Half (400 Pin)</option>
-                    <option value="mini">Mini (170 Pin)</option>
-                    <option value="grid">Grid 17px</option>
-                  </select>
-                )}
-
-                {/* Opacity slider */}
-                {showBreadboard && (
-                  <div className="hidden xl:flex items-center gap-1.5 text-xs text-slate-400" title="Transparansi Breadboard">
-                    <span className="text-[10px]">Opasitas:</span>
+                {/* Breadboard Capsule */}
+                <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-xl border border-slate-800 shadow-sm shrink-0">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300 select-none">
                     <input
-                      type="range"
-                      min="0.1"
-                      max="1.0"
-                      step="0.05"
-                      value={breadboardOpacity}
-                      onChange={(e) => setBreadboardOpacity(Number(e.target.value))}
-                      className="w-16 accent-sky-500 h-1 bg-slate-800 rounded cursor-pointer"
+                      type="checkbox"
+                      checked={showBreadboard}
+                      onChange={(e) => setShowBreadboard(e.target.checked)}
+                      className="rounded border-slate-700 bg-slate-950 text-sky-500 w-3.5 h-3.5 cursor-pointer"
                     />
-                  </div>
-                )}
+                    <span className="font-semibold text-xs">Breadboard</span>
+                  </label>
 
-                {/* Magnet Snap */}
-                <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
-                  <input
-                    type="checkbox"
-                    checked={snapToBreadboard}
-                    onChange={(e) => setSnapToBreadboard(e.target.checked)}
-                    className="rounded border-slate-700 bg-slate-900 text-emerald-500 w-3.5 h-3.5"
-                  />
-                  <span>Magnet Snap (17px)</span>
-                </label>
+                  {showBreadboard && (
+                    <>
+                      <select
+                        value={breadboardType}
+                        onChange={(e) => setBreadboardType(e.target.value as any)}
+                        className="bg-slate-950 border border-slate-700/80 text-slate-200 text-[11px] rounded-lg px-2 py-0.5 outline-none focus:border-sky-500 cursor-pointer"
+                      >
+                        <option value="half">Half (400)</option>
+                        <option value="mini">Mini (170)</option>
+                        <option value="grid">Grid 17px</option>
+                      </select>
 
-                <div className="h-4 w-px bg-slate-700" />
+                      <div className="flex items-center gap-1 pl-1 border-l border-slate-800" title="Transparansi Breadboard">
+                        <input
+                          type="range"
+                          min="0.1"
+                          max="1.0"
+                          step="0.05"
+                          value={breadboardOpacity}
+                          onChange={(e) => setBreadboardOpacity(Number(e.target.value))}
+                          className="w-14 accent-sky-500 h-1 bg-slate-800 rounded cursor-pointer"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
 
-                {/* Zoom controls */}
-                <div className="flex items-center gap-1">
+                {/* Zoom Capsule */}
+                <div className="flex items-center gap-0.5 bg-slate-900 px-1 py-1 rounded-xl border border-slate-800 shadow-sm shrink-0">
                   <button
                     onClick={() => setZoom((z) => Math.max(0.4, z - 0.2))}
-                    className="p-1 rounded hover:bg-slate-800 text-slate-300"
+                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
                     title="Zoom Out"
                   >
                     <ZoomOut className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-[11px] font-mono text-slate-300 w-12 text-center">
+                  <span className="text-[11px] font-mono text-slate-300 font-bold px-1 min-w-[38px] text-center">
                     {Math.round(zoom * 100)}%
                   </span>
                   <button
                     onClick={() => setZoom((z) => Math.min(4.0, z + 0.2))}
-                    className="p-1 rounded hover:bg-slate-800 text-slate-300"
+                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
                     title="Zoom In"
                   >
                     <ZoomIn className="w-3.5 h-3.5" />
@@ -1431,8 +1431,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       setZoom(1.8);
                       setPan({ x: 0, y: 0 });
                     }}
-                    className="p-1 rounded hover:bg-slate-800 text-slate-300"
-                    title="Reset View"
+                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-sky-300 transition-colors ml-0.5 border-l border-slate-800"
+                    title="Reset Posisi & Zoom"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                   </button>
