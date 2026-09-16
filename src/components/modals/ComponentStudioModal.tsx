@@ -81,12 +81,27 @@ const CATEGORIES = [
   { id: 'custom', label: 'Custom' },
 ];
 
+// Physical to Pixel Conversion Helpers (Standard 2.54mm Breadboard Pitch = 17.0px)
+export const MM_PER_PX = 2.54 / 17.0; // ~0.14941176 mm per px
+export const PX_PER_MM = 17.0 / 2.54; // ~6.69291339 px per mm
+
+export const pxToMm = (px: number, decimals = 1): number => {
+  return Number((px * MM_PER_PX).toFixed(decimals));
+};
+
+export const mmToPx = (mm: number, decimals = 1): number => {
+  return Number((mm * PX_PER_MM).toFixed(decimals));
+};
+
 export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   isOpen,
   onClose,
   onComponentSaved,
   initialDefinition,
 }) => {
+  // Measurement Unit: 'mm' (Physical Millimeters - Default) | 'px' (Canvas Pixels)
+  const [unit, setUnit] = useState<'mm' | 'px'>('mm');
+
   // Image state (raw original preserved for non-destructive re-runs)
   const [rawImageDataUrl, setRawImageDataUrl] = useState<string>('');
   const [imageDataUrl, setImageDataUrl] = useState<string>('');
@@ -1313,37 +1328,84 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             {/* Dimension, Rotation & Image Positioning Controls */}
             <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-800">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-200">2. Ukuran & Posisi Gambar</label>
-                {/* Rotate 90 deg button */}
-                <button
-                  onClick={handleRotateClockwise}
-                  className="px-2 py-1 rounded bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-[11px] font-semibold flex items-center gap-1 transition-colors"
-                  title="Putar 90° Searah Jarum Jam (Shortcut: Tombol R atau Spasi)"
-                >
-                  <RotateCw className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Putar 90° (R)</span>
-                </button>
+                <label className="text-xs font-semibold text-slate-200">2. Ukuran & Posisi</label>
+
+                <div className="flex items-center gap-1.5">
+                  {/* Unit Switcher: mm / px */}
+                  <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                    <button
+                      onClick={() => setUnit('mm')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                        unit === 'mm'
+                          ? 'bg-sky-500 text-slate-950 shadow'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                      title="Gunakan satuan Milimeter (mm) - Standar Fisik Komponen"
+                    >
+                      mm
+                    </button>
+                    <button
+                      onClick={() => setUnit('px')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                        unit === 'px'
+                          ? 'bg-sky-500 text-slate-950 shadow'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                      title="Gunakan satuan Pixel (px) - Standar Kanvas"
+                    >
+                      px
+                    </button>
+                  </div>
+
+                  {/* Rotate 90 deg button */}
+                  <button
+                    onClick={handleRotateClockwise}
+                    className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold flex items-center gap-1 transition-colors"
+                    title="Putar 90° Searah Jarum Jam (Shortcut: Tombol R atau Spasi)"
+                  >
+                    <RotateCw className="w-3 h-3 text-sky-400" />
+                    <span>90°</span>
+                  </button>
+                </div>
               </div>
 
               {/* Width & Height */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <span className="text-[10px] text-slate-400">Lebar (Width px)</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400">Lebar ({unit})</span>
+                    <span className="text-[9px] font-mono text-slate-400">
+                      {unit === 'mm' ? `≈ ${width} px` : `≈ ${pxToMm(width, 1)} mm`}
+                    </span>
+                  </div>
                   <input
                     type="number"
-                    value={width}
-                    onChange={(e) => handleWidthChange(Number(e.target.value))}
-                    step="1"
+                    value={unit === 'mm' ? pxToMm(width, 1) : width}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      const pxVal = unit === 'mm' ? mmToPx(val, 1) : val;
+                      handleWidthChange(pxVal);
+                    }}
+                    step={unit === 'mm' ? '0.1' : '1'}
                     className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400">Tinggi (Height px)</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400">Tinggi ({unit})</span>
+                    <span className="text-[9px] font-mono text-slate-400">
+                      {unit === 'mm' ? `≈ ${height} px` : `≈ ${pxToMm(height, 1)} mm`}
+                    </span>
+                  </div>
                   <input
                     type="number"
-                    value={height}
-                    onChange={(e) => handleHeightChange(Number(e.target.value))}
-                    step="1"
+                    value={unit === 'mm' ? pxToMm(height, 1) : height}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      const pxVal = unit === 'mm' ? mmToPx(val, 1) : val;
+                      handleHeightChange(pxVal);
+                    }}
+                    step={unit === 'mm' ? '0.1' : '1'}
                     className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
                   />
                 </div>
@@ -1378,22 +1440,44 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-[10px] text-slate-400">Offset X (px)</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400">Offset X ({unit})</span>
+                      <span className="text-[9px] font-mono text-slate-400">
+                        {unit === 'mm' ? `≈ ${imageOffset.x} px` : `≈ ${pxToMm(imageOffset.x, 2)} mm`}
+                      </span>
+                    </div>
                     <input
                       type="number"
-                      value={imageOffset.x}
-                      onChange={(e) => setImageOffset({ ...imageOffset, x: Number(e.target.value) })}
-                      step="0.5"
+                      value={unit === 'mm' ? pxToMm(imageOffset.x, 2) : imageOffset.x}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        const pxVal = unit === 'mm' ? mmToPx(val, 1) : val;
+                        const next = { ...imageOffset, x: pxVal };
+                        setImageOffset(next);
+                        pushSnapshot({ imageOffset: next });
+                      }}
+                      step={unit === 'mm' ? '0.1' : '0.5'}
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
                     />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400">Offset Y (px)</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400">Offset Y ({unit})</span>
+                      <span className="text-[9px] font-mono text-slate-400">
+                        {unit === 'mm' ? `≈ ${imageOffset.y} px` : `≈ ${pxToMm(imageOffset.y, 2)} mm`}
+                      </span>
+                    </div>
                     <input
                       type="number"
-                      value={imageOffset.y}
-                      onChange={(e) => setImageOffset({ ...imageOffset, y: Number(e.target.value) })}
-                      step="0.5"
+                      value={unit === 'mm' ? pxToMm(imageOffset.y, 2) : imageOffset.y}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        const pxVal = unit === 'mm' ? mmToPx(val, 1) : val;
+                        const next = { ...imageOffset, y: pxVal };
+                        setImageOffset(next);
+                        pushSnapshot({ imageOffset: next });
+                      }}
+                      step={unit === 'mm' ? '0.1' : '0.5'}
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
                     />
                   </div>
@@ -1404,30 +1488,30 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   <span className="text-[10px] text-slate-400">Nudge Gambar:</span>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => nudgeImage(-1.0, 0)}
+                      onClick={() => nudgeImage(unit === 'mm' ? -mmToPx(0.5, 1) : -1.0, 0)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      title="Geser Gambar Kiri (-1px)"
+                      title={`Geser Gambar Kiri (-${unit === 'mm' ? '0.5mm' : '1px'})`}
                     >
                       <ArrowLeft className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => nudgeImage(0, -1.0)}
+                      onClick={() => nudgeImage(0, unit === 'mm' ? -mmToPx(0.5, 1) : -1.0)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      title="Geser Gambar Atas (-1px)"
+                      title={`Geser Gambar Atas (-${unit === 'mm' ? '0.5mm' : '1px'})`}
                     >
                       <ArrowUp className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => nudgeImage(0, 1.0)}
+                      onClick={() => nudgeImage(0, unit === 'mm' ? mmToPx(0.5, 1) : 1.0)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      title="Geser Gambar Bawah (+1px)"
+                      title={`Geser Gambar Bawah (+${unit === 'mm' ? '0.5mm' : '1px'})`}
                     >
                       <ArrowDown className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => nudgeImage(1.0, 0)}
+                      onClick={() => nudgeImage(unit === 'mm' ? mmToPx(0.5, 1) : 1.0, 0)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      title="Geser Gambar Kanan (+1px)"
+                      title={`Geser Gambar Kanan (+${unit === 'mm' ? '0.5mm' : '1px'})`}
                     >
                       <ArrowRight className="w-3 h-3" />
                     </button>
@@ -1595,10 +1679,14 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
                       : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300'
                   }`}
-                  title="Kunci posisi pin tepat di lubang breadboard (Pitch 17px)"
+                  title={
+                    unit === 'mm'
+                      ? 'Kunci posisi pin tepat di lubang breadboard (Pitch 2.54mm / 17px)'
+                      : 'Kunci posisi pin tepat di lubang breadboard (Pitch 17px)'
+                  }
                 >
                   <Magnet className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Snap 17px</span>
+                  <span>{unit === 'mm' ? 'Snap 2.54mm' : 'Snap 17px'}</span>
                 </button>
 
                 {/* Pin Labels Toggle Button */}
@@ -1921,15 +2009,64 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   />
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400">Pitch (px)</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400">Pitch ({unit})</span>
+                    <span className="text-[9px] font-mono text-slate-400">
+                      {unit === 'mm' ? `≈ ${genPitch} px` : `≈ ${pxToMm(genPitch, 2)} mm`}
+                    </span>
+                  </div>
                   <input
                     type="number"
-                    value={genPitch}
-                    onChange={(e) => setGenPitch(Number(e.target.value))}
-                    step="0.5"
+                    value={unit === 'mm' ? pxToMm(genPitch, 2) : genPitch}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      const pxVal = unit === 'mm' ? mmToPx(val, 2) : val;
+                      setGenPitch(pxVal);
+                    }}
+                    step={unit === 'mm' ? '0.01' : '0.5'}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
                   />
                 </div>
+              </div>
+
+              {/* Quick Pitch Pills */}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setGenPitch(17.0)}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
+                    Math.abs(genPitch - 17.0) < 0.1
+                      ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 font-bold'
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                  }`}
+                  title="Standar Breadboard / DIP (2.54 mm / 17 px)"
+                >
+                  2.54mm (DIP)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGenPitch(mmToPx(2.0, 2))}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
+                    Math.abs(genPitch - mmToPx(2.0, 2)) < 0.1
+                      ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 font-bold'
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                  }`}
+                  title="Pitch 2.0 mm (XBee / Mini Modules)"
+                >
+                  2.00mm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGenPitch(mmToPx(1.27, 2))}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
+                    Math.abs(genPitch - mmToPx(1.27, 2)) < 0.1
+                      ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 font-bold'
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                  }`}
+                  title="Pitch 1.27 mm (SMD / SOP)"
+                >
+                  1.27mm
+                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
@@ -1961,7 +2098,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 className="w-full py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
-                Generate Deretan Pin (17px)
+                Generate Deretan Pin ({unit === 'mm' ? `${pxToMm(genPitch, 2)}mm` : `${genPitch}px`})
               </button>
             </div>
 
@@ -2020,22 +2157,40 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-[10px] text-slate-400">Koordinat X (px)</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400">Koordinat X ({unit})</span>
+                      <span className="text-[9px] font-mono text-slate-400">
+                        {unit === 'mm' ? `≈ ${selectedPin.x} px` : `≈ ${pxToMm(selectedPin.x, 2)} mm`}
+                      </span>
+                    </div>
                     <input
                       type="number"
-                      value={selectedPin.x}
-                      onChange={(e) => updateSelectedPin({ x: Number(e.target.value) })}
-                      step="0.1"
+                      value={unit === 'mm' ? pxToMm(selectedPin.x, 2) : selectedPin.x}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        const pxVal = unit === 'mm' ? mmToPx(val, 2) : val;
+                        updateSelectedPin({ x: pxVal });
+                      }}
+                      step={unit === 'mm' ? '0.1' : '0.1'}
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
                     />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400">Koordinat Y (px)</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400">Koordinat Y ({unit})</span>
+                      <span className="text-[9px] font-mono text-slate-400">
+                        {unit === 'mm' ? `≈ ${selectedPin.y} px` : `≈ ${pxToMm(selectedPin.y, 2)} mm`}
+                      </span>
+                    </div>
                     <input
                       type="number"
-                      value={selectedPin.y}
-                      onChange={(e) => updateSelectedPin({ y: Number(e.target.value) })}
-                      step="0.1"
+                      value={unit === 'mm' ? pxToMm(selectedPin.y, 2) : selectedPin.y}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        const pxVal = unit === 'mm' ? mmToPx(val, 2) : val;
+                        updateSelectedPin({ y: pxVal });
+                      }}
+                      step={unit === 'mm' ? '0.1' : '0.1'}
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
                     />
                   </div>
@@ -2046,30 +2201,30 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   <span className="text-[10px] text-slate-400">Micro Nudge:</span>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => nudgePin(-0.5, 0)}
+                      onClick={() => nudgePin(unit === 'mm' ? -mmToPx(0.5, 1) : -0.5, 0)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      title="Nudge Kiri (-0.5px)"
+                      title={`Nudge Kiri (-${unit === 'mm' ? '0.5mm' : '0.5px'})`}
                     >
                       <ArrowLeft className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => nudgePin(0, -0.5)}
+                      onClick={() => nudgePin(0, unit === 'mm' ? -mmToPx(0.5, 1) : -0.5)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      title="Nudge Atas (-0.5px)"
+                      title={`Nudge Atas (-${unit === 'mm' ? '0.5mm' : '0.5px'})`}
                     >
                       <ArrowUp className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => nudgePin(0, 0.5)}
+                      onClick={() => nudgePin(0, unit === 'mm' ? mmToPx(0.5, 1) : 0.5)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      title="Nudge Bawah (+0.5px)"
+                      title={`Nudge Bawah (+${unit === 'mm' ? '0.5mm' : '0.5px'})`}
                     >
                       <ArrowDown className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => nudgePin(0.5, 0)}
+                      onClick={() => nudgePin(unit === 'mm' ? mmToPx(0.5, 1) : 0.5, 0)}
                       className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      title="Nudge Kanan (+0.5px)"
+                      title={`Nudge Kanan (+${unit === 'mm' ? '0.5mm' : '0.5px'})`}
                     >
                       <ArrowRight className="w-3 h-3" />
                     </button>
