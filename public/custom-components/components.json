@@ -63,6 +63,56 @@
     },
     "imageUrl": "/components/tp4056.png",
     "createdAt": "2026-09-16T16:11:45.310Z",
-    "updatedAt": "2026-09-16T16:11:45.310Z"
+    "updatedAt": "2026-09-16T16:18:56.841Z"
+  },
+  "xl4015-display": {
+    "definition": {
+      "type": "xl4015-display",
+      "name": "Step-Down XL4015 5A (Display Voltmeter)",
+      "category": "power",
+      "description": "Modul penurun tegangan DC-DC Step-Down Buck Converter XL4015 5A dengan voltmeter digital LED 3-digit, tombol pemilih display & switch off, serta terminal sekrup input/output.",
+      "width": 448.4,
+      "height": 254.3,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "OUT-",
+          "x": 26,
+          "y": 106,
+          "type": "power",
+          "description": "Pin 1"
+        },
+        {
+          "id": "pin_2",
+          "name": "OUT+",
+          "x": 26,
+          "y": 142,
+          "type": "power",
+          "description": "Pin 2"
+        },
+        {
+          "id": "pin_3",
+          "name": "IN-",
+          "x": 422,
+          "y": 106,
+          "type": "power",
+          "description": "Pin 3"
+        },
+        {
+          "id": "pin_4",
+          "name": "IN+",
+          "x": 423,
+          "y": 142,
+          "type": "power",
+          "description": "Pin 4"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/xl4015-display.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/xl4015-display.png",
+    "createdAt": "2026-09-16T16:29:00.266Z",
+    "updatedAt": "2026-09-16T16:29:00.266Z"
   }
 }

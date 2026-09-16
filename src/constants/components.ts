@@ -1812,22 +1812,6 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'buck-converter-xl4015-display': {
-    type: 'buck-converter-xl4015-display',
-    name: 'Step-Down XL4015 5A (Display Voltmeter)',
-    category: 'power',
-    description: 'Modul penurun tegangan DC-DC Step-Down Buck Converter XL4015 5A dengan voltmeter digital LED 3-digit, tombol pemilih display & switch off, serta terminal sekrup input/output.',
-    width: 320.0,
-    height: 178.8,
-    icon: 'Zap',
-    pins: [
-      { id: 'in_minus', name: 'IN- (GND)', x: 302.0, y: 76.8, type: 'ground', description: 'Ground Masukan (0V)' },
-      { id: 'in_plus', name: 'IN+ (VIN)', x: 302.0, y: 98.2, type: 'power', description: 'Tegangan Masukan Positif (+4.0V - 38V DC)' },
-      { id: 'out_minus', name: 'OUT- (GND)', x: 18.0, y: 76.8, type: 'ground', description: 'Ground Keluaran (0V)' },
-      { id: 'out_plus', name: 'OUT+ (VOUT)', x: 18.0, y: 98.2, type: 'power', description: 'Tegangan Keluaran Teratur Positif (+1.25V - 36V DC)' },
-    ],
-  },
-
   'buck-converter-xl4015': {
     type: 'buck-converter-xl4015',
     name: 'Step-Down XL4015 5A (CV-CC)',

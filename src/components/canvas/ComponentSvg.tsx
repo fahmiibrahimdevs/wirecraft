@@ -1404,18 +1404,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      case 'buck-converter-xl4015-display':
-        return (
-          <image
-            href="/components/step_down_xl4015_display.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'buck-converter-xl4015':
         return (
           <image

@@ -74,7 +74,6 @@ export type ComponentType =
   | 'sensor-ads1115'
   | 'sensor-jsn-sr04t'
   | 'module-sim800l'
-  | 'buck-converter-xl4015-display'
   | 'buck-converter-xl4015'
   | (string & {});
 
