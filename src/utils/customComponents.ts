@@ -112,7 +112,11 @@ export function generateTypeScriptCode(definition: ComponentDefinition, imageFil
     description: '${definition.description.replace(/'/g, "\\'")}',
     width: ${definition.width.toFixed(1)},
     height: ${definition.height.toFixed(1)},
-    icon: '${definition.icon || 'Cpu'}',
+    icon: '${definition.icon || 'Cpu'}',${
+      definition.imageOffset && (definition.imageOffset.x !== 0 || definition.imageOffset.y !== 0)
+        ? `\n    imageOffset: { x: ${definition.imageOffset.x.toFixed(1)}, y: ${definition.imageOffset.y.toFixed(1)} },`
+        : ''
+    }
     pins: [
 ${pinsFormatted}
     ],
@@ -123,8 +127,8 @@ ${pinsFormatted}
     return (
       <image
         href="${imageFileName ? `/components/${imageFileName}` : `/components/${definition.type.replace(/-/g, '_')}.png`}"
-        x="0"
-        y="0"
+        x="${definition.imageOffset?.x ? definition.imageOffset.x.toFixed(1) : '0'}"
+        y="${definition.imageOffset?.y ? definition.imageOffset.y.toFixed(1) : '0'}"
         width={width}
         height={height}
         preserveAspectRatio="none"

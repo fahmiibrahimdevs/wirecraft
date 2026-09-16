@@ -146,6 +146,7 @@ export interface ComponentDefinition {
   defaultProps?: Record<string, any>;
   icon: string; // Lucide icon name or svg tag
   imageUrl?: string;
+  imageOffset?: { x: number; y: number };
   isCustom?: boolean;
 }
 

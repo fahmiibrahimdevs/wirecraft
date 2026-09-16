@@ -1494,12 +1494,14 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
 
       default: {
         const customImg = (def as any)?.imageUrl || component.customProps?.customImage;
+        const imgOffsetX = def.imageOffset?.x || 0;
+        const imgOffsetY = def.imageOffset?.y || 0;
         if (customImg) {
           return (
             <image
               href={customImg}
-              x="0"
-              y="0"
+              x={imgOffsetX}
+              y={imgOffsetY}
               width={width}
               height={height}
               preserveAspectRatio="none"

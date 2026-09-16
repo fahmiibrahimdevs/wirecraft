@@ -38,6 +38,9 @@ import {
   ShieldCheck,
   Globe,
   Undo,
+  Image as ImageIcon,
+  AlignCenter,
+  Compass,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -95,10 +98,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [description, setDescription] = useState<string>('Modul kustom terkalibrasi');
   const [icon, setIcon] = useState<string>('Cpu');
 
-  // Dimension state (WireCraft logical units)
+  // Dimension & Image Offset state (WireCraft logical units)
   const [width, setWidth] = useState<number>(200);
   const [height, setHeight] = useState<number>(150);
   const [lockAspectRatio, setLockAspectRatio] = useState<boolean>(true);
+  const [imageOffset, setImageOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Pins state
   const [pins, setPins] = useState<Pin[]>([]);
@@ -112,14 +116,23 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
   // Breadboard overlay & snapping helpers
   const [showBreadboard, setShowBreadboard] = useState<boolean>(true);
+  const [breadboardType, setBreadboardType] = useState<'half' | 'mini' | 'grid'>('half');
+  const [breadboardOpacity, setBreadboardOpacity] = useState<number>(0.7);
   const [snapToBreadboard, setSnapToBreadboard] = useState<boolean>(true);
   const [breadboardOffset, setBreadboardOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Pin Dragging State
-  const [draggingPinId, setDraggingPinId] = useState<string | null>(null);
+  // Tool mode: 'select-pin' | 'drag-image' | 'add-pin'
+  const [toolMode, setToolMode] = useState<'select-pin' | 'drag-image' | 'add-pin'>('select-pin');
 
-  // Tool mode: 'select' | 'add-pin'
-  const [toolMode, setToolMode] = useState<'select' | 'add-pin'>('select');
+  // Dragging states
+  const [draggingPinId, setDraggingPinId] = useState<string | null>(null);
+  const [isDraggingImage, setIsDraggingImage] = useState<boolean>(false);
+  const [imageDragStart, setImageDragStart] = useState<{ mouseX: number; mouseY: number; startX: number; startY: number }>({
+    mouseX: 0,
+    mouseY: 0,
+    startX: 0,
+    startY: 0,
+  });
 
   // Multi-pin Generator state
   const [genCount, setGenCount] = useState<number>(6);
@@ -146,6 +159,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       setWidth(initialDefinition.width);
       setHeight(initialDefinition.height);
       setPins(initialDefinition.pins || []);
+      if (initialDefinition.imageOffset) {
+        setImageOffset(initialDefinition.imageOffset);
+      }
       if ((initialDefinition as any).imageUrl) {
         setImageDataUrl((initialDefinition as any).imageUrl);
         setRawImageDataUrl((initialDefinition as any).imageUrl);
@@ -192,6 +208,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         setOriginalImageSize({ width: img.naturalWidth, height: img.naturalHeight });
         setRawImageDataUrl(dataUrl);
         setImageDataUrl(dataUrl);
+        setImageOffset({ x: 0, y: 0 });
 
         // Auto calculate initial logical dimensions
         const aspect = img.naturalWidth / img.naturalHeight;
@@ -275,14 +292,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
         if (bgAlgorithm === 'flood-fill') {
           // --- FLOOD FILL / EDGE BFS ALGORITHM (SILKSCREEN SAFE) ---
-          // visited: 0 = unvisited (internal / untouched), 1 = outer background (remove), 2 = foreground / boundary
           const visited = new Uint8Array(W * H);
           const qx = new Int32Array(W * H);
           const qy = new Int32Array(W * H);
           let head = 0;
           let tail = 0;
 
-          // Helper to enqueue
           const enqueue = (x: number, y: number) => {
             const idx = y * W + x;
             if (visited[idx] !== 0) return;
@@ -293,11 +308,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               qy[tail] = y;
               tail++;
             } else {
-              visited[idx] = 2; // Hit component boundary on edge
+              visited[idx] = 2; // Component boundary on border
             }
           };
 
-          // Seed with all 4 outer borders of the image
           for (let x = 0; x < W; x++) {
             enqueue(x, 0);
             enqueue(x, H - 1);
@@ -307,13 +321,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             enqueue(W - 1, y);
           }
 
-          // BFS propagation through contiguous outer background
           while (head < tail) {
             const cx = qx[head];
             const cy = qy[head];
             head++;
 
-            // 4-directional neighbor expansion
             const neighbors = [
               [cx + 1, cy],
               [cx - 1, cy],
@@ -335,24 +347,21 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     qy[tail] = ny;
                     tail++;
                   } else {
-                    visited[nIdx] = 2; // Component edge boundary
+                    visited[nIdx] = 2;
                   }
                 }
               }
             }
           }
 
-          // Erase ONLY the outer flood-filled background
           for (let y = 0; y < H; y++) {
             for (let x = 0; x < W; x++) {
               const idx = y * W + x;
               const p = idx * 4;
 
               if (visited[idx] === 1) {
-                // Outer background: set alpha = 0
                 data[p + 3] = 0;
               } else if (visited[idx] === 2) {
-                // Component boundary pixel touching background: apply soft anti-aliasing
                 const r = data[p];
                 const g = data[p + 1];
                 const b = data[p + 2];
@@ -365,7 +374,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   data[p + 3] = Math.round(data[p + 3] * factor);
                 }
               }
-              // visited === 0 (Internal silkscreen, IC text, internal traces): 100% untouched!
             }
           }
         } else {
@@ -422,7 +430,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }
   };
 
-  // Pin Dragging Mouse Event Listeners (Global window tracking for buttery smooth drag)
+  // Image Offset Nudge
+  const nudgeImage = (dx: number, dy: number) => {
+    setImageOffset((prev) => ({
+      x: Math.round((prev.x + dx) * 10) / 10,
+      y: Math.round((prev.y + dy) * 10) / 10,
+    }));
+  };
+
+  // Pin Dragging Mouse Event Listeners
   useEffect(() => {
     if (!draggingPinId) return;
 
@@ -439,8 +455,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         finalY = Math.round(rawY * 10) / 10;
       }
 
-      finalX = Math.max(0, Math.min(width, finalX));
-      finalY = Math.max(0, Math.min(height, finalY));
+      finalX = Math.max(-50, Math.min(width + 50, finalX));
+      finalY = Math.max(-50, Math.min(height + 50, finalY));
 
       setPins((prevPins) =>
         prevPins.map((p) =>
@@ -469,7 +485,41 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     height,
   ]);
 
-  // Handle Pin Mouse Down to start dragging
+  // Image Dragging Mouse Event Listeners
+  useEffect(() => {
+    if (!isDraggingImage) return;
+
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      const deltaX = (e.clientX - imageDragStart.mouseX) / zoom;
+      const deltaY = (e.clientY - imageDragStart.mouseY) / zoom;
+
+      let newX = imageDragStart.startX + deltaX;
+      let newY = imageDragStart.startY + deltaY;
+
+      if (snapToBreadboard) {
+        newX = snapCoordinate(newX, breadboardOffset.x % 17);
+        newY = snapCoordinate(newY, breadboardOffset.y % 17);
+      } else {
+        newX = Math.round(newX * 10) / 10;
+        newY = Math.round(newY * 10) / 10;
+      }
+
+      setImageOffset({ x: newX, y: newY });
+    };
+
+    const handleWindowMouseUp = () => {
+      setIsDraggingImage(false);
+    };
+
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseup', handleWindowMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowMouseUp);
+    };
+  }, [isDraggingImage, imageDragStart, zoom, snapToBreadboard, breadboardOffset.x, breadboardOffset.y]);
+
+  // Handle Pin Mouse Down to start dragging pin
   const handlePinMouseDown = (e: React.MouseEvent, pinId: string) => {
     if (e.button !== 0) return; // Left click only
     e.stopPropagation();
@@ -478,22 +528,30 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setDraggingPinId(pinId);
   };
 
+  // Handle Image Mouse Down to start dragging component image
+  const handleImageMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    if (toolMode === 'drag-image') {
+      e.stopPropagation();
+      e.preventDefault();
+      setIsDraggingImage(true);
+      setImageDragStart({
+        mouseX: e.clientX,
+        mouseY: e.clientY,
+        startX: imageOffset.x,
+        startY: imageOffset.y,
+      });
+    }
+  };
+
   // Canvas click to add new pin
   const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (isPanning || draggingPinId) return;
+    if (isPanning || draggingPinId || isDraggingImage) return;
     const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
-
-    // Check bounds
-    if (rawX < -15 || rawX > width + 15 || rawY < -15 || rawY > height + 15) {
-      return;
-    }
 
     if (toolMode === 'add-pin') {
       let finalX = snapToBreadboard ? snapCoordinate(rawX, breadboardOffset.x % 17) : Math.round(rawX * 10) / 10;
       let finalY = snapToBreadboard ? snapCoordinate(rawY, breadboardOffset.y % 17) : Math.round(rawY * 10) / 10;
-
-      finalX = Math.max(0, Math.min(width, finalX));
-      finalY = Math.max(0, Math.min(height, finalY));
 
       const newId = `pin_${pins.length + 1}`;
       const newPin: Pin = {
@@ -536,42 +594,62 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   // Micro-nudge pin with keyboard arrow keys
   const nudgePin = (dx: number, dy: number) => {
     if (!selectedPin) return;
-    const newX = Math.max(0, Math.min(width, Math.round((selectedPin.x + dx) * 10) / 10));
-    const newY = Math.max(0, Math.min(height, Math.round((selectedPin.y + dy) * 10) / 10));
+    const newX = Math.round((selectedPin.x + dx) * 10) / 10;
+    const newY = Math.round((selectedPin.y + dy) * 10) / 10;
     updateSelectedPin({ x: newX, y: newY });
   };
 
+  // Keyboard navigation & nudging
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen || !selectedPin) return;
+      if (!isOpen) return;
       if (['input', 'textarea', 'select'].includes((e.target as HTMLElement)?.tagName.toLowerCase())) {
         return;
       }
 
       const step = e.shiftKey ? 5.0 : e.altKey ? 0.1 : 1.0;
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        nudgePin(0, -step);
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        nudgePin(0, step);
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        nudgePin(-step, 0);
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        nudgePin(step, 0);
-      } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (selectedPinId) {
+
+      if (toolMode === 'drag-image') {
+        // Nudge image with arrow keys
+        if (e.key === 'ArrowUp') {
           e.preventDefault();
-          deletePin(selectedPinId);
+          nudgeImage(0, -step);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          nudgeImage(0, step);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          nudgeImage(-step, 0);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          nudgeImage(step, 0);
+        }
+      } else if (selectedPin) {
+        // Nudge pin with arrow keys
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          nudgePin(0, -step);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          nudgePin(0, step);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          nudgePin(-step, 0);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          nudgePin(step, 0);
+        } else if (e.key === 'Delete' || e.key === 'Backspace') {
+          if (selectedPinId) {
+            e.preventDefault();
+            deletePin(selectedPinId);
+          }
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, selectedPin, selectedPinId, width, height]);
+  }, [isOpen, selectedPin, selectedPinId, toolMode, width, height]);
 
   // Generate multi-pin / DIP Row
   const handleGeneratePinRow = () => {
@@ -584,16 +662,14 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const px = genOrientation === 'horizontal' ? startX + i * genPitch : startX;
       const py = genOrientation === 'vertical' ? startY + i * genPitch : startY;
 
-      if (px <= width && py <= height) {
-        newGeneratedPins.push({
-          id: `${genPrefix}_${i + 1}`,
-          name: `${genPrefix.toUpperCase()}${i + 1}`,
-          x: Math.round(px * 10) / 10,
-          y: Math.round(py * 10) / 10,
-          type: 'digital',
-          description: `Header Pin ${i + 1}`,
-        });
-      }
+      newGeneratedPins.push({
+        id: `${genPrefix}_${i + 1}`,
+        name: `${genPrefix.toUpperCase()}${i + 1}`,
+        x: Math.round(px * 10) / 10,
+        y: Math.round(py * 10) / 10,
+        type: 'digital',
+        description: `Header Pin ${i + 1}`,
+      });
     }
 
     setPins([...pins, ...newGeneratedPins]);
@@ -615,6 +691,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       pins,
       icon: icon || 'Cpu',
       imageUrl: imageDataUrl,
+      imageOffset: (imageOffset.x !== 0 || imageOffset.y !== 0) ? imageOffset : undefined,
       isCustom: true,
     };
 
@@ -636,6 +713,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       height: Math.round(height * 10) / 10,
       pins,
       icon: icon || 'Cpu',
+      imageOffset: (imageOffset.x !== 0 || imageOffset.y !== 0) ? imageOffset : undefined,
       isCustom: true,
     };
 
@@ -664,6 +742,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             setWidth(def.width || 200);
             setHeight(def.height || 150);
             setPins(def.pins || []);
+            if (def.imageOffset) {
+              setImageOffset(def.imageOffset);
+            }
             if (item.imageBase64 || def.imageUrl) {
               const imgUrl = item.imageBase64 || def.imageUrl;
               setRawImageDataUrl(imgUrl);
@@ -698,7 +779,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </span>
               </h2>
               <span className="text-[11px] text-slate-400">
-                Visual Pin Calibrator & HD Component Builder
+                Visual Pin Calibrator & Breadboard Alignment Studio
               </span>
             </div>
           </div>
@@ -826,7 +907,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Magic Background Remover with Flood Fill & Silkscreen Protection */}
+                  {/* Magic Background Remover */}
                   <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex flex-col gap-2.5">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-slate-200 flex items-center gap-1.5">
@@ -846,7 +927,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                             ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold shadow-sm'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title="Hanya hapus background luar yang menyentuh pinggir foto. Silkscreen/sablon putih di dalam board AMAN!"
+                        title="Hanya hapus background luar. Silkscreen/sablon putih di dalam board AMAN!"
                       >
                         <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
                         <span>Tepi Luar (Aman)</span>
@@ -860,7 +941,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                             ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title="Hapus semua warna putih di seluruh gambar (termasuk bagian dalam)"
+                        title="Hapus semua warna putih di seluruh gambar"
                       >
                         <Globe className="w-3 h-3 text-amber-400 shrink-0" />
                         <span>Global (Semua)</span>
@@ -895,13 +976,17 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               )}
             </div>
 
-            {/* Dimension & Scaling */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-slate-800">
-              <label className="text-xs font-semibold text-slate-200">2. Dimensi Canvas (px)</label>
+            {/* Dimension & Image Positioning Controls */}
+            <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-800">
+              <label className="text-xs font-semibold text-slate-200 flex items-center justify-between">
+                <span>2. Ukuran & Posisi Gambar</span>
+                <span className="text-[10px] text-sky-400 font-mono">17px pitch</span>
+              </label>
 
+              {/* Width & Height */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <span className="text-[10px] text-slate-400">Lebar (Width)</span>
+                  <span className="text-[10px] text-slate-400">Lebar (Width px)</span>
                   <input
                     type="number"
                     value={width}
@@ -911,7 +996,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   />
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400">Tinggi (Height)</span>
+                  <span className="text-[10px] text-slate-400">Tinggi (Height px)</span>
                   <input
                     type="number"
                     value={height}
@@ -922,7 +1007,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 cursor-pointer mt-1">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={lockAspectRatio}
@@ -931,6 +1016,80 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 />
                 <span className="text-xs text-slate-300">Kunci Rasio Aspek (Aspect Ratio)</span>
               </label>
+
+              {/* Image Offset X & Y with Nudge Controls */}
+              <div className="p-2.5 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col gap-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-300 font-medium flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-sky-400" />
+                    Posisi Offset Gambar
+                  </span>
+                  <button
+                    onClick={() => setImageOffset({ x: 0, y: 0 })}
+                    className="text-[10px] text-sky-400 hover:underline"
+                  >
+                    Reset (0,0)
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-400">Offset X (px)</span>
+                    <input
+                      type="number"
+                      value={imageOffset.x}
+                      onChange={(e) => setImageOffset({ ...imageOffset, x: Number(e.target.value) })}
+                      step="0.5"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400">Offset Y (px)</span>
+                    <input
+                      type="number"
+                      value={imageOffset.y}
+                      onChange={(e) => setImageOffset({ ...imageOffset, y: Number(e.target.value) })}
+                      step="0.5"
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Micro Nudge Image Buttons */}
+                <div className="flex items-center justify-between bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                  <span className="text-[10px] text-slate-400">Nudge Gambar:</span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => nudgeImage(-1.0, 0)}
+                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      title="Geser Gambar Kiri (-1px)"
+                    >
+                      <ArrowLeft className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => nudgeImage(0, -1.0)}
+                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      title="Geser Gambar Atas (-1px)"
+                    >
+                      <ArrowUp className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => nudgeImage(0, 1.0)}
+                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      title="Geser Gambar Bawah (+1px)"
+                    >
+                      <ArrowDown className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => nudgeImage(1.0, 0)}
+                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      title="Geser Gambar Kanan (+1px)"
+                    >
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Component Metadata */}
@@ -987,37 +1146,55 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             </div>
           </div>
 
-          {/* Center Canvas: Interactive Pin Visualizer & Snapper */}
+          {/* Center Canvas: Interactive Pin & Image Visualizer */}
           <div className="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
             {/* Canvas Toolbar */}
-            <div className="h-11 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between z-10">
-              <div className="flex items-center gap-2">
+            <div className="h-11 bg-slate-900/95 border-b border-slate-800 px-4 flex items-center justify-between z-10 flex-wrap gap-2">
+              {/* Primary Tool Mode Switch */}
+              <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => setToolMode('select')}
+                  onClick={() => setToolMode('select-pin')}
                   className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    toolMode === 'select'
-                      ? 'bg-sky-500 text-slate-950'
+                    toolMode === 'select-pin'
+                      ? 'bg-sky-500 text-slate-950 font-semibold shadow-sm'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                   }`}
+                  title="Klik dan geser pin"
                 >
                   <Move className="w-3.5 h-3.5" />
-                  Pilih & Geser Pin (Drag)
+                  Pilih & Geser Pin
                 </button>
+
+                <button
+                  onClick={() => setToolMode('drag-image')}
+                  className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    toolMode === 'drag-image'
+                      ? 'bg-amber-400 text-slate-950 font-semibold shadow-sm'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                  title="Klik dan drag gambar komponen di canvas untuk mencocokkan ke breadboard"
+                >
+                  <ImageIcon className="w-3.5 h-3.5" />
+                  Geser Gambar (Drag Visual)
+                </button>
+
                 <button
                   onClick={() => setToolMode('add-pin')}
                   className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     toolMode === 'add-pin'
-                      ? 'bg-emerald-500 text-slate-950'
+                      ? 'bg-emerald-500 text-slate-950 font-semibold shadow-sm'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                   }`}
+                  title="Klik di kanvas untuk menambahkan pin baru"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Klik Canvas Tambah Pin
+                  Tambah Pin
                 </button>
               </div>
 
               {/* Breadboard Overlay & Snapping Controls */}
               <div className="flex items-center gap-3">
+                {/* Breadboard Toggle */}
                 <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
                   <input
                     type="checkbox"
@@ -1025,9 +1202,39 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     onChange={(e) => setShowBreadboard(e.target.checked)}
                     className="rounded border-slate-700 bg-slate-900 text-sky-500 w-3.5 h-3.5"
                   />
-                  <span>Overlay Breadboard (17px)</span>
+                  <span>Overlay Breadboard</span>
                 </label>
 
+                {/* Breadboard Type Dropdown */}
+                {showBreadboard && (
+                  <select
+                    value={breadboardType}
+                    onChange={(e) => setBreadboardType(e.target.value as any)}
+                    className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded px-2 py-0.5"
+                  >
+                    <option value="half">Half (400 Pin)</option>
+                    <option value="mini">Mini (170 Pin)</option>
+                    <option value="grid">Grid 17px</option>
+                  </select>
+                )}
+
+                {/* Opacity slider */}
+                {showBreadboard && (
+                  <div className="hidden xl:flex items-center gap-1.5 text-xs text-slate-400" title="Transparansi Breadboard">
+                    <span className="text-[10px]">Opasitas:</span>
+                    <input
+                      type="range"
+                      min="0.1"
+                      max="1.0"
+                      step="0.05"
+                      value={breadboardOpacity}
+                      onChange={(e) => setBreadboardOpacity(Number(e.target.value))}
+                      className="w-16 accent-sky-500 h-1 bg-slate-800 rounded cursor-pointer"
+                    />
+                  </div>
+                )}
+
+                {/* Magnet Snap */}
                 <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
                   <input
                     type="checkbox"
@@ -1035,7 +1242,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     onChange={(e) => setSnapToBreadboard(e.target.checked)}
                     className="rounded border-slate-700 bg-slate-900 text-emerald-500 w-3.5 h-3.5"
                   />
-                  <span>Magnet Snap</span>
+                  <span>Magnet Snap (17px)</span>
                 </label>
 
                 <div className="h-4 w-px bg-slate-700" />
@@ -1075,11 +1282,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
             {/* SVG Interactive Canvas */}
             <div
-              className="flex-1 overflow-hidden relative cursor-crosshair bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px]"
+              className={`flex-1 overflow-hidden relative bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] ${
+                toolMode === 'drag-image' ? 'cursor-grab active:cursor-grabbing' : 'cursor-crosshair'
+              }`}
               onMouseDown={(e) => {
                 if (e.button === 1 || e.altKey) {
                   setIsPanning(true);
                   setStartPanPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+                } else if (toolMode === 'drag-image') {
+                  handleImageMouseDown(e);
                 }
               }}
               onMouseMove={(e) => {
@@ -1095,54 +1306,87 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 onClick={handleCanvasClick}
               >
                 <g transform={`translate(${pan.x + 120}, ${pan.y + 80}) scale(${zoom})`}>
-                  {/* Breadboard Hole Grid Overlay (17.0px standard pitch) */}
+                  {/* REALISTIC BREADBOARD OVERLAY (HALF / MINI / GRID) */}
                   {showBreadboard && (
-                    <g opacity={0.4} pointerEvents="none">
-                      {Array.from({ length: Math.ceil(height / 17) + 6 }).map((_, r) => (
-                        <React.Fragment key={`row-${r}`}>
-                          {Array.from({ length: Math.ceil(width / 17) + 6 }).map((_, c) => {
-                            const hx = c * 17.0 + breadboardOffset.x;
-                            const hy = r * 17.0 + breadboardOffset.y;
-                            return (
-                              <circle
-                                key={`bb-${r}-${c}`}
-                                cx={hx}
-                                cy={hy}
-                                r={2.2}
-                                fill="#38bdf8"
-                                stroke="#0284c7"
-                                strokeWidth={0.8}
-                              />
-                            );
-                          })}
-                        </React.Fragment>
-                      ))}
+                    <g opacity={breadboardOpacity} pointerEvents="none">
+                      {breadboardType === 'half' ? (
+                        /* Photorealistic Half Breadboard (400 Tie-Point) with Exact 17px Pitch */
+                        <g transform={`translate(${breadboardOffset.x - 30}, ${breadboardOffset.y - 20})`}>
+                          <image
+                            href="/components/breadboard_half.svg"
+                            x={0}
+                            y={0}
+                            width={595.6}
+                            height={340.0}
+                            preserveAspectRatio="none"
+                          />
+                        </g>
+                      ) : breadboardType === 'mini' ? (
+                        /* Photorealistic Mini Breadboard (170 Tie-Point) */
+                        <g transform={`translate(${breadboardOffset.x - 20}, ${breadboardOffset.y - 15})`}>
+                          <image
+                            href="/components/breadboard_mini.svg"
+                            x={0}
+                            y={0}
+                            width={340.0}
+                            height={260.0}
+                            preserveAspectRatio="none"
+                          />
+                        </g>
+                      ) : (
+                        /* Clean 17px Cyan Grid Overlay */
+                        <g opacity={0.4}>
+                          {Array.from({ length: Math.ceil(height / 17) + 6 }).map((_, r) => (
+                            <React.Fragment key={`row-${r}`}>
+                              {Array.from({ length: Math.ceil(width / 17) + 6 }).map((_, c) => {
+                                const hx = c * 17.0 + breadboardOffset.x;
+                                const hy = r * 17.0 + breadboardOffset.y;
+                                return (
+                                  <circle
+                                    key={`bb-${r}-${c}`}
+                                    cx={hx}
+                                    cy={hy}
+                                    r={2.2}
+                                    fill="#38bdf8"
+                                    stroke="#0284c7"
+                                    strokeWidth={0.8}
+                                  />
+                                );
+                              })}
+                            </React.Fragment>
+                          ))}
+                        </g>
+                      )}
                     </g>
                   )}
 
-                  {/* Component Border Box */}
+                  {/* Component Border Box (Defines component dimensions in library) */}
                   <rect
                     x={0}
                     y={0}
                     width={width}
                     height={height}
                     fill="#0f172a"
+                    fillOpacity={0.5}
                     stroke="#38bdf8"
                     strokeWidth={1.5}
                     strokeDasharray="4 4"
                     rx={4}
-                    opacity={0.7}
                   />
 
-                  {/* Component Image */}
+                  {/* Component Image (with interactive drag & custom offset) */}
                   {imageDataUrl && (
                     <image
                       href={imageDataUrl}
-                      x={0}
-                      y={0}
+                      x={imageOffset.x}
+                      y={imageOffset.y}
                       width={width}
                       height={height}
                       preserveAspectRatio="none"
+                      className={`transition-opacity duration-150 ${
+                        toolMode === 'drag-image' ? 'cursor-grab active:cursor-grabbing hover:opacity-90' : ''
+                      }`}
+                      onMouseDown={handleImageMouseDown}
                     />
                   )}
 
@@ -1233,10 +1477,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               </svg>
 
               {/* Instructions badge */}
-              <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-400 flex items-center gap-2 pointer-events-none">
+              <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
                 <Info className="w-3.5 h-3.5 text-sky-400" />
                 <span>
-                  <b>Drag Pin:</b> Tarik langsung dengan mouse • <b>Arrow Keys:</b> Nudge 1px (Shift: 5px, Alt: 0.1px)
+                  {toolMode === 'drag-image' ? (
+                    <b>Mode Geser Gambar:</b>
+                  ) : (
+                    <b>Mode Geser Pin:</b>
+                  )}{' '}
+                  Tarik langsung dengan mouse • <b>Arrow Keys:</b> Nudge 1px (Shift: 5px, Alt: 0.1px)
                 </span>
               </div>
             </div>
@@ -1432,7 +1681,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               </div>
             ) : (
               <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 text-center text-xs text-slate-500">
-                Pilih pin pada canvas untuk mengedit atau drag pin langsung dengan cursor mouse.
+                Pilih pin pada canvas untuk mengedit atau geser gambar/pin langsung dengan cursor mouse.
               </div>
             )}
 
