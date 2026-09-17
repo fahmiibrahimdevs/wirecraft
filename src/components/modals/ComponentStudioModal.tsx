@@ -239,8 +239,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [snapToBreadboard, setSnapToBreadboard] = useState<boolean>(true);
   const [breadboardOffset, setBreadboardOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Tool mode: 'select-pin' | 'drag-image' | 'drag-all' | 'add-pin' | 'pan'
-  const [toolMode, setToolMode] = useState<'select-pin' | 'drag-image' | 'drag-all' | 'add-pin' | 'pan'>('select-pin');
+  // Tool mode: 'smart' (Auto/Smart drag) | 'add-pin'
+  const [toolMode, setToolMode] = useState<'smart' | 'add-pin'>('smart');
+  const [linkPinsToImage, setLinkPinsToImage] = useState<boolean>(false);
 
   // Dragging states
   const [draggingPinId, setDraggingPinId] = useState<string | null>(null);
@@ -251,12 +252,14 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     startX: number;
     startY: number;
     initialPins: Pin[];
+    dragAll: boolean;
   }>({
     mouseX: 0,
     mouseY: 0,
     startX: 0,
     startY: 0,
     initialPins: [],
+    dragAll: false,
   });
 
   // Undo / Redo History Stack
@@ -912,7 +915,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   };
 
   // Rotate component, image, and pins 90 degrees clockwise (R / Space Shortcut)
-  const handleRotateClockwise = useCallback(() => {
+  const handleRotateClockwise = useCallback((shouldRotatePins: boolean = true) => {
     const oldWidth = width;
     const oldHeight = height;
 
@@ -931,10 +934,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setImageOffset(nextOffset);
 
     // 3. Rotate All Pins mathematically around the component's relative box
-    // When toolMode === 'drag-image' (Geser Gambar), pins STAY in place and ONLY the image rotates!
-    // When toolMode === 'drag-all' / 'select-pin' / others, ALL pins rotate together with the image!
-    const shouldRotatePins = toolMode !== 'drag-image';
-
     const newPins = shouldRotatePins
       ? pins.map((p) => {
           const relX = p.x - imageOffset.x;
@@ -1005,7 +1004,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         imageOffset: nextOffset,
       });
     }
-  }, [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, toolMode, pushSnapshot]);
+  }, [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, pushSnapshot]);
 
   // Pin Dragging Mouse Event Listeners (UNCONSTRAINED - Can drag anywhere to match module pads!)
   useEffect(() => {
@@ -1081,7 +1080,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       latestOffset = { x: newX, y: newY };
       setImageOffset(latestOffset);
 
-      if (toolMode === 'drag-all' && imageDragStart.initialPins.length > 0) {
+      if (imageDragStart.dragAll && imageDragStart.initialPins.length > 0) {
         latestPins = imageDragStart.initialPins.map((p) => ({
           ...p,
           x: Math.round((p.x + diffX) * 10) / 10,
@@ -1102,15 +1101,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       window.removeEventListener('mousemove', handleWindowMouseMove);
       window.removeEventListener('mouseup', handleWindowMouseUp);
     };
-  }, [isDraggingImage, imageDragStart, zoom, snapToBreadboard, breadboardOffset.x, breadboardOffset.y, toolMode, pushSnapshot, imageOffset, pins]);
+  }, [isDraggingImage, imageDragStart, zoom, snapToBreadboard, breadboardOffset.x, breadboardOffset.y, pushSnapshot, imageOffset, pins]);
 
-  // Handle Pin Mouse Down to start dragging pin
+  // Handle Pin Mouse Down to start dragging pin directly in Smart Mode
   const handlePinMouseDown = (e: React.MouseEvent, pinId: string) => {
     if (e.button !== 0) return; // Left click only
-    if (toolMode === 'drag-all') {
-      handleImageMouseDown(e);
-      return;
-    }
+    if (toolMode === 'add-pin') return;
     e.stopPropagation();
     e.preventDefault();
     setSelectedPinId(pinId);
@@ -1147,24 +1143,25 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setPan(newPan);
   };
 
-  // Handle Image Mouse Down to start dragging component image or all
-  const handleImageMouseDown = (e: React.MouseEvent) => {
+  // Handle Image / Component Mouse Down (Direct Smart Drag - Shift or linkPinsToImage drags All)
+  const handleImageMouseDown = (e: React.MouseEvent, forceDragAll = false) => {
     if (e.button !== 0) return;
-    if (toolMode === 'drag-image' || toolMode === 'drag-all') {
-      e.stopPropagation();
-      e.preventDefault();
-      setIsDraggingImage(true);
-      setImageDragStart({
-        mouseX: e.clientX,
-        mouseY: e.clientY,
-        startX: imageOffset.x,
-        startY: imageOffset.y,
-        initialPins: [...pins],
-      });
-    }
+    if (toolMode === 'add-pin') return;
+    e.stopPropagation();
+    e.preventDefault();
+    const shouldDragAll = forceDragAll || linkPinsToImage || e.shiftKey;
+    setIsDraggingImage(true);
+    setImageDragStart({
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      startX: imageOffset.x,
+      startY: imageOffset.y,
+      initialPins: [...pins],
+      dragAll: shouldDragAll,
+    });
   };
 
-  // Canvas click to add new pin (Unconstrained)
+  // Canvas click handler (places pin in add-pin mode, or deselects in smart mode)
   const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
     if (isPanning || draggingPinId || isDraggingImage || hasMovedPanRef.current) return;
     const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
@@ -1187,6 +1184,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       setPins(nextPins);
       setSelectedPinId(newId);
       pushSnapshot({ pins: nextPins });
+    } else {
+      setSelectedPinId(null);
     }
   };
 
@@ -1254,10 +1253,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Shortcut: R to Rotate 90° Clockwise
-      if (!e.altKey && (e.key === 'r' || e.key === 'R')) {
+      // Shortcut: R to Rotate 90° Clockwise (Alt/Shift for image only)
+      if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
-        handleRotateClockwise();
+        const shouldRotatePins = !e.altKey;
+        handleRotateClockwise(shouldRotatePins);
         return;
       }
 
@@ -1270,35 +1270,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
       const step = e.shiftKey ? 5.0 : e.altKey ? 0.1 : 1.0;
 
-      if (toolMode === 'drag-all') {
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          nudgeAll(0, -step);
-        } else if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          nudgeAll(0, step);
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          nudgeAll(-step, 0);
-        } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          nudgeAll(step, 0);
-        }
-      } else if (toolMode === 'drag-image') {
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          nudgeImage(0, -step);
-        } else if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          nudgeImage(0, step);
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          nudgeImage(-step, 0);
-        } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          nudgeImage(step, 0);
-        }
-      } else if (selectedPin) {
+      if (selectedPin) {
         if (e.key === 'ArrowUp') {
           e.preventDefault();
           nudgePin(0, -step);
@@ -1316,6 +1288,29 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             e.preventDefault();
             deletePin(selectedPinId);
           }
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          setSelectedPinId(null);
+        }
+      } else {
+        // No pin selected: arrow keys nudge Image (or All if linkPinsToImage or Shift is pressed)
+        const isAll = linkPinsToImage || e.shiftKey;
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (isAll) nudgeAll(0, -step);
+          else nudgeImage(0, -step);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (isAll) nudgeAll(0, step);
+          else nudgeImage(0, step);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (isAll) nudgeAll(-step, 0);
+          else nudgeImage(-step, 0);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          if (isAll) nudgeAll(step, 0);
+          else nudgeImage(step, 0);
         }
       }
     };
@@ -1336,7 +1331,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     isOpen,
     selectedPin,
     selectedPinId,
-    toolMode,
+    linkPinsToImage,
     width,
     height,
     handleRotateClockwise,
@@ -1787,16 +1782,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
                   {/* Rotate 90 deg button */}
                   <button
-                    onClick={handleRotateClockwise}
+                    onClick={() => handleRotateClockwise(true)}
                     className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold flex items-center gap-1 transition-colors"
-                    title={
-                      toolMode === 'drag-image'
-                        ? 'Putar Gambar Saja 90° (Pin tidak ikut berputar)'
-                        : 'Putar Semua (Gambar + Pin) 90°'
-                    }
+                    title="Putar Komponen 90° (Gambar + Pin)"
                   >
-                    <RotateCw className={`w-3 h-3 ${toolMode === 'drag-image' ? 'text-amber-400' : 'text-sky-400'}`} />
-                    <span>{toolMode === 'drag-image' ? 'Putar Gbr' : '90°'}</span>
+                    <RotateCw className="w-3 h-3 text-sky-400" />
+                    <span>90°</span>
                   </button>
                 </div>
               </div>
@@ -2032,52 +2023,26 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   </button>
                 </div>
 
-                {/* Segmented Control */}
+                {/* Smart Mode & Add Pin Segmented Control */}
                 <div className="flex bg-slate-900/90 p-0.5 rounded-xl border border-slate-800 shadow-inner">
                   <button
-                    onClick={() => setToolMode('select-pin')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                      toolMode === 'select-pin'
-                        ? 'bg-sky-500 text-slate-950 shadow-md'
+                    onClick={() => setToolMode('smart')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      toolMode === 'smart'
+                        ? 'bg-sky-500 text-slate-950 shadow-md font-bold'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
                     }`}
-                    title="Pilih & Geser Pin di kanvas"
+                    title="Mode Pintar: Langsung geser Pin, Gambar, atau Kanvas secara otomatis tanpa gonta-ganti tombol"
                   >
-                    <Move className="w-3.5 h-3.5" />
-                    <span>Geser Pin</span>
-                  </button>
-
-                  <button
-                    onClick={() => setToolMode('drag-image')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                      toolMode === 'drag-image'
-                        ? 'bg-amber-400 text-slate-950 shadow-md'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
-                    }`}
-                    title="Geser Gambar Modul saja untuk dicocokkan ke pin / breadboard"
-                  >
-                    <ImageIcon className="w-3.5 h-3.5" />
-                    <span>Geser Gambar</span>
-                  </button>
-
-                  <button
-                    onClick={() => setToolMode('drag-all')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                      toolMode === 'drag-all'
-                        ? 'bg-purple-500 text-white shadow-md'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
-                    }`}
-                    title="Geser Gambar dan Pin bersamaan"
-                  >
-                    <Layers className="w-3.5 h-3.5" />
-                    <span>Geser Semua</span>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Mode Pintar</span>
                   </button>
 
                   <button
                     onClick={() => setToolMode('add-pin')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                       toolMode === 'add-pin'
-                        ? 'bg-emerald-500 text-slate-950 shadow-md'
+                        ? 'bg-emerald-500 text-slate-950 shadow-md font-bold'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
                     }`}
                     title="Klik kanvas untuk menambah pin baru"
@@ -2085,43 +2050,48 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <Plus className="w-3.5 h-3.5" />
                     <span>Tambah Pin</span>
                   </button>
-
-                  <button
-                    onClick={() => setToolMode('pan')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                      toolMode === 'pan'
-                        ? 'bg-sky-400 text-slate-950 shadow-md'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
-                    }`}
-                    title="Geser / Pan kanvas secara leluasa (atau tahan Spasi / klik background)"
-                  >
-                    <Hand className="w-3.5 h-3.5" />
-                    <span>Geser Kanvas</span>
-                  </button>
                 </div>
 
-                {/* Rotate Button */}
+                {/* Geser Bersama (Link Pins) Toggle Button */}
                 <button
-                  onClick={handleRotateClockwise}
+                  onClick={() => setLinkPinsToImage(!linkPinsToImage)}
                   className={`px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 cursor-pointer ${
-                    toolMode === 'drag-image'
-                      ? 'bg-amber-500/15 border-amber-500/50 text-amber-300 hover:bg-amber-500/25'
-                      : 'bg-slate-900 hover:bg-slate-800 border-slate-800 hover:border-sky-500/40 text-slate-300 hover:text-sky-300'
+                    linkPinsToImage
+                      ? 'bg-purple-500/20 border-purple-500/60 text-purple-300 shadow-purple-500/10'
+                      : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-400 hover:text-slate-300'
                   }`}
-                  title={
-                    toolMode === 'drag-image'
-                      ? 'Putar Gambar Saja 90° (Pin TIDAK ikut berputar karena Mode Geser Gambar aktif)'
-                      : 'Putar Semua (Gambar + Pin + Bodi) 90° (Shortcut: Tombol R)'
-                  }
+                  title="Geser Bersama: Saat aktif, menggeser gambar otomatis menggeser semua pin bersamaan (atau tahan Shift saat tarik gambar)"
                 >
-                  <RotateCw className={`w-3.5 h-3.5 ${toolMode === 'drag-image' ? 'text-amber-400' : 'text-sky-400'}`} />
-                  <span className="hidden sm:inline">
-                    {toolMode === 'drag-image' ? 'Putar Gambar' : 'Putar 90°'}
-                  </span>
-                  <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-slate-950 text-slate-400 rounded border border-slate-800">
-                    R
+                  <Layers className={`w-3.5 h-3.5 ${linkPinsToImage ? 'text-purple-400' : 'text-slate-400'}`} />
+                  <span className="hidden sm:inline">Geser Bersama</span>
+                  <span className="text-[10px] font-mono px-1 py-0.2 bg-slate-950 text-slate-400 rounded border border-slate-800">
+                    Shift
                   </span>
                 </button>
+
+                {/* Direct Rotate Actions */}
+                <div className="flex items-center gap-0.5 bg-slate-900/90 p-0.5 rounded-xl border border-slate-800">
+                  <button
+                    onClick={() => handleRotateClockwise(true)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-300 hover:text-sky-300 hover:bg-slate-800 transition-colors cursor-pointer"
+                    title="Putar Seluruh Komponen (Bodi + Gambar + Semua Pin) 90° (Shortcut: Tombol R)"
+                  >
+                    <RotateCw className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Putar 90°</span>
+                    <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-slate-950 text-slate-400 rounded border border-slate-800">
+                      R
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => handleRotateClockwise(false)}
+                    className="px-2 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1 text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors border-l border-slate-800 cursor-pointer"
+                    title="Putar visual gambar saja 90° (Pin TIDAK ikut berputar untuk kalibrasi visual)"
+                  >
+                    <RotateCw className="w-3 h-3 text-amber-400" />
+                    <span className="hidden md:inline">Gbr Saja</span>
+                  </button>
+                </div>
               </div>
 
               {/* Guides, Overlays & Zoom */}
@@ -2235,39 +2205,22 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               className={`flex-1 overflow-hidden relative bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] select-none ${
                 isPanning
                   ? 'cursor-grabbing'
-                  : isSpacePressed || toolMode === 'pan'
+                  : isSpacePressed
                   ? 'cursor-grab'
-                  : toolMode === 'drag-image' || toolMode === 'drag-all'
-                  ? 'cursor-grab active:cursor-grabbing'
                   : toolMode === 'add-pin'
                   ? 'cursor-crosshair'
-                  : 'cursor-grab'
+                  : 'cursor-grab active:cursor-grabbing'
               }`}
               onWheel={handleCanvasWheel}
               onMouseDown={(e) => {
                 hasMovedPanRef.current = false;
-                // Middle click, space pressed, alt/shift, pan tool
+                // Middle click, space pressed, alt/shift, or left click on empty background
                 if (
                   e.button === 1 ||
                   isSpacePressed ||
                   e.altKey ||
-                  toolMode === 'pan' ||
-                  (e.button === 0 && e.shiftKey)
+                  (e.button === 0 && toolMode !== 'add-pin')
                 ) {
-                  e.preventDefault();
-                  setIsPanning(true);
-                  setStartPanPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-                  return;
-                }
-
-                // If in drag-image or drag-all mode
-                if (toolMode === 'drag-image' || toolMode === 'drag-all') {
-                  handleImageMouseDown(e);
-                  return;
-                }
-
-                // Left click on canvas to pan (when not adding a pin)
-                if (e.button === 0 && toolMode !== 'add-pin') {
                   setIsPanning(true);
                   setStartPanPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
                 }
@@ -2345,9 +2298,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     strokeWidth={1.5}
                     strokeDasharray="4 4"
                     rx={4}
+                    className={toolMode === 'add-pin' ? 'cursor-crosshair' : 'cursor-grab active:cursor-grabbing hover:stroke-sky-400'}
+                    onMouseDown={(e) => handleImageMouseDown(e)}
                   />
 
-                  {/* Component Image (with interactive drag & custom offset) */}
+                  {/* Component Image (with direct interactive drag & custom offset) */}
                   {imageDataUrl && (
                     <image
                       href={imageDataUrl}
@@ -2356,11 +2311,45 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       width={width}
                       height={height}
                       preserveAspectRatio="none"
-                      className={`transition-opacity duration-150 ${
-                        toolMode === 'drag-image' || toolMode === 'drag-all' ? 'cursor-grab active:cursor-grabbing hover:opacity-90' : ''
-                      }`}
-                      onMouseDown={handleImageMouseDown}
+                      className={
+                        toolMode === 'add-pin'
+                          ? 'cursor-crosshair'
+                          : 'cursor-grab active:cursor-grabbing hover:opacity-95 transition-opacity duration-150'
+                      }
+                      onMouseDown={(e) => handleImageMouseDown(e)}
                     />
+                  )}
+
+                  {/* Component Header Drag Pill (Drag to move All Component + Pins) */}
+                  {toolMode !== 'add-pin' && (
+                    <g
+                      transform={`translate(${imageOffset.x + width / 2}, ${imageOffset.y - 12})`}
+                      className="cursor-grab active:cursor-grabbing group/header select-none"
+                      onMouseDown={(e) => handleImageMouseDown(e, true)}
+                    >
+                      <rect
+                        x={-60}
+                        y={-10}
+                        width={120}
+                        height={18}
+                        rx={9}
+                        fill="#0f172a"
+                        stroke={linkPinsToImage ? '#c084fc' : '#38bdf8'}
+                        strokeWidth={1.2}
+                        className="group-hover/header:fill-slate-800 transition-colors"
+                      />
+                      <text
+                        x={0}
+                        y={2.5}
+                        fill={linkPinsToImage ? '#e9d5ff' : '#94a3b8'}
+                        fontSize={9}
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        className="select-none pointer-events-none"
+                      >
+                        {linkPinsToImage ? '⠿ Geser Semua' : '⠿ Geser Komponen'}
+                      </text>
+                    </g>
                   )}
 
                   {/* Render Pins & Smart Elbow Callouts with Live Grab & Drag */}
@@ -2504,9 +2493,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
               {/* Instructions badge */}
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
-                <Info className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <Sparkles className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 <span>
-                  <b>Tarik Background / Spasi:</b> Geser Kanvas • <b>Scroll:</b> Zoom • <b>Hover Pin:</b> Callout • <b>Putar:</b> <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd>
+                  <b>Mode Pintar:</b> Tarik <b>Pin</b> untuk geser pin • Tarik <b>Gambar</b> untuk sesuaikan posisi visual (tahan <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-purple-300 font-bold">Shift</kbd> untuk geser semua) • Tarik <b>Kanvas</b> untuk pan • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> Putar 90°
                 </span>
               </div>
             </div>
