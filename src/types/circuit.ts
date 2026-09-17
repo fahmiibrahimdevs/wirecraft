@@ -56,7 +56,6 @@ export type ComponentType =
   | 'dfplayer-mini'
   | 'pzem-004t'
   | 'sensor-ct-coil'
-  | 'sensor-tds'
   | 'sensor-pt100'
   | 'transmitter-rtd-pt100'
   | 'level-converter-4ch-blue'

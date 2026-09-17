@@ -1790,5 +1790,237 @@
     "imageUrl": "/components/ph4502c.png",
     "createdAt": "2026-09-17T05:47:41.365Z",
     "updatedAt": "2026-09-17T05:47:41.365Z"
+  },
+  "sensor-tds": {
+    "definition": {
+      "type": "sensor-tds",
+      "name": "Analog TDS Sensor (Total Dissolved Solids)",
+      "category": "sensors",
+      "description": "Sensor pengukur kualitas air TDS (Total Dissolved Solids / PPM) analog dengan probe waterproof 2-elektroda dan driver board signal conditioner (A, +, -).",
+      "width": 405,
+      "height": 410,
+      "icon": "Droplets",
+      "pins": [
+        {
+          "id": "a",
+          "name": "A (Signal)",
+          "x": 295.5,
+          "y": 351,
+          "type": "analog",
+          "description": "Analog Output Voltage (0 - 2.3V DC)"
+        },
+        {
+          "id": "vcc",
+          "name": "+ (VCC)",
+          "x": 312.5,
+          "y": 351,
+          "type": "power",
+          "description": "Power Supply (+3.3V - +5.5V DC)"
+        },
+        {
+          "id": "gnd",
+          "name": "- (GND)",
+          "x": 329.5,
+          "y": 351,
+          "type": "ground",
+          "description": "Ground Daya / Sinyal (0V)"
+        },
+        {
+          "id": "probe_1",
+          "name": "Probe 1",
+          "x": 20.7,
+          "y": 403,
+          "type": "passive",
+          "description": "Elektroda Logam Probe Air (Kiri)"
+        },
+        {
+          "id": "probe_2",
+          "name": "Probe 2",
+          "x": 32.5,
+          "y": 403,
+          "type": "passive",
+          "description": "Elektroda Logam Probe Air (Kanan)"
+        }
+      ],
+      "imageUrl": "/components/sensor_tds.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sensor_tds.png",
+    "createdAt": "2026-09-17T05:55:34.508Z",
+    "updatedAt": "2026-09-17T05:55:34.508Z"
+  },
+  "sensor-touch-ttp223": {
+    "definition": {
+      "type": "sensor-touch-ttp223",
+      "name": "Sensor Touch TTP223 (Capacitive)",
+      "category": "sensors",
+      "description": "Modul sensor sentuh kapasitif digital chip TTP223 red edition dengan tombol sentuh bundar sensitif dan 3 solder pad header (pitch 17.0px).",
+      "width": 65,
+      "height": 89.5,
+      "icon": "CircleDot",
+      "pins": [
+        {
+          "id": "gnd",
+          "name": "GND",
+          "x": 15.5,
+          "y": 8,
+          "type": "ground",
+          "description": "Power Ground (0V)"
+        },
+        {
+          "id": "vcc",
+          "name": "VCC",
+          "x": 32.5,
+          "y": 8,
+          "type": "power",
+          "description": "Power Supply (+2.0V - +5.5V DC)"
+        },
+        {
+          "id": "io",
+          "name": "SIG / IO",
+          "x": 49.5,
+          "y": 8,
+          "type": "digital",
+          "description": "Digital Touch Output (Active HIGH saat disentuh)"
+        }
+      ],
+      "imageUrl": "/components/sensor_touch_ttp223.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sensor_touch_ttp223.png",
+    "createdAt": "2026-09-17T05:55:34.508Z",
+    "updatedAt": "2026-09-17T05:55:34.508Z"
+  },
+  "sensor-soil-moisture": {
+    "definition": {
+      "type": "sensor-soil-moisture",
+      "name": "Soil Moisture Sensor (FC-28 / YL-69)",
+      "category": "sensors",
+      "description": "Sensor kelembaban tanah satu set modul FC-28 probe emas & komparator LM393 4-pin breadboard (pitch 17.0px).",
+      "width": 260,
+      "height": 316,
+      "icon": "Droplets",
+      "pins": [
+        {
+          "id": "a0",
+          "name": "AO",
+          "x": 169.5,
+          "y": 302,
+          "type": "analog",
+          "description": "Analog Output (Kelembaban Tanah 0-1023)"
+        },
+        {
+          "id": "d0",
+          "name": "DO",
+          "x": 186.5,
+          "y": 302,
+          "type": "digital",
+          "description": "Digital Output (Threshold Komparator LM393)"
+        },
+        {
+          "id": "gnd",
+          "name": "GND",
+          "x": 203.5,
+          "y": 302,
+          "type": "ground",
+          "description": "Ground (0V)"
+        },
+        {
+          "id": "vcc",
+          "name": "VCC",
+          "x": 220.5,
+          "y": 302,
+          "type": "power",
+          "description": "Power Supply (3.3V - 5V)"
+        }
+      ],
+      "imageUrl": "/components/sensor_soil_moisture.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sensor_soil_moisture.png",
+    "createdAt": "2026-09-17T05:55:34.508Z",
+    "updatedAt": "2026-09-17T05:55:34.508Z"
+  },
+  "sensor-rfid-rc522": {
+    "definition": {
+      "type": "sensor-rfid-rc522",
+      "name": "RFID-RC522 (Reader Module)",
+      "category": "sensors",
+      "description": "Modul pembaca kartu & tag RFID 13.56MHz antarmuka SPI 8-pin presisi breadboard (pitch 17.0px).",
+      "width": 272,
+      "height": 422,
+      "icon": "Radio",
+      "pins": [
+        {
+          "id": "sda",
+          "name": "SDA (SS)",
+          "x": 76.5,
+          "y": 422,
+          "type": "digital",
+          "description": "SPI Slave Select / Chip Select"
+        },
+        {
+          "id": "sck",
+          "name": "SCK",
+          "x": 93.5,
+          "y": 422,
+          "type": "digital",
+          "description": "SPI Serial Clock"
+        },
+        {
+          "id": "mosi",
+          "name": "MOSI",
+          "x": 110.5,
+          "y": 422,
+          "type": "digital",
+          "description": "SPI Master Out Slave In"
+        },
+        {
+          "id": "miso",
+          "name": "MISO",
+          "x": 127.5,
+          "y": 422,
+          "type": "digital",
+          "description": "SPI Master In Slave Out"
+        },
+        {
+          "id": "irq",
+          "name": "IRQ",
+          "x": 144.5,
+          "y": 422,
+          "type": "digital",
+          "description": "Interrupt Request"
+        },
+        {
+          "id": "gnd",
+          "name": "GND",
+          "x": 161.5,
+          "y": 422,
+          "type": "ground",
+          "description": "Power Ground (0V)"
+        },
+        {
+          "id": "rst",
+          "name": "RST",
+          "x": 178.5,
+          "y": 422,
+          "type": "digital",
+          "description": "Reset Pin"
+        },
+        {
+          "id": "3v3",
+          "name": "3.3V (VCC)",
+          "x": 195.5,
+          "y": 422,
+          "type": "power",
+          "description": "Power Supply (3.3V Only)"
+        }
+      ],
+      "imageUrl": "/components/rfid_rc522.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/rfid_rc522.png",
+    "createdAt": "2026-09-17T05:55:34.508Z",
+    "updatedAt": "2026-09-17T05:55:34.508Z"
   }
 }

@@ -950,62 +950,10 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'sensor-rfid-rc522': {
-    type: 'sensor-rfid-rc522',
-    name: 'RFID-RC522 (Reader Module)',
-    category: 'sensors',
-    description: 'Modul pembaca kartu & tag RFID 13.56MHz antarmuka SPI 8-pin presisi breadboard (pitch 17.0px).',
-    width: 272.0,
-    height: 422.0,
-    icon: 'Radio',
-    pins: [
-      { id: 'sda', name: 'SDA (SS)', x: 76.5, y: 422.0, type: 'digital', description: 'SPI Slave Select / Chip Select' },
-      { id: 'sck', name: 'SCK', x: 93.5, y: 422.0, type: 'digital', description: 'SPI Serial Clock' },
-      { id: 'mosi', name: 'MOSI', x: 110.5, y: 422.0, type: 'digital', description: 'SPI Master Out Slave In' },
-      { id: 'miso', name: 'MISO', x: 127.5, y: 422.0, type: 'digital', description: 'SPI Master In Slave Out' },
-      { id: 'irq', name: 'IRQ', x: 144.5, y: 422.0, type: 'digital', description: 'Interrupt Request' },
-      { id: 'gnd', name: 'GND', x: 161.5, y: 422.0, type: 'ground', description: 'Power Ground (0V)' },
-      { id: 'rst', name: 'RST', x: 178.5, y: 422.0, type: 'digital', description: 'Reset Pin' },
-      { id: '3v3', name: '3.3V (VCC)', x: 195.5, y: 422.0, type: 'power', description: 'Power Supply (3.3V Only)' },
-    ],
-  },
+  
 
-
-  'sensor-soil-moisture': {
-    type: 'sensor-soil-moisture',
-    name: 'Soil Moisture Sensor (FC-28 / YL-69)',
-    category: 'sensors',
-    description: 'Sensor kelembaban tanah satu set modul FC-28 probe emas & komparator LM393 4-pin breadboard (pitch 17.0px).',
-    width: 260.0,
-    height: 316.0,
-    icon: 'Droplets',
-    pins: [
-      { id: 'a0', name: 'AO', x: 169.5, y: 302.0, type: 'analog', description: 'Analog Output (Kelembaban Tanah 0-1023)' },
-      { id: 'd0', name: 'DO', x: 186.5, y: 302.0, type: 'digital', description: 'Digital Output (Threshold Komparator LM393)' },
-      { id: 'gnd', name: 'GND', x: 203.5, y: 302.0, type: 'ground', description: 'Ground (0V)' },
-      { id: 'vcc', name: 'VCC', x: 220.5, y: 302.0, type: 'power', description: 'Power Supply (3.3V - 5V)' },
-    ],
-  },
-
-  'sensor-tds': {
-    type: 'sensor-tds',
-    name: 'Analog TDS Sensor (Total Dissolved Solids)',
-    category: 'sensors',
-    description: 'Sensor pengukur kualitas air TDS (Total Dissolved Solids / PPM) analog dengan probe waterproof 2-elektroda dan driver board signal conditioner (A, +, -).',
-    width: 405.0,
-    height: 410.0,
-    icon: 'Droplets',
-    pins: [
-      // Driver board connector pins (bawah) - pitch 17.0px breadboard aligned
-      { id: 'a', name: 'A (Signal)', x: 295.5, y: 351.0, type: 'analog', description: 'Analog Output Voltage (0 - 2.3V DC)' },
-      { id: 'vcc', name: '+ (VCC)', x: 312.5, y: 351.0, type: 'power', description: 'Power Supply (+3.3V - +5.5V DC)' },
-      { id: 'gnd', name: '- (GND)', x: 329.5, y: 351.0, type: 'ground', description: 'Ground Daya / Sinyal (0V)' },
-      // Waterproof probe electrode pins (kiri bawah)
-      { id: 'probe_1', name: 'Probe 1', x: 20.7, y: 403.0, type: 'passive', description: 'Elektroda Logam Probe Air (Kiri)' },
-      { id: 'probe_2', name: 'Probe 2', x: 32.5, y: 403.0, type: 'passive', description: 'Elektroda Logam Probe Air (Kanan)' },
-    ],
-  },
-
+  
+  
 
   'sensor-pt100': {
     type: 'sensor-pt100',
@@ -1041,21 +989,7 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
   },
 
 
-  'sensor-touch-ttp223': {
-    type: 'sensor-touch-ttp223',
-    name: 'Sensor Touch TTP223 (Capacitive)',
-    category: 'sensors',
-    description: 'Modul sensor sentuh kapasitif digital chip TTP223 red edition dengan tombol sentuh bundar sensitif dan 3 solder pad header (pitch 17.0px).',
-    width: 65.0,
-    height: 89.5,
-    icon: 'CircleDot',
-    pins: [
-      { id: 'gnd', name: 'GND', x: 15.5, y: 8.0, type: 'ground', description: 'Power Ground (0V)' },
-      { id: 'vcc', name: 'VCC', x: 32.5, y: 8.0, type: 'power', description: 'Power Supply (+2.0V - +5.5V DC)' },
-      { id: 'io', name: 'SIG / IO', x: 49.5, y: 8.0, type: 'digital', description: 'Digital Touch Output (Active HIGH saat disentuh)' },
-    ],
-  },
-
+  
 
   'display-lcd1602': {
     type: 'display-lcd1602',

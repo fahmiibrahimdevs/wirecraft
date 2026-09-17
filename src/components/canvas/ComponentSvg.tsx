@@ -998,47 +998,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             height={height}
             preserveAspectRatio="none"
           />
-        );
-
-      case 'sensor-rfid-rc522':
-        return (
-          <image
-            href="/components/rfid_rc522.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-
-      case 'sensor-soil-moisture':
-        return (
-          <image
-            href="/components/sensor_soil_moisture.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'sensor-tds':
-        return (
-          <image
-            href="/components/sensor_tds.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-
-      case 'sensor-pt100':
+        );      case 'sensor-pt100':
         return (
           <image
             href="/components/sensor_pt100.png"
@@ -1061,20 +1021,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             preserveAspectRatio="none"
           />
         );
-
-
-      case 'sensor-touch-ttp223':
-        return (
-          <image
-            href="/components/sensor_touch_ttp223.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'sensor-ads1115':
         return (
           <image
