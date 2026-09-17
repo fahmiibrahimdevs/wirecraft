@@ -20,6 +20,7 @@ import { BomModal } from './components/modals/BomModal';
 import { PresetsModal } from './components/modals/PresetsModal';
 import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
 import { UserManagementModal } from './components/modals/UserManagementModal';
+import { ExportModal } from './components/modals/ExportModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthModal } from './components/modals/AuthModal';
@@ -318,6 +319,7 @@ function CircuitAppContent() {
   const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [studioEditDef, setStudioEditDef] = useState<ComponentDefinition | null>(null);
 
   // Context Menu state
@@ -952,6 +954,7 @@ function CircuitAppContent() {
               }
             : undefined
         }
+        onOpenExportModal={() => setIsExportModalOpen(true)}
         onExportPng={handleExportPng}
         onExportJson={handleExportJson}
         onImportJson={handleImportJson}
@@ -1121,6 +1124,15 @@ function CircuitAppContent() {
           onClose={() => setIsUserManagementOpen(false)}
         />
       )}
+
+      {/* HD Schema & Diagram Export Modal */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        projectName={projectName}
+        components={components}
+        wires={wires}
+      />
 
       {/* Auth Modal (Login / Register) */}
       <AuthModal

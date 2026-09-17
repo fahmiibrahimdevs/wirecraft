@@ -778,6 +778,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   return (
     <div
       ref={containerRef}
+      data-canvas-container="true"
       onMouseDown={handleCanvasMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
