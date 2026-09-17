@@ -9,6 +9,7 @@ import {
   importComponentJson,
   rotateSvgDataUrl,
 } from '../../utils/customComponents';
+import { inferPinProfile, COMMON_PIN_SUGGESTIONS } from '../../utils/pinInference';
 import {
   Upload,
   Sparkles,
@@ -1203,6 +1204,61 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setPins(nextPins);
   };
 
+  // Smart pin name change handler with auto-inference for pin type & description
+  const handlePinNameChange = (newName: string) => {
+    if (!selectedPin) return;
+    const oldName = selectedPin.name;
+    const oldDesc = selectedPin.description || '';
+    const oldProfile = inferPinProfile(oldName);
+    const newProfile = inferPinProfile(newName);
+
+    // Auto-update description if:
+    // 1. Current description is empty
+    // 2. Current description is default/generic (e.g. "Pin 1", "Pin 2")
+    // 3. Current description matches the previous auto-inferred description for oldName
+    // 4. Current description starts with "Terminal Pin "
+    const isGenericOrAuto =
+      !oldDesc ||
+      /^Pin\s*\d+$/i.test(oldDesc.trim()) ||
+      oldDesc.trim() === oldProfile.description.trim() ||
+      oldDesc.startsWith('Terminal Pin ');
+
+    const updatedFields: Partial<Pin> = {
+      name: newName,
+      type: newProfile.type,
+      description: isGenericOrAuto ? newProfile.description : oldDesc,
+    };
+
+    updateSelectedPin(updatedFields);
+  };
+
+  const handleAutoFillPinProfile = () => {
+    if (!selectedPin) return;
+    const profile = inferPinProfile(selectedPin.name);
+    updateSelectedPin({
+      type: profile.type,
+      description: profile.description,
+    });
+  };
+
+  const handleAutoInferAllPins = () => {
+    if (pins.length === 0) return;
+    const nextPins = pins.map((p) => {
+      const profile = inferPinProfile(p.name);
+      const isGenericOrAuto =
+        !p.description ||
+        /^Pin\s*\d+$/i.test(p.description.trim()) ||
+        p.description.startsWith('Terminal Pin ');
+      return {
+        ...p,
+        type: profile.type,
+        description: isGenericOrAuto ? profile.description : p.description,
+      };
+    });
+    setPins(nextPins);
+    pushSnapshot({ pins: nextPins });
+  };
+
   const deletePin = (id: string) => {
     const remaining = pins.filter((p) => p.id !== id);
     setPins(remaining);
@@ -1376,14 +1432,16 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     for (let i = 0; i < genCount; i++) {
       const px = genOrientation === 'horizontal' ? startX + i * genPitch : startX;
       const py = genOrientation === 'vertical' ? startY + i * genPitch : startY;
+      const pinName = `${genPrefix.toUpperCase()}${i + 1}`;
+      const inferred = inferPinProfile(pinName);
 
       newGeneratedPins.push({
         id: `${genPrefix}_${i + 1}`,
-        name: `${genPrefix.toUpperCase()}${i + 1}`,
+        name: pinName,
         x: Math.round(px * 10) / 10,
         y: Math.round(py * 10) / 10,
-        type: 'digital',
-        description: `Header Pin ${i + 1}`,
+        type: inferred.type,
+        description: inferred.description || `Header Pin ${i + 1}`,
       });
     }
 
@@ -2647,12 +2705,23 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <span className="text-[10px] text-slate-400">Nama / Label</span>
                     <input
                       type="text"
+                      list="pin-name-suggestions"
                       value={selectedPin.name}
-                      onChange={(e) => updateSelectedPin({ name: e.target.value })}
+                      onChange={(e) => handlePinNameChange(e.target.value)}
+                      placeholder="cth: VCC, GND..."
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-bold focus:border-sky-500 focus:outline-none"
                     />
                   </div>
                 </div>
+
+                {/* Native Autocomplete Datalist for Pin Names */}
+                <datalist id="pin-name-suggestions">
+                  {COMMON_PIN_SUGGESTIONS.map((s) => (
+                    <option key={s.name} value={s.name}>
+                      {s.description} ({s.category})
+                    </option>
+                  ))}
+                </datalist>
 
                 <div>
                   <span className="text-[10px] text-slate-400">Tipe Pin</span>
@@ -2746,7 +2815,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </div>
 
                 <div>
-                  <span className="text-[10px] text-slate-400">Deskripsi Tooltip</span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-slate-400">Deskripsi Tooltip</span>
+                    <button
+                      type="button"
+                      onClick={handleAutoFillPinProfile}
+                      className="text-[10px] text-sky-400 hover:text-sky-300 flex items-center gap-1 font-medium hover:underline cursor-pointer"
+                      title="Otomatiskan Tipe Pin dan Deskripsi dari Nama Pin"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      Auto Isi
+                    </button>
+                  </div>
                   <input
                     type="text"
                     value={selectedPin.description || ''}
@@ -2767,12 +2847,23 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <div className="flex items-center justify-between text-xs font-semibold text-slate-300 px-1">
                 <span>Daftar Pin ({pins.length})</span>
                 {pins.length > 0 && (
-                  <button
-                    onClick={() => setPins([])}
-                    className="text-[10px] text-rose-400 hover:underline"
-                  >
-                    Hapus Semua
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAutoInferAllPins}
+                      className="text-[10px] text-sky-400 hover:text-sky-300 flex items-center gap-1 hover:underline cursor-pointer"
+                      title="Otomatiskan Tipe dan Deskripsi semua pin berdasarkan namanya"
+                    >
+                      <Sparkles className="w-2.5 h-2.5" />
+                      Auto Semua
+                    </button>
+                    <button
+                      onClick={() => setPins([])}
+                      className="text-[10px] text-rose-400 hover:underline"
+                    >
+                      Hapus Semua
+                    </button>
+                  </div>
                 )}
               </div>
 
