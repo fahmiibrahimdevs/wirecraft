@@ -1167,18 +1167,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const newWidth = Math.max(10, Math.round(width * scale * 10) / 10);
     const newHeight = Math.max(10, Math.round(height * scale * 10) / 10);
 
-    // Reference pin for anchoring (use first pin or selected pin)
-    const refPin = pins.find((p) => p.id === selectedPinId) || pins[0];
-    const targetRefX = snapCoordinate(refPin.x, breadboardOffset.x % 17);
-    const targetRefY = snapCoordinate(refPin.y, breadboardOffset.y % 17);
-
-    // New Image Offset
-    const relRefX = refPin.x - imageOffset.x;
-    const relRefY = refPin.y - imageOffset.y;
-    const newOffsetX = Math.round((targetRefX - relRefX * scale) * 10) / 10;
-    const newOffsetY = Math.round((targetRefY - relRefY * scale) * 10) / 10;
-
-    // Calculate new pin coordinates:
+    let newOffsetX = imageOffset.x;
+    let newOffsetY = imageOffset.y;
     let newPins: Pin[] = [];
 
     if (isHorizontalRow) {
@@ -1187,8 +1177,20 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       sortedByX.forEach((p, idx) => indexMap.set(p.id, idx));
 
       const firstPin = sortedByX[0];
-      const startHoleX = snapCoordinate(firstPin.x, breadboardOffset.x % 17);
-      const startHoleY = snapCoordinate(firstPin.y, breadboardOffset.y % 17);
+      let startHoleX = snapCoordinate(firstPin.x, breadboardOffset.x % 17);
+      let startHoleY = snapCoordinate(firstPin.y, breadboardOffset.y % 17);
+
+      // If outside breadboard bounds, place at Column 4, Row E of breadboard
+      if (startHoleX < 34.0 || startHoleX > 530.0 || startHoleY < 30.0 || startHoleY > 320.0) {
+        startHoleX = 68.0 + (breadboardOffset.x % 17);
+        startHoleY = 136.0 + (breadboardOffset.y % 17);
+      }
+
+      // Anchor image offset to the EXACT same firstPin
+      const relFirstX = firstPin.x - imageOffset.x;
+      const relFirstY = firstPin.y - imageOffset.y;
+      newOffsetX = Math.round((startHoleX - relFirstX * scale) * 10) / 10;
+      newOffsetY = Math.round((startHoleY - relFirstY * scale) * 10) / 10;
 
       newPins = pins.map((p) => {
         const idx = indexMap.get(p.id) ?? 0;
@@ -1204,8 +1206,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       sortedByY.forEach((p, idx) => indexMap.set(p.id, idx));
 
       const firstPin = sortedByY[0];
-      const startHoleX = snapCoordinate(firstPin.x, breadboardOffset.x % 17);
-      const startHoleY = snapCoordinate(firstPin.y, breadboardOffset.y % 17);
+      let startHoleX = snapCoordinate(firstPin.x, breadboardOffset.x % 17);
+      let startHoleY = snapCoordinate(firstPin.y, breadboardOffset.y % 17);
+
+      if (startHoleX < 34.0 || startHoleX > 530.0 || startHoleY < 30.0 || startHoleY > 320.0) {
+        startHoleX = 68.0 + (breadboardOffset.x % 17);
+        startHoleY = 68.0 + (breadboardOffset.y % 17);
+      }
+
+      const relFirstX = firstPin.x - imageOffset.x;
+      const relFirstY = firstPin.y - imageOffset.y;
+      newOffsetX = Math.round((startHoleX - relFirstX * scale) * 10) / 10;
+      newOffsetY = Math.round((startHoleY - relFirstY * scale) * 10) / 10;
 
       newPins = pins.map((p) => {
         const idx = indexMap.get(p.id) ?? 0;
@@ -1221,12 +1233,22 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const rightCol = pins.filter((p) => p.x >= midX).sort((a, b) => a.y - b.y);
 
       const firstLeftPin = leftCol[0];
-      const startLeftHoleX = snapCoordinate(firstLeftPin.x, breadboardOffset.x % 17);
-      const startLeftHoleY = snapCoordinate(firstLeftPin.y, breadboardOffset.y % 17);
+      let startLeftHoleX = snapCoordinate(firstLeftPin.x, breadboardOffset.x % 17);
+      let startLeftHoleY = snapCoordinate(firstLeftPin.y, breadboardOffset.y % 17);
+
+      if (startLeftHoleX < 34.0 || startLeftHoleX > 530.0 || startLeftHoleY < 30.0 || startLeftHoleY > 320.0) {
+        startLeftHoleX = 68.0 + (breadboardOffset.x % 17);
+        startLeftHoleY = 68.0 + (breadboardOffset.y % 17);
+      }
 
       const rawColWidth = (rightCol[0].x - leftCol[0].x) * scale;
       const targetColSteps = Math.max(1, Math.round(rawColWidth / 17.0));
       const targetRightHoleX = startLeftHoleX + targetColSteps * 17.0;
+
+      const relFirstX = firstLeftPin.x - imageOffset.x;
+      const relFirstY = firstLeftPin.y - imageOffset.y;
+      newOffsetX = Math.round((startLeftHoleX - relFirstX * scale) * 10) / 10;
+      newOffsetY = Math.round((startLeftHoleY - relFirstY * scale) * 10) / 10;
 
       const leftMap = new Map<string, number>();
       leftCol.forEach((p, idx) => leftMap.set(p.id, idx));
@@ -1252,6 +1274,20 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       });
     } else {
       // General proportional scale + snap each pin to closest 17px grid hole
+      const refPin = pins[0];
+      let targetRefX = snapCoordinate(refPin.x, breadboardOffset.x % 17);
+      let targetRefY = snapCoordinate(refPin.y, breadboardOffset.y % 17);
+
+      if (targetRefX < 34.0 || targetRefX > 530.0 || targetRefY < 30.0 || targetRefY > 320.0) {
+        targetRefX = 68.0 + (breadboardOffset.x % 17);
+        targetRefY = 136.0 + (breadboardOffset.y % 17);
+      }
+
+      const relRefX = refPin.x - imageOffset.x;
+      const relRefY = refPin.y - imageOffset.y;
+      newOffsetX = Math.round((targetRefX - relRefX * scale) * 10) / 10;
+      newOffsetY = Math.round((targetRefY - relRefY * scale) * 10) / 10;
+
       newPins = pins.map((p) => {
         const scaledX = targetRefX + (p.x - refPin.x) * scale;
         const scaledY = targetRefY + (p.y - refPin.y) * scale;
