@@ -58,7 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token, fetchCurrentUser]);
 
   const login = async (identifier: string, password: string) => {
-    setIsLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -72,20 +71,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem(TOKEN_KEY, data.token);
         setToken(data.token);
         setUser(data.user);
-        setIsLoading(false);
         return { success: true };
       } else {
-        setIsLoading(false);
-        return { success: false, error: data.error || 'Gagal masuk akun.' };
+        return { success: false, error: data.error || 'Gagal masuk akun. Periksa username dan kata sandi Anda.' };
       }
     } catch (err: any) {
-      setIsLoading(false);
       return { success: false, error: err.message || 'Koneksi ke server gagal.' };
     }
   };
 
   const register = async (username: string, email: string, password: string) => {
-    setIsLoading(true);
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -99,14 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem(TOKEN_KEY, data.token);
         setToken(data.token);
         setUser(data.user);
-        setIsLoading(false);
         return { success: true };
       } else {
-        setIsLoading(false);
         return { success: false, error: data.error || 'Gagal mendaftar akun.' };
       }
     } catch (err: any) {
-      setIsLoading(false);
       return { success: false, error: err.message || 'Koneksi ke server gagal.' };
     }
   };

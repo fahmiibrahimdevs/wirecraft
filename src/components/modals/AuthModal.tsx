@@ -61,7 +61,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     if (result.success) {
       if (onClose) onClose();
     } else {
-      setErrorMessage(result.error || 'Gagal masuk akun. Periksa kembali data Anda.');
+      setErrorMessage(result.error || 'Username atau kata sandi tidak cocok. Silakan periksa kembali.');
     }
   };
 
@@ -69,13 +69,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!username.trim() || !email.trim() || !password.trim()) {
-      setErrorMessage('Harap lengkapi semua data pendaftaran.');
+    const cleanUsername = username.trim();
+    const cleanEmail = email.trim();
+
+    if (!cleanUsername || !cleanEmail || !password.trim()) {
+      setErrorMessage('Harap lengkapi semua kolom pendaftaran.');
       return;
     }
 
-    if (password !== confirmPassword) {
-      setErrorMessage('Konfirmasi kata sandi tidak cocok.');
+    if (cleanUsername.length < 3) {
+      setErrorMessage('Username minimal 3 karakter.');
+      return;
+    }
+
+    if (cleanUsername.includes(' ')) {
+      setErrorMessage('Username tidak boleh mengandung spasi.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      setErrorMessage('Format alamat email tidak valid (contoh: nama@domain.com).');
       return;
     }
 
@@ -84,14 +98,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
+    if (password !== confirmPassword) {
+      setErrorMessage('Konfirmasi kata sandi tidak cocok dengan kata sandi.');
+      return;
+    }
+
     setIsSubmitting(true);
-    const result = await register(username.trim(), email.trim(), password);
+    const result = await register(cleanUsername, cleanEmail, password);
     setIsSubmitting(false);
 
     if (result.success) {
       if (onClose) onClose();
     } else {
-      setErrorMessage(result.error || 'Gagal mendaftar akun.');
+      setErrorMessage(result.error || 'Gagal mendaftarkan akun baru.');
     }
   };
 
@@ -168,11 +187,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        {/* Error Alert */}
+        {/* Error Alert Notification */}
         {errorMessage && (
-          <div className="mb-4 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-start gap-2 text-rose-400 text-xs animate-in fade-in">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{errorMessage}</span>
+          <div className="mb-4 p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 flex items-start gap-2.5 text-rose-300 text-xs shadow-lg shadow-rose-950/40 animate-in fade-in slide-in-from-top-2 duration-150">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="flex-1 leading-snug">
+              <span className="font-semibold block text-rose-200">
+                {tab === 'login' ? 'Gagal Masuk Akun' : 'Gagal Pendaftaran Akun'}
+              </span>
+              <span className="text-[11px] text-rose-300/90">{errorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="text-rose-400/70 hover:text-rose-200 cursor-pointer p-0.5 rounded transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
 
