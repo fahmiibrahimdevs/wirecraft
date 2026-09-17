@@ -98,10 +98,10 @@ const ResistorPropertyEditor: React.FC<{
   };
 
   return (
-    <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
+    <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-300">Resistor Metal Film (5-Gelang)</span>
-        <span className="text-[10px] text-sky-400 font-mono font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
+        <span className="text-xs font-semibold text-slate-800 dark:text-slate-300">Resistor Metal Film (5-Gelang)</span>
+        <span className="text-[10px] text-sky-600 dark:text-sky-400 font-mono font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
           Biru • 1%
         </span>
       </div>
@@ -115,58 +115,58 @@ const ResistorPropertyEditor: React.FC<{
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           placeholder="Nilai ohm..."
-          className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-mono outline-none focus:border-sky-500/80"
+          className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-200 font-mono outline-none focus:border-sky-500/80"
         />
-        <span className="text-xs font-mono font-bold text-sky-400">
+        <span className="text-xs font-mono font-bold text-sky-600 dark:text-sky-400">
           {formatResistance(currentOhms)}
         </span>
       </div>
 
       {/* Dynamic 5-Band Color Code Preview */}
-      <div className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1.5">
-        <div className="text-[10px] text-slate-400 font-medium flex items-center justify-between">
+      <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-1.5">
+        <div className="text-[10px] text-slate-600 dark:text-slate-400 font-medium flex items-center justify-between">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span className="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400"></span>
             <span>Kode Warna 5-Gelang:</span>
           </span>
-          <span className="font-mono text-slate-500 text-[9px]">IEC 60062</span>
+          <span className="font-mono text-slate-400 dark:text-slate-500 text-[9px]">IEC 60062</span>
         </div>
         <div className="grid grid-cols-5 gap-1 pt-1 text-center">
           <div className="flex flex-col items-center gap-1">
-            <span className="w-4 h-4 rounded-full border border-slate-700 shadow-sm" style={{ backgroundColor: b1 }} />
-            <span className="text-[9px] text-slate-400 font-mono">D1</span>
+            <span className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shadow-sm" style={{ backgroundColor: b1 }} />
+            <span className="text-[9px] text-slate-600 dark:text-slate-400 font-mono">D1</span>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <span className="w-4 h-4 rounded-full border border-slate-700 shadow-sm" style={{ backgroundColor: b2 }} />
-            <span className="text-[9px] text-slate-400 font-mono">D2</span>
+            <span className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shadow-sm" style={{ backgroundColor: b2 }} />
+            <span className="text-[9px] text-slate-600 dark:text-slate-400 font-mono">D2</span>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <span className="w-4 h-4 rounded-full border border-slate-700 shadow-sm" style={{ backgroundColor: b3 }} />
-            <span className="text-[9px] text-slate-400 font-mono">D3</span>
+            <span className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shadow-sm" style={{ backgroundColor: b3 }} />
+            <span className="text-[9px] text-slate-600 dark:text-slate-400 font-mono">D3</span>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <span className="w-4 h-4 rounded-full border border-slate-700 shadow-sm" style={{ backgroundColor: b4 }} />
-            <span className="text-[9px] text-slate-400 font-mono">x10ⁿ</span>
+            <span className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shadow-sm" style={{ backgroundColor: b4 }} />
+            <span className="text-[9px] text-slate-600 dark:text-slate-400 font-mono">x10ⁿ</span>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <span className="w-4 h-4 rounded-full border border-slate-700 shadow-sm" style={{ backgroundColor: b5 }} />
-            <span className="text-[9px] text-amber-600 font-mono font-semibold">1%</span>
+            <span className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shadow-sm" style={{ backgroundColor: b5 }} />
+            <span className="text-[9px] text-amber-600 dark:text-amber-500 font-mono font-semibold">1%</span>
           </div>
         </div>
       </div>
 
       {/* Quick Digit D1 Selector */}
       <div className="space-y-1">
-        <div className="text-[10px] text-slate-400 flex items-center justify-between">
+        <div className="text-[10px] text-slate-600 dark:text-slate-400 flex items-center justify-between font-medium">
           <span>Ubah Digit 1 (D1):</span>
-          <span className="text-[9px] font-mono text-sky-400">Pilih Angka Depan</span>
+          <span className="text-[9px] font-mono text-sky-600 dark:text-sky-400">Pilih Angka Depan</span>
         </div>
         <div className="grid grid-cols-9 gap-1">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
             <button
               key={digit}
               onClick={() => setD1(digit)}
-              className="py-1 rounded text-center text-xs font-mono font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-sky-400 hover:border-sky-500/50 cursor-pointer transition-colors"
+              className="py-1 rounded text-center text-xs font-mono font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 hover:border-sky-500/50 cursor-pointer transition-colors shadow-xs"
             >
               {digit}
             </button>
@@ -174,7 +174,7 @@ const ResistorPropertyEditor: React.FC<{
         </div>
       </div>
 
-      <div className="text-[10px] text-slate-400">Preset Standar:</div>
+      <div className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">Preset Standar:</div>
       <div className="flex flex-wrap gap-1.5">
         {[100, 220, 330, 470, 1000, 2200, 4700, 10000, 100000, 1000000].map((val) => (
           <button
@@ -187,8 +187,8 @@ const ResistorPropertyEditor: React.FC<{
             }}
             className={`px-2 py-0.5 rounded text-[10px] font-mono border cursor-pointer transition-colors ${
               currentOhms === val
-                ? 'bg-sky-500/20 text-sky-400 border-sky-500/40'
-                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                ? 'bg-sky-50 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400 border-sky-300 dark:border-sky-500/40 font-bold'
+                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             {formatResistance(val)}
@@ -384,62 +384,62 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
 
         <div className="flex-1 overflow-y-auto p-4 space-y-5">
           {/* Component Info Card */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5">
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-xs">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold text-slate-200">{def?.name || selectedComponent.name}</div>
+              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">{def?.name || selectedComponent.name}</div>
               {selectedComponent.locked && (
-                <span className="flex items-center gap-1 text-[10px] text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                <span className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 font-semibold">
                   <Lock className="w-2.5 h-2.5" /> Terkunci
                 </span>
               )}
             </div>
-            <div className="text-[11px] text-slate-400 mt-0.5">{def?.description}</div>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{def?.description}</div>
 
             {/* Label Input */}
             <div className="mt-3">
-              <label className="text-[11px] text-slate-400 block mb-1">Label Identitas:</label>
+              <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1 font-medium">Label Identitas:</label>
               <input
                 type="text"
                 value={selectedComponent.label}
                 onChange={(e) => onUpdateComponent(selectedComponent.id, { label: e.target.value })}
-                className="w-full bg-slate-900 border border-slate-800 focus:border-sky-500/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-mono outline-none"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-sky-500/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-200 font-mono outline-none"
               />
             </div>
           </div>
 
           {/* Actions: Duplicate, Rotation, Lock */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
-            <div className="text-xs font-medium text-slate-300 flex items-center justify-between">
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2.5 shadow-xs">
+            <div className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
               <span>Aksi Komponen</span>
-              <span className="font-mono text-sky-400 text-xs">{selectedComponent.rotation}°</span>
+              <span className="font-mono text-sky-600 dark:text-sky-400 text-xs font-bold">{selectedComponent.rotation}°</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={handleRotate}
-                className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                className="flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-sky-500/40 text-slate-700 dark:text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer shadow-xs"
                 title="Putar Komponen 90° (R / Space)"
               >
-                <RotateCw className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <RotateCw className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 shrink-0" />
                 <span>Putar 90°</span>
               </button>
               {onToggleLock && (
                 <button
                   onClick={() => onToggleLock([selectedComponent.id])}
-                  className={`flex items-center justify-center gap-1.5 border py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  className={`flex items-center justify-center gap-1.5 border py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer shadow-xs ${
                     selectedComponent.locked
-                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
-                      : 'bg-slate-900 hover:bg-slate-800 border-slate-800 hover:border-amber-500/40 text-slate-200'
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-300 hover:bg-amber-500/20'
+                      : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-800 hover:border-amber-500/40 text-slate-700 dark:text-slate-200'
                   }`}
                   title="Kunci Posisi (L)"
                 >
                   {selectedComponent.locked ? (
                     <>
-                      <Unlock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <Unlock className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
                       <span>Buka Kunci</span>
                     </>
                   ) : (
                     <>
-                      <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <Lock className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
                       <span>Kunci (L)</span>
                     </>
                   )}
@@ -457,8 +457,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           )}
 
           {selectedComponent.type === 'led' && (
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
-              <div className="text-xs font-medium text-slate-300">Warna LED</div>
+            <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3 shadow-xs">
+              <div className="text-xs font-medium text-slate-700 dark:text-slate-300">Warna LED</div>
               <div className="grid grid-cols-3 gap-1.5">
                 {(['red', 'green', 'blue', 'yellow', 'amber', 'white'] as const).map((color) => (
                   <button
@@ -470,8 +470,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                     }
                     className={`py-1.5 px-2 rounded-lg text-xs capitalize border flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
                       selectedComponent.customProps.ledColor === color
-                        ? 'bg-slate-800 border-sky-500/80 text-slate-100 ring-1 ring-sky-500/30'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                        ? 'bg-white dark:bg-slate-800 border-sky-500 text-slate-900 dark:text-slate-100 ring-1 ring-sky-500/30 font-semibold shadow-xs'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                     }`}
                   >
                     <span
@@ -491,8 +491,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
               </div>
 
               {/* Live LED Test State */}
-              <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
-                <span className="text-xs text-slate-300">Status Nyala (Test)</span>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-700 dark:text-slate-300">Status Nyala (Test)</span>
                 <button
                   onClick={() =>
                     onUpdateComponent(selectedComponent.id, {
@@ -504,8 +504,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                   }
                   className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer transition-all ${
                     selectedComponent.customProps.isLedOn
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-slate-900 text-slate-400 border border-slate-800'
+                      ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-semibold'
+                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
                   {selectedComponent.customProps.isLedOn ? 'Menyala (ON)' : 'Mati (OFF)'}
@@ -515,15 +515,15 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           )}
 
           {selectedComponent.type === 'steker-switch' && (
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
+            <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-300">Steker Saklar Arde</span>
-                <span className="text-[10px] text-sky-400 font-mono font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-300">Steker Saklar Arde</span>
+                <span className="text-[10px] text-sky-600 dark:text-sky-400 font-mono font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
                   Broco AC 220V
                 </span>
               </div>
               <div className="flex items-center justify-between pt-1">
-                <span className="text-xs text-slate-400">Saklar & Indikator Neon</span>
+                <span className="text-xs text-slate-600 dark:text-slate-400">Saklar & Indikator Neon</span>
                 <button
                   onClick={() =>
                     onUpdateComponent(selectedComponent.id, {
@@ -535,8 +535,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                   }
                   className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer transition-all ${
                     selectedComponent.customProps.isSwitchedOn !== false
-                      ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                      : 'bg-slate-900 text-slate-400 border border-slate-800'
+                      ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-semibold'
+                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
                   {selectedComponent.customProps.isSwitchedOn !== false ? 'Saklar ON (Menyala)' : 'Saklar OFF (Mati)'}
@@ -546,15 +546,15 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           )}
 
           {selectedComponent.type === 'fitting-lamp' && (
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
+            <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-300">Fitting Lampu E27</span>
-                <span className="text-[10px] text-sky-400 font-mono font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-300">Fitting Lampu E27</span>
+                <span className="text-[10px] text-sky-600 dark:text-sky-400 font-mono font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
                   Bohlam LED
                 </span>
               </div>
               <div className="flex items-center justify-between pt-1">
-                <span className="text-xs text-slate-400">Status Bohlam</span>
+                <span className="text-xs text-slate-600 dark:text-slate-400">Status Bohlam</span>
                 <button
                   onClick={() =>
                     onUpdateComponent(selectedComponent.id, {
@@ -566,8 +566,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                   }
                   className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer transition-all ${
                     selectedComponent.customProps.isLedOn !== false
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      : 'bg-slate-900 text-slate-400 border border-slate-800'
+                      ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-semibold'
+                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
                   {selectedComponent.customProps.isLedOn !== false ? 'Bohlam ON (Menyala)' : 'Bohlam OFF (Mati)'}
@@ -579,19 +579,19 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           {(selectedComponent.type === 'push-button' ||
             selectedComponent.type === 'push-button-6mm' ||
             selectedComponent.type === 'push-button-12mm') && (
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
+            <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-300">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-300">
                   {selectedComponent.type === 'push-button-12mm'
                     ? 'Push Button 12mm (Big Tactile)'
                     : 'Push Button 6mm (Mini Tactile)'}
                 </span>
-                <span className="text-[10px] text-sky-400 font-mono font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
+                <span className="text-[10px] text-sky-600 dark:text-sky-400 font-mono font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
                   SPST 4-Pin
                 </span>
               </div>
 
-              <div className="text-[11px] text-slate-400">Warna Cap Tombol</div>
+              <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Warna Cap Tombol</div>
               <div className="grid grid-cols-5 gap-1.5">
                 {(['green', 'red', 'blue', 'yellow', 'black'] as const).map((color) => {
                   const colorHexes: Record<string, string> = {
@@ -615,12 +615,12 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                       }
                       className={`py-1.5 rounded-lg text-xs capitalize border flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${
                         currentColor === color
-                          ? 'bg-slate-800 border-sky-500/80 text-slate-100 ring-1 ring-sky-500/30'
-                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                          ? 'bg-white dark:bg-slate-800 border-sky-500 text-slate-900 dark:text-slate-100 ring-1 ring-sky-500/30 font-semibold shadow-xs'
+                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                       }`}
                     >
                       <span
-                        className="w-3 h-3 rounded-full border border-slate-700"
+                        className="w-3 h-3 rounded-full border border-slate-300 dark:border-slate-700"
                         style={{ backgroundColor: colorHexes[color] }}
                       />
                       <span className="text-[9px]">{color}</span>
@@ -630,8 +630,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
               </div>
 
               {/* Push Button Interactive Press State */}
-              <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
-                <span className="text-xs text-slate-300">Status Tombol</span>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-700 dark:text-slate-300">Status Tombol</span>
                 <button
                   onClick={() =>
                     onUpdateComponent(selectedComponent.id, {
@@ -643,8 +643,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                   }
                   className={`px-3 py-1 rounded-md text-xs font-medium cursor-pointer transition-all ${
                     selectedComponent.customProps.buttonPressed
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold'
-                      : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+                      ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-semibold'
+                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
                   {selectedComponent.customProps.buttonPressed ? 'Ditekan (PRESSED)' : 'Dilepas (RELEASED)'}
@@ -654,10 +654,10 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           )}
 
           {selectedComponent.type === 'potentiometer' && (
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
-              <div className="flex items-center justify-between text-xs font-medium text-slate-300">
+            <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300">
                 <span>Nilai Posisi Knob:</span>
-                <span className="font-mono text-sky-400">{selectedComponent.customProps.potValue ?? 50}%</span>
+                <span className="font-mono text-sky-600 dark:text-sky-400 font-bold">{selectedComponent.customProps.potValue ?? 50}%</span>
               </div>
               <input
                 type="range"
@@ -672,16 +672,16 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                     },
                   })
                 }
-                className="w-full accent-sky-400 cursor-pointer"
+                className="w-full accent-sky-500 cursor-pointer"
               />
             </div>
           )}
 
           {(selectedComponent.type === 'display-lcd1602' || selectedComponent.type === 'display-lcd1602-i2c') && (
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
-              <div className="text-xs font-medium text-slate-300">Teks Layar LCD (16x2)</div>
+            <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3 shadow-xs">
+              <div className="text-xs font-medium text-slate-700 dark:text-slate-300">Teks Layar LCD (16x2)</div>
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Baris 1 (Maks 16 char):</label>
+                <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1 font-medium">Baris 1 (Maks 16 char):</label>
                 <input
                   type="text"
                   maxLength={16}
@@ -694,11 +694,11 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                       },
                     })
                   }
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-300 font-mono outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-700 dark:text-sky-300 font-mono outline-none focus:border-sky-500/80"
                 />
               </div>
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Baris 2 (Maks 16 char):</label>
+                <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1 font-medium">Baris 2 (Maks 16 char):</label>
                 <input
                   type="text"
                   maxLength={16}
@@ -711,17 +711,17 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                       },
                     })
                   }
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-300 font-mono outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-700 dark:text-sky-300 font-mono outline-none focus:border-sky-500/80"
                 />
               </div>
             </div>
           )}
 
           {(selectedComponent.type === 'display-lcd2004' || selectedComponent.type === 'display-lcd2004-i2c') && (
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
-              <div className="text-xs font-medium text-slate-300">Teks Layar LCD (20x4)</div>
+            <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3 shadow-xs">
+              <div className="text-xs font-medium text-slate-700 dark:text-slate-300">Teks Layar LCD (20x4)</div>
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Baris 1 (Maks 20 char):</label>
+                <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1 font-medium">Baris 1 (Maks 20 char):</label>
                 <input
                   type="text"
                   maxLength={20}
@@ -734,11 +734,11 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                       },
                     })
                   }
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-300 font-mono outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-700 dark:text-sky-300 font-mono outline-none focus:border-sky-500/80"
                 />
               </div>
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Baris 2 (Maks 20 char):</label>
+                <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1 font-medium">Baris 2 (Maks 20 char):</label>
                 <input
                   type="text"
                   maxLength={20}
@@ -751,11 +751,11 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                       },
                     })
                   }
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-300 font-mono outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-700 dark:text-sky-300 font-mono outline-none focus:border-sky-500/80"
                 />
               </div>
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Baris 3 (Maks 20 char):</label>
+                <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1 font-medium">Baris 3 (Maks 20 char):</label>
                 <input
                   type="text"
                   maxLength={20}
@@ -768,11 +768,11 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                       },
                     })
                   }
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-300 font-mono outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-700 dark:text-sky-300 font-mono outline-none focus:border-sky-500/80"
                 />
               </div>
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Baris 4 (Maks 20 char):</label>
+                <label className="text-[11px] text-slate-600 dark:text-slate-400 block mb-1 font-medium">Baris 4 (Maks 20 char):</label>
                 <input
                   type="text"
                   maxLength={20}
@@ -785,22 +785,22 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                       },
                     })
                   }
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-300 font-mono outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1 text-xs text-sky-700 dark:text-sky-300 font-mono outline-none focus:border-sky-500/80"
                 />
               </div>
             </div>
           )}
 
           {/* Connected Wires Summary */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5">
-            <div className="text-xs font-medium text-slate-300 mb-2 flex items-center justify-between">
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-xs">
+            <div className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <Link className="w-3.5 h-3.5 text-sky-400" />
+                <Link className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
                 Koneksi Kabel ({compWires.length})
               </span>
             </div>
             {compWires.length === 0 ? (
-              <div className="text-[11px] text-slate-500 py-1">Belum ada kabel terhubung.</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 py-1">Belum ada kabel terhubung.</div>
             ) : (
               <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
                 {compWires.map((w) => {
@@ -813,19 +813,19 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                   return (
                     <div
                       key={w.id}
-                      className="flex items-center justify-between bg-slate-900/80 border border-slate-800/80 rounded-lg px-2.5 py-1 text-[11px]"
+                      className="flex items-center justify-between bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 rounded-lg px-2.5 py-1 text-[11px]"
                     >
                       <div className="flex items-center gap-1.5 truncate">
                         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: w.color }} />
-                        <span className="font-mono text-sky-400">{myPinId}</span>
-                        <span className="text-slate-500">→</span>
-                        <span className="text-slate-300 truncate">
+                        <span className="font-mono text-sky-600 dark:text-sky-400 font-semibold">{myPinId}</span>
+                        <span className="text-slate-400 dark:text-slate-500">→</span>
+                        <span className="text-slate-700 dark:text-slate-300 truncate">
                           {otherComp?.label || otherCompId}.{otherPinId}
                         </span>
                       </div>
                       <button
                         onClick={() => onDeleteWire(w.id)}
-                        className="text-slate-500 hover:text-rose-400 p-0.5 cursor-pointer"
+                        className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-0.5 cursor-pointer transition-colors"
                         title="Putus Kabel"
                       >
                         <Trash2 className="w-3 h-3" />
