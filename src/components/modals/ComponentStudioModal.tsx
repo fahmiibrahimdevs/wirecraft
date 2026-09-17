@@ -232,7 +232,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   // Inline Canvas Quick Edit state
   const [inlineEditPinId, setInlineEditPinId] = useState<string | null>(null);
   const [inlinePinName, setInlinePinName] = useState<string>('');
+  const [inlinePinDescription, setInlinePinDescription] = useState<string>('');
   const inlineInputRef = useRef<HTMLInputElement>(null);
+  const pinClickTrackerRef = useRef<{ id: string; time: number; clientX: number; clientY: number } | null>(null);
 
   // Canvas / Viewport state
   const [zoom, setZoom] = useState<number>(1.8);
@@ -1458,15 +1460,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     selectedPinId,
   ]);
 
-  // Handle Pin Mouse Down to start dragging pin directly in Smart Mode
-  const handlePinMouseDown = (e: React.MouseEvent, pinId: string) => {
-    if (e.button !== 0) return; // Left click only
-    if (toolMode === 'add-pin') return;
-    e.stopPropagation();
-    e.preventDefault();
-    setSelectedPinId(pinId);
-    setDraggingPinId(pinId);
-  };
 
   // Handle Mouse Wheel Zoom centered on cursor position
   const handleCanvasWheel = (e: React.WheelEvent) => {
@@ -1560,7 +1553,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
   // Core pin name change function with auto-inference for pin type & description
   const applyPinNameChange = useCallback(
-    (pinId: string, newName: string, explicitType?: PinType) => {
+    (pinId: string, newName: string, explicitType?: PinType, explicitDesc?: string) => {
       const targetPin = pins.find((p) => p.id === pinId);
       if (!targetPin) return pins;
       const oldName = targetPin.name;
@@ -1568,22 +1561,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const oldProfile = inferPinProfile(oldName);
       const newProfile = inferPinProfile(newName);
 
-      // Auto-update description if:
-      // 1. Current description is empty
-      // 2. Current description is default/generic (e.g. "Pin 1", "Pin 2")
-      // 3. Current description matches the previous auto-inferred description for oldName
-      // 4. Current description starts with "Terminal Pin "
-      const isGenericOrAuto =
-        !oldDesc ||
-        /^Pin\s*\d+$/i.test(oldDesc.trim()) ||
-        oldDesc.trim() === oldProfile.description.trim() ||
-        oldDesc.startsWith('Terminal Pin ');
+      // Auto-update description if explicitDesc is not supplied
+      let finalDescription = explicitDesc !== undefined ? explicitDesc : oldDesc;
+      if (explicitDesc === undefined) {
+        const isGenericOrAuto =
+          !oldDesc ||
+          /^Pin\s*\d+$/i.test(oldDesc.trim()) ||
+          oldDesc.trim() === oldProfile.description.trim() ||
+          oldDesc.startsWith('Terminal Pin ');
+        finalDescription = isGenericOrAuto ? newProfile.description : oldDesc;
+      }
 
       // Determine PinType:
-      // 1. If explicitType is provided -> use it
-      // 2. If newProfile has a confident match (GND, Power, I2C, SPI, UART, etc.) -> use newProfile.type
-      // 3. If targetPin already had a non-default type (power/ground/etc.) and newProfile is unconfident -> PRESERVE targetPin.type!
-      // 4. Otherwise -> use newProfile.type
       let nextType: PinType = targetPin.type;
       if (explicitType) {
         nextType = explicitType;
@@ -1597,7 +1586,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         ...targetPin,
         name: newName,
         type: nextType,
-        description: isGenericOrAuto ? newProfile.description : oldDesc,
+        description: finalDescription,
       };
 
       const nextPins = pins.map((p) => (p.id === pinId ? updatedPin : p));
@@ -1619,9 +1608,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     (pinId: string) => {
       const pin = pins.find((p) => p.id === pinId);
       if (!pin) return;
+      const profile = inferPinProfile(pin.name);
       setSelectedPinId(pinId);
       setInlineEditPinId(pinId);
       setInlinePinName(pin.name);
+      setInlinePinDescription(pin.description || profile.description || '');
       setTimeout(() => {
         inlineInputRef.current?.focus();
         inlineInputRef.current?.select();
@@ -1634,7 +1625,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const commitAndNavigateInlineEdit = useCallback(
     (direction: 'next' | 'prev' | 'close') => {
       if (!inlineEditPinId) return;
-      const nextPins = applyPinNameChange(inlineEditPinId, inlinePinName);
+      const nextPins = applyPinNameChange(inlineEditPinId, inlinePinName, undefined, inlinePinDescription);
       pushSnapshot({ pins: nextPins });
 
       if (direction === 'close') {
@@ -1667,9 +1658,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
       if (targetIndex >= 0 && targetIndex < nextPins.length) {
         const targetPin = nextPins[targetIndex];
+        const profile = inferPinProfile(targetPin.name);
         setSelectedPinId(targetPin.id);
         setInlineEditPinId(targetPin.id);
         setInlinePinName(targetPin.name);
+        setInlinePinDescription(targetPin.description || profile.description || '');
         setTimeout(() => {
           inlineInputRef.current?.focus();
           inlineInputRef.current?.select();
@@ -1678,8 +1671,35 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         setInlineEditPinId(null);
       }
     },
-    [inlineEditPinId, inlinePinName, applyPinNameChange, pushSnapshot]
+    [inlineEditPinId, inlinePinName, inlinePinDescription, applyPinNameChange, pushSnapshot]
   );
+
+  // Handle Pin Mouse Down to start dragging pin directly in Smart Mode with double click support
+  const handlePinMouseDown = (e: React.MouseEvent, pinId: string) => {
+    if (e.button !== 0) return; // Left click only
+    if (toolMode === 'add-pin') return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    const now = Date.now();
+    const lastClick = pinClickTrackerRef.current;
+    if (
+      lastClick &&
+      lastClick.id === pinId &&
+      now - lastClick.time < 450 &&
+      Math.hypot(e.clientX - lastClick.clientX, e.clientY - lastClick.clientY) < 15
+    ) {
+      pinClickTrackerRef.current = null;
+      setDraggingPinId(null);
+      setIsDraggingImage(false);
+      startInlineEdit(pinId);
+      return;
+    }
+    pinClickTrackerRef.current = { id: pinId, time: now, clientX: e.clientX, clientY: e.clientY };
+
+    setSelectedPinId(pinId);
+    setDraggingPinId(pinId);
+  };
 
   const handleAutoFillPinProfile = () => {
     if (!selectedPin) return;
@@ -3126,8 +3146,19 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         list="pin-name-suggestions"
                         value={inlinePinName}
                         onChange={(e) => {
-                          setInlinePinName(e.target.value);
-                          applyPinNameChange(inlineEditingPin.id, e.target.value);
+                          const val = e.target.value;
+                          setInlinePinName(val);
+                          const profile = inferPinProfile(val);
+                          const shouldSyncDesc =
+                            !inlinePinDescription ||
+                            inlinePinDescription === inlineProfile.description ||
+                            /^Pin\s*\d+$/i.test(inlinePinDescription) ||
+                            inlinePinDescription.startsWith('Terminal Pin ');
+                          const nextDesc = shouldSyncDesc ? profile.description : inlinePinDescription;
+                          if (shouldSyncDesc) {
+                            setInlinePinDescription(profile.description);
+                          }
+                          applyPinNameChange(inlineEditingPin.id, val, undefined, nextDesc);
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Tab') {
@@ -3154,15 +3185,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       </button>
                     </div>
 
-                    {/* Live Pin Type Dropdown & Description Preview */}
+                    {/* Live Pin Type Dropdown & Editable Tooltip Description */}
                     <div className="flex flex-col gap-1.5 pt-1.5 border-t border-slate-800/80">
                       <div className="flex items-center justify-between gap-2 text-[10px]">
-                        <span className="text-slate-400 shrink-0">Tipe Pin:</span>
+                        <span className="text-slate-400 shrink-0 font-medium">Tipe Pin:</span>
                         <select
                           value={inlineEditingPin.type}
                           onChange={(e) => {
                             const newType = e.target.value as PinType;
-                            applyPinNameChange(inlineEditingPin.id, inlinePinName, newType);
+                            applyPinNameChange(inlineEditingPin.id, inlinePinName, newType, inlinePinDescription);
                           }}
                           className="bg-slate-950 border border-slate-700/80 rounded px-2 py-0.5 text-[10px] text-slate-200 focus:border-sky-400 focus:outline-none cursor-pointer flex-1"
                         >
@@ -3173,8 +3204,44 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                           ))}
                         </select>
                       </div>
-                      <div className="text-[10px] text-slate-300 leading-tight bg-slate-950/70 px-2 py-1 rounded border border-slate-800/60 truncate font-mono" title={inlineEditingPin.description || inlineProfile.description}>
-                        {inlineEditingPin.description || inlineProfile.description || 'Deskripsi otomatis...'}
+
+                      {/* Tooltip Description Input */}
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="text-slate-400 font-medium">Deskripsi Tooltip:</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const profile = inferPinProfile(inlinePinName);
+                              setInlinePinDescription(profile.description);
+                              applyPinNameChange(inlineEditingPin.id, inlinePinName, undefined, profile.description);
+                            }}
+                            className="text-[9px] text-sky-400 hover:text-sky-300 flex items-center gap-1 hover:underline cursor-pointer"
+                            title="Auto isi deskripsi dari nama pin"
+                          >
+                            <Sparkles className="w-2.5 h-2.5" />
+                            Auto
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          value={inlinePinDescription}
+                          onChange={(e) => {
+                            setInlinePinDescription(e.target.value);
+                            applyPinNameChange(inlineEditingPin.id, inlinePinName, undefined, e.target.value);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              commitAndNavigateInlineEdit(inlinePinIndex < pins.length - 1 ? 'next' : 'close');
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault();
+                              commitAndNavigateInlineEdit('close');
+                            }
+                          }}
+                          placeholder="Deskripsi tooltip (cth: Ground / Power 5V)..."
+                          className="w-full bg-slate-950 border border-slate-700/80 focus:border-sky-400 rounded px-2 py-0.5 text-[10px] text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                        />
                       </div>
                     </div>
 
@@ -3531,8 +3598,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <div
                       key={pin.id}
                       onClick={() => setSelectedPinId(pin.id)}
+                      onDoubleClick={() => startInlineEdit(pin.id)}
                       onMouseEnter={() => setHoveredPinId(pin.id)}
                       onMouseLeave={() => setHoveredPinId(null)}
+                      title="Double-click untuk Edit Cepat"
                       className={`px-2.5 py-1.5 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
                         isSelected
                           ? 'bg-sky-500/15 border-sky-500/50 text-sky-200'
