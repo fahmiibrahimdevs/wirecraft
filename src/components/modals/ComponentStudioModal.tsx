@@ -299,28 +299,82 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const jsonInputRef = useRef<HTMLInputElement>(null);
 
-  // Load initial definition if provided
+  // Cleanly initialize studio state whenever modal opens or initialDefinition changes
   useEffect(() => {
+    if (!isOpen) return;
+
     if (initialDefinition) {
+      const initW =
+        initialDefinition.imageWidth && initialDefinition.imageHeight
+          ? initialDefinition.imageWidth
+          : initialDefinition.width || 200;
+      const initH =
+        initialDefinition.imageWidth && initialDefinition.imageHeight
+          ? initialDefinition.imageHeight
+          : initialDefinition.height || 150;
+      const initPins = initialDefinition.pins
+        ? JSON.parse(JSON.stringify(initialDefinition.pins))
+        : [];
+      const initOffset = initialDefinition.imageOffset
+        ? { ...initialDefinition.imageOffset }
+        : { x: 0, y: 0 };
+      const initImg = (initialDefinition as any).imageUrl || '';
+
       setTypeId(initialDefinition.type);
       setName(initialDefinition.name);
       setCategory(initialDefinition.category || 'sensors');
       setDescription(initialDefinition.description || '');
-      if (initialDefinition.imageWidth && initialDefinition.imageHeight) {
-        setWidth(initialDefinition.imageWidth);
-        setHeight(initialDefinition.imageHeight);
-      } else {
-        setWidth(initialDefinition.width);
-        setHeight(initialDefinition.height);
-      }
-      setPins(initialDefinition.pins || []);
-      if (initialDefinition.imageOffset) {
-        setImageOffset(initialDefinition.imageOffset);
-      }
-      if ((initialDefinition as any).imageUrl) {
-        setImageDataUrl((initialDefinition as any).imageUrl);
-        setRawImageDataUrl((initialDefinition as any).imageUrl);
-      }
+      setWidth(initW);
+      setHeight(initH);
+      setPins(initPins);
+      setImageOffset(initOffset);
+      setImageDataUrl(initImg);
+      setRawImageDataUrl(initImg);
+      setSelectedPinId(null);
+      setHoveredPinId(null);
+      setInlineEditPinId(null);
+      setZoom(1.8);
+      setPan({ x: 0, y: 0 });
+
+      // Clean History Stack for this component
+      const initSnap = {
+        width: initW,
+        height: initH,
+        pins: initPins,
+        imageOffset: initOffset,
+        imageDataUrl: initImg,
+        rawImageDataUrl: initImg,
+      };
+      setHistory([initSnap]);
+      setHistoryIndex(0);
+    } else {
+      // Fresh new blank component initialization
+      const freshSnap = {
+        width: 200,
+        height: 150,
+        pins: [],
+        imageOffset: { x: 0, y: 0 },
+        imageDataUrl: '',
+        rawImageDataUrl: '',
+      };
+      setTypeId('custom-module-1');
+      setName('Modul Kustom Baru');
+      setCategory('sensors');
+      setDescription('Modul kustom terkalibrasi');
+      setWidth(200);
+      setHeight(150);
+      setPins([]);
+      setImageOffset({ x: 0, y: 0 });
+      setImageDataUrl('');
+      setRawImageDataUrl('');
+      setSelectedPinId(null);
+      setHoveredPinId(null);
+      setInlineEditPinId(null);
+      setZoom(1.8);
+      setPan({ x: 0, y: 0 });
+
+      setHistory([freshSnap]);
+      setHistoryIndex(0);
     }
   }, [initialDefinition, isOpen]);
 
@@ -351,22 +405,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     },
     [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, historyIndex]
   );
-
-  // Initialize history when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      const initSnap = {
-        width: initialDefinition?.width || width || 200,
-        height: initialDefinition?.height || height || 150,
-        pins: initialDefinition?.pins ? JSON.parse(JSON.stringify(initialDefinition.pins)) : JSON.parse(JSON.stringify(pins)),
-        imageOffset: initialDefinition?.imageOffset ? { ...initialDefinition.imageOffset } : { ...imageOffset },
-        imageDataUrl: (initialDefinition as any)?.imageUrl || imageDataUrl || '',
-        rawImageDataUrl: (initialDefinition as any)?.imageUrl || rawImageDataUrl || '',
-      };
-      setHistory([initSnap]);
-      setHistoryIndex(0);
-    }
-  }, [isOpen]);
 
   // Undo Action
   const handleUndo = useCallback(() => {

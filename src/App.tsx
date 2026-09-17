@@ -648,7 +648,10 @@ export default function App() {
       {/* Component Studio (Admin Mode) Modal */}
       <ComponentStudioModal
         isOpen={isStudioOpen}
-        onClose={() => setIsStudioOpen(false)}
+        onClose={() => {
+          setIsStudioOpen(false);
+          setStudioEditDef(null);
+        }}
         initialDefinition={studioEditDef}
         onComponentSaved={(typeId) => {
           handleAddComponent(typeId);
