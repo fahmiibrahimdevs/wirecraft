@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CircuitFile, CircuitFolder, CircuitFileSystem } from '../../types/circuit';
 import {
   Folder,
@@ -14,13 +14,18 @@ import {
   Edit2,
   Trash2,
   FileText,
-  FileCode2,
-  File,
   Layers,
   Sparkles,
-  Move,
-  CornerDownRight,
+  Eye,
 } from 'lucide-react';
+
+interface ExplorerContextMenuState {
+  x: number;
+  y: number;
+  type: 'file' | 'folder' | 'root';
+  targetId?: string;
+  targetName?: string;
+}
 
 interface CircuitFileExplorerProps {
   fileSystem: CircuitFileSystem;
@@ -60,6 +65,10 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
   onExportFile,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  // Right-click context menu state
+  const [contextMenu, setContextMenu] = useState<ExplorerContextMenuState | null>(null);
 
   // Inline creation states
   const [creatingType, setCreatingType] = useState<'file' | 'folder' | null>(null);
@@ -76,6 +85,30 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
     null
   );
   const [dragOverTargetId, setDragOverTargetId] = useState<string | null>(null);
+
+  // Close context menu on click outside or escape key
+  useEffect(() => {
+    if (!contextMenu) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
+        setContextMenu(null);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setContextMenu(null);
+      }
+    };
+
+    window.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [contextMenu]);
 
   const startCreating = (type: 'file' | 'folder', parentId: string | null = null) => {
     setCreatingType(type);
@@ -168,6 +201,17 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                   setDraggedItem(null);
                 }}
                 onClick={() => onToggleFolder(folder.id)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setContextMenu({
+                    type: 'folder',
+                    x: e.clientX,
+                    y: e.clientY,
+                    targetId: folder.id,
+                    targetName: folder.name,
+                  });
+                }}
                 style={{ paddingLeft: `${depth * 14 + 8}px` }}
                 className={`group flex items-center justify-between py-1.5 pr-2 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
                   isTarget
@@ -299,6 +343,17 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                 setDraggedItem({ id: file.id, type: 'file' });
               }}
               onClick={() => onSelectFile(file.id)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setContextMenu({
+                  type: 'file',
+                  x: e.clientX,
+                  y: e.clientY,
+                  targetId: file.id,
+                  targetName: file.name,
+                });
+              }}
               style={{ paddingLeft: `${depth * 14 + 10}px` }}
               className={`group flex items-center justify-between py-1.5 pr-2 rounded-lg text-xs font-medium cursor-pointer transition-all ${
                 isActive
@@ -436,7 +491,17 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
       </div>
 
       {/* Main Tree List */}
-      <div className="flex-1 overflow-y-auto p-2.5 space-y-1">
+      <div
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setContextMenu({
+            type: 'root',
+            x: e.clientX,
+            y: e.clientY,
+          });
+        }}
+        className="flex-1 overflow-y-auto p-2.5 space-y-1"
+      >
         {/* Inline Input when creating at root */}
         {creatingType && creatingParentId === null && (
           <div className="flex items-center gap-2 py-1.5 px-2 bg-slate-950/80 border border-sky-500 rounded-lg">
@@ -500,6 +565,262 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
           {fileSystem.files.length} Desain
         </span>
       </div>
+
+      {/* Right-click Context Menu */}
+      {contextMenu && (
+        <div
+          ref={contextMenuRef}
+          style={{
+            left: Math.max(10, Math.min(contextMenu.x, window.innerWidth - 230)),
+            top: Math.max(10, Math.min(contextMenu.y, window.innerHeight - 260)),
+          }}
+          className="fixed z-50 min-w-[210px] max-w-[260px] bg-slate-900/95 border border-slate-700/80 rounded-xl shadow-2xl backdrop-blur-xl py-1 text-slate-200 text-xs select-none animate-in fade-in zoom-in-95 duration-100 font-sans"
+        >
+          {/* FILE CONTEXT MENU */}
+          {contextMenu.type === 'file' && contextMenu.targetId && (
+            <>
+              <div className="px-3 py-1.5 border-b border-slate-800/80 text-[11px] text-slate-400 font-medium flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <span className="truncate font-semibold text-slate-200">
+                  {contextMenu.targetName || 'Berkas Desain'}
+                </span>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId) onSelectFile(contextMenu.targetId);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Eye className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Buka Desain</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId) onDuplicateFile(contextMenu.targetId);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Copy className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Duplikat Desain</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId && contextMenu.targetName) {
+                      startRenaming(contextMenu.targetId, contextMenu.targetName, 'file');
+                    }
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Ubah Nama</span>
+                  </span>
+                  <kbd className="text-[10px] text-slate-500 bg-slate-800 px-1 py-0.5 rounded">F2</kbd>
+                </button>
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId) onExportFile(contextMenu.targetId);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Ekspor Berkas (.wire)</span>
+                  </span>
+                </button>
+
+                <div className="h-px bg-slate-800/80 my-1" />
+
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId) {
+                      if (confirm(`Hapus berkas rangkaian "${contextMenu.targetName || ''}"?`)) {
+                        onDeleteFile(contextMenu.targetId);
+                      }
+                    }
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-500/15 text-rose-300/90 hover:text-rose-400 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                    <span>Hapus Berkas</span>
+                  </span>
+                  <kbd className="text-[10px] text-slate-500 bg-slate-800 px-1 py-0.5 rounded">Del</kbd>
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* FOLDER CONTEXT MENU */}
+          {contextMenu.type === 'folder' && contextMenu.targetId && (
+            <>
+              <div className="px-3 py-1.5 border-b border-slate-800/80 text-[11px] text-slate-400 font-medium flex items-center gap-2">
+                <Folder className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="truncate font-semibold text-slate-200">
+                  {contextMenu.targetName || 'Folder'}
+                </span>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId) startCreating('file', contextMenu.targetId);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <FilePlus className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Berkas Baru di Folder Ini</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId) startCreating('folder', contextMenu.targetId);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <FolderPlus className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Folder Baru di Folder Ini</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId) onToggleFolder(contextMenu.targetId);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <FolderOpen className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Buka / Tutup Folder</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId && contextMenu.targetName) {
+                      startRenaming(contextMenu.targetId, contextMenu.targetName, 'folder');
+                    }
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Ubah Nama</span>
+                  </span>
+                  <kbd className="text-[10px] text-slate-500 bg-slate-800 px-1 py-0.5 rounded">F2</kbd>
+                </button>
+
+                <div className="h-px bg-slate-800/80 my-1" />
+
+                <button
+                  onClick={() => {
+                    if (contextMenu.targetId) {
+                      if (confirm(`Hapus folder "${contextMenu.targetName || ''}" beserta seluruh isinya?`)) {
+                        onDeleteFolder(contextMenu.targetId);
+                      }
+                    }
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-500/15 text-rose-300/90 hover:text-rose-400 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                    <span>Hapus Folder</span>
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* ROOT CONTEXT MENU */}
+          {contextMenu.type === 'root' && (
+            <>
+              <div className="px-3 py-1.5 border-b border-slate-800/80 text-[11px] text-slate-400 font-medium flex items-center gap-2">
+                <Layers className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <span className="truncate font-semibold text-slate-200">Berkas Desain</span>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    startCreating('file', null);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <FilePlus className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Berkas Desain Baru</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    startCreating('folder', null);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <FolderPlus className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Folder Baru</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Upload className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Impor Desain (.wire / .json)</span>
+                  </span>
+                </button>
+
+                <div className="h-px bg-slate-800/80 my-1" />
+
+                <button
+                  onClick={() => {
+                    onExpandAll();
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <FolderOpen className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Buka Semua Folder</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    onCollapseAll();
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Folder className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Tutup Semua Folder</span>
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
