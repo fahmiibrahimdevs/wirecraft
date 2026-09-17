@@ -52,6 +52,9 @@ import {
   Undo2,
   Redo2,
   Hand,
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
 } from 'lucide-react';
 
 interface ComponentStudioModalProps {
@@ -225,6 +228,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
   const [alwaysShowLabels, setAlwaysShowLabels] = useState<boolean>(false);
+
+  // Inline Canvas Quick Edit state
+  const [inlineEditPinId, setInlineEditPinId] = useState<string | null>(null);
+  const [inlinePinName, setInlinePinName] = useState<string>('');
+  const inlineInputRef = useRef<HTMLInputElement>(null);
 
   // Canvas / Viewport state
   const [zoom, setZoom] = useState<number>(1.8);
@@ -1280,33 +1288,114 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setPins(nextPins);
   };
 
+  // Core pin name change function with auto-inference for pin type & description
+  const applyPinNameChange = useCallback(
+    (pinId: string, newName: string) => {
+      const targetPin = pins.find((p) => p.id === pinId);
+      if (!targetPin) return pins;
+      const oldName = targetPin.name;
+      const oldDesc = targetPin.description || '';
+      const oldProfile = inferPinProfile(oldName);
+      const newProfile = inferPinProfile(newName);
+
+      // Auto-update description if:
+      // 1. Current description is empty
+      // 2. Current description is default/generic (e.g. "Pin 1", "Pin 2")
+      // 3. Current description matches the previous auto-inferred description for oldName
+      // 4. Current description starts with "Terminal Pin "
+      const isGenericOrAuto =
+        !oldDesc ||
+        /^Pin\s*\d+$/i.test(oldDesc.trim()) ||
+        oldDesc.trim() === oldProfile.description.trim() ||
+        oldDesc.startsWith('Terminal Pin ');
+
+      const updatedPin: Pin = {
+        ...targetPin,
+        name: newName,
+        type: newProfile.type,
+        description: isGenericOrAuto ? newProfile.description : oldDesc,
+      };
+
+      const nextPins = pins.map((p) => (p.id === pinId ? updatedPin : p));
+      setPins(nextPins);
+      return nextPins;
+    },
+    [pins]
+  );
+
   // Smart pin name change handler with auto-inference for pin type & description
   const handlePinNameChange = (newName: string) => {
-    if (!selectedPin) return;
-    const oldName = selectedPin.name;
-    const oldDesc = selectedPin.description || '';
-    const oldProfile = inferPinProfile(oldName);
-    const newProfile = inferPinProfile(newName);
-
-    // Auto-update description if:
-    // 1. Current description is empty
-    // 2. Current description is default/generic (e.g. "Pin 1", "Pin 2")
-    // 3. Current description matches the previous auto-inferred description for oldName
-    // 4. Current description starts with "Terminal Pin "
-    const isGenericOrAuto =
-      !oldDesc ||
-      /^Pin\s*\d+$/i.test(oldDesc.trim()) ||
-      oldDesc.trim() === oldProfile.description.trim() ||
-      oldDesc.startsWith('Terminal Pin ');
-
-    const updatedFields: Partial<Pin> = {
-      name: newName,
-      type: newProfile.type,
-      description: isGenericOrAuto ? newProfile.description : oldDesc,
-    };
-
-    updateSelectedPin(updatedFields);
+    if (!selectedPinId) return;
+    const nextPins = applyPinNameChange(selectedPinId, newName);
+    pushSnapshot({ pins: nextPins });
   };
+
+  // Start inline editing for a pin on canvas
+  const startInlineEdit = useCallback(
+    (pinId: string) => {
+      const pin = pins.find((p) => p.id === pinId);
+      if (!pin) return;
+      setSelectedPinId(pinId);
+      setInlineEditPinId(pinId);
+      setInlinePinName(pin.name);
+      setTimeout(() => {
+        inlineInputRef.current?.focus();
+        inlineInputRef.current?.select();
+      }, 50);
+    },
+    [pins]
+  );
+
+  // Commit and navigate inline edit (Tab / Shift+Tab / Enter / Close)
+  const commitAndNavigateInlineEdit = useCallback(
+    (direction: 'next' | 'prev' | 'close') => {
+      if (!inlineEditPinId) return;
+      const nextPins = applyPinNameChange(inlineEditPinId, inlinePinName);
+      pushSnapshot({ pins: nextPins });
+
+      if (direction === 'close') {
+        setInlineEditPinId(null);
+        return;
+      }
+
+      const currentIndex = nextPins.findIndex((p) => p.id === inlineEditPinId);
+      if (currentIndex === -1) {
+        setInlineEditPinId(null);
+        return;
+      }
+
+      let targetIndex = -1;
+      if (direction === 'next') {
+        if (currentIndex < nextPins.length - 1) {
+          targetIndex = currentIndex + 1;
+        } else {
+          setInlineEditPinId(null);
+          return;
+        }
+      } else if (direction === 'prev') {
+        if (currentIndex > 0) {
+          targetIndex = currentIndex - 1;
+        } else {
+          setInlineEditPinId(null);
+          return;
+        }
+      }
+
+      if (targetIndex >= 0 && targetIndex < nextPins.length) {
+        const targetPin = nextPins[targetIndex];
+        setSelectedPinId(targetPin.id);
+        setInlineEditPinId(targetPin.id);
+        setInlinePinName(targetPin.name);
+        setTimeout(() => {
+          inlineInputRef.current?.focus();
+          inlineInputRef.current?.select();
+        }, 50);
+      } else {
+        setInlineEditPinId(null);
+      }
+    },
+    [inlineEditPinId, inlinePinName, applyPinNameChange, pushSnapshot]
+  );
 
   const handleAutoFillPinProfile = () => {
     if (!selectedPin) return;
@@ -1398,6 +1487,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
+      // Enter key to start inline editing if a pin is selected
+      if (e.key === 'Enter' && selectedPinId && !inlineEditPinId) {
+        e.preventDefault();
+        startInlineEdit(selectedPinId);
+        return;
+      }
+
       // Space key for Hand/Pan tool
       if (!isCmdOrCtrl && (e.code === 'Space' || e.key === ' ')) {
         e.preventDefault();
@@ -1468,6 +1564,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     isOpen,
     selectedPin,
     selectedPinId,
+    inlineEditPinId,
+    startInlineEdit,
     linkPinsToImage,
     width,
     height,
@@ -2547,6 +2645,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                             e.stopPropagation();
                             setSelectedPinId(pin.id);
                           }}
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            startInlineEdit(pin.id);
+                          }}
                         >
                           {/* Invisible Large Hit Area Circle for Easy Grabbing & Hover */}
                           <circle
@@ -2654,11 +2756,131 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </g>
               </svg>
 
+              {/* Floating Inline Pin Quick Edit Popover */}
+              {(() => {
+                const inlineEditingPin = pins.find((p) => p.id === inlineEditPinId);
+                if (!inlineEditingPin) return null;
+                const inlinePinIndex = pins.findIndex((p) => p.id === inlineEditPinId);
+                const inlineProfile = inferPinProfile(inlinePinName);
+                const inlineTypeDef = PIN_TYPES.find((t) => t.type === inlineProfile.type) || PIN_TYPES[0];
+
+                return (
+                  <div
+                    className="absolute z-30 flex flex-col gap-2 p-3 bg-slate-900/95 border border-sky-500 rounded-xl shadow-2xl backdrop-blur-md min-w-[280px] max-w-[340px] select-none"
+                    style={{
+                      left: `${inlineEditingPin.x * zoom + pan.x + 120}px`,
+                      top: `${inlineEditingPin.y * zoom + pan.y + 80 - 18}px`,
+                      transform: 'translate(-50%, -100%)',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    {/* Popover Header */}
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full ring-2 ring-slate-800" style={{ backgroundColor: inlineTypeDef.color }} />
+                        <span className="text-[11px] font-bold text-sky-300 font-mono">
+                          Pin {inlinePinIndex + 1}/{pins.length}
+                        </span>
+                        <span className="text-[10px] text-slate-500 font-mono">({inlineEditingPin.id})</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => commitAndNavigateInlineEdit('prev')}
+                          disabled={inlinePinIndex <= 0}
+                          className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                          title="Pin Sebelumnya (Shift + Tab)"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => commitAndNavigateInlineEdit('next')}
+                          disabled={inlinePinIndex >= pins.length - 1}
+                          className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                          title="Pin Berikutnya (Tab / Enter)"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => commitAndNavigateInlineEdit('close')}
+                          className="p-1 rounded hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 ml-1 transition-colors cursor-pointer"
+                          title="Selesai / Tutup (Esc)"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Input field with Auto-Complete */}
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        ref={inlineInputRef}
+                        type="text"
+                        list="pin-name-suggestions"
+                        value={inlinePinName}
+                        onChange={(e) => {
+                          setInlinePinName(e.target.value);
+                          applyPinNameChange(inlineEditingPin.id, e.target.value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Tab') {
+                            e.preventDefault();
+                            commitAndNavigateInlineEdit(e.shiftKey ? 'prev' : 'next');
+                          } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            commitAndNavigateInlineEdit(inlinePinIndex < pins.length - 1 ? 'next' : 'close');
+                          } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            commitAndNavigateInlineEdit('close');
+                          }
+                        }}
+                        placeholder="Label Pin (cth: VIN, GND, D2...)"
+                        className="flex-1 bg-slate-950 border border-sky-500/70 focus:border-sky-400 rounded-lg px-2.5 py-1 text-xs text-slate-100 font-bold focus:outline-none focus:ring-1 focus:ring-sky-400 shadow-inner"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => commitAndNavigateInlineEdit(inlinePinIndex < pins.length - 1 ? 'next' : 'close')}
+                        className="px-2.5 py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow"
+                        title={inlinePinIndex < pins.length - 1 ? "Simpan & Lanjut ke Pin Berikutnya (Enter / Tab)" : "Simpan & Selesai (Enter)"}
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Live Auto-Inference Preview */}
+                    <div className="flex flex-col gap-0.5 pt-1 border-t border-slate-800/80">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-slate-400">Tipe: <span className="font-semibold text-slate-200">{inlineTypeDef.label}</span></span>
+                        <span className="text-sky-400/80 font-mono text-[9px]">⚡ Auto-Inference</span>
+                      </div>
+                      <div className="text-[10px] text-slate-300 leading-tight bg-slate-950/70 px-2 py-1 rounded border border-slate-800/60 truncate font-mono" title={inlineProfile.description}>
+                        {inlineProfile.description || 'Deskripsi otomatis...'}
+                      </div>
+                    </div>
+
+                    {/* Shortcut Tips Footer */}
+                    <div className="flex items-center justify-between text-[9px] text-slate-400 pt-0.5 font-mono">
+                      <span><kbd className="bg-slate-800 px-1 py-0.2 rounded text-slate-300 border border-slate-700">Tab</kbd> / <kbd className="bg-slate-800 px-1 py-0.2 rounded text-slate-300 border border-slate-700">↵</kbd> Lanjut</span>
+                      <span><kbd className="bg-slate-800 px-1 py-0.2 rounded text-slate-300 border border-slate-700">Shift+Tab</kbd> Balik</span>
+                      <span><kbd className="bg-slate-800 px-1 py-0.2 rounded text-slate-300 border border-slate-700">Esc</kbd> Tutup</span>
+                    </div>
+
+                    {/* Downward pointing arrow */}
+                    <div
+                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-r border-b border-sky-500 rotate-45"
+                    />
+                  </div>
+                );
+              })()}
+
               {/* Instructions badge */}
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
                 <Sparkles className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 <span>
-                  <b>Mode Pintar:</b> Tarik <b>Pin</b> / <b>Gambar</b> • Tahan <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-emerald-300 font-bold">Alt</kbd> untuk Geser Mulus (Bypass Snap) • Tahan <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-purple-300 font-bold">Shift</kbd> untuk Geser Semua • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> Putar 90°
+                  <b>Mode Pintar:</b> Tarik <b>Pin</b> / <b>Gambar</b> • <b>Double-Click Pin / <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">↵</kbd></b> Edit Cepat di Canvas • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-emerald-300 font-bold">Alt</kbd> Geser Mulus • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-purple-300 font-bold">Shift</kbd> Geser Semua • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> Putar 90°
                 </span>
               </div>
             </div>
@@ -2787,13 +3009,24 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <span className="w-2.5 h-2.5 rounded-full bg-sky-400" />
                     Edit Pin Terpilih
                   </span>
-                  <button
-                    onClick={() => deletePin(selectedPin.id)}
-                    className="p-1 rounded hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors"
-                    title="Hapus Pin"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => startInlineEdit(selectedPin.id)}
+                      className="px-2 py-0.5 rounded bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-[10px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Buka Edit Cepat di Canvas (Shortcut: Enter)"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      Canvas (↵)
+                    </button>
+                    <button
+                      onClick={() => deletePin(selectedPin.id)}
+                      className="p-1 rounded hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors"
+                      title="Hapus Pin"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
