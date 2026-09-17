@@ -302,33 +302,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         if (!dragState) setIsHovered(false);
       }}
     >
-      {/* 1. Selection & Hover Outline (Clean Matte, Zero-Neon) */}
-      {isSelected ? (
-        <path
-          d={pathD}
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth="6.5"
-          strokeDasharray="6 4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.8"
-          className="pointer-events-none"
-        />
-      ) : isHovered ? (
-        <path
-          d={pathD}
-          fill="none"
-          stroke="#94a3b8"
-          strokeWidth="5.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.35"
-          className="pointer-events-none"
-        />
-      ) : null}
-
-      {/* 2. Outer Border / Casing - Uses contrast slate outline for dark/black wires */}
+      {/* 1. Outer Border / Casing - Uses contrast slate outline for dark/black wires */}
       <path
         d={pathD}
         fill="none"
@@ -339,7 +313,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         opacity={isDarkWire ? 0.95 : 0.9}
       />
 
-      {/* 3. Main Colored Wire - Thick, rich and solid wire body */}
+      {/* 2. Main Colored Wire - Thick, rich and solid wire body */}
       <path
         d={pathD}
         fill="none"
@@ -347,10 +321,10 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         strokeWidth="3.6"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="transition-colors duration-150 group-hover/wire:brightness-125"
+        className={`transition-all duration-150 ${isSelected ? 'brightness-125' : 'group-hover/wire:brightness-110'}`}
       />
 
-      {/* 4. Terminal Eyelets */}
+      {/* 3. Terminal Eyelets */}
       <circle
         cx={startPoint.x}
         cy={startPoint.y}
@@ -370,7 +344,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         className="pointer-events-none"
       />
 
-      {/* 6. Non-orthogonal Invisible Hitbox */}
+      {/* 4. Non-orthogonal Invisible Hitbox */}
       {wire.routing !== 'orthogonal' && (
         <path
           d={pathD}
@@ -381,7 +355,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         />
       )}
 
-      {/* 7. Interactive Orthogonal Segment Drag Hitboxes (ERD Studio style) */}
+      {/* 5. Interactive Orthogonal Segment Drag Hitboxes (ERD Studio style) */}
       {wire.routing === 'orthogonal' &&
         waypoints.map((p, idx) => {
           if (idx === waypoints.length - 1) return null;
@@ -412,39 +386,9 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
           );
         })}
 
-      {/* 8. Interactive Handles (Corner & Midpoint dots when Hovered or Selected) */}
+      {/* 6. Interactive Midpoint Split Handles (Only center points, zero corner clutter) */}
       {isActive && wire.routing === 'orthogonal' && (
         <g>
-          {/* Corner Handles */}
-          {waypoints.map((p, idx) => {
-            if (idx === 0 || idx === waypoints.length - 1) return null;
-            return (
-              <g key={`corner-${idx}`}>
-                <circle
-                  cx={p.x}
-                  cy={p.y}
-                  r={12}
-                  fill="transparent"
-                  className="cursor-move"
-                  onPointerDown={(e) => handleStartCornerDrag(idx, e)}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  onPointerCancel={handlePointerUp}
-                />
-                <circle
-                  cx={p.x}
-                  cy={p.y}
-                  r={4.5}
-                  fill="#0f172a"
-                  stroke="#38bdf8"
-                  strokeWidth={2}
-                  className="pointer-events-none"
-                />
-              </g>
-            );
-          })}
-
-          {/* Midpoint Split Handles */}
           {waypoints.map((p, idx) => {
             if (idx === waypoints.length - 1) return null;
             const nextP = waypoints[idx + 1]!;
