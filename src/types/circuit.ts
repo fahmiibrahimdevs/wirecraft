@@ -67,6 +67,7 @@ export interface CircuitComponent {
   x: number;
   y: number;
   rotation: 0 | 90 | 180 | 270;
+  locked?: boolean;
   customProps: {
     resistance?: number; // in Ohms for resistors
     ledColor?: 'red' | 'green' | 'blue' | 'yellow' | 'amber' | 'white';

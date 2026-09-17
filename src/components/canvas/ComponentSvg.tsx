@@ -975,7 +975,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
       <g
         transform={`translate(${component.x}, ${component.y}) rotate(${component.rotation}, ${cx}, ${cy})`}
       >
-        {/* Selected outline / ring */}
+        {/* Selection Bounding Box */}
         {isSelected && (
           <rect
             x="-6"
@@ -983,12 +983,27 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             width={width + 12}
             height={height + 12}
             rx="10"
-            fill="none"
-            stroke="#38bdf8"
+            fill={component.locked ? "rgba(245, 158, 11, 0.05)" : "none"}
+            stroke={component.locked ? "#f59e0b" : "#38bdf8"}
             strokeWidth="2"
-            strokeDasharray="4 4"
-            className="animate-pulse"
+            strokeDasharray={component.locked ? "6 3" : "4 4"}
+            className="animate-pulse pointer-events-none"
           />
+        )}
+
+        {/* Locked Indicator Badge */}
+        {component.locked && (
+          <g transform={`translate(${width - 18}, -8)`} className="pointer-events-none">
+            <circle cx="8" cy="8" r="8.5" fill="#0f172a" stroke="#f59e0b" strokeWidth="1.5" />
+            <path
+              d="M5.5 8V6.5a2.5 2.5 0 0 1 5 0V8m-6 0h7a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"
+              fill="none"
+              stroke="#f59e0b"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </g>
         )}
 
         {/* Component Graphics (Photorealistic PNG / Clean SVG) */}
@@ -1223,6 +1238,7 @@ function areComponentPropsEqual(prev: ComponentSvgProps, next: ComponentSvgProps
   if (pc.id !== nc.id) return false;
   if (pc.x !== nc.x || pc.y !== nc.y || pc.rotation !== nc.rotation) return false;
   if (pc.label !== nc.label || pc.name !== nc.name || pc.type !== nc.type) return false;
+  if (pc.locked !== nc.locked) return false;
 
   if (pc.customProps !== nc.customProps) {
     const pKeys = Object.keys(pc.customProps || {});

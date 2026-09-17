@@ -14,10 +14,13 @@ import {
   Link,
   CheckCircle2,
   Copy,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 
 interface PropertiesInspectorProps {
   selectedComponent: CircuitComponent | null;
+  selectedComponentIds?: string[];
   selectedWire: Wire | null;
   allComponents: CircuitComponent[];
   allWires: Wire[];
@@ -26,6 +29,10 @@ interface PropertiesInspectorProps {
   onUpdateComponent: (id: string, updates: Partial<CircuitComponent>) => void;
   onDeleteComponent: (id: string) => void;
   onDuplicateComponent?: (id: string) => void;
+  onToggleLock?: (ids: string[]) => void;
+  onRotateComponents?: (ids: string[]) => void;
+  onDuplicateComponents?: (ids: string[]) => void;
+  onDeleteComponents?: (ids: string[]) => void;
   onUpdateWire: (id: string, updates: Partial<Wire>) => void;
   onDeleteWire: (id: string) => void;
   isOpen: boolean;
@@ -187,6 +194,7 @@ const ResistorPropertyEditor: React.FC<{
 
 export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   selectedComponent,
+  selectedComponentIds = [],
   selectedWire,
   allComponents,
   allWires,
@@ -195,13 +203,122 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   onUpdateComponent,
   onDeleteComponent,
   onDuplicateComponent,
+  onToggleLock,
+  onRotateComponents,
+  onDuplicateComponents,
+  onDeleteComponents,
   onUpdateWire,
   onDeleteWire,
   isOpen,
 }) => {
   if (!isOpen) return null;
 
-  // 1. If Component is Selected
+  // 1. If MULTIPLE Components are Selected
+  if (selectedComponentIds.length > 1) {
+    const selectedComps = allComponents.filter((c) => selectedComponentIds.includes(c.id));
+    const allLocked = selectedComps.length > 0 && selectedComps.every((c) => c.locked);
+
+    return (
+      <aside className="fixed top-14 bottom-0 right-0 z-30 w-80 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
+        {/* Header */}
+        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-sky-400" />
+            <h3 className="text-sm font-semibold text-slate-100">Multi-Selection</h3>
+          </div>
+          <div className="flex items-center gap-1">
+            {onToggleLock && (
+              <button
+                onClick={() => onToggleLock(selectedComponentIds)}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  allLocked
+                    ? 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
+                    : 'text-slate-400 hover:text-amber-400 hover:bg-amber-500/10'
+                }`}
+                title={allLocked ? 'Buka Kunci Semua (L)' : 'Kunci Semua (L)'}
+              >
+                {allLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+              </button>
+            )}
+            {onDuplicateComponents && (
+              <button
+                onClick={() => onDuplicateComponents(selectedComponentIds)}
+                className="text-slate-400 hover:text-sky-400 p-1.5 rounded-lg hover:bg-sky-500/10 transition-colors cursor-pointer"
+                title="Duplikat Semua (Ctrl+D)"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+            )}
+            {onDeleteComponents && (
+              <button
+                onClick={() => onDeleteComponents(selectedComponentIds)}
+                className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+                title="Hapus Semua Terpilih (Delete)"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div className="text-xs font-semibold text-sky-300">
+              {selectedComponentIds.length} Komponen Terpilih
+            </div>
+            <div className="text-[11px] text-slate-400">
+              Anda dapat menggeser, menduplikasi, mengunci, atau memutar grup komponen ini secara serentak.
+            </div>
+          </div>
+
+          {/* Group Actions */}
+          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+            <div className="text-xs font-medium text-slate-300">Aksi Massal (Grup)</div>
+            <div className="grid grid-cols-2 gap-2">
+              {onToggleLock && (
+                <button
+                  onClick={() => onToggleLock(selectedComponentIds)}
+                  className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                >
+                  {allLocked ? (
+                    <>
+                      <Unlock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Buka Kunci</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Kunci (L)</span>
+                    </>
+                  )}
+                </button>
+              )}
+              {onRotateComponents && (
+                <button
+                  onClick={() => onRotateComponents(selectedComponentIds)}
+                  className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                >
+                  <RotateCw className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Putar (R)</span>
+                </button>
+              )}
+              {onDuplicateComponents && (
+                <button
+                  onClick={() => onDuplicateComponents(selectedComponentIds)}
+                  className="col-span-2 flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                >
+                  <Copy className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                  <span>Duplikat Semua ({selectedComponentIds.length})</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  // 2. If Single Component is Selected
   if (selectedComponent) {
     const allDefs = getAllComponentDefinitions();
     const def = allDefs[selectedComponent.type] || COMPONENT_DEFINITIONS[selectedComponent.type];
@@ -225,6 +342,19 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             <h3 className="text-sm font-semibold text-slate-100">Properties Inspector</h3>
           </div>
           <div className="flex items-center gap-1">
+            {onToggleLock && (
+              <button
+                onClick={() => onToggleLock([selectedComponent.id])}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  selectedComponent.locked
+                    ? 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
+                    : 'text-slate-400 hover:text-amber-400 hover:bg-amber-500/10'
+                }`}
+                title={selectedComponent.locked ? 'Buka Kunci Posisi (L)' : 'Kunci Posisi (L)'}
+              >
+                {selectedComponent.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+              </button>
+            )}
             {onDuplicateComponent && (
               <button
                 onClick={() => onDuplicateComponent(selectedComponent.id)}
@@ -247,7 +377,14 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
         <div className="flex-1 overflow-y-auto p-4 space-y-5">
           {/* Component Info Card */}
           <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5">
-            <div className="text-xs font-semibold text-slate-200">{def?.name || selectedComponent.name}</div>
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-semibold text-slate-200">{def?.name || selectedComponent.name}</div>
+              {selectedComponent.locked && (
+                <span className="flex items-center gap-1 text-[10px] text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                  <Lock className="w-2.5 h-2.5" /> Terkunci
+                </span>
+              )}
+            </div>
             <div className="text-[11px] text-slate-400 mt-0.5">{def?.description}</div>
 
             {/* Label Input */}
@@ -262,7 +399,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             </div>
           </div>
 
-          {/* Actions: Duplicate & Rotation */}
+          {/* Actions: Duplicate, Rotation, Lock */}
           <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
             <div className="text-xs font-medium text-slate-300 flex items-center justify-between">
               <span>Aksi Komponen</span>
@@ -277,14 +414,27 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                 <RotateCw className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 <span>Putar 90°</span>
               </button>
-              {onDuplicateComponent && (
+              {onToggleLock && (
                 <button
-                  onClick={() => onDuplicateComponent(selectedComponent.id)}
-                  className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
-                  title="Duplikat Komponen (Ctrl+D)"
+                  onClick={() => onToggleLock([selectedComponent.id])}
+                  className={`flex items-center justify-center gap-1.5 border py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    selectedComponent.locked
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                      : 'bg-slate-900 hover:bg-slate-800 border-slate-800 hover:border-amber-500/40 text-slate-200'
+                  }`}
+                  title="Kunci Posisi (L)"
                 >
-                  <Copy className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                  <span>Duplikat</span>
+                  {selectedComponent.locked ? (
+                    <>
+                      <Unlock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Buka Kunci</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Kunci (L)</span>
+                    </>
+                  )}
                 </button>
               )}
             </div>
