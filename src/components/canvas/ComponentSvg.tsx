@@ -71,19 +71,30 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
   const cx = width / 2;
   const cy = height / 2;
 
-  // Render component visual - using real PNG/SVG image assets where available!
+  // Render component visual - prioritizing custom images & studio components
   const renderVisual = () => {
-    switch (component.type) {
-      case 'arduino-nano':
+    // If this definition is a custom component or has a custom/overridden image, ALWAYS prioritize it!
+    const customImg = (def as any)?.imageUrl || component.customProps?.customImage;
+    if (def.isCustom || (customImg && customImg !== `/components/${component.type}.png` && !customImg.includes('arduino_nano.png'))) {
+      if (customImg) {
+        const imgOffsetX = def.imageOffset?.x || 0;
+        const imgOffsetY = def.imageOffset?.y || 0;
+        const imgWidth = (def as any).imageWidth || width;
+        const imgHeight = (def as any).imageHeight || height;
         return (
           <image
-            href="/components/arduino_nano.png"
-            width={width}
-            height={height}
+            href={customImg}
+            x={imgOffsetX}
+            y={imgOffsetY}
+            width={imgWidth}
+            height={imgHeight}
             preserveAspectRatio="none"
           />
         );
+      }
+    }
 
+    switch (component.type) {
       case 'arduino-uno':
         return (
           <image
@@ -1382,14 +1393,16 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
         const customImg = (def as any)?.imageUrl || component.customProps?.customImage;
         const imgOffsetX = def.imageOffset?.x || 0;
         const imgOffsetY = def.imageOffset?.y || 0;
+        const imgWidth = (def as any).imageWidth || width;
+        const imgHeight = (def as any).imageHeight || height;
         if (customImg) {
           return (
             <image
               href={customImg}
               x={imgOffsetX}
               y={imgOffsetY}
-              width={width}
-              height={height}
+              width={imgWidth}
+              height={imgHeight}
               preserveAspectRatio="none"
             />
           );

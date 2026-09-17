@@ -297,8 +297,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       setName(initialDefinition.name);
       setCategory(initialDefinition.category || 'sensors');
       setDescription(initialDefinition.description || '');
-      setWidth(initialDefinition.width);
-      setHeight(initialDefinition.height);
+      if (initialDefinition.imageWidth && initialDefinition.imageHeight) {
+        setWidth(initialDefinition.imageWidth);
+        setHeight(initialDefinition.imageHeight);
+      } else {
+        setWidth(initialDefinition.width);
+        setHeight(initialDefinition.height);
+      }
       setPins(initialDefinition.pins || []);
       if (initialDefinition.imageOffset) {
         setImageOffset(initialDefinition.imageOffset);
@@ -1489,6 +1494,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       icon: icon || 'Cpu',
       imageUrl: imageDataUrl,
       imageOffset: (normOffset.x !== 0 || normOffset.y !== 0) ? normOffset : undefined,
+      imageWidth: width,
+      imageHeight: height,
       isCustom: true,
     };
   };

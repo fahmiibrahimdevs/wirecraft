@@ -836,5 +836,409 @@
     "imageUrl": "/components/max31865-blue.png",
     "createdAt": "2026-09-17T02:29:39.981Z",
     "updatedAt": "2026-09-17T02:29:39.981Z"
+  },
+  "wemos-d1-mini-esp8266": {
+    "definition": {
+      "type": "wemos-d1-mini-esp8266",
+      "name": "WEMOS D1 MINI (ESP8266)",
+      "category": "microcontrollers",
+      "description": "WeMos D1 Mini adalah papan pengembangan (development board) mikrokomputer berbasis SoC ESP8266EX yang mengintegrasikan mikrokontroler 32-bit dengan konektivitas Wi-Fi dalam bentuk fisik (form factor) yang sangat ringkas.",
+      "width": 229.8,
+      "height": 172,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "3V3",
+          "x": 62.1,
+          "y": 10,
+          "type": "power",
+          "description": "Keluaran Tegangan Teratur +3.3V DC (LDO Onboard)"
+        },
+        {
+          "id": "pin_2",
+          "name": "D8",
+          "x": 79.1,
+          "y": 10,
+          "type": "digital",
+          "description": "General Purpose Digital Input/Output (D8)"
+        },
+        {
+          "id": "pin_3",
+          "name": "Pin 3",
+          "x": 96.1,
+          "y": 10,
+          "type": "digital",
+          "description": "Pin 3"
+        },
+        {
+          "id": "pin_4",
+          "name": "Pin 4",
+          "x": 113.1,
+          "y": 10,
+          "type": "digital",
+          "description": "Pin 4"
+        },
+        {
+          "id": "pin_5",
+          "name": "Pin 5",
+          "x": 130.1,
+          "y": 10,
+          "type": "digital",
+          "description": "Pin 5"
+        },
+        {
+          "id": "pin_6",
+          "name": "Pin 6",
+          "x": 147.1,
+          "y": 10,
+          "type": "digital",
+          "description": "Pin 6"
+        },
+        {
+          "id": "pin_7",
+          "name": "A0",
+          "x": 164.1,
+          "y": 10,
+          "type": "analog",
+          "description": "Pin Masukan Analog ADC (Analog Input A0)"
+        },
+        {
+          "id": "pin_8",
+          "name": "RST",
+          "x": 181.1,
+          "y": 10,
+          "type": "generic",
+          "description": "System Hardware Reset Pin (Active LOW)"
+        },
+        {
+          "id": "pin_9",
+          "name": "5V",
+          "x": 62.1,
+          "y": 163,
+          "type": "power",
+          "description": "Tegangan Masukan Power Supply (+5V DC / Eksternal)"
+        },
+        {
+          "id": "pin_10",
+          "name": "GND",
+          "x": 79.1,
+          "y": 163,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        },
+        {
+          "id": "pin_11",
+          "name": "D4 (LED)",
+          "x": 96.1,
+          "y": 163,
+          "type": "pwm",
+          "description": "GPIO2 / Built-in Blue LED / PWM"
+        },
+        {
+          "id": "pin_12",
+          "name": "D3",
+          "x": 113.1,
+          "y": 163,
+          "type": "pwm",
+          "description": "GPIO0 / Flash Button / 10k Pull-up / PWM"
+        },
+        {
+          "id": "pin_13",
+          "name": "D2 (SDA)",
+          "x": 130.1,
+          "y": 163,
+          "type": "i2c",
+          "description": "GPIO4 / I2C SDA"
+        },
+        {
+          "id": "pin_14",
+          "name": "D1 (SCL)",
+          "x": 147.1,
+          "y": 163,
+          "type": "i2c",
+          "description": "GPIO5 / I2C SCL"
+        },
+        {
+          "id": "pin_15",
+          "name": "RX",
+          "x": 164.1,
+          "y": 163,
+          "type": "uart",
+          "description": "GPIO0 / UART Serial Receive / Serial RX (RX)"
+        },
+        {
+          "id": "pin_16",
+          "name": "TX",
+          "x": 181.1,
+          "y": 163,
+          "type": "uart",
+          "description": "GPIO1 / UART Serial Transmit / Serial TX (TX)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/wemos-d1-mini-esp8266.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/wemos-d1-mini-esp8266.png",
+    "createdAt": "2026-09-17T02:55:12.158Z",
+    "updatedAt": "2026-09-17T02:56:07.805Z"
+  },
+  "arduino-nano": {
+    "definition": {
+      "type": "arduino-nano",
+      "name": "ARDUINO NANO",
+      "category": "microcontrollers",
+      "description": "Arduino Nano adalah papan pengembangan (development board) mikrokontroler berbasis chip ATmega328P (atau ATmega168 pada versi lama) yang memiliki fungsionalitas serupa dengan Arduino Uno, namun dikemas dalam bentuk fisik (form factor) yang jauh lebih kecil dan breadboard-friendly.",
+      "width": 301.2,
+      "height": 119,
+      "pins": [
+        {
+          "id": "p_1",
+          "name": "D12 (MISO)",
+          "x": 37.5,
+          "y": 8.4,
+          "type": "digital",
+          "description": "General Purpose Digital Input/Output (D12) / SPI MISO"
+        },
+        {
+          "id": "p_2",
+          "name": "D11 (MOSI)",
+          "x": 54.5,
+          "y": 8.4,
+          "type": "digital",
+          "description": "General Purpose Digital I/O dengan dukungan PWM (D11) / SPI MOSI"
+        },
+        {
+          "id": "p_3",
+          "name": "D10 (SS)",
+          "x": 71.5,
+          "y": 8.4,
+          "type": "digital",
+          "description": "General Purpose Digital I/O dengan dukungan PWM (D10) / SPI SS"
+        },
+        {
+          "id": "p_4",
+          "name": "D9",
+          "x": 88.5,
+          "y": 8.4,
+          "type": "pwm",
+          "description": "General Purpose Digital I/O dengan dukungan PWM (D9)"
+        },
+        {
+          "id": "p_5",
+          "name": "D8",
+          "x": 105.5,
+          "y": 8.4,
+          "type": "digital",
+          "description": "General Purpose Digital Input/Output (D8)"
+        },
+        {
+          "id": "p_6",
+          "name": "D7",
+          "x": 122.5,
+          "y": 8.4,
+          "type": "digital",
+          "description": "General Purpose Digital Input/Output (D7)"
+        },
+        {
+          "id": "p_7",
+          "name": "D6",
+          "x": 139.5,
+          "y": 8.4,
+          "type": "pwm",
+          "description": "General Purpose Digital I/O dengan dukungan PWM (D6)"
+        },
+        {
+          "id": "p_8",
+          "name": "D5",
+          "x": 156.5,
+          "y": 8.4,
+          "type": "pwm",
+          "description": "General Purpose Digital I/O dengan dukungan PWM (D5)"
+        },
+        {
+          "id": "p_9",
+          "name": "D4",
+          "x": 173.5,
+          "y": 8.4,
+          "type": "digital",
+          "description": "General Purpose Digital Input/Output (D4)"
+        },
+        {
+          "id": "p_10",
+          "name": "D3",
+          "x": 190.5,
+          "y": 8.4,
+          "type": "pwm",
+          "description": "General Purpose Digital I/O dengan dukungan PWM (D3)"
+        },
+        {
+          "id": "p_11",
+          "name": "D2",
+          "x": 207.5,
+          "y": 8.4,
+          "type": "digital",
+          "description": "General Purpose Digital Input/Output (D2)"
+        },
+        {
+          "id": "p_12",
+          "name": "GND",
+          "x": 224.5,
+          "y": 8.4,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        },
+        {
+          "id": "p_13",
+          "name": "RST",
+          "x": 241.5,
+          "y": 8.4,
+          "type": "generic",
+          "description": "System Hardware Reset Pin (Active LOW)"
+        },
+        {
+          "id": "p_14",
+          "name": "RX",
+          "x": 258.5,
+          "y": 8.4,
+          "type": "uart",
+          "description": "UART Serial Receive / Serial RX (RX)"
+        },
+        {
+          "id": "p_15",
+          "name": "TX",
+          "x": 275.5,
+          "y": 8.4,
+          "type": "uart",
+          "description": "UART Serial Transmit / Serial TX (TX)"
+        },
+        {
+          "id": "pin_17",
+          "name": "D13 (SCK)",
+          "x": 37.5,
+          "y": 110.4,
+          "type": "spi",
+          "description": "Digital Pin 13 / Built-in LED / SPI SCK"
+        },
+        {
+          "id": "pin_18",
+          "name": "3V3",
+          "x": 54.5,
+          "y": 110.4,
+          "type": "power",
+          "description": "Keluaran Tegangan Teratur +3.3V DC (LDO Onboard)"
+        },
+        {
+          "id": "pin_19",
+          "name": "AREF",
+          "x": 71.5,
+          "y": 110.4,
+          "type": "power",
+          "description": "Tegangan Referensi Analog (Analog Reference Voltage)"
+        },
+        {
+          "id": "pin_20",
+          "name": "A0",
+          "x": 88.5,
+          "y": 110.4,
+          "type": "analog",
+          "description": "Pin Masukan Analog ADC (Analog Input A0) / Digital 14"
+        },
+        {
+          "id": "pin_21",
+          "name": "A1",
+          "x": 105.5,
+          "y": 110.4,
+          "type": "analog",
+          "description": "Pin Masukan Analog ADC (Analog Input A1) / Digital 15"
+        },
+        {
+          "id": "pin_22",
+          "name": "A2",
+          "x": 122.5,
+          "y": 110.4,
+          "type": "analog",
+          "description": "Pin Masukan Analog ADC (Analog Input A2) / Digital 16"
+        },
+        {
+          "id": "pin_23",
+          "name": "A3",
+          "x": 139.5,
+          "y": 110.4,
+          "type": "analog",
+          "description": "Pin Masukan Analog ADC (Analog Input A3) / Digital 17"
+        },
+        {
+          "id": "pin_24",
+          "name": "A4 (SDA)",
+          "x": 156.5,
+          "y": 110.4,
+          "type": "i2c",
+          "description": "Terminal Pin A4 (SDA)"
+        },
+        {
+          "id": "pin_25",
+          "name": "A5 (SCL)",
+          "x": 173.5,
+          "y": 110.4,
+          "type": "i2c",
+          "description": "Terminal Pin A5 (SCL)"
+        },
+        {
+          "id": "pin_26",
+          "name": "A6",
+          "x": 190.5,
+          "y": 110.4,
+          "type": "analog",
+          "description": "Pin Masukan Analog ADC (Analog Input A6) / ADC Only"
+        },
+        {
+          "id": "pin_27",
+          "name": "A7",
+          "x": 207.5,
+          "y": 110.4,
+          "type": "analog",
+          "description": "Pin Masukan Analog ADC (Analog Input A7) / ADC Only"
+        },
+        {
+          "id": "pin_28",
+          "name": "5V",
+          "x": 224.5,
+          "y": 110.4,
+          "type": "power",
+          "description": "Tegangan Masukan Power Supply (+5V DC / Eksternal)"
+        },
+        {
+          "id": "pin_29",
+          "name": "RST",
+          "x": 241.5,
+          "y": 110.4,
+          "type": "generic",
+          "description": "System Hardware Reset Pin (Active LOW)"
+        },
+        {
+          "id": "pin_30",
+          "name": "GND",
+          "x": 258.5,
+          "y": 110.4,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        },
+        {
+          "id": "pin_31",
+          "name": "VIN",
+          "x": 275.5,
+          "y": 110.4,
+          "type": "power",
+          "description": "Tegangan Masukan Power Supply (+5V DC / Eksternal)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/arduino-nano.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/arduino-nano.png",
+    "createdAt": "2026-09-17T03:09:55.003Z",
+    "updatedAt": "2026-09-17T03:09:55.003Z"
   }
 }

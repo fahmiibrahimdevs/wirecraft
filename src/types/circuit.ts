@@ -137,6 +137,8 @@ export interface ComponentDefinition {
   icon: string; // Lucide icon name or svg tag
   imageUrl?: string;
   imageOffset?: { x: number; y: number };
+  imageWidth?: number;
+  imageHeight?: number;
   isCustom?: boolean;
 }
 
