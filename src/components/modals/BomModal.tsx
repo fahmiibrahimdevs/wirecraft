@@ -52,11 +52,35 @@ export const BomModal: React.FC<BomModalProps> = ({
     }
   });
 
-  // Add Jumper Wires summary
+  // Add Jumper Wires summary with detailed color breakdown
   if (wires.length > 0) {
+    const getColorName = (hex: string): string => {
+      const h = hex.toLowerCase().trim();
+      if (h === '#ef4444' || h === 'red') return 'Merah';
+      if (h === '#1e293b' || h === '#0f172a' || h === '#020617' || h === '#000000' || h === 'black') return 'Hitam';
+      if (h === '#38bdf8' || h === '#0ea5e9' || h === '#0284c7' || h === 'cyan') return 'Biru Muda';
+      if (h === '#10b981' || h === '#22c55e' || h === 'green') return 'Hijau';
+      if (h === '#eab308' || h === '#facc15' || h === 'yellow') return 'Kuning';
+      if (h === '#f97316' || h === '#ea580c' || h === 'orange') return 'Oranye';
+      if (h === '#a855f7' || h === '#c084fc' || h === 'purple') return 'Ungu';
+      if (h === '#f8fafc' || h === '#ffffff' || h === 'white') return 'Putih';
+      if (h === '#3b82f6' || h === '#2563eb' || h === 'blue') return 'Biru';
+      return 'Kustom';
+    };
+
+    const colorCounts: Record<string, number> = {};
+    wires.forEach((w) => {
+      const name = getColorName(w.color || '#38bdf8');
+      colorCounts[name] = (colorCounts[name] || 0) + 1;
+    });
+
+    const specsSummary = Object.entries(colorCounts)
+      .map(([colName, count]) => `${count}x ${colName}`)
+      .join(', ');
+
     groupedParts['wires'] = {
       name: 'Kabel Jumper Fleksibel (Breadboard Wires)',
-      specs: 'Pelbagai Warna',
+      specs: specsSummary || 'Aneka Warna',
       labels: [`${wires.length} kabel`],
       qty: wires.length,
     };
