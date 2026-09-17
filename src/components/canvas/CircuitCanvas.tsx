@@ -101,19 +101,26 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   }, []);
 
   // Incremental Pin World Coordinate Cache: Only recalculate moved components!
-  const pinCacheRef = useRef<Map<string, { x: number; y: number; rot: number; pins: Map<string, WirePoint> }>>(new Map());
+  const pinCacheRef = useRef<Map<string, { x: number; y: number; rot: number; def: any; pins: Map<string, WirePoint> }>>(new Map());
 
   const pinWorldMap = useMemo(() => {
     const fullMap = new Map<string, WirePoint>();
     const currentCache = pinCacheRef.current;
-    const newCache = new Map<string, { x: number; y: number; rot: number; pins: Map<string, WirePoint> }>();
+    const newCache = new Map<string, { x: number; y: number; rot: number; def: any; pins: Map<string, WirePoint> }>();
 
     for (const comp of components) {
       const def = allDefs[comp.type] || COMPONENT_DEFINITIONS[comp.type];
       if (!def) continue;
 
       const cached = currentCache.get(comp.id);
-      if (cached && cached.x === comp.x && cached.y === comp.y && cached.rot === comp.rotation) {
+      if (
+        cached &&
+        cached.x === comp.x &&
+        cached.y === comp.y &&
+        cached.rot === comp.rotation &&
+        cached.def === def &&
+        cached.pins.size === def.pins.length
+      ) {
         // Reuse cached pins without math!
         newCache.set(comp.id, cached);
         cached.pins.forEach((pos, key) => fullMap.set(key, pos));
@@ -126,7 +133,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           compPinMap.set(key, pos);
           fullMap.set(key, pos);
         }
-        newCache.set(comp.id, { x: comp.x, y: comp.y, rot: comp.rotation, pins: compPinMap });
+        newCache.set(comp.id, { x: comp.x, y: comp.y, rot: comp.rotation, def, pins: compPinMap });
       }
     }
 
@@ -147,7 +154,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         type === 'arduino-uno' ||
         type === 'arduino-nano' ||
         type.startsWith('esp32') ||
-        type === 'wemos-d1-mini' ||
+        type.startsWith('wemos') ||
         type === 'battery-9v'
       )
         return 1;
@@ -215,20 +222,13 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
   // Handle Mouse Down on Canvas Background
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
-    // If drawing wire
+    // If drawing wire: Clicking on canvas adds intermediate bend waypoints
     if (drawingWire) {
       if (e.button === 0) {
-        if (
-          hoveredPinInfo &&
-          (hoveredPinInfo.component.id !== drawingWire.fromComponentId ||
-            hoveredPinInfo.pin.id !== drawingWire.fromPin.id)
-        ) {
-          finishWireConnection(hoveredPinInfo.component.id, hoveredPinInfo.pin);
-          return;
-        }
         const worldPos = screenToWorld(e.clientX, e.clientY);
         setDrawingWire((prev) => (prev ? { ...prev, waypoints: [...prev.waypoints, worldPos] } : null));
       } else if (e.button === 2) {
+        // Right click cancels wire drawing
         setDrawingWire(null);
         setHoveredPinInfo(null);
       }

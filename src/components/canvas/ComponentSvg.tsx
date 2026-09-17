@@ -1014,7 +1014,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           const isStartPin = activeWireStartPinId === pin.id;
           const isTargetPin = activeWireTargetPinId === pin.id;
           const isEsp = component.type.startsWith('esp32');
-          const isWemos = component.type === 'wemos-d1-mini';
+          const isWemos = component.type.startsWith('wemos');
           const isLed = component.type === 'led';
           const isResistor = component.type === 'resistor';
           const isPot = component.type === 'potentiometer';

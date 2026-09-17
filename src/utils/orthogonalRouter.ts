@@ -321,47 +321,48 @@ export function getEffectiveWaypoints(
   startPoint: WirePoint,
   endPoint: WirePoint
 ): Point[] {
-  if (wire.waypoints && wire.waypoints.length >= 2) {
-    const pts = wire.waypoints.map((p) => ({ ...p }));
+  const rawWaypoints = wire.waypoints || [];
 
-    const wasStartH = Math.abs(pts[0]!.y - pts[1]!.y) <= 2;
+  if (rawWaypoints.length === 0) {
+    const dx = endPoint.x - startPoint.x;
+    const dy = endPoint.y - startPoint.y;
+
+    if (Math.abs(dx) < 2 || Math.abs(dy) < 2) {
+      return [startPoint, endPoint];
+    }
+
+    const midX = Math.round(((startPoint.x + endPoint.x) / 2) / 10) * 10;
+    return cleanAndSimplifyWaypoints([
+      startPoint,
+      { x: midX, y: startPoint.y },
+      { x: midX, y: endPoint.y },
+      endPoint,
+    ]);
+  }
+
+  // Check if rawWaypoints already starts near startPoint and ends near endPoint
+  // (e.g. from user segment/corner drag editing in WireSvg)
+  const firstPt = rawWaypoints[0]!;
+  const lastPt = rawWaypoints[rawWaypoints.length - 1]!;
+  const startsNearStart = Math.hypot(firstPt.x - startPoint.x, firstPt.y - startPoint.y) <= 20;
+  const endsNearEnd = Math.hypot(lastPt.x - endPoint.x, lastPt.y - endPoint.y) <= 20;
+
+  let pts: Point[];
+
+  if (startsNearStart && endsNearEnd && rawWaypoints.length >= 2) {
+    pts = rawWaypoints.map((p) => ({ ...p }));
     pts[0] = { ...startPoint };
-    if (pts.length > 2) {
-      if (wasStartH) {
-        pts[1]!.y = startPoint.y;
-      } else {
-        pts[1]!.x = startPoint.x;
-      }
-    }
-
-    const lastIdx = pts.length - 1;
-    const wasEndH = Math.abs(pts[lastIdx]!.y - pts[lastIdx - 1]!.y) <= 2;
-    pts[lastIdx] = { ...endPoint };
-    if (pts.length > 2) {
-      if (wasEndH) {
-        pts[lastIdx - 1]!.y = endPoint.y;
-      } else {
-        pts[lastIdx - 1]!.x = endPoint.x;
-      }
-    }
-
-    return cleanAndSimplifyWaypoints(pts);
+    pts[pts.length - 1] = { ...endPoint };
+  } else {
+    // Intermediate waypoints list (from user clicks during drawing): Prepend startPoint and append endPoint
+    pts = [
+      { ...startPoint },
+      ...rawWaypoints.map((p) => ({ ...p })),
+      { ...endPoint },
+    ];
   }
 
-  const dx = endPoint.x - startPoint.x;
-  const dy = endPoint.y - startPoint.y;
-
-  if (Math.abs(dx) < 2 || Math.abs(dy) < 2) {
-    return [startPoint, endPoint];
-  }
-
-  const midX = Math.round(((startPoint.x + endPoint.x) / 2) / 10) * 10;
-  return cleanAndSimplifyWaypoints([
-    startPoint,
-    { x: midX, y: startPoint.y },
-    { x: midX, y: endPoint.y },
-    endPoint,
-  ]);
+  return cleanAndSimplifyWaypoints(pts);
 }
 
 // Returns true if Wire A has vertical segments that jump over horizontal segments of Wire B

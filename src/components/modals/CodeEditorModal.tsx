@@ -28,7 +28,7 @@ export const CodeEditorModal: React.FC<CodeEditorModalProps> = ({
         c.type === 'arduino-uno' ||
         c.type === 'arduino-nano' ||
         c.type.startsWith('esp32') ||
-        c.type === 'wemos-d1-mini'
+        c.type.startsWith('wemos')
     );
     if (!uno) {
       setCode(`// Belum ada mikrokontroler (Arduino Nano / Uno / ESP32) di kanvas.
