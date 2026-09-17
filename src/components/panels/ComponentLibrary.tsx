@@ -340,22 +340,20 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                           {def.description}
                         </p>
 
-                        {/* Custom Component Action Toolbar */}
-                        {def.isCustom && (
+                        {/* Custom Component Action Toolbar (Admin Only) */}
+                        {def.isCustom && onOpenStudio && (
                           <div
                             className="mt-2 flex items-center gap-2 pt-1 border-t border-slate-200 dark:border-slate-800/80"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {onOpenStudio && (
-                              <button
-                                onClick={() => onOpenStudio(def)}
-                                className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-sky-500/20 text-[10px] text-sky-600 dark:text-sky-300 border border-slate-200 dark:border-slate-700 hover:border-sky-500/40 flex items-center gap-1 transition-colors"
-                                title="Edit Komponen di Component Studio"
-                              >
-                                <Sliders className="w-3 h-3" />
-                                <span>Edit</span>
-                              </button>
-                            )}
+                            <button
+                              onClick={() => onOpenStudio(def)}
+                              className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-sky-500/20 text-[10px] text-sky-600 dark:text-sky-300 border border-slate-200 dark:border-slate-700 hover:border-sky-500/40 flex items-center gap-1 transition-colors"
+                              title="Edit Komponen di Component Studio"
+                            >
+                              <Sliders className="w-3 h-3" />
+                              <span>Edit</span>
+                            </button>
                             <button
                               onClick={async () => {
                                 const isConfirmed = await showConfirm({

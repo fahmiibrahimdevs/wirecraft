@@ -147,29 +147,35 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
     // Auto-fit bounding box snapshot
     const svgOriginal = document.querySelector('[data-canvas-container="true"] svg') as SVGSVGElement;
-    if (!svgOriginal) throw new Error('Canvas SVG not found');
+    if (!svgOriginal) throw new Error('Canvas SVG tidak ditemukan');
 
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'fixed';
-    tempContainer.style.left = '-99999px';
-    tempContainer.style.top = '-99999px';
+    tempContainer.style.left = '0px';
+    tempContainer.style.top = '0px';
+    tempContainer.style.zIndex = '-9999';
     tempContainer.style.width = `${boundingBox.width}px`;
     tempContainer.style.height = `${boundingBox.height}px`;
     tempContainer.style.overflow = 'hidden';
+    tempContainer.style.pointerEvents = 'none';
     if (resolvedBgColor) {
       tempContainer.style.backgroundColor = resolvedBgColor;
     }
 
     const clonedSvg = svgOriginal.cloneNode(true) as SVGSVGElement;
+    clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     clonedSvg.setAttribute('width', `${boundingBox.width}`);
     clonedSvg.setAttribute('height', `${boundingBox.height}`);
     clonedSvg.setAttribute(
       'viewBox',
       `${boundingBox.minX} ${boundingBox.minY} ${boundingBox.width} ${boundingBox.height}`
     );
-    clonedSvg.style.width = '100%';
-    clonedSvg.style.height = '100%';
-    clonedSvg.style.position = 'static';
+    clonedSvg.style.width = `${boundingBox.width}px`;
+    clonedSvg.style.height = `${boundingBox.height}px`;
+    clonedSvg.style.position = 'absolute';
+    clonedSvg.style.left = '0px';
+    clonedSvg.style.top = '0px';
+    clonedSvg.style.overflow = 'visible';
 
     // Reset transform on top-level group inside cloned SVG
     const topGroup = clonedSvg.querySelector('g');
@@ -214,9 +220,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         cleanupFn = cleanup;
 
         const serializer = new XMLSerializer();
-        let svgString = serializer.serializeToString(clonedSvg || document.querySelector('svg')!);
+        let svgString = serializer.serializeToString(clonedSvg || document.querySelector('[data-canvas-container="true"] svg')!);
         if (!svgString.startsWith('<?xml')) {
-          svgString = '<?xml version="1.0" standalone="no"?>\r\n' + svgString;
+          svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\r\n' + svgString;
         }
 
         const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8;' });
@@ -235,6 +241,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           pixelRatio: scale,
           quality: 0.95,
           backgroundColor: resolvedBgColor || undefined,
+          width: scope === 'auto' ? boundingBox.width : undefined,
+          height: scope === 'auto' ? boundingBox.height : undefined,
         };
 
         const dataUrl =
@@ -266,6 +274,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const dataUrl = await toPng(element, {
         pixelRatio: Math.min(scale, 2), // 2x is optimal for clipboard memory
         backgroundColor: resolvedBgColor || undefined,
+        width: scope === 'auto' ? boundingBox.width : undefined,
+        height: scope === 'auto' ? boundingBox.height : undefined,
       });
 
       const response = await fetch(dataUrl);
