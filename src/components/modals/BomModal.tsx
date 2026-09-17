@@ -115,25 +115,25 @@ export const BomModal: React.FC<BomModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-100">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                 Bill of Materials (BOM)
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Daftar rincian kebutuhan komponen untuk perakitan sirkuit fisik.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -143,7 +143,7 @@ export const BomModal: React.FC<BomModalProps> = ({
         <div className="flex-1 overflow-y-auto p-4">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 text-[11px] font-mono text-slate-400 uppercase">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase">
                 <th className="py-2 px-3">No</th>
                 <th className="py-2 px-3">Komponen</th>
                 <th className="py-2 px-3">Nilai / Spek</th>
@@ -151,23 +151,23 @@ export const BomModal: React.FC<BomModalProps> = ({
                 <th className="py-2 px-3 text-right">Qty</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-xs">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
               {partsList.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-slate-500 text-xs">
+                  <td colSpan={5} className="text-center py-8 text-slate-400 dark:text-slate-500 text-xs">
                     Belum ada komponen di dalam kanvas sirkuit
                   </td>
                 </tr>
               ) : (
                 partsList.map((part, index) => (
-                  <tr key={index} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-slate-500">{index + 1}</td>
-                    <td className="py-2.5 px-3 font-medium text-slate-200">{part.name}</td>
-                    <td className="py-2.5 px-3 font-mono text-sky-400">{part.specs}</td>
-                    <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px]">
+                  <tr key={index} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-2.5 px-3 font-mono text-slate-400 dark:text-slate-500">{index + 1}</td>
+                    <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200">{part.name}</td>
+                    <td className="py-2.5 px-3 font-mono text-sky-600 dark:text-sky-400">{part.specs}</td>
+                    <td className="py-2.5 px-3 font-mono text-slate-500 dark:text-slate-400 text-[11px]">
                       {part.labels.join(', ')}
                     </td>
-                    <td className="py-2.5 px-3 font-mono font-semibold text-slate-100 text-right">
+                    <td className="py-2.5 px-3 font-mono font-semibold text-slate-900 dark:text-slate-100 text-right">
                       {part.qty}
                     </td>
                   </tr>
@@ -178,21 +178,21 @@ export const BomModal: React.FC<BomModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-3 border-t border-slate-800 bg-slate-900/90 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400 font-mono">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 flex items-center justify-between">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
             Total Item Part: {components.length}
           </span>
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyText}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? 'Tersalin!' : 'Salin Text'}
             </button>
             <button
               onClick={handleDownloadCsv}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-md"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-md"
             >
               <Download className="w-3.5 h-3.5" />
               Download CSV

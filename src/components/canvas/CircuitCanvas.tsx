@@ -783,7 +783,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       onMouseUp={handleMouseUp}
       onWheel={handleWheel}
       onContextMenu={handleCanvasContextMenu}
-      className={`relative w-full h-full bg-[#020617] overflow-hidden select-none ${
+      className={`relative w-full h-full bg-[#f1f5f9] dark:bg-[#020617] overflow-hidden select-none transition-colors duration-200 ${
         isPanning ? 'cursor-grabbing' : drawingWire ? 'cursor-crosshair' : 'cursor-default'
       }`}
     >
@@ -939,38 +939,38 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       {/* Floating Pin Tooltip */}
       {hoveredPinInfo && (
         <div
-          className="fixed z-50 pointer-events-none px-2.5 py-1.5 rounded-lg bg-slate-900/95 border border-slate-700 shadow-xl backdrop-blur-md transform -translate-x-1/2 -translate-y-full mb-3"
+          className="fixed z-50 pointer-events-none px-2.5 py-1.5 rounded-lg bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-700 shadow-xl backdrop-blur-md transform -translate-x-1/2 -translate-y-full mb-3"
           style={{
             left: hoveredPinInfo.screenX,
             top: hoveredPinInfo.screenY - 8,
           }}
         >
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="font-semibold text-slate-100 font-mono">
+            <span className="font-semibold text-slate-800 dark:text-slate-100 font-mono">
               {hoveredPinInfo.pin.name}
             </span>
             <span
               className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-semibold ${
                 hoveredPinInfo.pin.type === 'power'
-                  ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                  ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30'
                   : hoveredPinInfo.pin.type === 'ground'
-                  ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
+                  ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30'
                   : hoveredPinInfo.pin.type === 'i2c'
-                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                  ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30'
                   : hoveredPinInfo.pin.type === 'pwm'
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  : 'bg-slate-800 text-slate-300 border border-slate-700'
+                  ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
               }`}
             >
               {hoveredPinInfo.pin.type}
             </span>
           </div>
           {hoveredPinInfo.pin.description && (
-            <div className="text-[11px] text-slate-400 mt-0.5 max-w-xs">
+            <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 max-w-xs">
               {hoveredPinInfo.pin.description}
             </div>
           )}
-          <div className="text-[10px] text-slate-400 mt-1 font-medium">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
             {drawingWire
               ? '✓ Klik / Lepas mouse untuk menyambungkan'
               : 'Klik pin untuk mulai pasang kabel'}
@@ -980,23 +980,23 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
       {/* Wire Drawing Help Banner */}
       {drawingWire && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 border border-sky-500/40 text-slate-200 px-4 py-2 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-3 animate-fade-in">
-          <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping" />
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 border border-sky-500/40 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-3 animate-fade-in">
+          <span className="w-2.5 h-2.5 rounded-full bg-sky-500 dark:bg-sky-400 animate-ping" />
           <div className="text-xs flex items-center gap-1.5 flex-wrap">
             <span>Menghubungkan pin</span>
-            <span className="text-sky-400 font-mono font-bold bg-sky-500/15 px-1.5 py-0.5 rounded border border-sky-500/30">
+            <span className="text-sky-600 dark:text-sky-400 font-mono font-bold bg-sky-500/15 px-1.5 py-0.5 rounded border border-sky-500/30">
               {drawingWire.fromPin.name}
             </span>
             {hoveredPinInfo ? (
               <>
                 <span className="text-slate-400">→</span>
-                <span className="text-emerald-400 font-mono font-bold bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30">
                   {hoveredPinInfo.component.label || hoveredPinInfo.component.name}.{hoveredPinInfo.pin.name}
                 </span>
-                <span className="text-slate-400 text-[11px]">(Klik untuk menyambungkan)</span>
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">(Klik untuk menyambungkan)</span>
               </>
             ) : (
-              <span className="text-slate-400 text-[11px]">(Klik pin tujuan untuk menyambungkan, atau klik kanvas untuk belokan)</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[11px]">(Klik pin tujuan untuk menyambungkan, atau klik kanvas untuk belokan)</span>
             )}
           </div>
           <button
@@ -1004,7 +1004,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
               setDrawingWire(null);
               setHoveredPinInfo(null);
             }}
-            className="text-[11px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded text-slate-300 transition-colors cursor-pointer shrink-0"
+            className="text-[11px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 transition-colors cursor-pointer shrink-0"
           >
             Batal (Esc)
           </button>

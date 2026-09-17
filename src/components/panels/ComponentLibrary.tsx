@@ -168,32 +168,32 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
     >
       {/* Main Drawer Panel */}
       <div
-        className={`w-84 h-full bg-slate-900/95 backdrop-blur-md border-r border-slate-800 flex flex-col overflow-hidden transition-all duration-300 ${
+        className={`w-84 h-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-r border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden transition-all duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
         {/* Top Activity Tab Switcher (Katalog Komponen vs Desain Rangkaian) */}
-        <div className="flex border-b border-slate-800 bg-slate-950/70 p-1.5 gap-1 shrink-0">
+        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 p-1.5 gap-1 shrink-0">
           <button
             onClick={() => setActiveTab('components')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'components'
-                ? 'bg-slate-900 text-sky-400 shadow-sm border border-slate-700/80'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-transparent'
+                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm border border-slate-200 dark:border-slate-700/80'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900/40 border border-transparent'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+            <Sparkles className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
             <span>Katalog</span>
           </button>
           <button
             onClick={() => setActiveTab('explorer')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'explorer'
-                ? 'bg-slate-900 text-sky-400 shadow-sm border border-slate-700/80'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-transparent'
+                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm border border-slate-200 dark:border-slate-700/80'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900/40 border border-transparent'
             }`}
           >
-            <Folder className="w-3.5 h-3.5 text-amber-400" />
+            <Folder className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
             <span>Desain Rangkaian</span>
           </button>
         </div>
@@ -226,15 +226,15 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
         {activeTab === 'components' && (
           <div className="flex-1 overflow-hidden flex flex-col">
             {/* Header */}
-            <div className="p-3.5 border-b border-slate-800 shrink-0">
+            <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 shrink-0">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-sky-400" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-100 font-mono">
+                  <Sparkles className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100 font-mono">
                     KATALOG KOMPONEN
                   </h2>
                 </div>
-                <span className="text-[11px] font-mono text-slate-400 px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
+                <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                   {filteredComponents.length} part
                 </span>
               </div>
@@ -243,28 +243,28 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
               {onOpenStudio && (
                 <button
                   onClick={() => onOpenStudio()}
-                  className="w-full mb-2.5 py-1.5 px-3 rounded-xl bg-gradient-to-r from-sky-500/20 to-emerald-500/20 hover:from-sky-500/30 hover:to-emerald-500/30 border border-sky-500/40 text-sky-300 text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all group cursor-pointer"
+                  className="w-full mb-2.5 py-1.5 px-3 rounded-xl bg-gradient-to-r from-sky-500/10 to-emerald-500/10 dark:from-sky-500/20 dark:to-emerald-500/20 hover:from-sky-500/20 hover:to-emerald-500/20 dark:hover:from-sky-500/30 dark:hover:to-emerald-500/30 border border-sky-500/30 dark:border-sky-500/40 text-sky-700 dark:text-sky-300 text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all group cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-sky-400 group-hover:rotate-12 transition-transform" />
+                  <Sparkles className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 group-hover:rotate-12 transition-transform" />
                   <span>+ Buat / Import Komponen (Studio)</span>
                 </button>
               )}
 
               {/* Search Box */}
               <div className="relative">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari Arduino, LED, Sensor..."
-                  className="w-full bg-slate-950/70 border border-slate-800 focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/30 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 transition-all outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/30 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all outline-none"
                 />
               </div>
             </div>
 
             {/* Category Pills */}
-            <div className="px-3 py-2 border-b border-slate-800/80 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+            <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800/80 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
               {Object.entries(CATEGORY_MAP).map(([catKey, catLabel]) => {
                 const isActive = activeCategory === catKey;
                 return (
@@ -273,8 +273,8 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                     onClick={() => setActiveCategory(catKey)}
                     className={`px-2.5 py-1 rounded-md text-[11px] font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
                       isActive
-                        ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30 shadow-sm'
-                        : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                        ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-950/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800/60 border border-transparent'
                     }`}
                   >
                     {catLabel}
@@ -286,12 +286,12 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
             {/* Component List */}
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
               {filteredComponents.length === 0 ? (
-                <div className="text-center py-10 text-slate-500 text-xs flex flex-col items-center gap-2">
+                <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-xs flex flex-col items-center gap-2">
                   <span>Tidak ada komponen ditemukan</span>
                   {activeCategory === 'custom' && onOpenStudio && (
                     <button
                       onClick={() => onOpenStudio()}
-                      className="mt-2 text-xs text-sky-400 hover:underline flex items-center gap-1"
+                      className="mt-2 text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       Buat komponen pertama Anda di Studio
@@ -307,9 +307,9 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                     <div
                       key={def.type}
                       onClick={() => onAddComponent(def.type)}
-                      className="group relative bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 hover:border-sky-500/80 hover:ring-1 hover:ring-sky-500/30 rounded-xl p-3 cursor-pointer transition-all duration-200 flex items-start gap-3 shadow-sm"
+                      className="group relative bg-slate-50/90 dark:bg-slate-950/70 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 hover:border-sky-500/80 hover:ring-1 hover:ring-sky-500/30 rounded-xl p-3 cursor-pointer transition-all duration-200 flex items-start gap-3 shadow-xs"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-sky-400 group-hover:scale-105 transition-transform shrink-0 overflow-hidden p-1">
+                      <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-sky-500 dark:text-sky-400 group-hover:scale-105 transition-transform shrink-0 overflow-hidden p-1 shadow-xs">
                         {customImg ? (
                           <img
                             src={customImg}
@@ -323,11 +323,11 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5 truncate">
-                            <span className="text-xs font-semibold text-slate-200 group-hover:text-sky-300 transition-colors truncate">
+                            <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors truncate">
                               {def.name}
                             </span>
                             {def.isCustom && (
-                              <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
+                              <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
                                 Custom
                               </span>
                             )}
@@ -336,20 +336,20 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                             {def.pins.length} pin
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">
                           {def.description}
                         </p>
 
                         {/* Custom Component Action Toolbar */}
                         {def.isCustom && (
                           <div
-                            className="mt-2 flex items-center gap-2 pt-1 border-t border-slate-800/80"
+                            className="mt-2 flex items-center gap-2 pt-1 border-t border-slate-200 dark:border-slate-800/80"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {onOpenStudio && (
                               <button
                                 onClick={() => onOpenStudio(def)}
-                                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-sky-500/20 text-[10px] text-sky-300 border border-slate-700 hover:border-sky-500/40 flex items-center gap-1 transition-colors"
+                                className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-sky-500/20 text-[10px] text-sky-600 dark:text-sky-300 border border-slate-200 dark:border-slate-700 hover:border-sky-500/40 flex items-center gap-1 transition-colors"
                                 title="Edit Komponen di Component Studio"
                               >
                                 <Sliders className="w-3 h-3" />
@@ -371,7 +371,7 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                                   showToast('success', `Komponen "${def.name}" telah dihapus.`);
                                 }
                               }}
-                              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-rose-500/20 text-[10px] text-slate-400 hover:text-rose-300 border border-slate-700 hover:border-rose-500/40 flex items-center gap-1 transition-colors"
+                              className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-rose-500/20 text-[10px] text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 border border-slate-200 dark:border-slate-700 hover:border-rose-500/40 flex items-center gap-1 transition-colors"
                               title="Hapus Komponen Kustom dari Library"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -387,7 +387,7 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
             </div>
 
             {/* Footer Hint */}
-            <div className="p-3 border-t border-slate-800/80 text-[11px] text-slate-500 text-center shrink-0">
+            <div className="p-3 border-t border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-500 text-center shrink-0">
               Klik komponen untuk menambahkannya ke kanvas
             </div>
           </div>
@@ -398,7 +398,7 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
       <button
         onClick={onToggle}
         title={isOpen ? 'Tutup Panel Samping' : 'Buka Panel Samping'}
-        className="self-center -ml-px bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-sky-400 py-3 px-1 rounded-r-md transition-colors cursor-pointer shadow-lg backdrop-blur-md"
+        className="self-center -ml-px bg-white dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 py-3 px-1 rounded-r-md transition-colors cursor-pointer shadow-lg backdrop-blur-md"
       >
         {isOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
       </button>

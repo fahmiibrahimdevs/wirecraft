@@ -464,7 +464,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 select-none">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 select-none">
       {/* Hidden File Input for Import */}
       <input
         type="file"
@@ -475,10 +475,10 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
       />
 
       {/* Explorer Top Toolbar */}
-      <div className="p-3 border-b border-slate-800/90 flex items-center justify-between bg-slate-900/95">
+      <div className="p-3 border-b border-slate-200 dark:border-slate-800/90 flex items-center justify-between bg-slate-50 dark:bg-slate-900/95">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-sky-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+          <Layers className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
             BERKAS DESAIN
           </span>
         </div>
@@ -487,21 +487,21 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
           <button
             onClick={() => startCreating('file', null)}
             title="Buat Desain Rangkaian Baru (.wire)"
-            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-sky-400 border border-slate-700/80 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
           >
             <FilePlus className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => startCreating('folder', null)}
             title="Buat Folder Baru"
-            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border border-slate-700/80 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
           >
             <FolderPlus className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
             title="Import File Rangkaian (.wire / .json)"
-            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-emerald-400 border border-slate-700/80 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5" />
           </button>
@@ -522,11 +522,11 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
       >
         {/* Inline Input when creating at root */}
         {creatingType && creatingParentId === null && (
-          <div className="flex items-center gap-2 py-1.5 px-2 bg-slate-950/80 border border-sky-500 rounded-lg">
+          <div className="flex items-center gap-2 py-1.5 px-2 bg-slate-50 dark:bg-slate-950/80 border border-sky-500 rounded-lg">
             {creatingType === 'folder' ? (
-              <Folder className="w-4 h-4 text-amber-400 shrink-0" />
+              <Folder className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
             ) : (
-              <FileText className="w-4 h-4 text-sky-400 shrink-0" />
+              <FileText className="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" />
             )}
             <input
               type="text"
@@ -539,7 +539,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               onBlur={submitCreating}
               autoFocus
               placeholder={creatingType === 'file' ? 'nama_desain' : 'nama_folder'}
-              className="bg-transparent text-slate-100 text-xs outline-none w-full"
+              className="bg-transparent text-slate-800 dark:text-slate-100 text-xs outline-none w-full"
             />
           </div>
         )}
@@ -566,8 +566,8 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
           }}
           className={`mt-4 py-3 px-2 rounded-lg border border-dashed text-center text-[10px] transition-colors ${
             dragOverTargetId === 'root'
-              ? 'bg-sky-500/15 border-sky-400 text-sky-300'
-              : 'border-slate-800 text-slate-600 hover:border-slate-700'
+              ? 'bg-sky-500/15 border-sky-400 text-sky-600 dark:text-sky-300'
+              : 'border-slate-300 dark:border-slate-800 text-slate-500 dark:text-slate-600 hover:border-slate-400 dark:hover:border-slate-700'
           }`}
         >
           Tarik file/folder ke sini untuk pindah ke Root
@@ -575,11 +575,11 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
       </div>
 
       {/* Footer Info */}
-      <div className="p-2.5 border-t border-slate-800/80 bg-slate-950/50 flex items-center justify-between text-[11px] text-slate-400">
+      <div className="p-2.5 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/50 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
         <span className="truncate">
-          Aktif: <span className="text-sky-400 font-medium">{activeFile?.name || '-'}</span>
+          Aktif: <span className="text-sky-600 dark:text-sky-400 font-medium">{activeFile?.name || '-'}</span>
         </span>
-        <span className="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400 shrink-0">
+        <span className="text-[10px] bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 shrink-0">
           {fileSystem.files.length} Desain
         </span>
       </div>
@@ -593,14 +593,14 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               left: Math.max(10, Math.min(contextMenu.x, window.innerWidth - 230)),
               top: Math.max(10, Math.min(contextMenu.y, window.innerHeight - 260)),
             }}
-            className="fixed z-[9999] min-w-[210px] max-w-[260px] bg-slate-900/95 border border-slate-700/80 rounded-xl shadow-2xl backdrop-blur-xl py-1 text-slate-200 text-xs select-none animate-in fade-in zoom-in-95 duration-100 font-sans"
+            className="fixed z-[9999] min-w-[210px] max-w-[260px] bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-700/80 rounded-xl shadow-2xl backdrop-blur-xl py-1 text-slate-800 dark:text-slate-200 text-xs select-none animate-in fade-in zoom-in-95 duration-100 font-sans"
           >
             {/* FILE CONTEXT MENU */}
             {contextMenu.type === 'file' && contextMenu.targetId && (
               <>
-                <div className="px-3 py-1.5 border-b border-slate-800/80 text-[11px] text-slate-400 font-medium flex items-center gap-2">
-                  <FileText className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                  <span className="truncate font-semibold text-slate-200">
+                <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 shrink-0" />
+                  <span className="truncate font-semibold text-slate-900 dark:text-slate-200">
                     {contextMenu.targetName || 'Berkas Desain'}
                   </span>
                 </div>
@@ -610,7 +610,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                       if (contextMenu.targetId) onSelectFile(contextMenu.targetId);
                       setContextMenu(null);
                     }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
                       <Eye className="w-3.5 h-3.5 text-sky-400" />

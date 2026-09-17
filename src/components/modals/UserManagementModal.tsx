@@ -176,24 +176,24 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
   const inactiveCount = users.filter((u) => !u.isActive).length;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 select-none">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col font-sans animate-in zoom-in-95 duration-200 text-slate-200">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/60 dark:bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 select-none">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col font-sans animate-in zoom-in-95 duration-200 text-slate-800 dark:text-slate-200">
         {/* Header */}
-        <div className="p-5 border-b border-slate-800/90 flex items-center justify-between bg-slate-950/40">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800/90 flex items-center justify-between bg-slate-50 dark:bg-slate-950/40">
           <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 dark:bg-sky-500/15 dark:border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 shadow-sm">
               <Users className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-slate-100 tracking-tight">
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                   Kelola Pengguna (User Management)
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/30 font-semibold">
                   Admin Panel
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Kontrol status akun aktif/nonaktif, pantau aktivitas berkas, dan hak akses pengguna.
               </p>
             </div>
@@ -204,13 +204,13 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
               onClick={fetchUsers}
               disabled={isLoading}
               title="Refresh Data Pengguna"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-sky-300 border border-slate-700 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-sky-600 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-sky-300 dark:border-slate-700 transition-colors cursor-pointer"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-sky-400' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-sky-500 dark:text-sky-400' : ''}`} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-100 border border-slate-700 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-slate-100 dark:border-slate-700 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -218,33 +218,33 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-3 p-5 bg-slate-950/60 border-b border-slate-800/80">
-          <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
+        <div className="grid grid-cols-3 gap-3 p-5 bg-slate-100/60 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800/80">
+          <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
             <div>
-              <div className="text-[11px] font-medium text-slate-400">Total Pengguna</div>
-              <div className="text-xl font-bold text-slate-100 mt-0.5">{totalUsers}</div>
+              <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Total Pengguna</div>
+              <div className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-0.5">{totalUsers}</div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400">
               <Users className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
             <div>
-              <div className="text-[11px] font-medium text-slate-400">Pengguna Aktif</div>
-              <div className="text-xl font-bold text-emerald-400 mt-0.5">{activeCount}</div>
+              <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Pengguna Aktif</div>
+              <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{activeCount}</div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
             <div>
-              <div className="text-[11px] font-medium text-slate-400">Pengguna Nonaktif</div>
-              <div className="text-xl font-bold text-rose-400 mt-0.5">{inactiveCount}</div>
+              <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Pengguna Nonaktif</div>
+              <div className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-0.5">{inactiveCount}</div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+            <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400">
               <XCircle className="w-4 h-4" />
             </div>
           </div>
@@ -253,19 +253,19 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
         {/* Search & Alerts */}
         <div className="px-5 pt-4 pb-2 space-y-3">
           {/* Search Bar */}
-          <div className="bg-slate-950/90 border border-slate-800 focus-within:border-sky-500/60 rounded-xl px-3.5 py-2 flex items-center gap-2.5 transition-all">
-            <Search className="w-4 h-4 text-slate-500 shrink-0" />
+          <div className="bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 focus-within:border-sky-500/60 rounded-xl px-3.5 py-2 flex items-center gap-2.5 transition-all">
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari berdasarkan username atau email..."
-              className="bg-transparent text-xs text-slate-100 placeholder:text-slate-500 outline-none w-full"
+              className="bg-transparent text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none w-full"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="text-slate-500 hover:text-slate-300 text-xs cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 text-xs cursor-pointer"
               >
                 Clear
               </button>
@@ -274,15 +274,15 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
 
           {/* Alert Messages */}
           {errorMessage && (
-            <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 flex items-center gap-2.5 text-rose-300 text-xs animate-in fade-in">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 flex items-center gap-2.5 text-rose-600 dark:text-rose-300 text-xs animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center gap-2.5 text-emerald-300 text-xs animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center gap-2.5 text-emerald-600 dark:text-emerald-300 text-xs animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -291,17 +291,17 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
         {/* Users Table / List */}
         <div className="flex-1 overflow-y-auto px-5 py-3">
           {isLoading ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400 text-xs">
-              <RefreshCw className="w-6 h-6 animate-spin text-sky-400" />
+            <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+              <RefreshCw className="w-6 h-6 animate-spin text-sky-600 dark:text-sky-400" />
               <span>Memuat data pengguna...</span>
             </div>
           ) : filteredUsers.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-500 text-xs">
-              <Users className="w-8 h-8 stroke-1 text-slate-600" />
+            <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-xs">
+              <Users className="w-8 h-8 stroke-1 text-slate-400 dark:text-slate-600" />
               <span>Tidak ada pengguna yang cocok dengan pencarian.</span>
             </div>
           ) : (
-            <div className="border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/80 bg-slate-950/40">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800/80 bg-white dark:bg-slate-950/40">
               {filteredUsers.map((u) => {
                 const isSelf = u.id === currentAdmin?.id;
                 const isActionLoading = actionLoadingId === u.id;
@@ -309,7 +309,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
                 return (
                   <div
                     key={u.id}
-                    className="p-3.5 flex items-center justify-between hover:bg-slate-800/40 transition-colors gap-4"
+                    className="p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors gap-4"
                   >
                     {/* User Info */}
                     <div className="flex items-center gap-3 min-w-0">
@@ -318,39 +318,39 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-xs text-slate-100 truncate">
+                          <span className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
                             {u.username}
                           </span>
                           {isSelf && (
-                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-600 border border-sky-500/20 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30">
                               Akun Anda
                             </span>
                           )}
                           <span
                             className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded uppercase ${
                               u.role === 'admin'
-                                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                                : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                ? 'bg-amber-500/15 text-amber-600 border border-amber-500/25 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
                             }`}
                           >
                             {u.role}
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-400 truncate mt-0.5">{u.email}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{u.email}</div>
                       </div>
                     </div>
 
                     {/* Metadata: File Count & Date */}
-                    <div className="hidden sm:flex items-center gap-6 text-xs text-slate-400 shrink-0">
+                    <div className="hidden sm:flex items-center gap-6 text-xs text-slate-500 dark:text-slate-400 shrink-0">
                       <div className="flex items-center gap-1.5" title="Jumlah Berkas Sirkuit">
-                        <FileText className="w-3.5 h-3.5 text-slate-500" />
+                        <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         <span>{u.fileCount ?? 0} Berkas</span>
                       </div>
                       <div
                         className="flex items-center gap-1.5 text-[11px]"
                         title={`Bergabung: ${u.createdAt || '-'}`}
                       >
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         <span>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</span>
                       </div>
                     </div>
@@ -370,22 +370,22 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
                         }
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                           isSelf
-                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 cursor-default opacity-90'
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:border-emerald-500/30 dark:text-emerald-400 cursor-default opacity-90'
                             : u.isActive
-                            ? 'bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/40 text-emerald-300 shadow-xs'
-                            : 'bg-rose-500/15 hover:bg-rose-500/25 border-rose-500/40 text-rose-300 shadow-xs'
+                            ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-600 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:border-emerald-500/40 dark:text-emerald-300 shadow-xs'
+                            : 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-600 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 dark:border-rose-500/40 dark:text-rose-300 shadow-xs'
                         } ${isActionLoading ? 'opacity-50 pointer-events-none' : ''}`}
                       >
                         {isActionLoading ? (
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                         ) : u.isActive ? (
                           <>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span>Aktif</span>
                           </>
                         ) : (
                           <>
-                            <XCircle className="w-3.5 h-3.5 text-rose-400" />
+                            <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                             <span>Nonaktif</span>
                           </>
                         )}
@@ -397,7 +397,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
                           onClick={() => handleDeleteUser(u)}
                           disabled={isActionLoading}
                           title="Hapus Pengguna Permanen"
-                          className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:text-slate-500 dark:hover:text-rose-400 dark:hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -411,14 +411,14 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs text-slate-400">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
-            <Shield className="w-3.5 h-3.5 text-sky-400" />
+            <Shield className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
             <span>Pengguna nonaktif tidak akan diizinkan login atau mengakses sirkuit.</span>
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition-colors cursor-pointer text-xs"
+            className="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 font-semibold rounded-xl transition-colors cursor-pointer text-xs"
           >
             Tutup
           </button>

@@ -1,17 +1,24 @@
 import Swal, { SweetAlertOptions, SweetAlertIcon } from 'sweetalert2';
 
-const baseDarkOptions: SweetAlertOptions = {
-  background: '#0f172a',
-  color: '#f8fafc',
-  buttonsStyling: false,
-  customClass: {
-    confirmButton:
-      'px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-lg shadow-sky-500/20 cursor-pointer mx-1.5',
-    cancelButton:
-      'px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs border border-slate-700 transition-all cursor-pointer mx-1.5',
-    denyButton:
-      'px-4 py-2 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-xl text-xs transition-all cursor-pointer mx-1.5',
-  },
+const getSwalThemeOptions = (): SweetAlertOptions => {
+  const isDark =
+    document.documentElement.classList.contains('dark') ||
+    !document.documentElement.classList.contains('light');
+
+  return {
+    background: isDark ? '#0f172a' : '#ffffff',
+    color: isDark ? '#f8fafc' : '#0f172a',
+    buttonsStyling: false,
+    customClass: {
+      confirmButton:
+        'px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-lg shadow-sky-500/20 cursor-pointer mx-1.5',
+      cancelButton: isDark
+        ? 'px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs border border-slate-700 transition-all cursor-pointer mx-1.5'
+        : 'px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs border border-slate-300 transition-all cursor-pointer mx-1.5',
+      denyButton:
+        'px-4 py-2 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-xl text-xs transition-all cursor-pointer mx-1.5',
+    },
+  };
 };
 
 /**
@@ -22,34 +29,34 @@ const TOAST_ICONS: Record<
   { svg: string; badgeClass: string; progressBar: string }
 > = {
   success: {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
-    badgeClass: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+    badgeClass: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400',
     progressBar: '#10b981',
   },
   error: {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
-    badgeClass: 'bg-rose-500/15 border-rose-500/30 text-rose-400',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
+    badgeClass: 'bg-rose-500/15 border-rose-500/30 text-rose-600 dark:text-rose-400',
     progressBar: '#f43f5e',
   },
   warning: {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-    badgeClass: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    badgeClass: 'bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400',
     progressBar: '#f59e0b',
   },
   info: {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
-    badgeClass: 'bg-sky-500/15 border-sky-500/30 text-sky-400',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+    badgeClass: 'bg-sky-500/15 border-sky-500/30 text-sky-600 dark:text-sky-400',
     progressBar: '#0ea5e9',
   },
   question: {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-    badgeClass: 'bg-purple-500/15 border-purple-500/30 text-purple-400',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-500 dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    badgeClass: 'bg-purple-500/15 border-purple-500/30 text-purple-600 dark:text-purple-400',
     progressBar: '#a855f7',
   },
 };
 
 /**
- * Show a sleek dark-themed Toast notification at the top-right corner
+ * Show a sleek Toast notification at the top-right corner (Dark & Light aware)
  */
 export const showToast = (
   icon: SweetAlertIcon = 'success',
@@ -83,7 +90,7 @@ export const showToast = (
           ${config.svg}
         </div>
         <div class="flex-1 min-w-0 pr-1">
-          <p class="text-xs font-semibold text-slate-100 tracking-tight leading-snug truncate">
+          <p class="text-xs font-semibold text-slate-900 dark:text-slate-100 tracking-tight leading-snug truncate">
             ${title}
           </p>
         </div>
@@ -112,8 +119,10 @@ export const showConfirm = async (options: {
     isDanger = false,
   } = options;
 
+  const themeOpts = getSwalThemeOptions();
+
   const result = await Swal.fire({
-    ...baseDarkOptions,
+    ...themeOpts,
     title,
     text,
     icon,
@@ -122,7 +131,7 @@ export const showConfirm = async (options: {
     cancelButtonText: cancelText,
     reverseButtons: true,
     customClass: {
-      ...baseDarkOptions.customClass,
+      ...themeOpts.customClass,
       confirmButton: isDanger
         ? 'px-4 py-2 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-xl text-xs transition-all shadow-lg shadow-rose-500/20 cursor-pointer mx-1.5'
         : 'px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-lg shadow-sky-500/20 cursor-pointer mx-1.5',
@@ -136,8 +145,9 @@ export const showConfirm = async (options: {
  * Show Success Alert Modal
  */
 export const showSuccess = (title: string, text?: string) => {
+  const themeOpts = getSwalThemeOptions();
   return Swal.fire({
-    ...baseDarkOptions,
+    ...themeOpts,
     icon: 'success',
     title,
     text,
@@ -149,14 +159,15 @@ export const showSuccess = (title: string, text?: string) => {
  * Show Error Alert Modal
  */
 export const showError = (title: string, text?: string) => {
+  const themeOpts = getSwalThemeOptions();
   return Swal.fire({
-    ...baseDarkOptions,
+    ...themeOpts,
     icon: 'error',
     title,
     text,
     confirmButtonText: 'Mengerti',
     customClass: {
-      ...baseDarkOptions.customClass,
+      ...themeOpts.customClass,
       confirmButton:
         'px-4 py-2 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-xl text-xs transition-all cursor-pointer',
     },
@@ -167,8 +178,9 @@ export const showError = (title: string, text?: string) => {
  * Show Info Alert Modal
  */
 export const showInfo = (title: string, text?: string) => {
+  const themeOpts = getSwalThemeOptions();
   return Swal.fire({
-    ...baseDarkOptions,
+    ...themeOpts,
     icon: 'info',
     title,
     text,
@@ -180,8 +192,9 @@ export const showInfo = (title: string, text?: string) => {
  * Show Warning Alert Modal
  */
 export const showWarning = (title: string, text?: string) => {
+  const themeOpts = getSwalThemeOptions();
   return Swal.fire({
-    ...baseDarkOptions,
+    ...themeOpts,
     icon: 'warning',
     title,
     text,
@@ -190,3 +203,4 @@ export const showWarning = (title: string, text?: string) => {
 };
 
 export default Swal;
+

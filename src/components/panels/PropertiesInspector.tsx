@@ -227,12 +227,12 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
     const allLocked = selectedComps.length > 0 && selectedComps.every((c) => c.locked);
 
     return (
-      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
+      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl animate-fade-in transition-colors duration-200">
         {/* Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-sky-400" />
-            <h3 className="text-sm font-semibold text-slate-100">Multi-Selection</h3>
+            <Layers className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Multi-Selection</h3>
           </div>
           <div className="flex items-center gap-1">
             {onToggleLock && (
@@ -240,8 +240,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                 onClick={() => onToggleLock(selectedComponentIds)}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   allLocked
-                    ? 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
-                    : 'text-slate-400 hover:text-amber-400 hover:bg-amber-500/10'
+                    ? 'text-amber-500 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
+                    : 'text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10'
                 }`}
                 title={allLocked ? 'Buka Kunci Semua (L)' : 'Kunci Semua (L)'}
               >
@@ -251,7 +251,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             {onDuplicateComponents && (
               <button
                 onClick={() => onDuplicateComponents(selectedComponentIds)}
-                className="text-slate-400 hover:text-sky-400 p-1.5 rounded-lg hover:bg-sky-500/10 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-sky-500 dark:hover:text-sky-400 p-1.5 rounded-lg hover:bg-sky-500/10 transition-colors cursor-pointer"
                 title="Duplikat Semua (Ctrl+D)"
               >
                 <Copy className="w-4 h-4" />
@@ -260,7 +260,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             {onDeleteComponents && (
               <button
                 onClick={() => onDeleteComponents(selectedComponentIds)}
-                className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
                 title="Hapus Semua Terpilih (Delete)"
               >
                 <Trash2 className="w-4 h-4" />
@@ -270,32 +270,32 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div className="text-xs font-semibold text-sky-300">
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div className="text-xs font-semibold text-sky-600 dark:text-sky-300">
               {selectedComponentIds.length} Komponen Terpilih
             </div>
-            <div className="text-[11px] text-slate-400">
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">
               Anda dapat menggeser, menduplikasi, mengunci, atau memutar grup komponen ini secara serentak.
             </div>
           </div>
 
           {/* Group Actions */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
-            <div className="text-xs font-medium text-slate-300">Aksi Massal (Grup)</div>
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2.5">
+            <div className="text-xs font-medium text-slate-700 dark:text-slate-300">Aksi Massal (Grup)</div>
             <div className="grid grid-cols-2 gap-2">
               {onToggleLock && (
                 <button
                   onClick={() => onToggleLock(selectedComponentIds)}
-                  className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-amber-500/40 text-slate-700 dark:text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
                 >
                   {allLocked ? (
                     <>
-                      <Unlock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <Unlock className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
                       <span>Buka Kunci</span>
                     </>
                   ) : (
                     <>
-                      <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <Lock className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
                       <span>Kunci (L)</span>
                     </>
                   )}
@@ -304,18 +304,18 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
               {onRotateComponents && (
                 <button
                   onClick={() => onRotateComponents(selectedComponentIds)}
-                  className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/40 text-slate-700 dark:text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
                 >
-                  <RotateCw className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <RotateCw className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
                   <span>Putar (R)</span>
                 </button>
               )}
               {onDuplicateComponents && (
                 <button
                   onClick={() => onDuplicateComponents(selectedComponentIds)}
-                  className="col-span-2 flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                  className="col-span-2 flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-sky-500/40 text-slate-700 dark:text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
                 >
-                  <Copy className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                  <Copy className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 shrink-0" />
                   <span>Duplikat Semua ({selectedComponentIds.length})</span>
                 </button>
               )}
@@ -342,12 +342,12 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
     };
 
     return (
-      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
+      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl animate-fade-in transition-colors duration-200">
         {/* Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-sky-400" />
-            <h3 className="text-sm font-semibold text-slate-100">Properties Inspector</h3>
+            <Sliders className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Properties Inspector</h3>
           </div>
           <div className="flex items-center gap-1">
             {onToggleLock && (
@@ -355,8 +355,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                 onClick={() => onToggleLock([selectedComponent.id])}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   selectedComponent.locked
-                    ? 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
-                    : 'text-slate-400 hover:text-amber-400 hover:bg-amber-500/10'
+                    ? 'text-amber-500 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
+                    : 'text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10'
                 }`}
                 title={selectedComponent.locked ? 'Buka Kunci Posisi (L)' : 'Kunci Posisi (L)'}
               >
@@ -847,16 +847,16 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
     const toComp = allComponents.find((c) => c.id === selectedWire.toComponentId);
 
     return (
-      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
+      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl animate-fade-in transition-colors duration-200">
         {/* Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link className="w-4 h-4 text-sky-400" />
-            <h3 className="text-sm font-semibold text-slate-100">Kabel Jumper</h3>
+            <Link className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Kabel Jumper</h3>
           </div>
           <button
             onClick={() => onDeleteWire(selectedWire.id)}
-            className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
             title="Hapus Kabel (Delete)"
           >
             <Trash2 className="w-4 h-4" />
@@ -865,22 +865,22 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Connection Overview */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div className="text-xs text-slate-400">Jalur Sambungan:</div>
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div className="text-xs text-slate-600 dark:text-slate-400">Jalur Sambungan:</div>
             <div className="flex items-center gap-2 text-xs font-mono">
-              <span className="text-sky-400 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+              <span className="text-sky-600 dark:text-sky-400 bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">
                 {fromComp?.label || 'Comp'}:{selectedWire.fromPinId}
               </span>
-              <span className="text-slate-500">⇄</span>
-              <span className="text-emerald-400 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+              <span className="text-slate-400 dark:text-slate-500">⇄</span>
+              <span className="text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">
                 {toComp?.label || 'Comp'}:{selectedWire.toPinId}
               </span>
             </div>
           </div>
 
           {/* Color Selector */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
-            <div className="text-xs font-medium text-slate-300">Warna Kabel</div>
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2.5">
+            <div className="text-xs font-medium text-slate-700 dark:text-slate-300">Warna Kabel</div>
             <div className="grid grid-cols-3 gap-1.5">
               {WIRE_COLORS.map((c) => (
                 <button
@@ -888,11 +888,11 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                   onClick={() => onUpdateWire(selectedWire.id, { color: c.value })}
                   className={`p-2 rounded-lg border flex items-center gap-2 text-[11px] cursor-pointer transition-all ${
                     selectedWire.color === c.value
-                      ? 'bg-slate-800 border-sky-500/80 text-slate-100 ring-1 ring-sky-500/30'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-white dark:bg-slate-800 border-sky-500 text-slate-900 dark:text-slate-100 ring-1 ring-sky-500/30'
+                      : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: c.value }} />
+                  <span className="w-3 h-3 rounded-full shrink-0 border border-black/10 dark:border-white/20" style={{ backgroundColor: c.value }} />
                   <span className="truncate">{c.name.split(' ')[0]}</span>
                 </button>
               ))}
@@ -900,8 +900,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           </div>
 
           {/* Routing Style Selector */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
-            <div className="text-xs font-medium text-slate-300">Gaya Lengkungan Jalur</div>
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2.5">
+            <div className="text-xs font-medium text-slate-700 dark:text-slate-300">Gaya Lengkungan Jalur</div>
             <div className="grid grid-cols-3 gap-1.5">
               {(['bezier', 'orthogonal', 'straight'] as WireRouting[]).map((r) => (
                 <button
@@ -909,8 +909,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                   onClick={() => onUpdateWire(selectedWire.id, { routing: r })}
                   className={`py-2 px-1 text-center rounded-lg border text-xs capitalize cursor-pointer transition-all ${
                     selectedWire.routing === r
-                      ? 'bg-sky-500/15 text-sky-400 border-sky-500/40'
-                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                      ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/40 font-semibold'
+                      : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
                   {r === 'bezier' ? 'Kurva' : r === 'orthogonal' ? 'Siku 90°' : 'Lurus'}
@@ -922,7 +922,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           {/* Delete Action Button */}
           <button
             onClick={() => onDeleteWire(selectedWire.id)}
-            className="w-full py-2 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2 bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
             Putuskan & Hapus Kabel
@@ -1022,13 +1022,13 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   }
 
   return (
-    <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl">
-      <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+    <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl transition-colors duration-200">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-sky-400 shrink-0" />
-          <h3 className="text-sm font-semibold text-slate-100 whitespace-nowrap">Ringkasan Sirkuit</h3>
+          <Layers className="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" />
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 whitespace-nowrap">Ringkasan Sirkuit</h3>
         </div>
-        <span className="text-[10px] text-slate-400 font-mono bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700 shrink-0 whitespace-nowrap">
+        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 shrink-0 whitespace-nowrap">
           Live Status
         </span>
       </div>
@@ -1036,15 +1036,15 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Statistics Cards */}
         <div className="grid grid-cols-2 gap-2.5">
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
-            <span className="text-[11px] text-slate-400">Total Komponen</span>
-            <div className="text-xl font-bold font-mono text-sky-400 mt-1">
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Total Komponen</span>
+            <div className="text-xl font-bold font-mono text-sky-600 dark:text-sky-400 mt-1">
               {allComponents.length}
             </div>
           </div>
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
-            <span className="text-[11px] text-slate-400">Kabel Jumper</span>
-            <div className="text-xl font-bold font-mono text-emerald-400 mt-1">
+          <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Kabel Jumper</span>
+            <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1">
               {allWires.length}
             </div>
           </div>
@@ -1054,28 +1054,28 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
         {onCenterCanvas && (
           <button
             onClick={onCenterCanvas}
-            className="w-full flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 hover:border-sky-500/50 text-slate-200 py-2.5 px-3 rounded-xl text-xs font-medium transition-all shadow-sm cursor-pointer group"
+            className="w-full flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 hover:border-sky-500/50 text-slate-700 dark:text-slate-200 py-2.5 px-3 rounded-xl text-xs font-medium transition-all shadow-xs cursor-pointer group"
             title="Pusatkan pandangan ke seluruh komponen (Fit to Screen)"
           >
-            <Maximize2 className="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform shrink-0" />
+            <Maximize2 className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 group-hover:scale-110 transition-transform shrink-0" />
             <span className="whitespace-nowrap">Pusatkan Semua Komponen (Fit View)</span>
           </button>
         )}
 
         {/* Circuit Diagnostics / Health Check */}
-        <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+        <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2.5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-              <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
+              <ShieldCheck className="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" />
               <span className="whitespace-nowrap">Diagnosa Sirkuit</span>
             </div>
             <span
               className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border shrink-0 whitespace-nowrap ${
                 circuitDiagnostics.some((i) => i.type === 'error')
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                  ? 'bg-rose-500/15 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border-rose-500/30'
                   : circuitDiagnostics.length > 0
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  ? 'bg-amber-500/15 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border-amber-500/30'
+                  : 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/30'
               }`}
             >
               {circuitDiagnostics.some((i) => i.type === 'error')
@@ -1087,8 +1087,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           </div>
 
           {circuitDiagnostics.length === 0 ? (
-            <div className="flex items-center gap-2 bg-emerald-950/30 border border-emerald-500/20 rounded-lg p-2.5 text-[11px] text-emerald-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-500/20 rounded-lg p-2.5 text-[11px] text-emerald-700 dark:text-emerald-300">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
               <span>Semua modul aktif terhubung dan tidak terdeteksi korsleting.</span>
             </div>
           ) : (
@@ -1098,14 +1098,14 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
                   key={idx}
                   className={`p-2.5 rounded-lg border text-[11px] flex items-start gap-2 ${
                     issue.type === 'error'
-                      ? 'bg-rose-950/40 border-rose-500/30 text-rose-200'
-                      : 'bg-amber-950/30 border-amber-500/25 text-amber-200'
+                      ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-500/30 text-rose-800 dark:text-rose-200'
+                      : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-500/25 text-amber-800 dark:text-amber-200'
                   }`}
                 >
                   {issue.type === 'error' ? (
-                    <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                    <AlertCircle className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" />
                   ) : (
-                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-[11px] leading-tight">{issue.title}</div>
@@ -1118,14 +1118,14 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
         </div>
 
         {/* Canvas Options */}
-        <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
-          <div className="text-xs font-semibold text-slate-200">Pengaturan Kanvas</div>
+        <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3">
+          <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">Pengaturan Kanvas</div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400">Snap to Grid (10px)</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400">Snap to Grid (10px)</span>
             <button
               onClick={onToggleSnapGrid}
               className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                snapGrid ? 'bg-sky-500' : 'bg-slate-800'
+                snapGrid ? 'bg-sky-500' : 'bg-slate-300 dark:bg-slate-800'
               }`}
             >
               <div
@@ -1138,29 +1138,29 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
         </div>
 
         {/* Quick Guide Card */}
-        <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-            <Info className="w-3.5 h-3.5 text-sky-400" />
+        <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
+            <Info className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
             <span>Petunjuk Navigasi</span>
           </div>
-          <ul className="text-[11px] text-slate-400 space-y-1.5 list-disc list-inside leading-relaxed">
+          <ul className="text-[11px] text-slate-600 dark:text-slate-400 space-y-1.5 list-disc list-inside leading-relaxed">
             <li>
-              <strong className="text-slate-300">Pan Kanvas:</strong> Klik kiri & tahan drag pada background kosong.
+              <strong className="text-slate-700 dark:text-slate-300">Pan Kanvas:</strong> Klik kiri & tahan drag pada background kosong.
             </li>
             <li>
-              <strong className="text-slate-300">Seleksi Banyak:</strong> Tahan <kbd className="bg-slate-800 px-1 rounded text-[10px] text-slate-300 font-mono">Ctrl</kbd> / <kbd className="bg-slate-800 px-1 rounded text-[10px] text-slate-300 font-mono">Shift</kbd> + klik drag kanvas.
+              <strong className="text-slate-700 dark:text-slate-300">Seleksi Banyak:</strong> Tahan <kbd className="bg-slate-200 dark:bg-slate-800 px-1 rounded text-[10px] text-slate-700 dark:text-slate-300 font-mono">Ctrl</kbd> / <kbd className="bg-slate-200 dark:bg-slate-800 px-1 rounded text-[10px] text-slate-700 dark:text-slate-300 font-mono">Shift</kbd> + klik drag kanvas.
             </li>
             <li>
-              <strong className="text-slate-300">Kabel:</strong> Klik pin awal $\rightarrow$ tarik $\rightarrow$ klik pin tujuan.
+              <strong className="text-slate-700 dark:text-slate-300">Kabel:</strong> Klik pin awal $\rightarrow$ tarik $\rightarrow$ klik pin tujuan.
             </li>
             <li>
-              <strong className="text-slate-300">Geser Komponen:</strong> Klik tahan dan geser komponen di kanvas.
+              <strong className="text-slate-700 dark:text-slate-300">Geser Komponen:</strong> Klik tahan dan geser komponen di kanvas.
             </li>
             <li>
-              <strong className="text-slate-300">Zoom:</strong> Putar scroll wheel mouse ke atas/bawah.
+              <strong className="text-slate-700 dark:text-slate-300">Zoom:</strong> Putar scroll wheel mouse ke atas/bawah.
             </li>
             <li>
-              <strong className="text-slate-300">Menu & Kunci:</strong> Klik kanan komponen untuk kunci (L), duplikat, dll.
+              <strong className="text-slate-700 dark:text-slate-300">Menu & Kunci:</strong> Klik kanan komponen untuk kunci (L), duplikat, dll.
             </li>
           </ul>
         </div>

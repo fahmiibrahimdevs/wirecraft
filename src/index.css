@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "sweetalert2/dist/sweetalert2.min.css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -9,13 +11,20 @@
     margin: 0;
     padding: 0;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #020617;
-    color: #f8fafc;
     overflow: hidden;
     user-select: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  html.dark, html.dark body {
+    background-color: #020617;
+    color: #f8fafc;
+  }
+  html.light, html.light body {
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 
-  /* Custom dark scrollbar */
+  /* Custom dark and light scrollbars */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -23,12 +32,19 @@
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-  ::-webkit-scrollbar-thumb {
+  html.dark ::-webkit-scrollbar-thumb {
     background: #1e293b;
     border-radius: 9999px;
   }
-  ::-webkit-scrollbar-thumb:hover {
+  html.dark ::-webkit-scrollbar-thumb:hover {
     background: #334155;
+  }
+  html.light ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+  html.light ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 
   code, kbd, samp, pre {
@@ -36,22 +52,41 @@
   }
 }
 
-/* Subtle dot-grid for circuit breadboard canvas */
-.bg-canvas-dots {
+/* Dot-grid for circuit breadboard canvas */
+html.dark .bg-canvas-dots,
+.dark .bg-canvas-dots {
   background-image: radial-gradient(rgba(148, 163, 184, 0.15) 1.2px, transparent 1.2px);
 }
+html.light .bg-canvas-dots,
+.light .bg-canvas-dots {
+  background-image: radial-gradient(rgba(100, 116, 139, 0.28) 1.2px, transparent 1.2px);
+}
 
-.bg-canvas-grid {
+html.dark .bg-canvas-grid,
+.dark .bg-canvas-grid {
   background-image: 
     linear-gradient(to right, rgba(51, 65, 85, 0.25) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(51, 65, 85, 0.25) 1px, transparent 1px);
 }
+html.light .bg-canvas-grid,
+.light .bg-canvas-grid {
+  background-image: 
+    linear-gradient(to right, rgba(203, 213, 225, 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(203, 213, 225, 0.6) 1px, transparent 1px);
+}
 
 /* Subtle glass panels */
-.panel-glass {
+html.dark .panel-glass,
+.dark .panel-glass {
   background-color: rgba(15, 23, 42, 0.92);
   backdrop-filter: blur(12px);
   border: 1px solid #1e293b;
+}
+html.light .panel-glass,
+.light .panel-glass {
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid #e2e8f0;
 }
 
 /* Pulse animation for active pin */
@@ -71,43 +106,59 @@
 }
 
 /* ----------------------------------------------------
-   SweetAlert2 Wirecraft Dark Theme Customizations
+   SweetAlert2 Customizations (Dark & Light)
    ---------------------------------------------------- */
-:root {
-  --swal2-background: #0f172a;
-  --swal2-color: #f8fafc;
-}
-
 .swal2-container {
   z-index: 10000 !important;
 }
 
-/* Modal Backdrop (Active only for non-toast modals) */
+/* Modal Backdrop */
 body.swal2-shown:not(.swal2-toast-shown) .swal2-container.swal2-backdrop-show {
   background: rgba(2, 6, 23, 0.75) !important;
   backdrop-filter: blur(8px) !important;
 }
 
-/* Modal Popup (Confirmation & Alerts) */
+/* Modal Popup */
 .swal2-popup:not(.swal2-toast) {
-  background: #0f172a !important;
-  border: 1px solid rgba(51, 65, 85, 0.8) !important;
   border-radius: 1rem !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
-  color: #f8fafc !important;
   font-family: inherit !important;
   padding: 1.5rem !important;
+  transition: all 0.2s ease;
 }
 
-.swal2-popup:not(.swal2-toast) .swal2-title {
+html.dark .swal2-popup:not(.swal2-toast) {
+  background: #0f172a !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+  color: #f8fafc !important;
+}
+html.light .swal2-popup:not(.swal2-toast) {
+  background: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  color: #0f172a !important;
+}
+
+html.dark .swal2-popup:not(.swal2-toast) .swal2-title {
   color: #f8fafc !important;
   font-size: 1.1rem !important;
   font-weight: 700 !important;
   margin-bottom: 0.5rem !important;
 }
+html.light .swal2-popup:not(.swal2-toast) .swal2-title {
+  color: #0f172a !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.5rem !important;
+}
 
-.swal2-popup:not(.swal2-toast) .swal2-html-container {
+html.dark .swal2-popup:not(.swal2-toast) .swal2-html-container {
   color: #94a3b8 !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.5 !important;
+}
+html.light .swal2-popup:not(.swal2-toast) .swal2-html-container {
+  color: #64748b !important;
   font-size: 0.8125rem !important;
   line-height: 1.5 !important;
 }
@@ -158,20 +209,34 @@ body.swal2-toast-shown .swal2-container {
 
 /* Toast Card */
 .swal2-popup.swal2-toast {
-  background: rgba(15, 23, 42, 0.95) !important;
-  border: 1px solid rgba(51, 65, 85, 0.9) !important;
   border-radius: 0.875rem !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
   backdrop-filter: blur(16px) !important;
   padding: 0.625rem 0.875rem !important;
   width: auto !important;
   min-width: 260px !important;
   max-width: 420px !important;
   margin: 0 !important;
-  color: #f8fafc !important;
   font-family: inherit !important;
   pointer-events: auto !important;
   overflow: hidden !important;
+  transition: all 0.2s ease;
+}
+
+html.dark .swal2-popup.swal2-toast {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(51, 65, 85, 0.9) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+  color: #f8fafc !important;
+}
+html.light .swal2-popup.swal2-toast {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+html.light .swal2-toast .text-slate-100 {
+  color: #0f172a !important;
 }
 
 .swal2-toast .swal2-html-container {
@@ -186,3 +251,4 @@ body.swal2-toast-shown .swal2-container {
   height: 2.5px !important;
   bottom: 0 !important;
 }
+

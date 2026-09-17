@@ -2333,21 +2333,21 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md select-none overflow-hidden animate-in fade-in duration-200">
-      <div className="flex flex-col w-[96vw] h-[94vh] bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="flex flex-col w-[96vw] h-[94vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden">
         {/* 1. Modal Top Bar */}
-        <div className="h-14 bg-slate-950/90 border-b border-slate-800 px-6 flex items-center justify-between">
+        <div className="h-14 bg-slate-50 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 dark:bg-sky-500/20 dark:border-sky-500/40 flex items-center justify-center text-sky-600 dark:text-sky-400">
               <Sliders className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 WireCraft Component Studio
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                   Admin Mode
                 </span>
               </h2>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
                 Visual Pin Calibrator & Breadboard Alignment Studio
               </span>
             </div>
@@ -2364,40 +2364,40 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             />
             <button
               onClick={() => jsonInputRef.current?.click()}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Buka File JSON Komponen"
             >
-              <FolderOpen className="w-3.5 h-3.5 text-sky-400" />
+              <FolderOpen className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
               <span>Import JSON</span>
             </button>
 
             {/* Export JSON */}
             <button
               onClick={() => exportComponentJson(typeId)}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Export Definisi JSON Komponen"
             >
-              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Export JSON</span>
             </button>
 
             {/* Copy TS Code */}
             <button
               onClick={handleCopyCode}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Copy TypeScript Definition Code"
             >
-              {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
+              {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
               {copiedCode ? 'Tersalin!' : 'Copy TS Code'}
             </button>
 
             {/* Save Button */}
             <button
               onClick={handleSaveComponent}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all ${
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all cursor-pointer ${
                 saveSuccess
                   ? 'bg-emerald-600 text-white shadow-emerald-500/30'
-                  : 'bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-sky-500/25'
+                  : 'bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 shadow-sky-500/25'
               }`}
             >
               {saveSuccess ? <Check className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
@@ -2407,7 +2407,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-100 flex items-center justify-center transition-colors ml-2"
+              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-slate-100 flex items-center justify-center transition-colors ml-2 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>

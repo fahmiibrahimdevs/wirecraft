@@ -21,6 +21,7 @@ import { PresetsModal } from './components/modals/PresetsModal';
 import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
 import { UserManagementModal } from './components/modals/UserManagementModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthModal } from './components/modals/AuthModal';
 import { ContextMenu, ContextMenuState } from './components/menu/ContextMenu';
 import { Zap } from 'lucide-react';
@@ -880,12 +881,12 @@ function CircuitAppContent() {
   // 1. Loading state while verifying stored session token
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center w-screen h-screen bg-[#020617] text-slate-100 select-none">
+      <div className="flex flex-col items-center justify-center w-screen h-screen bg-slate-100 dark:bg-[#020617] text-slate-900 dark:text-slate-100 select-none">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shadow-sm animate-pulse">
             <Zap className="w-5 h-5" />
           </div>
-          <div className="text-xs text-slate-400 font-medium">Memuat Circuit Electronics IDE...</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Memuat Circuit Electronics IDE...</div>
         </div>
       </div>
     );
@@ -894,8 +895,8 @@ function CircuitAppContent() {
   // 2. Unauthenticated state: Lock canvas and show Auth Modal
   if (!user) {
     return (
-      <div className="flex flex-col w-screen h-screen bg-[#020617] text-slate-100 overflow-hidden select-none relative">
-        {/* Ambient Dark Grid Background */}
+      <div className="flex flex-col w-screen h-screen bg-slate-100 dark:bg-[#020617] text-slate-900 dark:text-slate-100 overflow-hidden select-none relative">
+        {/* Ambient Grid Background */}
         <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px]" />
 
         {/* Auth Modal with locked close */}
@@ -911,7 +912,7 @@ function CircuitAppContent() {
   const selectedWire = wires.find((w) => w.id === selectedWireId) || null;
 
   return (
-    <div className="flex flex-col w-screen h-screen bg-[#020617] text-slate-100 overflow-hidden select-none">
+    <div className="flex flex-col w-screen h-screen bg-slate-100 dark:bg-[#020617] text-slate-900 dark:text-slate-100 overflow-hidden select-none">
       {/* Top Header Navigation with Undo / Redo */}
       <TopBar
         saveStatus={saveStatus}
@@ -1132,9 +1133,11 @@ function CircuitAppContent() {
 
 export function App() {
   return (
-    <AuthProvider>
-      <CircuitAppContent />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CircuitAppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
