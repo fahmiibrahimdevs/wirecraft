@@ -172,8 +172,19 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {/* Top Activity Tab Switcher (Katalog Komponen vs Desain Rangkaian) */}
+        {/* Top Activity Tab Switcher (File Explorer vs Katalog) */}
         <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 p-1.5 gap-1 shrink-0">
+          <button
+            onClick={() => setActiveTab('explorer')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              activeTab === 'explorer'
+                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm border border-slate-200 dark:border-slate-700/80'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900/40 border border-transparent'
+            }`}
+          >
+            <Folder className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+            <span>File Explorer</span>
+          </button>
           <button
             onClick={() => setActiveTab('components')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
@@ -184,17 +195,6 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
             <span>Katalog</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('explorer')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'explorer'
-                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm border border-slate-200 dark:border-slate-700/80'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900/40 border border-transparent'
-            }`}
-          >
-            <Folder className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-            <span>Desain Rangkaian</span>
           </button>
         </div>
 

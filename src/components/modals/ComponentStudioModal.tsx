@@ -2438,13 +2438,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         {/* 2. Main Studio Workspace (3 Columns) */}
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel: Image Upload, Background Cleaner & Component Meta */}
-          <div className="w-80 bg-slate-950/60 border-r border-slate-800 p-4 flex flex-col gap-4 overflow-y-auto">
+          <div className="w-80 bg-slate-50 dark:bg-slate-950/60 border-r border-slate-200 dark:border-slate-800 p-4 flex flex-col gap-4 overflow-y-auto">
             {/* Upload Box */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-slate-200 flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center justify-between">
                 <span>1. Visual Asset Image</span>
                 {imageDataUrl && (
-                  <span className="text-[10px] text-slate-400 font-mono">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                     {originalImageSize.width} × {originalImageSize.height} px
                   </span>
                 )}
@@ -2461,17 +2461,17 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               {!imageDataUrl ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-28 border-2 border-dashed border-slate-700 hover:border-sky-500/60 rounded-xl bg-slate-900/50 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all p-3 text-center"
+                  className="h-28 border-2 border-dashed border-slate-300 hover:border-sky-500 dark:border-slate-700 dark:hover:border-sky-500/60 rounded-xl bg-white/70 hover:bg-white dark:bg-slate-900/50 dark:hover:bg-slate-900 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all p-3 text-center"
                 >
-                  <Upload className="w-6 h-6 text-sky-400" />
-                  <span className="text-xs font-medium text-slate-300">
+                  <Upload className="w-6 h-6 text-sky-600 dark:text-sky-400" />
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
                     Klik atau Drop Gambar Komponen
                   </span>
-                  <span className="text-[10px] text-slate-500">PNG, JPG, WebP (Rekomendasi HD)</span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500">PNG, JPG, WebP (Rekomendasi HD)</span>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  <div className="relative h-28 bg-slate-900/80 rounded-xl border border-slate-700/80 p-2 flex items-center justify-center overflow-hidden">
+                  <div className="relative h-28 bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-700/80 p-2 flex items-center justify-center overflow-hidden shadow-xs">
                     <img
                       src={imageDataUrl}
                       alt="Component Preview"
@@ -2481,7 +2481,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       {rawImageDataUrl && rawImageDataUrl !== imageDataUrl && (
                         <button
                           onClick={handleResetToOriginal}
-                          className="px-2 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-[10px] text-amber-300 border border-slate-600 shadow flex items-center gap-1"
+                          className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 text-[10px] text-amber-600 dark:text-amber-300 border border-slate-200 dark:border-slate-600 shadow flex items-center gap-1 cursor-pointer"
                           title="Kembalikan gambar asli sebelum remove bg"
                         >
                           <Undo className="w-3 h-3" />
@@ -2490,7 +2490,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       )}
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-2 py-1 rounded bg-slate-800/90 hover:bg-slate-700 text-[10px] text-slate-200 border border-slate-600 shadow"
+                        className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 text-[10px] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 shadow cursor-pointer"
                       >
                         Ganti
                       </button>
@@ -2498,48 +2498,48 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   </div>
 
                   {/* Magic Background Remover */}
-                  <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex flex-col gap-2.5">
+                  <div className="p-3 bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5 shadow-xs">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-200 flex items-center gap-1.5">
-                        <Wand2 className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                        <Wand2 className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                         Auto Remove Background
                       </span>
-                      <span className="text-[10px] text-sky-400 font-mono font-bold">{bgTolerance}%</span>
+                      <span className="text-[10px] text-sky-600 dark:text-sky-400 font-mono font-bold">{bgTolerance}%</span>
                     </div>
 
                     {/* Mode Algorithm Selector */}
-                    <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800 text-[11px]">
+                    <div className="grid grid-cols-2 gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px]">
                       <button
                         type="button"
                         onClick={() => setBgAlgorithm('flood-fill')}
-                        className={`py-1 px-1.5 rounded flex items-center justify-center gap-1 transition-all ${
+                        className={`py-1 px-1.5 rounded flex items-center justify-center gap-1 transition-all cursor-pointer ${
                           bgAlgorithm === 'flood-fill'
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold shadow-sm'
-                            : 'text-slate-400 hover:text-slate-200'
+                            ? 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40 font-semibold shadow-xs'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                         }`}
                         title="Hanya hapus background luar. Silkscreen/sablon putih di dalam board AMAN!"
                       >
-                        <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                         <span>Tepi Luar (Aman)</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setBgAlgorithm('global')}
-                        className={`py-1 px-1.5 rounded flex items-center justify-center gap-1 transition-all ${
+                        className={`py-1 px-1.5 rounded flex items-center justify-center gap-1 transition-all cursor-pointer ${
                           bgAlgorithm === 'global'
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm'
-                            : 'text-slate-400 hover:text-slate-200'
+                            ? 'bg-amber-500/15 text-amber-700 border border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 font-semibold shadow-xs'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                         }`}
                         title="Hapus semua warna putih di seluruh gambar"
                       >
-                        <Globe className="w-3 h-3 text-amber-400 shrink-0" />
+                        <Globe className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
                         <span>Global (Semua)</span>
                       </button>
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
                         <span>Toleransi Warna</span>
                         <span>{bgTolerance <= 15 ? 'Ketat' : bgTolerance <= 35 ? 'Sedang' : 'Tinggi'}</span>
                       </div>
@@ -2549,7 +2549,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         max="70"
                         value={bgTolerance}
                         onChange={(e) => setBgTolerance(Number(e.target.value))}
-                        className="w-full accent-sky-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                        className="w-full accent-sky-500 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg cursor-pointer"
                       />
                     </div>
 
@@ -2557,7 +2557,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       <button
                         onClick={handleMagicRemoveBackground}
                         disabled={isProcessingBg}
-                        className="py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                        className="py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 dark:text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
                         title="Hapus background luar dan otomatis pangkas (crop) ke batas fisik bodi modul"
                       >
                         <Sparkles className="w-3.5 h-3.5" />
@@ -2567,7 +2567,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       <button
                         type="button"
                         onClick={handleAutoCropToContent}
-                        className="py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                        className="py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-700 dark:bg-sky-500/15 dark:hover:bg-sky-500/25 dark:text-sky-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
                         title="Pangkas (crop) sisa area transparan di pinggir agar ukuran mm pas ke bodi modul"
                       >
                         <Crop className="w-3.5 h-3.5" />
@@ -2580,19 +2580,19 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             </div>
 
             {/* Dimension, Rotation & Image Positioning Controls */}
-            <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-800">
+            <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-200">2. Ukuran & Posisi</label>
+                <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">2. Ukuran & Posisi</label>
 
                 <div className="flex items-center gap-1.5">
                   {/* Unit Switcher: mm / px */}
-                  <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                  <div className="flex bg-slate-100 dark:bg-slate-950 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
                     <button
                       onClick={() => setUnit('mm')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
                         unit === 'mm'
-                          ? 'bg-sky-500 text-slate-950 shadow'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'bg-sky-500 text-white dark:text-slate-950 shadow-xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                       }`}
                       title="Gunakan satuan Milimeter (mm) - Standar Fisik Komponen"
                     >
@@ -2600,10 +2600,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     </button>
                     <button
                       onClick={() => setUnit('px')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
                         unit === 'px'
-                          ? 'bg-sky-500 text-slate-950 shadow'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'bg-sky-500 text-white dark:text-slate-950 shadow-xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                       }`}
                       title="Gunakan satuan Pixel (px) - Standar Kanvas"
                     >
@@ -2614,10 +2614,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   {/* Rotate 90 deg button */}
                   <button
                     onClick={() => handleRotateClockwise(true)}
-                    className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold flex items-center gap-1 transition-colors"
+                    className="px-2 py-0.5 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-slate-700 dark:text-slate-300 text-[10px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                     title="Putar Komponen 90° (Gambar + Pin)"
                   >
-                    <RotateCw className="w-3 h-3 text-sky-400" />
+                    <RotateCw className="w-3 h-3 text-sky-600 dark:text-sky-400" />
                     <span>90°</span>
                   </button>
                 </div>
@@ -2638,8 +2638,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400">Lebar ({unit})</span>
-                    <span className="text-[9px] font-mono text-slate-400">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Lebar ({unit})</span>
+                    <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
                       {unit === 'mm' ? `≈ ${width} px` : `≈ ${pxToMm(width, 1)} mm`}
                     </span>
                   </div>
@@ -2652,13 +2652,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       handleWidthChange(pxVal);
                     }}
                     step={unit === 'mm' ? '0.1' : '1'}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
                   />
                 </div>
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400">Tinggi ({unit})</span>
-                    <span className="text-[9px] font-mono text-slate-400">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Tinggi ({unit})</span>
+                    <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
                       {unit === 'mm' ? `≈ ${height} px` : `≈ ${pxToMm(height, 1)} mm`}
                     </span>
                   </div>
@@ -2671,7 +2671,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       handleHeightChange(pxVal);
                     }}
                     step={unit === 'mm' ? '0.1' : '1'}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -2681,23 +2681,23 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   type="checkbox"
                   checked={lockAspectRatio}
                   onChange={(e) => setLockAspectRatio(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-0 w-3.5 h-3.5"
+                  className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sky-500 focus:ring-0 w-3.5 h-3.5"
                 />
-                <span className="text-xs text-slate-300">Kunci Rasio Aspek (Aspect Ratio)</span>
+                <span className="text-xs text-slate-700 dark:text-slate-300">Kunci Rasio Aspek (Aspect Ratio)</span>
               </label>
 
               {/* Image Offset X & Y with Nudge & Fit Box Controls */}
-              <div className="p-2.5 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col gap-2">
+              <div className="p-2.5 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2 shadow-xs">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-300 font-medium flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-sky-400" />
+                  <span className="text-slate-800 dark:text-slate-300 font-medium flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                     Posisi Offset Gambar
                   </span>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={handleSnapPinsToBreadboard}
-                      className="text-[10px] text-emerald-400 hover:text-emerald-300 font-medium hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-medium hover:underline flex items-center gap-1 cursor-pointer"
                       title="Kunci posisi gambar & pin tepat ke lubang breadboard terdekat"
                     >
                       <Target className="w-3 h-3" />
@@ -2706,7 +2706,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <button
                       type="button"
                       onClick={handleFitBoxToImage}
-                      className="text-[10px] text-sky-400 hover:text-sky-300 font-medium hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-[10px] text-sky-600 dark:text-sky-400 hover:text-sky-500 font-medium hover:underline flex items-center gap-1 cursor-pointer"
                       title="Paskan Bounding Box ke Gambar dan nolkan offset"
                     >
                       <Box className="w-3 h-3" />
@@ -2718,8 +2718,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400">Offset X ({unit})</span>
-                      <span className="text-[9px] font-mono text-slate-400">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Offset X ({unit})</span>
+                      <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
                         {unit === 'mm' ? `≈ ${imageOffset.x} px` : `≈ ${pxToMm(imageOffset.x, 2)} mm`}
                       </span>
                     </div>
@@ -2734,13 +2734,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         pushSnapshot({ imageOffset: next });
                       }}
                       step={unit === 'mm' ? '0.1' : '0.5'}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
                     />
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400">Offset Y ({unit})</span>
-                      <span className="text-[9px] font-mono text-slate-400">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Offset Y ({unit})</span>
+                      <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
                         {unit === 'mm' ? `≈ ${imageOffset.y} px` : `≈ ${pxToMm(imageOffset.y, 2)} mm`}
                       </span>
                     </div>
@@ -2755,39 +2755,39 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         pushSnapshot({ imageOffset: next });
                       }}
                       step={unit === 'mm' ? '0.1' : '0.5'}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Micro Nudge Image Buttons */}
-                <div className="flex items-center justify-between bg-slate-950 p-1.5 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-400">Nudge Gambar:</span>
+                <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-950 p-1.5 rounded-lg border border-slate-200 dark:border-slate-800">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Nudge Gambar:</span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => nudgeImage(unit === 'mm' ? -mmToPx(0.5, 1) : -1.0, 0)}
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      className="p-1 rounded bg-white hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
                       title={`Geser Gambar Kiri (-${unit === 'mm' ? '0.5mm' : '1px'})`}
                     >
                       <ArrowLeft className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgeImage(0, unit === 'mm' ? -mmToPx(0.5, 1) : -1.0)}
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      className="p-1 rounded bg-white hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
                       title={`Geser Gambar Atas (-${unit === 'mm' ? '0.5mm' : '1px'})`}
                     >
                       <ArrowUp className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgeImage(0, unit === 'mm' ? mmToPx(0.5, 1) : 1.0)}
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      className="p-1 rounded bg-white hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
                       title={`Geser Gambar Bawah (+${unit === 'mm' ? '0.5mm' : '1px'})`}
                     >
                       <ArrowDown className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgeImage(unit === 'mm' ? mmToPx(0.5, 1) : 1.0, 0)}
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      className="p-1 rounded bg-white hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
                       title={`Geser Gambar Kanan (+${unit === 'mm' ? '0.5mm' : '1px'})`}
                     >
                       <ArrowRight className="w-3 h-3" />
@@ -2798,37 +2798,37 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             </div>
 
             {/* Component Metadata */}
-            <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-800">
-              <label className="text-xs font-semibold text-slate-200">3. Informasi Komponen</label>
+            <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+              <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">3. Informasi Komponen</label>
 
               <div>
-                <span className="text-[10px] text-slate-400">ID Tipe (slug unik)</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">ID Tipe (slug unik)</span>
                 <input
                   type="text"
                   value={typeId}
                   onChange={(e) => setTypeId(e.target.value)}
                   placeholder="sensor-nama-modul"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <span className="text-[10px] text-slate-400">Nama Tampilan</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Nama Tampilan</span>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Modul Sensor..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:border-sky-500 focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <span className="text-[10px] text-slate-400">Kategori</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Kategori</span>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:border-sky-500 focus:outline-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none cursor-pointer"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -2839,30 +2839,30 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               </div>
 
               <div>
-                <span className="text-[10px] text-slate-400">Deskripsi</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Deskripsi</span>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="Keterangan singkat fungsi modul..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:border-sky-500 focus:outline-none resize-none"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none resize-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Center Canvas: Interactive Pin & Image Visualizer */}
-          <div className="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
+          <div className="flex-1 flex flex-col bg-[#f1f5f9] dark:bg-slate-950 relative overflow-hidden">
             {/* Canvas Toolbar - Sleek Pro Single-Line Bar */}
-            <div className="min-h-[46px] bg-slate-950/90 backdrop-blur-md border-b border-slate-800 px-4 py-1.5 flex items-center justify-between z-10 gap-3 overflow-x-auto no-scrollbar select-none">
+            <div className="min-h-[46px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-1.5 flex items-center justify-between z-10 gap-3 overflow-x-auto no-scrollbar select-none">
               {/* Primary Tool Mode Switch, Undo/Redo & Rotate */}
               <div className="flex items-center gap-2 shrink-0">
                 {/* Undo / Redo Buttons */}
-                <div className="flex bg-slate-900/90 p-0.5 rounded-xl border border-slate-800 shadow-inner">
+                <div className="flex bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
                   <button
                     onClick={handleUndo}
                     disabled={historyIndex <= 0}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors"
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer"
                     title="Undo (Ctrl+Z)"
                   >
                     <Undo2 className="w-3.5 h-3.5" />
@@ -2870,7 +2870,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   <button
                     onClick={handleRedo}
                     disabled={historyIndex >= history.length - 1}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors"
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer"
                     title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
                   >
                     <Redo2 className="w-3.5 h-3.5" />
@@ -2878,13 +2878,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </div>
 
                 {/* Smart Mode & Add Pin Segmented Control */}
-                <div className="flex bg-slate-900/90 p-0.5 rounded-xl border border-slate-800 shadow-inner">
+                <div className="flex bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
                   <button
                     onClick={() => setToolMode('smart')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                       toolMode === 'smart'
-                        ? 'bg-sky-500 text-slate-950 shadow-md font-bold'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                        ? 'bg-sky-500 text-white dark:text-slate-950 shadow-xs font-bold'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800/80'
                     }`}
                     title="Mode Pintar: Langsung geser Pin, Gambar, atau Kanvas secara otomatis tanpa gonta-ganti tombol"
                   >
@@ -2894,10 +2894,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
                   <button
                     onClick={() => setToolMode('add-pin')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                       toolMode === 'add-pin'
-                        ? 'bg-emerald-500 text-slate-950 shadow-md font-bold'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                        ? 'bg-emerald-500 text-white dark:text-slate-950 shadow-xs font-bold'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800/80'
                     }`}
                     title="Tambah Pin: Klik kanvas untuk menambah pin baru. Tips: Tahan Shift + Klik untuk Pin Stamp otomatis (jarak pas 17px berurutan)!"
                   >
@@ -2909,40 +2909,40 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 {/* Geser Bersama (Link Pins) Toggle Button */}
                 <button
                   onClick={() => setLinkPinsToImage(!linkPinsToImage)}
-                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm shrink-0 cursor-pointer ${
+                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer ${
                     linkPinsToImage
-                      ? 'bg-purple-500/20 border-purple-500/60 text-purple-300 shadow-purple-500/10'
-                      : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-400 hover:text-slate-300'
+                      ? 'bg-purple-500/15 border-purple-500/40 text-purple-700 dark:bg-purple-500/20 dark:border-purple-500/60 dark:text-purple-300'
+                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-slate-800 dark:text-slate-400 dark:hover:text-slate-300'
                   }`}
                   title="Geser Bersama: Saat aktif, menggeser gambar otomatis menggeser semua pin bersamaan (atau tahan Shift saat tarik gambar)"
                 >
-                  <Layers className={`w-3.5 h-3.5 ${linkPinsToImage ? 'text-purple-400' : 'text-slate-400'}`} />
+                  <Layers className={`w-3.5 h-3.5 ${linkPinsToImage ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
                   <span className="hidden sm:inline">Geser Bersama</span>
-                  <span className="text-[10px] font-mono px-1 py-0.2 bg-slate-950 text-slate-400 rounded border border-slate-800">
+                  <span className="text-[10px] font-mono px-1 py-0.2 bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-800">
                     Shift
                   </span>
                 </button>
 
                 {/* Direct Rotate Actions */}
-                <div className="flex items-center gap-0.5 bg-slate-900/90 p-0.5 rounded-xl border border-slate-800">
+                <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800">
                   <button
                     onClick={() => handleRotateClockwise(true)}
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-300 hover:text-sky-300 hover:bg-slate-800 transition-colors cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                     title="Putar Seluruh Komponen (Bodi + Gambar + Semua Pin) 90° (Shortcut: Tombol R)"
                   >
-                    <RotateCw className="w-3.5 h-3.5 text-sky-400" />
+                    <RotateCw className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                     <span>Putar 90°</span>
-                    <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-slate-950 text-slate-400 rounded border border-slate-800">
+                    <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-800">
                       R
                     </span>
                   </button>
 
                   <button
                     onClick={() => handleRotateClockwise(false)}
-                    className="px-2 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1 text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors border-l border-slate-800 cursor-pointer"
+                    className="px-2 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors border-l border-slate-200 dark:border-slate-800 cursor-pointer"
                     title="Putar visual gambar saja 90° (Pin TIDAK ikut berputar untuk kalibrasi visual)"
                   >
-                    <RotateCw className="w-3 h-3 text-amber-400" />
+                    <RotateCw className="w-3 h-3 text-amber-500 dark:text-amber-400" />
                     <span className="hidden md:inline">Gbr Saja</span>
                   </button>
                 </div>
@@ -2953,10 +2953,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 {/* 1-Click Smart Auto-Scale & Snap to Breadboard Holes */}
                 <button
                   onClick={handleAutoScaleAndSnapToBreadboard}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border bg-gradient-to-r from-sky-500/20 to-indigo-500/20 hover:from-sky-500/30 hover:to-indigo-500/30 border-sky-500/40 text-sky-200 transition-all shadow-sm shrink-0 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border bg-gradient-to-r from-sky-500/10 to-indigo-500/10 hover:from-sky-500/20 hover:to-indigo-500/20 dark:from-sky-500/20 dark:to-indigo-500/20 dark:hover:from-sky-500/30 dark:hover:to-indigo-500/30 border-sky-500/30 dark:border-sky-500/40 text-sky-700 dark:text-sky-200 transition-all shadow-xs shrink-0 cursor-pointer"
                   title="1-Klik: Otomatis resize gambar sesuai jarak pin & kunci semua pin tepat di lubang breadboard (Pitch 17px / 2.54mm)"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                   <span className="hidden md:inline">Paskan Skala & Pin ke BB</span>
                   <span className="md:hidden">Paskan BB</span>
                 </button>
@@ -2964,10 +2964,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 {/* Magnet Snap Toggle Button */}
                 <button
                   onClick={() => setSnapToBreadboard(!snapToBreadboard)}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-sm shrink-0 cursor-pointer ${
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-xs shrink-0 cursor-pointer ${
                     snapToBreadboard
-                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:bg-emerald-500/15 dark:border-emerald-500/40 dark:text-emerald-300'
+                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:text-slate-300'
                   }`}
                   title={
                     unit === 'mm'
@@ -2975,32 +2975,32 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       : 'Kunci posisi pin tepat di lubang breadboard (Pitch 17px)'
                   }
                 >
-                  <Magnet className="w-3.5 h-3.5 text-emerald-400" />
+                  <Magnet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>{unit === 'mm' ? 'Snap 2.54mm' : 'Snap 17px'}</span>
                 </button>
 
                 {/* Pin Callout Toggle Button */}
                 <button
                   onClick={() => setAlwaysShowLabels(!alwaysShowLabels)}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-sm shrink-0 cursor-pointer ${
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-xs shrink-0 cursor-pointer ${
                     alwaysShowLabels
-                      ? 'bg-sky-500/15 border-sky-500/40 text-sky-300'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300'
+                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-700 dark:bg-sky-500/15 dark:border-sky-500/40 dark:text-sky-300'
+                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:text-slate-300'
                   }`}
                   title={alwaysShowLabels ? 'Callout selalu tampil' : 'Callout tampil saat pin di-hover / dipilih (Default)'}
                 >
-                  <Tag className="w-3.5 h-3.5 text-sky-400" />
+                  <Tag className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                   <span>Callout</span>
                 </button>
 
                 {/* Breadboard Capsule */}
-                <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-xl border border-slate-800 shadow-sm shrink-0">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300 select-none">
+                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs shrink-0">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-700 dark:text-slate-300 select-none">
                     <input
                       type="checkbox"
                       checked={showBreadboard}
                       onChange={(e) => setShowBreadboard(e.target.checked)}
-                      className="rounded border-slate-700 bg-slate-950 text-sky-500 w-3.5 h-3.5 cursor-pointer"
+                      className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sky-500 w-3.5 h-3.5 cursor-pointer"
                     />
                     <span className="font-semibold text-xs">Breadboard</span>
                   </label>
@@ -3010,14 +3010,14 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       <select
                         value={breadboardType}
                         onChange={(e) => setBreadboardType(e.target.value as any)}
-                        className="bg-slate-950 border border-slate-700/80 text-slate-200 text-[11px] rounded-lg px-2 py-0.5 outline-none focus:border-sky-500 cursor-pointer"
+                        className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 text-[11px] rounded-lg px-2 py-0.5 outline-none focus:border-sky-500 cursor-pointer"
                       >
                         <option value="half">Half (400)</option>
                         <option value="mini">Mini (170)</option>
                         <option value="grid">Grid 17px</option>
                       </select>
 
-                      <div className="flex items-center gap-1 pl-1 border-l border-slate-800" title="Transparansi Breadboard">
+                      <div className="flex items-center gap-1 pl-1 border-l border-slate-200 dark:border-slate-800" title="Transparansi Breadboard">
                         <input
                           type="range"
                           min="0.1"
@@ -3025,7 +3025,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                           step="0.05"
                           value={breadboardOpacity}
                           onChange={(e) => setBreadboardOpacity(Number(e.target.value))}
-                          className="w-14 accent-sky-500 h-1 bg-slate-800 rounded cursor-pointer"
+                          className="w-14 accent-sky-500 h-1 bg-slate-200 dark:bg-slate-800 rounded cursor-pointer"
                         />
                       </div>
                     </>
@@ -3033,20 +3033,20 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </div>
 
                 {/* Zoom Capsule */}
-                <div className="flex items-center gap-0.5 bg-slate-900 px-1 py-1 rounded-xl border border-slate-800 shadow-sm shrink-0">
+                <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-900 px-1 py-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs shrink-0">
                   <button
                     onClick={() => setZoom((z) => Math.max(0.4, z - 0.2))}
-                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
                     title="Zoom Out"
                   >
                     <ZoomOut className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-[11px] font-mono text-slate-300 font-bold px-1 min-w-[38px] text-center">
+                  <span className="text-[11px] font-mono text-slate-800 dark:text-slate-300 font-bold px-1 min-w-[38px] text-center">
                     {Math.round(zoom * 100)}%
                   </span>
                   <button
                     onClick={() => setZoom((z) => Math.min(4.0, z + 0.2))}
-                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
                     title="Zoom In"
                   >
                     <ZoomIn className="w-3.5 h-3.5" />
@@ -3056,7 +3056,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       setZoom(1.8);
                       setPan({ x: 0, y: 0 });
                     }}
-                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-sky-300 transition-colors ml-0.5 border-l border-slate-800"
+                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-300 transition-colors ml-0.5 border-l border-slate-200 dark:border-slate-800 cursor-pointer"
                     title="Reset Posisi & Zoom"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -3067,7 +3067,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
             {/* SVG Interactive Canvas */}
             <div
-              className={`flex-1 overflow-hidden relative bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] select-none ${
+              className={`flex-1 overflow-hidden relative bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] select-none ${
                 isPanning
                   ? 'cursor-grabbing'
                   : isSpacePressed
@@ -3549,40 +3549,40 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               })()}
 
               {/* Instructions badge */}
-              <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
-                <Sparkles className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+              <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 backdrop-blur text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
+                <Sparkles className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 shrink-0" />
                 <span>
-                  <b>Mode Pintar:</b> Tarik <b>Pin</b> / <b>Gambar</b> • <b>Double-Click Pin / <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">↵</kbd></b> Edit Cepat di Canvas • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-emerald-300 font-bold">Alt</kbd> Geser Mulus • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-purple-300 font-bold">Shift</kbd> Geser Semua • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> Putar 90°
+                  <b>Mode Pintar:</b> Tarik <b>Pin</b> / <b>Gambar</b> • <b>Double-Click Pin / <kbd className="px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono text-sky-600 dark:text-sky-300 font-bold">↵</kbd></b> Edit Cepat di Canvas • <kbd className="px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono text-emerald-600 dark:text-emerald-300 font-bold">Alt</kbd> Geser Mulus • <kbd className="px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono text-purple-600 dark:text-purple-300 font-bold">Shift</kbd> Geser Semua • <kbd className="px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono text-sky-600 dark:text-sky-300 font-bold">R</kbd> Putar 90°
                 </span>
               </div>
             </div>
           </div>
 
           {/* Right Panel: Pin Inspector & Header DIP Generator */}
-          <div className="w-80 bg-slate-950/60 border-l border-slate-800 p-4 flex flex-col gap-4 overflow-y-auto">
+          <div className="w-80 bg-slate-50 dark:bg-slate-950/60 border-l border-slate-200 dark:border-slate-800 p-4 flex flex-col gap-4 overflow-y-auto">
             {/* Multi-pin Header Generator */}
-            <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col gap-2.5">
-              <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-sky-400" />
+            <div className="p-3 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5 shadow-sm">
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
                 Auto Header / DIP Generator
               </span>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <span className="text-[10px] text-slate-400">Jumlah Pin</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Jumlah Pin</span>
                   <input
                     type="number"
                     value={genCount}
                     onChange={(e) => setGenCount(Number(e.target.value))}
                     min="1"
                     max="60"
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
                   />
                 </div>
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400">Pitch ({unit})</span>
-                    <span className="text-[9px] font-mono text-slate-400">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Pitch ({unit})</span>
+                    <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
                       {unit === 'mm' ? `≈ ${genPitch} px` : `≈ ${pxToMm(genPitch, 2)} mm`}
                     </span>
                   </div>
@@ -3595,7 +3595,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       setGenPitch(pxVal);
                     }}
                     step={unit === 'mm' ? '0.01' : '0.5'}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
                   />
                 </div>
               </div>
@@ -3607,8 +3607,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   onClick={() => setGenPitch(17.0)}
                   className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
                     Math.abs(genPitch - 17.0) < 0.1
-                      ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 font-bold'
-                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-sky-50 dark:bg-sky-500/20 border-sky-300 dark:border-sky-500/50 text-sky-700 dark:text-sky-300 font-bold'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                   title="Standar Breadboard / DIP (2.54 mm / 17 px)"
                 >
@@ -3619,8 +3619,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   onClick={() => setGenPitch(mmToPx(2.0, 2))}
                   className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
                     Math.abs(genPitch - mmToPx(2.0, 2)) < 0.1
-                      ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 font-bold'
-                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-sky-50 dark:bg-sky-500/20 border-sky-300 dark:border-sky-500/50 text-sky-700 dark:text-sky-300 font-bold'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                   title="Pitch 2.0 mm (XBee / Mini Modules)"
                 >
@@ -3631,8 +3631,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                   onClick={() => setGenPitch(mmToPx(1.27, 2))}
                   className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
                     Math.abs(genPitch - mmToPx(1.27, 2)) < 0.1
-                      ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 font-bold'
-                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-sky-50 dark:bg-sky-500/20 border-sky-300 dark:border-sky-500/50 text-sky-700 dark:text-sky-300 font-bold'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                   title="Pitch 1.27 mm (SMD / SOP)"
                 >
@@ -3642,31 +3642,31 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <span className="text-[10px] text-slate-400">Orientasi</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Orientasi</span>
                   <select
                     value={genOrientation}
                     onChange={(e) => setGenOrientation(e.target.value as any)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100"
                   >
                     <option value="vertical">Vertikal</option>
                     <option value="horizontal">Horizontal</option>
                   </select>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400">Prefix ID</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Prefix ID</span>
                   <input
                     type="text"
                     value={genPrefix}
                     onChange={(e) => setGenPrefix(e.target.value)}
                     placeholder="p / d / pin"
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
                   />
                 </div>
               </div>
 
               <button
                 onClick={handleGeneratePinRow}
-                className="w-full py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 dark:bg-sky-500/15 dark:hover:bg-sky-500/25 border border-sky-400/40 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Generate Deretan Pin ({unit === 'mm' ? `${pxToMm(genPitch, 2)}mm` : `${genPitch}px`})
@@ -3675,17 +3675,17 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
             {/* Selected Pin Details Inspector */}
             {selectedPin ? (
-              <div className="p-3 bg-slate-900 rounded-xl border border-sky-500/30 flex flex-col gap-3 shadow-lg">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-xs font-bold text-sky-400 flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-sky-400" />
+              <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-sky-400/40 dark:border-sky-500/30 flex flex-col gap-3 shadow-md">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <span className="text-xs font-bold text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-sky-500 dark:bg-sky-400" />
                     Edit Pin Terpilih
                   </span>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => startInlineEdit(selectedPin.id)}
-                      className="px-2 py-0.5 rounded bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-[10px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                      className="px-2 py-0.5 rounded bg-sky-500/10 hover:bg-sky-500/20 dark:bg-sky-500/15 dark:hover:bg-sky-500/25 border border-sky-400/40 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-[10px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
                       title="Buka Edit Cepat di Canvas (Shortcut: Enter)"
                     >
                       <Edit3 className="w-3 h-3" />
@@ -3693,7 +3693,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     </button>
                     <button
                       onClick={() => deletePin(selectedPin.id)}
-                      className="p-1 rounded hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors"
+                      className="p-1 rounded hover:bg-rose-500/10 dark:hover:bg-rose-500/20 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                       title="Hapus Pin"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -3703,23 +3703,23 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-[10px] text-slate-400">ID Pin (Unik)</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">ID Pin (Unik)</span>
                     <input
                       type="text"
                       value={selectedPin.id}
                       onChange={(e) => updateSelectedPin({ id: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400">Nama / Label</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Nama / Label</span>
                     <input
                       type="text"
                       list="pin-name-suggestions"
                       value={selectedPin.name}
                       onChange={(e) => handlePinNameChange(e.target.value)}
                       placeholder="cth: VCC, GND..."
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-bold focus:border-sky-500 focus:outline-none"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-bold focus:border-sky-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -3734,11 +3734,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </datalist>
 
                 <div>
-                  <span className="text-[10px] text-slate-400">Tipe Pin</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Tipe Pin</span>
                   <select
                     value={selectedPin.type}
                     onChange={(e) => updateSelectedPin({ type: e.target.value as PinType })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:border-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none"
                   >
                     {PIN_TYPES.map((t) => (
                       <option key={t.type} value={t.type}>
@@ -3751,8 +3751,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400">Koordinat X ({unit})</span>
-                      <span className="text-[9px] font-mono text-slate-400">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Koordinat X ({unit})</span>
+                      <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
                         {unit === 'mm' ? `≈ ${selectedPin.x} px` : `≈ ${pxToMm(selectedPin.x, 2)} mm`}
                       </span>
                     </div>
@@ -3765,13 +3765,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         updateSelectedPin({ x: pxVal });
                       }}
                       step={unit === 'mm' ? '0.1' : '0.1'}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
                     />
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400">Koordinat Y ({unit})</span>
-                      <span className="text-[9px] font-mono text-slate-400">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Koordinat Y ({unit})</span>
+                      <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
                         {unit === 'mm' ? `≈ ${selectedPin.y} px` : `≈ ${pxToMm(selectedPin.y, 2)} mm`}
                       </span>
                     </div>
@@ -3784,39 +3784,39 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         updateSelectedPin({ y: pxVal });
                       }}
                       step={unit === 'mm' ? '0.1' : '0.1'}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 font-mono"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Micro Nudge Buttons */}
-                <div className="flex items-center justify-between bg-slate-950 p-2 rounded-lg border border-slate-800">
-                  <span className="text-[10px] text-slate-400">Micro Nudge:</span>
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Micro Nudge:</span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => nudgePin(unit === 'mm' ? -mmToPx(0.5, 1) : -0.5, 0)}
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
                       title={`Nudge Kiri (-${unit === 'mm' ? '0.5mm' : '0.5px'})`}
                     >
                       <ArrowLeft className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgePin(0, unit === 'mm' ? -mmToPx(0.5, 1) : -0.5)}
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
                       title={`Nudge Atas (-${unit === 'mm' ? '0.5mm' : '0.5px'})`}
                     >
                       <ArrowUp className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgePin(0, unit === 'mm' ? mmToPx(0.5, 1) : 0.5)}
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
                       title={`Nudge Bawah (+${unit === 'mm' ? '0.5mm' : '0.5px'})`}
                     >
                       <ArrowDown className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => nudgePin(unit === 'mm' ? mmToPx(0.5, 1) : 0.5, 0)}
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                      className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
                       title={`Nudge Kanan (+${unit === 'mm' ? '0.5mm' : '0.5px'})`}
                     >
                       <ArrowRight className="w-3 h-3" />
@@ -3826,11 +3826,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] text-slate-400">Deskripsi Tooltip</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Deskripsi Tooltip</span>
                     <button
                       type="button"
                       onClick={handleAutoFillPinProfile}
-                      className="text-[10px] text-sky-400 hover:text-sky-300 flex items-center gap-1 font-medium hover:underline cursor-pointer"
+                      className="text-[10px] text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 font-medium hover:underline cursor-pointer"
                       title="Otomatiskan Tipe Pin dan Deskripsi dari Nama Pin"
                     >
                       <Sparkles className="w-3 h-3" />
@@ -3842,26 +3842,26 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     value={selectedPin.description || ''}
                     onChange={(e) => updateSelectedPin({ description: e.target.value })}
                     placeholder="Contoh: Power 5V / Signal Input..."
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 focus:border-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none"
                   />
                 </div>
               </div>
             ) : (
-              <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 text-center text-xs text-slate-500">
+              <div className="p-4 bg-slate-100/70 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500">
                 Pilih pin pada canvas untuk mengedit atau geser gambar/pin langsung dengan cursor mouse.
               </div>
             )}
 
             {/* List of All Pins */}
             <div className="flex-1 flex flex-col gap-1.5 min-h-[140px]">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-300 px-1">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 px-1">
                 <span>Daftar Pin ({pins.length})</span>
                 {pins.length > 0 && (
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={handleAutoInferAllPins}
-                      className="text-[10px] text-sky-400 hover:text-sky-300 flex items-center gap-1 hover:underline cursor-pointer"
+                      className="text-[10px] text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 hover:underline cursor-pointer font-medium"
                       title="Otomatiskan Tipe dan Deskripsi semua pin berdasarkan namanya"
                     >
                       <Sparkles className="w-2.5 h-2.5" />
@@ -3869,7 +3869,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     </button>
                     <button
                       onClick={() => setPins([])}
-                      className="text-[10px] text-rose-400 hover:underline"
+                      className="text-[10px] text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
                     >
                       Hapus Semua
                     </button>
@@ -3892,19 +3892,19 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       title="Double-click untuk Edit Cepat"
                       className={`px-2.5 py-1.5 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-sky-500/15 border-sky-500/50 text-sky-200'
-                          : 'bg-slate-900/70 border-slate-800 hover:bg-slate-900 text-slate-300'
+                          ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-300 dark:border-sky-500/50 text-sky-800 dark:text-sky-200 shadow-sm'
+                          : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-800 dark:text-slate-300'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <span
-                          className="w-2.5 h-2.5 rounded-full"
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: typeDef.color }}
                         />
                         <span className="font-bold">{pin.name}</span>
-                        <span className="text-[10px] font-mono text-slate-500">({pin.id})</span>
+                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">({pin.id})</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400">
+                      <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
                         {unit === 'mm'
                           ? `${pxToMm(pin.x, 1)}, ${pxToMm(pin.y, 1)}`
                           : `${pin.x.toFixed(1)}, ${pin.y.toFixed(1)}`}
