@@ -1059,8 +1059,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }
   }, [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, pushSnapshot]);
 
-  // 1-Click Auto Snap: Instantly snap component pins & image dead-center to nearest breadboard holes
-  const handleSnapPinsToBreadboard = () => {
+  // 1-Click Smart Auto-Scale & Snap to Breadboard:
+  // Dynamically measures pin spacing on the image, calculates exact scale factor to 2.54mm (17.0px) pitch,
+  // resizes component body image, and snaps all pins into exact breadboard hole coordinates!
+  const handleAutoScaleAndSnapToBreadboard = useCallback(() => {
     if (pins.length === 0) {
       const newX = snapCoordinate(imageOffset.x, breadboardOffset.x % 17);
       const newY = snapCoordinate(imageOffset.y, breadboardOffset.y % 17);
@@ -1070,29 +1072,223 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       return;
     }
 
-    // Use selected pin or first pin as the anchor
-    const refPin = selectedPin || pins[0];
-    const targetX = snapCoordinate(refPin.x, breadboardOffset.x % 17);
-    const targetY = snapCoordinate(refPin.y, breadboardOffset.y % 17);
-    const diffX = targetX - refPin.x;
-    const diffY = targetY - refPin.y;
+    if (pins.length === 1) {
+      const p = pins[0];
+      const targetX = snapCoordinate(p.x, breadboardOffset.x % 17);
+      const targetY = snapCoordinate(p.y, breadboardOffset.y % 17);
+      const diffX = targetX - p.x;
+      const diffY = targetY - p.y;
+      const nextOffset = {
+        x: Math.round((imageOffset.x + diffX) * 10) / 10,
+        y: Math.round((imageOffset.y + diffY) * 10) / 10,
+      };
+      const nextPins = [{ ...p, x: targetX, y: targetY }];
+      setImageOffset(nextOffset);
+      setPins(nextPins);
+      pushSnapshot({ imageOffset: nextOffset, pins: nextPins });
+      return;
+    }
 
-    if (Math.abs(diffX) < 0.001 && Math.abs(diffY) < 0.001) return;
+    // 2 or more pins:
+    const xs = pins.map((p) => p.x);
+    const ys = pins.map((p) => p.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const spanX = maxX - minX;
+    const spanY = maxY - minY;
 
-    const nextOffset = {
-      x: Math.round((imageOffset.x + diffX) * 10) / 10,
-      y: Math.round((imageOffset.y + diffY) * 10) / 10,
-    };
-    const nextPins = pins.map((p) => ({
-      ...p,
-      x: Math.round((p.x + diffX) * 10) / 10,
-      y: Math.round((p.y + diffY) * 10) / 10,
-    }));
+    let scale = 1.0;
+    let isHorizontalRow = false;
+    let isVerticalRow = false;
+    let isDualRow = false;
 
-    setImageOffset(nextOffset);
-    setPins(nextPins);
-    pushSnapshot({ imageOffset: nextOffset, pins: nextPins });
-  };
+    // Detect pin configuration:
+    // 1. Single Horizontal Row (e.g. DHT22, Potentiometer, Ultrasonic, I2C headers)
+    if (spanX > 5 && spanX >= spanY * 1.5) {
+      isHorizontalRow = true;
+      const sortedByX = [...pins].sort((a, b) => a.x - b.x);
+      const pinCount = sortedByX.length;
+      const targetSpanX = (pinCount - 1) * 17.0;
+      scale = targetSpanX / Math.max(1, spanX);
+    }
+    // 2. Single Vertical Row (e.g. vertical headers, SIP modules)
+    else if (spanY > 5 && spanY >= spanX * 1.5) {
+      isVerticalRow = true;
+      const sortedByY = [...pins].sort((a, b) => a.y - b.y);
+      const pinCount = sortedByY.length;
+      const targetSpanY = (pinCount - 1) * 17.0;
+      scale = targetSpanY / Math.max(1, spanY);
+    }
+    // 3. Dual Row / DIP / IC / Module (e.g. ESP8266, Logic Level Converter, DIP IC)
+    else if (pins.length >= 4) {
+      // Check if pins cluster into 2 vertical columns (left and right)
+      const midX = (minX + maxX) / 2;
+      const leftCol = pins.filter((p) => p.x < midX).sort((a, b) => a.y - b.y);
+      const rightCol = pins.filter((p) => p.x >= midX).sort((a, b) => a.y - b.y);
+
+      if (leftCol.length >= 2 && rightCol.length >= 2 && Math.abs(leftCol.length - rightCol.length) <= 2) {
+        isDualRow = true;
+        const leftSpanY = leftCol[leftCol.length - 1].y - leftCol[0].y;
+        const rightSpanY = rightCol[rightCol.length - 1].y - rightCol[0].y;
+        const avgSpanY = (leftSpanY + rightSpanY) / 2;
+        const avgCount = (leftCol.length + rightCol.length) / 2;
+        const targetSpanY = (avgCount - 1) * 17.0;
+        scale = targetSpanY / Math.max(1, avgSpanY);
+      } else {
+        // Fallback: estimate from average spacing between nearest neighbors
+        const sortedPins = [...pins].sort((a, b) => a.x - b.x || a.y - b.y);
+        let totalStepDist = 0;
+        let stepCount = 0;
+        for (let i = 0; i < sortedPins.length - 1; i++) {
+          const d = Math.hypot(sortedPins[i + 1].x - sortedPins[i].x, sortedPins[i + 1].y - sortedPins[i].y);
+          if (d > 3) {
+            totalStepDist += d;
+            stepCount++;
+          }
+        }
+        const avgDist = stepCount > 0 ? totalStepDist / stepCount : 17.0;
+        scale = 17.0 / Math.max(1, avgDist);
+      }
+    } else {
+      // 2 or 3 pins in arbitrary orientation
+      const d = Math.hypot(spanX, spanY);
+      const targetD = (pins.length - 1) * 17.0;
+      scale = targetD / Math.max(1, d);
+    }
+
+    // Sanity check on scale factor: clamp between 0.05 and 20.0
+    if (scale <= 0.02 || scale > 50 || !isFinite(scale)) {
+      scale = 1.0;
+    }
+
+    // New Component Dimensions
+    const newWidth = Math.max(10, Math.round(width * scale * 10) / 10);
+    const newHeight = Math.max(10, Math.round(height * scale * 10) / 10);
+
+    // Reference pin for anchoring (use first pin or selected pin)
+    const refPin = pins.find((p) => p.id === selectedPinId) || pins[0];
+    const targetRefX = snapCoordinate(refPin.x, breadboardOffset.x % 17);
+    const targetRefY = snapCoordinate(refPin.y, breadboardOffset.y % 17);
+
+    // New Image Offset
+    const relRefX = refPin.x - imageOffset.x;
+    const relRefY = refPin.y - imageOffset.y;
+    const newOffsetX = Math.round((targetRefX - relRefX * scale) * 10) / 10;
+    const newOffsetY = Math.round((targetRefY - relRefY * scale) * 10) / 10;
+
+    // Calculate new pin coordinates:
+    let newPins: Pin[] = [];
+
+    if (isHorizontalRow) {
+      const sortedByX = [...pins].sort((a, b) => a.x - b.x);
+      const indexMap = new Map<string, number>();
+      sortedByX.forEach((p, idx) => indexMap.set(p.id, idx));
+
+      const firstPin = sortedByX[0];
+      const startHoleX = snapCoordinate(firstPin.x, breadboardOffset.x % 17);
+      const startHoleY = snapCoordinate(firstPin.y, breadboardOffset.y % 17);
+
+      newPins = pins.map((p) => {
+        const idx = indexMap.get(p.id) ?? 0;
+        return {
+          ...p,
+          x: Math.round((startHoleX + idx * 17.0) * 10) / 10,
+          y: startHoleY,
+        };
+      });
+    } else if (isVerticalRow) {
+      const sortedByY = [...pins].sort((a, b) => a.y - b.y);
+      const indexMap = new Map<string, number>();
+      sortedByY.forEach((p, idx) => indexMap.set(p.id, idx));
+
+      const firstPin = sortedByY[0];
+      const startHoleX = snapCoordinate(firstPin.x, breadboardOffset.x % 17);
+      const startHoleY = snapCoordinate(firstPin.y, breadboardOffset.y % 17);
+
+      newPins = pins.map((p) => {
+        const idx = indexMap.get(p.id) ?? 0;
+        return {
+          ...p,
+          x: startHoleX,
+          y: Math.round((startHoleY + idx * 17.0) * 10) / 10,
+        };
+      });
+    } else if (isDualRow) {
+      const midX = (minX + maxX) / 2;
+      const leftCol = pins.filter((p) => p.x < midX).sort((a, b) => a.y - b.y);
+      const rightCol = pins.filter((p) => p.x >= midX).sort((a, b) => a.y - b.y);
+
+      const firstLeftPin = leftCol[0];
+      const startLeftHoleX = snapCoordinate(firstLeftPin.x, breadboardOffset.x % 17);
+      const startLeftHoleY = snapCoordinate(firstLeftPin.y, breadboardOffset.y % 17);
+
+      const rawColWidth = (rightCol[0].x - leftCol[0].x) * scale;
+      const targetColSteps = Math.max(1, Math.round(rawColWidth / 17.0));
+      const targetRightHoleX = startLeftHoleX + targetColSteps * 17.0;
+
+      const leftMap = new Map<string, number>();
+      leftCol.forEach((p, idx) => leftMap.set(p.id, idx));
+      const rightMap = new Map<string, number>();
+      rightCol.forEach((p, idx) => rightMap.set(p.id, idx));
+
+      newPins = pins.map((p) => {
+        if (leftMap.has(p.id)) {
+          const idx = leftMap.get(p.id)!;
+          return {
+            ...p,
+            x: startLeftHoleX,
+            y: Math.round((startLeftHoleY + idx * 17.0) * 10) / 10,
+          };
+        } else {
+          const idx = rightMap.get(p.id)!;
+          return {
+            ...p,
+            x: targetRightHoleX,
+            y: Math.round((startLeftHoleY + idx * 17.0) * 10) / 10,
+          };
+        }
+      });
+    } else {
+      // General proportional scale + snap each pin to closest 17px grid hole
+      newPins = pins.map((p) => {
+        const scaledX = targetRefX + (p.x - refPin.x) * scale;
+        const scaledY = targetRefY + (p.y - refPin.y) * scale;
+        return {
+          ...p,
+          x: snapCoordinate(scaledX, breadboardOffset.x % 17),
+          y: snapCoordinate(scaledY, breadboardOffset.y % 17),
+        };
+      });
+    }
+
+    // Apply updates to state
+    setWidth(newWidth);
+    setHeight(newHeight);
+    setImageOffset({ x: newOffsetX, y: newOffsetY });
+    setPins(newPins);
+
+    pushSnapshot({
+      width: newWidth,
+      height: newHeight,
+      imageOffset: { x: newOffsetX, y: newOffsetY },
+      pins: newPins,
+    });
+  }, [
+    pins,
+    width,
+    height,
+    imageOffset,
+    selectedPinId,
+    snapToBreadboard,
+    breadboardOffset.x,
+    breadboardOffset.y,
+    pushSnapshot,
+  ]);
+
+  // Fast direct snap (translation without scale)
+  const handleSnapPinsToBreadboard = handleAutoScaleAndSnapToBreadboard;
 
   // Pin Dragging Mouse Event Listeners (UNCONSTRAINED - Can drag anywhere to match module pads!)
   useEffect(() => {
@@ -2083,6 +2279,17 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 </div>
               </div>
 
+              {/* 1-Click Auto Scale & Snap to Breadboard Button */}
+              <button
+                type="button"
+                onClick={handleAutoScaleAndSnapToBreadboard}
+                className="w-full py-2 px-3 rounded-xl border border-sky-500/40 bg-gradient-to-r from-sky-500/15 to-indigo-500/15 hover:from-sky-500/25 hover:to-indigo-500/25 text-sky-200 font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+                title="Titiki pin di kaki-kaki gambar, lalu klik ini untuk otomatis me-resize gambar & menancapkan semua pin tepat di lubang breadboard (Pitch 17px)"
+              >
+                <Sparkles className="w-4 h-4 text-sky-400" />
+                <span>✨ Auto-Scale & Paskan ke BB</span>
+              </button>
+
               {/* Width & Height */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -2399,14 +2606,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
               {/* Guides, Overlays & Zoom */}
               <div className="flex items-center gap-2 shrink-0">
-                {/* 1-Click Auto Align / Snap to Breadboard Holes */}
+                {/* 1-Click Smart Auto-Scale & Snap to Breadboard Holes */}
                 <button
-                  onClick={handleSnapPinsToBreadboard}
-                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border bg-sky-500/15 hover:bg-sky-500/25 border-sky-500/40 text-sky-300 transition-all shadow-sm shrink-0 cursor-pointer"
-                  title="1-Klik: Kunci & paskan semua pin beserta gambar tepat ke lubang breadboard terdekat"
+                  onClick={handleAutoScaleAndSnapToBreadboard}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border bg-gradient-to-r from-sky-500/20 to-indigo-500/20 hover:from-sky-500/30 hover:to-indigo-500/30 border-sky-500/40 text-sky-200 transition-all shadow-sm shrink-0 cursor-pointer"
+                  title="1-Klik: Otomatis resize gambar sesuai jarak pin & kunci semua pin tepat di lubang breadboard (Pitch 17px / 2.54mm)"
                 >
-                  <Target className="w-3.5 h-3.5 text-sky-400" />
-                  <span className="hidden md:inline">Paskan ke BB</span>
+                  <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                  <span className="hidden md:inline">Paskan Skala & Pin ke BB</span>
+                  <span className="md:hidden">Paskan BB</span>
                 </button>
 
                 {/* Magnet Snap Toggle Button */}
@@ -2631,38 +2839,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       }
                       onMouseDown={(e) => handleImageMouseDown(e)}
                     />
-                  )}
-
-                  {/* Component Header Drag Pill (Drag to move All Component + Pins) */}
-                  {toolMode !== 'add-pin' && (
-                    <g
-                      transform={`translate(${imageOffset.x + width / 2}, ${imageOffset.y - 12})`}
-                      className="cursor-grab active:cursor-grabbing group/header select-none"
-                      onMouseDown={(e) => handleImageMouseDown(e, true)}
-                    >
-                      <rect
-                        x={-60}
-                        y={-10}
-                        width={120}
-                        height={18}
-                        rx={9}
-                        fill="#0f172a"
-                        stroke={linkPinsToImage ? '#c084fc' : '#38bdf8'}
-                        strokeWidth={1.2}
-                        className="group-hover/header:fill-slate-800 transition-colors"
-                      />
-                      <text
-                        x={0}
-                        y={2.5}
-                        fill={linkPinsToImage ? '#e9d5ff' : '#94a3b8'}
-                        fontSize={9}
-                        fontWeight="bold"
-                        textAnchor="middle"
-                        className="select-none pointer-events-none"
-                      >
-                        {linkPinsToImage ? '⠿ Geser Semua' : '⠿ Geser Komponen'}
-                      </text>
-                    </g>
                   )}
 
                   {/* Render Pins & Smart Elbow Callouts with Live Grab & Drag */}
