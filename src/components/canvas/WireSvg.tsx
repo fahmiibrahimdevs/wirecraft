@@ -339,7 +339,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         opacity={isDarkWire ? 0.95 : 0.9}
       />
 
-      {/* 3. Main Colored Wire - Thick and rich wire body */}
+      {/* 3. Main Colored Wire - Thick, rich and solid wire body */}
       <path
         d={pathD}
         fill="none"
@@ -350,18 +350,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         className="transition-colors duration-150 group-hover/wire:brightness-125"
       />
 
-      {/* 4. Glossy Center Highlight */}
-      <path
-        d={pathD}
-        fill="none"
-        stroke={isDarkWire ? '#94a3b8' : '#ffffff'}
-        strokeWidth={isDarkWire ? 1.0 : 0.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity={isDarkWire ? 0.55 : 0.4}
-      />
-
-      {/* 5. Terminal Eyelets */}
+      {/* 4. Terminal Eyelets */}
       <circle
         cx={startPoint.x}
         cy={startPoint.y}
