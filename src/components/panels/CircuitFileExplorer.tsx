@@ -13,10 +13,9 @@ import {
   Copy,
   Edit2,
   Trash2,
-  Cpu,
-  Zap,
-  Check,
-  X,
+  FileText,
+  FileCode2,
+  File,
   Layers,
   Sparkles,
   Move,
@@ -137,9 +136,6 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
           const isExpanded = folder.isExpanded ?? true;
           const isTarget = dragOverTargetId === folder.id;
           const isRenaming = renamingId === folder.id;
-          const childCount =
-            fileSystem.files.filter((f) => f.parentId === folder.id).length +
-            fileSystem.folders.filter((f) => f.parentId === folder.id).length;
 
           return (
             <div key={folder.id} className="select-none">
@@ -205,7 +201,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                       onBlur={submitRenaming}
                       autoFocus
                       onClick={(e) => e.stopPropagation()}
-                      className="bg-slate-950 border border-sky-500 text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36 font-mono"
+                      className="bg-slate-950 border border-sky-500 text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36"
                     />
                   ) : (
                     <span className="truncate">{folder.name}</span>
@@ -265,7 +261,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                       {creatingType === 'folder' ? (
                         <Folder className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                       ) : (
-                        <Cpu className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                        <FileText className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                       )}
                       <input
                         type="text"
@@ -278,7 +274,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                         onBlur={submitCreating}
                         autoFocus
                         placeholder={creatingType === 'file' ? 'nama_file' : 'nama_folder'}
-                        className="bg-slate-950 border border-sky-500 text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36 font-mono"
+                        className="bg-slate-950 border border-sky-500 text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36"
                       />
                     </div>
                   )}
@@ -311,11 +307,11 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               }`}
             >
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                {/* Circuit File Icon with active glow */}
+                {/* Standard File Document Icon with active status dot */}
                 <div className="relative shrink-0 flex items-center justify-center">
-                  <Cpu
+                  <FileText
                     className={`w-4 h-4 ${
-                      isActive ? 'text-sky-400 filter drop-shadow' : 'text-slate-400 group-hover:text-sky-400'
+                      isActive ? 'text-sky-400' : 'text-slate-400 group-hover:text-sky-400'
                     }`}
                   />
                   {isActive && (
@@ -335,11 +331,11 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                     onBlur={submitRenaming}
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
-                    className="bg-slate-950 border border-sky-500 text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36 font-mono"
+                    className="bg-slate-950 border border-sky-500 text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36"
                   />
                 ) : (
                   <div className="flex flex-col min-w-0">
-                    <span className="truncate font-mono">{file.name}</span>
+                    <span className="truncate">{file.name}</span>
                     <span className="text-[10px] text-slate-500 font-normal">
                       {file.components.length} part • {file.wires.length} kabel
                     </span>
@@ -409,7 +405,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
       <div className="p-3 border-b border-slate-800/90 flex items-center justify-between bg-slate-900/95">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-sky-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
             BERKAS DESAIN
           </span>
         </div>
@@ -447,7 +443,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
             {creatingType === 'folder' ? (
               <Folder className="w-4 h-4 text-amber-400 shrink-0" />
             ) : (
-              <Cpu className="w-4 h-4 text-sky-400 shrink-0" />
+              <FileText className="w-4 h-4 text-sky-400 shrink-0" />
             )}
             <input
               type="text"
@@ -460,7 +456,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               onBlur={submitCreating}
               autoFocus
               placeholder={creatingType === 'file' ? 'nama_desain' : 'nama_folder'}
-              className="bg-transparent text-slate-100 text-xs outline-none w-full font-mono"
+              className="bg-transparent text-slate-100 text-xs outline-none w-full"
             />
           </div>
         )}
@@ -485,7 +481,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
             setDragOverTargetId(null);
             setDraggedItem(null);
           }}
-          className={`mt-4 py-3 px-2 rounded-lg border border-dashed text-center text-[10px] font-mono transition-colors ${
+          className={`mt-4 py-3 px-2 rounded-lg border border-dashed text-center text-[10px] transition-colors ${
             dragOverTargetId === 'root'
               ? 'bg-sky-500/15 border-sky-400 text-sky-300'
               : 'border-slate-800 text-slate-600 hover:border-slate-700'
@@ -498,9 +494,9 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
       {/* Footer Info */}
       <div className="p-2.5 border-t border-slate-800/80 bg-slate-950/50 flex items-center justify-between text-[11px] text-slate-400">
         <span className="truncate">
-          Aktif: <span className="text-sky-400 font-mono font-medium">{activeFile?.name || '-'}</span>
+          Aktif: <span className="text-sky-400 font-medium">{activeFile?.name || '-'}</span>
         </span>
-        <span className="text-[10px] font-mono bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400 shrink-0">
+        <span className="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400 shrink-0">
           {fileSystem.files.length} Desain
         </span>
       </div>
