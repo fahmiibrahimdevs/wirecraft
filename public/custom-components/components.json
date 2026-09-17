@@ -1310,5 +1310,417 @@
     "imageUrl": "/components/ftdi232-red.png",
     "createdAt": "2026-09-17T03:24:43.019Z",
     "updatedAt": "2026-09-17T03:24:43.019Z"
+  },
+  "level-converter-4ch-blue": {
+    "definition": {
+      "type": "level-converter-4ch-blue",
+      "name": "Level Converter 4CH Blue",
+      "category": "power",
+      "description": "Modul Logic Level Converter 4-Channel Blue (sering disebut I2C Logic Level Shifter) adalah perangkat keras interkoneksi dua arah (bi-directional) yang berfungsi untuk menyelaraskan level tegangan sinyal digital antara dua perangkat yang memiliki perbedaan tegangan logika (umumnya antara perangkat 5V dan 3.3V).",
+      "width": 99.7,
+      "height": 82.3,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "HV1",
+          "x": 7.4,
+          "y": 7.5,
+          "type": "digital",
+          "description": "High Voltage Channel 1 (5V Side)"
+        },
+        {
+          "id": "pin_2",
+          "name": "HV2",
+          "x": 24.4,
+          "y": 7.5,
+          "type": "digital",
+          "description": "High Voltage Channel 2 (5V Side)"
+        },
+        {
+          "id": "pin_3",
+          "name": "HV (POWER)",
+          "x": 41.4,
+          "y": 7.5,
+          "type": "power",
+          "description": "High Voltage Supply Reference (+5V)"
+        },
+        {
+          "id": "pin_4",
+          "name": "GND",
+          "x": 58.4,
+          "y": 7.5,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        },
+        {
+          "id": "pin_5",
+          "name": "HV3",
+          "x": 75.4,
+          "y": 7.5,
+          "type": "digital",
+          "description": "High Voltage Channel 3 (5V Side)"
+        },
+        {
+          "id": "pin_6",
+          "name": "HV4",
+          "x": 92.4,
+          "y": 7.5,
+          "type": "digital",
+          "description": "High Voltage Channel 4 (5V Side)"
+        },
+        {
+          "id": "pin_7",
+          "name": "LV1",
+          "x": 7.4,
+          "y": 75.5,
+          "type": "digital",
+          "description": "Low Voltage Channel 1 (3.3V Side)"
+        },
+        {
+          "id": "pin_8",
+          "name": "LV2",
+          "x": 24.4,
+          "y": 75.5,
+          "type": "digital",
+          "description": "Low Voltage Channel 2 (3.3V Side)"
+        },
+        {
+          "id": "pin_9",
+          "name": "LV (POWER)",
+          "x": 41.4,
+          "y": 75.5,
+          "type": "power",
+          "description": "Low Voltage Supply Reference (+3.3V)"
+        },
+        {
+          "id": "pin_10",
+          "name": "Pin 10",
+          "x": 58.4,
+          "y": 75.5,
+          "type": "ground",
+          "description": "Pin 10"
+        },
+        {
+          "id": "pin_11",
+          "name": "LV3",
+          "x": 75.4,
+          "y": 75.5,
+          "type": "digital",
+          "description": "Low Voltage Channel 3 (3.3V Side)"
+        },
+        {
+          "id": "pin_12",
+          "name": "LV4",
+          "x": 92.4,
+          "y": 75.5,
+          "type": "digital",
+          "description": "Low Voltage Channel 4 (3.3V Side)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/level-converter-4ch-blue.png",
+      "imageWidth": 99.7,
+      "imageHeight": 82.3,
+      "isCustom": true
+    },
+    "imageUrl": "/components/level-converter-4ch-blue.png",
+    "createdAt": "2026-09-17T03:46:28.918Z",
+    "updatedAt": "2026-09-17T03:46:28.918Z"
+  },
+  "level-converter-4ch-red": {
+    "definition": {
+      "type": "level-converter-4ch-red",
+      "name": "LEVEL CONVERTER 4CH RED",
+      "category": "power",
+      "description": "Modul Logic Level Converter 4-Channel Blue (sering disebut I2C Logic Level Shifter) adalah perangkat keras interkoneksi dua arah (bi-directional) yang berfungsi untuk menyelaraskan level tegangan sinyal digital antara dua perangkat yang memiliki perbedaan tegangan logika (umumnya antara perangkat 5V dan 3.3V).",
+      "width": 100.4,
+      "height": 83,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "HV1",
+          "x": 7.3,
+          "y": 7.9,
+          "type": "digital",
+          "description": "High Voltage Channel 1 (5V Side)"
+        },
+        {
+          "id": "pin_2",
+          "name": "HV2",
+          "x": 24.3,
+          "y": 7.9,
+          "type": "digital",
+          "description": "High Voltage Channel 2 (5V Side)"
+        },
+        {
+          "id": "pin_3",
+          "name": "HV (POWER)",
+          "x": 41.3,
+          "y": 7.9,
+          "type": "power",
+          "description": "High Voltage Supply Reference (5V)"
+        },
+        {
+          "id": "pin_4",
+          "name": "GND",
+          "x": 58.3,
+          "y": 7.9,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        },
+        {
+          "id": "pin_5",
+          "name": "HV3",
+          "x": 75.3,
+          "y": 7.9,
+          "type": "digital",
+          "description": "High Voltage Channel 3 (5V Side)"
+        },
+        {
+          "id": "pin_6",
+          "name": "HV4",
+          "x": 92.3,
+          "y": 7.9,
+          "type": "digital",
+          "description": "High Voltage Channel 4 (5V Side)"
+        },
+        {
+          "id": "pin_7",
+          "name": "LV1",
+          "x": 7.3,
+          "y": 75.9,
+          "type": "digital",
+          "description": "Low Voltage Channel 1 (3.3V Side)"
+        },
+        {
+          "id": "pin_8",
+          "name": "LV2",
+          "x": 24.3,
+          "y": 75.9,
+          "type": "digital",
+          "description": "Low Voltage Channel 2 (3.3V Side)"
+        },
+        {
+          "id": "pin_9",
+          "name": "LV (POWER)",
+          "x": 41.3,
+          "y": 75.9,
+          "type": "power",
+          "description": "Low Voltage Supply Reference (3.3V)"
+        },
+        {
+          "id": "pin_10",
+          "name": "GND",
+          "x": 58.3,
+          "y": 75.9,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        },
+        {
+          "id": "pin_11",
+          "name": "LV3",
+          "x": 75.3,
+          "y": 75.9,
+          "type": "digital",
+          "description": "Low Voltage Channel 3 (3.3V Side)"
+        },
+        {
+          "id": "pin_12",
+          "name": "LV4",
+          "x": 92.3,
+          "y": 75.9,
+          "type": "digital",
+          "description": "Low Voltage Channel 4 (3.3V Side)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/level-converter-4ch-red.png",
+      "imageWidth": 100.4,
+      "imageHeight": 83,
+      "isCustom": true
+    },
+    "imageUrl": "/components/level-converter-4ch-red.png",
+    "createdAt": "2026-09-17T03:53:28.301Z",
+    "updatedAt": "2026-09-17T04:00:40.323Z"
+  },
+  "level-converter-8ch-red": {
+    "definition": {
+      "type": "level-converter-8ch-red",
+      "name": "LEVEL CONVERTER 8CH RED",
+      "category": "power",
+      "description": "Modul Logic Level Converter 8-Channel Red adalah perangkat keras interkoneksi dua arah (bi-directional) berkapasitas besar yang berfungsi untuk menyelaraskan level tegangan sinyal digital digital hingga 8 jalur sekaligus antara dua sirkuit elektronik dengan tegangan logika berbeda (biasanya menjembatani level 5V dengan 3.3V).",
+      "width": 186.1,
+      "height": 85.8,
+      "pins": [
+        {
+          "id": "p_1",
+          "name": "HV1",
+          "x": 15.3,
+          "y": 8.4,
+          "type": "digital",
+          "description": "High Voltage Channel 1 (5V Side)"
+        },
+        {
+          "id": "p_2",
+          "name": "HV2",
+          "x": 32.3,
+          "y": 8.4,
+          "type": "digital",
+          "description": "High Voltage Channel 2 (5V Side)"
+        },
+        {
+          "id": "p_3",
+          "name": "HV3",
+          "x": 49.3,
+          "y": 8.4,
+          "type": "digital",
+          "description": "High Voltage Channel 3 (5V Side)"
+        },
+        {
+          "id": "p_4",
+          "name": "HV4",
+          "x": 66.3,
+          "y": 8.4,
+          "type": "digital",
+          "description": "High Voltage Channel 4 (5V Side)"
+        },
+        {
+          "id": "p_5",
+          "name": "HV (POWER)",
+          "x": 83.3,
+          "y": 8.4,
+          "type": "power",
+          "description": "High Voltage Supply Reference (5V)"
+        },
+        {
+          "id": "p_6",
+          "name": "GND",
+          "x": 100.3,
+          "y": 8.4,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        },
+        {
+          "id": "p_7",
+          "name": "HV5",
+          "x": 117.3,
+          "y": 8.4,
+          "type": "digital",
+          "description": "High Voltage Channel 5 (5V Side)"
+        },
+        {
+          "id": "p_8",
+          "name": "HV6",
+          "x": 134.3,
+          "y": 8.4,
+          "type": "digital",
+          "description": "High Voltage Channel 6 (5V Side)"
+        },
+        {
+          "id": "p_9",
+          "name": "HV7",
+          "x": 151.3,
+          "y": 8.4,
+          "type": "digital",
+          "description": "High Voltage Channel 7 (5V Side)"
+        },
+        {
+          "id": "p_10",
+          "name": "HV8",
+          "x": 168.3,
+          "y": 8.4,
+          "type": "digital",
+          "description": "High Voltage Channel 8 (5V Side)"
+        },
+        {
+          "id": "pin_11",
+          "name": "LV1",
+          "x": 15.3,
+          "y": 76.4,
+          "type": "digital",
+          "description": "Low Voltage Channel 1 (3.3V Side)"
+        },
+        {
+          "id": "pin_12",
+          "name": "LV2",
+          "x": 32.3,
+          "y": 76.4,
+          "type": "digital",
+          "description": "Low Voltage Channel 2 (3.3V Side)"
+        },
+        {
+          "id": "pin_13",
+          "name": "LV3",
+          "x": 49.3,
+          "y": 76.4,
+          "type": "digital",
+          "description": "Low Voltage Channel 3 (3.3V Side)"
+        },
+        {
+          "id": "pin_14",
+          "name": "LV4",
+          "x": 66.3,
+          "y": 76.4,
+          "type": "digital",
+          "description": "Low Voltage Channel 4 (3.3V Side)"
+        },
+        {
+          "id": "pin_15",
+          "name": "LV (POWER)",
+          "x": 83.3,
+          "y": 76.4,
+          "type": "power",
+          "description": "Low Voltage Supply Reference (3.3V)"
+        },
+        {
+          "id": "pin_16",
+          "name": "GND",
+          "x": 100.3,
+          "y": 76.4,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        },
+        {
+          "id": "pin_17",
+          "name": "LV5",
+          "x": 117.3,
+          "y": 76.4,
+          "type": "digital",
+          "description": "Low Voltage Channel 5 (3.3V Side)"
+        },
+        {
+          "id": "pin_18",
+          "name": "LV6",
+          "x": 134.3,
+          "y": 76.4,
+          "type": "digital",
+          "description": "Low Voltage Channel 6 (3.3V Side)"
+        },
+        {
+          "id": "pin_19",
+          "name": "LV7",
+          "x": 151.3,
+          "y": 76.4,
+          "type": "digital",
+          "description": "Low Voltage Channel 7 (3.3V Side)"
+        },
+        {
+          "id": "pin_20",
+          "name": "LV8",
+          "x": 168.3,
+          "y": 76.4,
+          "type": "digital",
+          "description": "Low Voltage Channel 8 (3.3V Side)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/level-converter-8ch-red.png",
+      "imageWidth": 186.1,
+      "imageHeight": 85.8,
+      "isCustom": true
+    },
+    "imageUrl": "/components/level-converter-8ch-red.png",
+    "createdAt": "2026-09-17T04:00:17.555Z",
+    "updatedAt": "2026-09-17T04:00:17.555Z"
   }
 }

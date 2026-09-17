@@ -166,16 +166,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      case 'ftdi-ft232rl':
-        return (
-          <image
-            href="/components/ftdi_ft232rl.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'breadboard-mini':
         return (
           <image
@@ -1096,43 +1086,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-
-      case 'level-converter-4ch-blue':
-        return (
-          <image
-            href="/components/level_converter_4ch_blue.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'level-converter-8ch-red':
-        return (
-          <image
-            href="/components/level_converter_8ch_red.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'level-converter-4ch-red':
-        return (
-          <image
-            href="/components/level_converter_4ch_red.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'sensor-ads1115':
         return (
           <image
@@ -1491,10 +1444,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           const isPzem = component.type === 'pzem-004t';
           const isCtCoil = component.type === 'sensor-ct-coil';
           const isNodeMcu = component.type === 'nodemcu-v1' || component.type === 'nodemcu-ch340';
-          const isLevelConverter =
-            component.type === 'level-converter-4ch-blue' ||
-            component.type === 'level-converter-8ch-red' ||
-            component.type === 'level-converter-4ch-red';
           const isAds1115 = component.type === 'sensor-ads1115';
           const isJsnSr04t = component.type === 'sensor-jsn-sr04t';
           const isSim800l = component.type === 'module-sim800l';
@@ -1514,7 +1463,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             ? 3.2
             : isLed
             ? 2.5
-            : def.isCustom || isPot || isUltrasonic || isDht || isDs18b20 || isRfid || isSoilMoisture || isTds || isPh || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRelayRed || isRtc || isTft || isKeypad || isMax31865 || isLevelConverter || isAds1115 || isJsnSr04t || isSim800l || component.type === 'sensor-touch-ttp223'
+            : def.isCustom || isPot || isUltrasonic || isDht || isDs18b20 || isRfid || isSoilMoisture || isTds || isPh || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRelayRed || isRtc || isTft || isKeypad || isMax31865 || isAds1115 || isJsnSr04t || isSim800l || component.type === 'sensor-touch-ttp223'
             ? 2.8
             : isLcd
             ? 3.6
