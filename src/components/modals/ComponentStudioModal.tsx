@@ -1104,7 +1104,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     let scale = 1.0;
     let isHorizontalRow = false;
     let isVerticalRow = false;
-    let isDualRow = false;
+    let isDualHorizontalRow = false;
+    let isDualVerticalCol = false;
 
     // Detect pin configuration:
     // 1. Single Horizontal Row (e.g. DHT22, Potentiometer, Ultrasonic, I2C headers)
@@ -1123,17 +1124,48 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const targetSpanY = (pinCount - 1) * 17.0;
       scale = targetSpanY / Math.max(1, spanY);
     }
-    // 3. Dual Row / DIP / IC / Module (e.g. ESP8266, Logic Level Converter, DIP IC)
+    // 3. Dual Row / DIP / IC / Microcontroller Module
     else if (pins.length >= 4) {
-      // Check if pins cluster into 2 vertical columns (left and right)
+      const midY = (minY + maxY) / 2;
+      const topRow = pins.filter((p) => p.y < midY).sort((a, b) => a.x - b.x);
+      const botRow = pins.filter((p) => p.y >= midY).sort((a, b) => a.x - b.x);
+
+      const topSpanX = topRow.length > 1 ? topRow[topRow.length - 1].x - topRow[0].x : 0;
+      const botSpanX = botRow.length > 1 ? botRow[botRow.length - 1].x - botRow[0].x : 0;
+      const topSpanY = topRow.length > 1 ? Math.max(...topRow.map((p) => p.y)) - Math.min(...topRow.map((p) => p.y)) : 0;
+      const botSpanY = botRow.length > 1 ? Math.max(...botRow.map((p) => p.y)) - Math.min(...botRow.map((p) => p.y)) : 0;
+
       const midX = (minX + maxX) / 2;
       const leftCol = pins.filter((p) => p.x < midX).sort((a, b) => a.y - b.y);
       const rightCol = pins.filter((p) => p.x >= midX).sort((a, b) => a.y - b.y);
 
-      if (leftCol.length >= 2 && rightCol.length >= 2 && Math.abs(leftCol.length - rightCol.length) <= 2) {
-        isDualRow = true;
-        const leftSpanY = leftCol[leftCol.length - 1].y - leftCol[0].y;
-        const rightSpanY = rightCol[rightCol.length - 1].y - rightCol[0].y;
+      const leftSpanY = leftCol.length > 1 ? leftCol[leftCol.length - 1].y - leftCol[0].y : 0;
+      const rightSpanY = rightCol.length > 1 ? rightCol[rightCol.length - 1].y - rightCol[0].y : 0;
+      const leftSpanX = leftCol.length > 1 ? Math.max(...leftCol.map((p) => p.x)) - Math.min(...leftCol.map((p) => p.x)) : 0;
+      const rightSpanX = rightCol.length > 1 ? Math.max(...rightCol.map((p) => p.x)) - Math.min(...rightCol.map((p) => p.x)) : 0;
+
+      // 3A. Dual Horizontal Rows (Top Row & Bottom Row, e.g. ESP32-C3 Supermini, horizontal DIP)
+      if (
+        topRow.length >= 2 &&
+        botRow.length >= 2 &&
+        topSpanX >= topSpanY * 1.5 &&
+        botSpanX >= botSpanY * 1.5 &&
+        topSpanX > leftSpanY
+      ) {
+        isDualHorizontalRow = true;
+        const avgSpanX = (topSpanX + botSpanX) / 2;
+        const avgCount = (topRow.length + botRow.length) / 2;
+        const targetSpanX = (avgCount - 1) * 17.0;
+        scale = targetSpanX / Math.max(1, avgSpanX);
+      }
+      // 3B. Dual Vertical Columns (Left Column & Right Column, e.g. Arduino Nano, ESP32 30/38P, Logic Level Converter)
+      else if (
+        leftCol.length >= 2 &&
+        rightCol.length >= 2 &&
+        leftSpanY >= leftSpanX * 1.5 &&
+        rightSpanY >= rightSpanX * 1.5
+      ) {
+        isDualVerticalCol = true;
         const avgSpanY = (leftSpanY + rightSpanY) / 2;
         const avgCount = (leftCol.length + rightCol.length) / 2;
         const targetSpanY = (avgCount - 1) * 17.0;
@@ -1229,7 +1261,60 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           y: Math.round((startHoleY + idx * 17.0) * 10) / 10,
         };
       });
-    } else if (isDualRow) {
+    } else if (isDualHorizontalRow) {
+      const midY = (minY + maxY) / 2;
+      const topRow = pins.filter((p) => p.y < midY).sort((a, b) => a.x - b.x);
+      const botRow = pins.filter((p) => p.y >= midY).sort((a, b) => a.x - b.x);
+
+      const firstTopPin = topRow[0];
+      let startTopHoleX = snapCoordinate(firstTopPin.x, breadboardOffset.x % 17);
+      let startTopHoleY = snapCoordinate(firstTopPin.y, breadboardOffset.y % 17);
+
+      if (startTopHoleX < 34.0 || startTopHoleX > 530.0 || startTopHoleY < 30.0 || startTopHoleY > 320.0) {
+        startTopHoleX = 68.0 + (breadboardOffset.x % 17);
+        startTopHoleY = 68.0 + (breadboardOffset.y % 17);
+      }
+
+      const rawRowHeight = (botRow[0].y - topRow[0].y) * scale;
+      const targetRowSteps = Math.max(1, Math.round(rawRowHeight / 17.0));
+      const targetBotHoleY = startTopHoleY + targetRowSteps * 17.0;
+
+      const relFirstX = firstTopPin.x - imageOffset.x;
+      const relFirstY = firstTopPin.y - imageOffset.y;
+      newOffsetX = Math.round((startTopHoleX - relFirstX * scale) * 10) / 10;
+      newOffsetY = Math.round((startTopHoleY - relFirstY * scale) * 10) / 10;
+
+      const topMap = new Map<string, number>();
+      topRow.forEach((p, idx) => topMap.set(p.id, idx));
+      const botMap = new Map<string, number>();
+      botRow.forEach((p, idx) => botMap.set(p.id, idx));
+
+      newPins = pins.map((p) => {
+        if (topMap.has(p.id)) {
+          const idx = topMap.get(p.id)!;
+          return {
+            ...p,
+            x: Math.round((startTopHoleX + idx * 17.0) * 10) / 10,
+            y: startTopHoleY,
+          };
+        } else if (botMap.has(p.id)) {
+          const idx = botMap.get(p.id)!;
+          return {
+            ...p,
+            x: Math.round((startTopHoleX + idx * 17.0) * 10) / 10,
+            y: targetBotHoleY,
+          };
+        } else {
+          const scaledX = startTopHoleX + (p.x - firstTopPin.x) * scale;
+          const scaledY = startTopHoleY + (p.y - firstTopPin.y) * scale;
+          return {
+            ...p,
+            x: snapCoordinate(scaledX, breadboardOffset.x % 17),
+            y: snapCoordinate(scaledY, breadboardOffset.y % 17),
+          };
+        }
+      });
+    } else if (isDualVerticalCol) {
       const midX = (minX + maxX) / 2;
       const leftCol = pins.filter((p) => p.x < midX).sort((a, b) => a.y - b.y);
       const rightCol = pins.filter((p) => p.x >= midX).sort((a, b) => a.y - b.y);
@@ -1265,12 +1350,20 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             x: startLeftHoleX,
             y: Math.round((startLeftHoleY + idx * 17.0) * 10) / 10,
           };
-        } else {
+        } else if (rightMap.has(p.id)) {
           const idx = rightMap.get(p.id)!;
           return {
             ...p,
             x: targetRightHoleX,
             y: Math.round((startLeftHoleY + idx * 17.0) * 10) / 10,
+          };
+        } else {
+          const scaledX = startLeftHoleX + (p.x - firstLeftPin.x) * scale;
+          const scaledY = startLeftHoleY + (p.y - firstLeftPin.y) * scale;
+          return {
+            ...p,
+            x: snapCoordinate(scaledX, breadboardOffset.x % 17),
+            y: snapCoordinate(scaledY, breadboardOffset.y % 17),
           };
         }
       });
