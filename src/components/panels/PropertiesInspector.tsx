@@ -227,7 +227,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
     const allLocked = selectedComps.length > 0 && selectedComps.every((c) => c.locked);
 
     return (
-      <aside className="fixed top-14 bottom-0 right-0 z-30 w-80 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
+      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
         {/* Header */}
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -342,7 +342,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
     };
 
     return (
-      <aside className="fixed top-14 bottom-0 right-0 z-30 w-80 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
+      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
         {/* Header */}
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -847,7 +847,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
     const toComp = allComponents.find((c) => c.id === selectedWire.toComponentId);
 
     return (
-      <aside className="fixed top-14 bottom-0 right-0 z-30 w-80 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
+      <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl animate-fade-in">
         {/* Header */}
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -939,21 +939,62 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   const getPinTypeBadge = (type: string) => {
     switch (type) {
       case 'power':
-        return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+        return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
       case 'ground':
-        return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+        return 'bg-sky-500/20 text-sky-300 border-sky-500/40';
       case 'i2c':
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+        return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
       case 'spi':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+        return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
       case 'analog':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
       case 'pwm':
-        return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
+        return 'bg-orange-500/20 text-orange-300 border-orange-500/40';
       case 'uart':
-        return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+        return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
       default:
         return 'bg-slate-800 text-slate-300 border-slate-700';
+    }
+  };
+
+  const getWireColorName = (hex?: string): string => {
+    if (!hex) return 'Biru Muda';
+    const h = hex.toLowerCase().trim();
+    if (h === '#ef4444' || h === 'red') return 'Merah';
+    if (h === '#1e293b' || h === '#0f172a' || h === '#020617' || h === '#000000' || h === 'black') return 'Hitam';
+    if (h === '#38bdf8' || h === '#0ea5e9' || h === '#0284c7' || h === 'cyan') return 'Biru Muda';
+    if (h === '#10b981' || h === '#22c55e' || h === 'green') return 'Hijau';
+    if (h === '#eab308' || h === '#facc15' || h === 'yellow') return 'Kuning';
+    if (h === '#f97316' || h === '#ea580c' || h === 'orange') return 'Oranye';
+    if (h === '#a855f7' || h === '#c084fc' || h === 'purple') return 'Ungu';
+    if (h === '#f8fafc' || h === '#ffffff' || h === 'white') return 'Putih';
+    if (h === '#3b82f6' || h === '#2563eb' || h === 'blue') return 'Biru';
+    return 'Kustom';
+  };
+
+  const getPinFunctionLabel = (type: string, desc?: string): string => {
+    if (desc && desc.trim()) {
+      return desc;
+    }
+    switch (type) {
+      case 'power':
+        return 'POWER (VCC/5V)';
+      case 'ground':
+        return 'GROUND (GND)';
+      case 'i2c':
+        return 'I2C BUS';
+      case 'spi':
+        return 'SPI BUS';
+      case 'uart':
+        return 'UART SERIAL';
+      case 'analog':
+        return 'ANALOG ADC';
+      case 'pwm':
+        return 'PWM OUTPUT';
+      case 'digital':
+        return 'DIGITAL GPIO';
+      default:
+        return 'GPIO PIN';
     }
   };
 
@@ -992,8 +1033,13 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
         mcuPinId,
         mcuPinName: mcuPin?.name || mcuPinId,
         mcuPinType: mcuPin?.type || 'digital',
+        mcuPinDesc: mcuPin?.description || '',
+        targetCompId,
         targetCompLabel: targetComp?.label || targetComp?.name || targetCompId,
+        targetCompTypeName: targetDef?.name || targetComp?.name || targetComp?.type || '',
         targetPinName: targetPin?.name || targetPinId,
+        targetPinType: targetPin?.type || 'generic',
+        targetPinDesc: targetPin?.description || '',
       };
     });
 
@@ -1091,13 +1137,13 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   }
 
   return (
-    <aside className="fixed top-14 bottom-0 right-0 z-30 w-80 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl">
+    <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl">
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-sky-400" />
-          <h3 className="text-sm font-semibold text-slate-100">Ringkasan Sirkuit</h3>
+          <Layers className="w-4 h-4 text-sky-400 shrink-0" />
+          <h3 className="text-sm font-semibold text-slate-100 whitespace-nowrap">Ringkasan Sirkuit</h3>
         </div>
-        <span className="text-[10px] text-slate-400 font-mono bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+        <span className="text-[10px] text-slate-400 font-mono bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700 shrink-0 whitespace-nowrap">
           Live Status
         </span>
       </div>
@@ -1126,8 +1172,8 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             className="w-full flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 hover:border-sky-500/50 text-slate-200 py-2.5 px-3 rounded-xl text-xs font-medium transition-all shadow-sm cursor-pointer group"
             title="Pusatkan pandangan ke seluruh komponen (Fit to Screen)"
           >
-            <Maximize2 className="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform" />
-            <span>Pusatkan Semua Komponen (Fit View)</span>
+            <Maximize2 className="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="whitespace-nowrap">Pusatkan Semua Komponen (Fit View)</span>
           </button>
         )}
 
@@ -1135,11 +1181,11 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
         <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-              <ShieldCheck className="w-4 h-4 text-sky-400" />
-              <span>Diagnosa Sirkuit</span>
+              <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
+              <span className="whitespace-nowrap">Diagnosa Sirkuit</span>
             </div>
             <span
-              className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border ${
+              className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border shrink-0 whitespace-nowrap ${
                 circuitDiagnostics.some((i) => i.type === 'error')
                   ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
                   : circuitDiagnostics.length > 0
@@ -1190,10 +1236,10 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
         <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-              <Cpu className="w-4 h-4 text-sky-400" />
-              <span>Pemetaan Pin MCU</span>
+              <Cpu className="w-4 h-4 text-sky-400 shrink-0" />
+              <span className="whitespace-nowrap">Pemetaan Pin MCU</span>
             </div>
-            <span className="text-[10px] text-slate-400 font-mono">
+            <span className="text-[10px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800 shrink-0 whitespace-nowrap">
               {mcuPinMappings.reduce((acc, m) => acc + m.pins.length, 0)} Terpakai
             </span>
           </div>
@@ -1203,43 +1249,91 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
               Belum ada mikrokontroler (Arduino / ESP32 / WeMos) di kanvas.
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {mcuPinMappings.map(({ mcu, def, pins }) => (
-                <div key={mcu.id} className="space-y-1.5">
-                  <div className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
-                    <span className="truncate">{mcu.label} ({def?.name || mcu.name})</span>
-                    <span className="text-[10px] text-sky-400 font-mono">{pins.length} koneksi</span>
+                <div key={mcu.id} className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 space-y-2.5">
+                  {/* MCU Board Header */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
+                        <Cpu className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-200 truncate leading-tight">
+                          {mcu.label}
+                        </div>
+                        <div className="text-[10px] text-slate-400 truncate leading-tight mt-0.5">
+                          {def?.name || mcu.name}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-400 border border-sky-500/30 shrink-0 whitespace-nowrap">
+                      {pins.length} / {def?.pins.length || 0} Pin
+                    </span>
+                  </div>
+
+                  {/* Pin Utilization Bar */}
+                  <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800/80">
+                    <div
+                      className="bg-gradient-to-r from-sky-500 to-emerald-400 h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(100, Math.round((pins.length / (def?.pins.length || 1)) * 100))}%`,
+                      }}
+                    />
                   </div>
 
                   {pins.length === 0 ? (
-                    <div className="text-[10px] text-slate-500 bg-slate-900/60 rounded-lg p-2">
+                    <div className="text-[10px] text-slate-500 bg-slate-950/60 rounded-lg p-2 text-center">
                       Belum ada pin terhubung pada board ini.
                     </div>
                   ) : (
-                    <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+                    <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                       {pins.map((p, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between bg-slate-900/80 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px]"
+                          className="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 hover:border-slate-700/80 rounded-lg p-2 space-y-1.5 transition-colors"
                         >
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border shrink-0 ${getPinTypeBadge(
-                                p.mcuPinType
-                              )}`}
+                          {/* Row 1: Source MCU Pin -> Target Pin + Wire Color */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border whitespace-nowrap shadow-sm ${getPinTypeBadge(
+                                  p.mcuPinType
+                                )}`}
+                              >
+                                {p.mcuPinName}
+                              </span>
+                              <span className="text-slate-500 text-[10px] font-bold">→</span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800/90 text-emerald-300 border border-emerald-500/25 whitespace-nowrap shadow-sm">
+                                {p.targetPinName}
+                              </span>
+                            </div>
+
+                            <div
+                              className="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 shrink-0"
+                              title={`Warna Kabel: ${getWireColorName(p.wireColor)}`}
                             >
-                              {p.mcuPinName}
-                            </span>
-                            <span className="text-slate-500 text-[10px]">→</span>
-                            <span className="text-slate-200 truncate font-mono text-[10px]">
-                              {p.targetCompLabel}.<span className="text-emerald-400">{p.targetPinName}</span>
+                              <span
+                                className="w-2 h-2 rounded-full border border-slate-700 shadow-sm shrink-0"
+                                style={{ backgroundColor: p.wireColor }}
+                              />
+                              <span className="text-[9px] font-mono text-slate-300 whitespace-nowrap">
+                                {getWireColorName(p.wireColor)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Row 2: Target Component Label & Function Info */}
+                          <div className="flex items-center justify-between gap-2 text-[10px] pt-1 border-t border-slate-800/40">
+                            <div className="flex items-center gap-1 min-w-0 text-slate-300">
+                              <span className="text-sky-400 text-xs leading-none shrink-0">●</span>
+                              <span className="font-semibold text-slate-200 truncate">{p.targetCompLabel}</span>
+                              <span className="text-slate-500 truncate text-[9px]">({p.targetCompTypeName})</span>
+                            </div>
+                            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400 bg-slate-900 px-1.5 py-0.2 rounded border border-slate-800 shrink-0 whitespace-nowrap">
+                              {getPinFunctionLabel(p.mcuPinType, p.mcuPinDesc)}
                             </span>
                           </div>
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0 border border-slate-700 ml-1.5"
-                            style={{ backgroundColor: p.wireColor }}
-                            title={`Warna kabel: ${p.wireColor}`}
-                          />
                         </div>
                       ))}
                     </div>
