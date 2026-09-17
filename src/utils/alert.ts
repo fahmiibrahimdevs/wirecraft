@@ -1,4 +1,5 @@
 import Swal, { SweetAlertOptions, SweetAlertIcon } from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 // Dark Theme Base Configuration for Wirecraft IDE
 const baseDarkOptions: SweetAlertOptions = {
@@ -6,8 +7,8 @@ const baseDarkOptions: SweetAlertOptions = {
   color: '#f8fafc', // Slate 50
   buttonsStyling: false,
   customClass: {
-    popup: 'border border-slate-700/90 rounded-2xl shadow-2xl backdrop-blur-xl font-sans',
-    title: 'text-slate-100 font-bold text-base',
+    popup: 'border border-slate-700 rounded-2xl shadow-2xl backdrop-blur-xl font-sans text-slate-100',
+    title: 'text-slate-100 font-bold text-sm sm:text-base',
     htmlContainer: 'text-slate-300 text-xs leading-relaxed',
     confirmButton:
       'px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-lg shadow-sky-500/20 cursor-pointer mx-1.5',

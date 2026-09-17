@@ -68,3 +68,68 @@
 .animate-pin-target {
   animation: pin-pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* SweetAlert2 Wirecraft Dark Theme Customizations */
+div:where(.swal2-container) {
+  z-index: 10000 !important;
+}
+
+div:where(.swal2-container).swal2-backdrop-show {
+  background: rgba(2, 6, 23, 0.8) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+div:where(.swal2-popup) {
+  background: #0f172a !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+  color: #f8fafc !important;
+  font-family: inherit !important;
+}
+
+div:where(.swal2-popup).swal2-toast {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.65rem 1rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+div:where(.swal2-icon).swal2-success {
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+}
+
+div:where(.swal2-icon).swal2-success [class^='swal2-success-line'] {
+  background-color: #10b981 !important;
+}
+
+div:where(.swal2-icon).swal2-success .swal2-success-ring {
+  border: 0.25em solid rgba(16, 185, 129, 0.3) !important;
+}
+
+div:where(.swal2-icon).swal2-error {
+  border-color: #f43f5e !important;
+  color: #f43f5e !important;
+}
+
+div:where(.swal2-icon).swal2-error [class^='swal2-x-mark-line'] {
+  background-color: #f43f5e !important;
+}
+
+div:where(.swal2-icon).swal2-warning {
+  border-color: #f59e0b !important;
+  color: #f59e0b !important;
+}
+
+div:where(.swal2-icon).swal2-info {
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+.swal2-timer-progress-bar {
+  background: #38bdf8 !important;
+}
+
