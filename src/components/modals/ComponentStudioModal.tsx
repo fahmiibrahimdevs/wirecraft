@@ -1963,7 +1963,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const definition = getNormalizedDefinition();
     let imgToSave = imageDataUrl;
     if (imgToSave) {
-      imgToSave = await optimizeImageForStorage(imgToSave, 600);
+      imgToSave = await optimizeImageForStorage(imgToSave, 2400);
     }
     const res = saveCustomComponent(definition, imgToSave);
     if (res.success) {

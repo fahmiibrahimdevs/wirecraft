@@ -158,9 +158,9 @@ export function rotateSvgDataUrl(svgDataUrlOrString: string): string {
 }
 
 /**
- * Compress / optimize large base64 images
+ * Compress / optimize large base64 images while preserving crisp, crystal-clear high-definition detail
  */
-export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 800): Promise<string> {
+export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 2400): Promise<string> {
   if (!dataUrl || !dataUrl.startsWith('data:image')) {
     return Promise.resolve(dataUrl);
   }
@@ -171,8 +171,47 @@ export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 
   }
 
   return new Promise((resolve) => {
-    if (dataUrl.length < 200000) {
-      resolve(dataUrl);
+    // If under 4MB, preserve 100% original quality
+    if (dataUrl.length < 4000000) {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        const { naturalWidth: w, naturalHeight: h } = img;
+        if (w <= maxDimension && h <= maxDimension) {
+          resolve(dataUrl);
+          return;
+        }
+
+        let targetW = w;
+        let targetH = h;
+        if (w > h) {
+          if (w > maxDimension) {
+            targetH = Math.round((h * maxDimension) / w);
+            targetW = maxDimension;
+          }
+        } else {
+          if (h > maxDimension) {
+            targetW = Math.round((w * maxDimension) / h);
+            targetH = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
       return;
     }
 
@@ -180,7 +219,7 @@ export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 
     img.crossOrigin = 'Anonymous';
     img.onload = () => {
       let { naturalWidth: w, naturalHeight: h } = img;
-      if (w <= maxDimension && h <= maxDimension && dataUrl.length < 300000) {
+      if (w <= maxDimension && h <= maxDimension) {
         resolve(dataUrl);
         return;
       }
@@ -206,6 +245,8 @@ export function optimizeImageForStorage(dataUrl: string, maxDimension: number = 
         return;
       }
 
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, w, h);
       const optimized = canvas.toDataURL('image/png');
       resolve(optimized);
