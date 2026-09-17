@@ -109,52 +109,32 @@ const DEFAULT_STARTER_WIRES: Wire[] = [
   },
 ];
 
+import { useCircuitFiles } from './hooks/useCircuitFiles';
+
 export function App() {
-  // Load initial state from LocalStorage if available
-  const initialDataRef = useRef<{
-    projectName: string;
-    historyState: HistoryState;
-    wireRouting: WireRouting;
-    currentWireColor: string;
-    pan: WirePoint;
-    zoom: number;
-  }>((() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed: StoredProjectData = JSON.parse(saved);
-        if (Array.isArray(parsed.components) && Array.isArray(parsed.wires)) {
-          return {
-            projectName: parsed.projectName || 'Latihan Sirkuit Arduino',
-            historyState: {
-              components: parsed.components,
-              wires: parsed.wires,
-            },
-            wireRouting: parsed.wireRouting || 'orthogonal',
-            currentWireColor: parsed.currentWireColor || '#38bdf8',
-            pan: parsed.pan || { x: 80, y: 50 },
-            zoom: parsed.zoom || 1,
-          };
-        }
-      }
-    } catch (e) {
-      console.warn('Could not restore project from localStorage, using defaults:', e);
-    }
+  const {
+    fileSystem,
+    activeFile,
+    createFile,
+    createFolder,
+    renameFile,
+    renameFolder,
+    deleteFile,
+    deleteFolder,
+    moveItem,
+    toggleFolder,
+    collapseAllFolders,
+    expandAllFolders,
+    selectFile,
+    updateActiveFileContent,
+    duplicateFile,
+    importFile,
+    exportFile,
+  } = useCircuitFiles();
 
-    return {
-      projectName: 'Latihan Sirkuit Arduino',
-      historyState: {
-        components: DEFAULT_STARTER_COMPONENTS,
-        wires: DEFAULT_STARTER_WIRES,
-      },
-      wireRouting: 'orthogonal',
-      currentWireColor: '#38bdf8',
-      pan: { x: 80, y: 50 },
-      zoom: 1,
-    };
-  })());
-
-  const [projectName, setProjectName] = useState(initialDataRef.current.projectName);
+  const [projectName, setProjectName] = useState(
+    activeFile ? activeFile.name.replace(/\.wire$/, '') : 'Latihan Sirkuit Arduino'
+  );
 
   // History state management (Undo / Redo)
   const {
@@ -165,18 +145,21 @@ export function App() {
     redo,
     canUndo,
     canRedo,
-  } = useCircuitHistory(initialDataRef.current.historyState);
+  } = useCircuitHistory({
+    components: activeFile?.components || [],
+    wires: activeFile?.wires || [],
+  });
 
   // Selections (Multi-Selection support)
   const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>([]);
   const [selectedWireId, setSelectedWireId] = useState<string | null>(null);
 
   // Tools & Canvas States
-  const [currentWireColor, setCurrentWireColor] = useState(initialDataRef.current.currentWireColor);
-  const [wireRouting, setWireRouting] = useState<WireRouting>(initialDataRef.current.wireRouting);
+  const [currentWireColor, setCurrentWireColor] = useState(activeFile?.currentWireColor || '#38bdf8');
+  const [wireRouting, setWireRouting] = useState<WireRouting>(activeFile?.wireRouting || 'orthogonal');
   const [snapGrid, setSnapGrid] = useState(true);
-  const [zoom, setZoom] = useState(initialDataRef.current.zoom);
-  const [pan, setPan] = useState<WirePoint>(initialDataRef.current.pan);
+  const [zoom, setZoom] = useState(activeFile?.zoom || 1);
+  const [pan, setPan] = useState<WirePoint>(activeFile?.pan || { x: 80, y: 50 });
 
   // Cursor tracker for placing new components close to mouse
   const lastCursorWorldPosRef = useRef<WirePoint>({ x: 400, y: 300 });
@@ -184,54 +167,139 @@ export function App() {
   // Auto-save Status: 'saved' | 'saving'
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const latestDataRef = useRef<StoredProjectData>({
-    projectName,
-    components,
-    wires,
-    wireRouting,
-    currentWireColor,
-    pan,
-    zoom,
-    timestamp: Date.now(),
-  });
 
-  // Always keep latest refs updated without triggering re-renders
-  useEffect(() => {
-    latestDataRef.current = {
-      projectName,
+  // Active File tracking ref
+  const activeFileIdRef = useRef<string>(activeFile?.id || '');
+
+  // Handle switching active file
+  const handleSelectFile = useCallback(
+    (fileId: string) => {
+      if (fileId === activeFileIdRef.current) return;
+      // Save current file state first
+      updateActiveFileContent({
+        components,
+        wires,
+        wireRouting,
+        currentWireColor,
+        pan,
+        zoom,
+        name: projectName,
+      });
+
+      selectFile(fileId);
+    },
+    [
+      updateActiveFileContent,
       components,
       wires,
       wireRouting,
       currentWireColor,
       pan,
       zoom,
-      timestamp: Date.now(),
-    };
-  });
+      projectName,
+      selectFile,
+    ]
+  );
 
-  // Debounced Auto-Save to localStorage
+  // Sync canvas state when activeFile changes from file system
+  useEffect(() => {
+    if (!activeFile) return;
+    if (activeFile.id !== activeFileIdRef.current) {
+      activeFileIdRef.current = activeFile.id;
+      setProjectName(activeFile.name.replace(/\.wire$/, ''));
+      commit({
+        components: activeFile.components || [],
+        wires: activeFile.wires || [],
+      });
+      if (activeFile.wireRouting) setWireRouting(activeFile.wireRouting);
+      if (activeFile.currentWireColor) setCurrentWireColor(activeFile.currentWireColor);
+      if (activeFile.pan) setPan(activeFile.pan);
+      if (activeFile.zoom) setZoom(activeFile.zoom);
+      setSelectedComponentIds([]);
+      setSelectedWireId(null);
+    }
+  }, [activeFile, commit]);
+
+  // Handle creating a new file
+  const handleCreateFile = useCallback(
+    (name?: string, parentId?: string | null) => {
+      updateActiveFileContent({
+        components,
+        wires,
+        wireRouting,
+        currentWireColor,
+        pan,
+        zoom,
+        name: projectName,
+      });
+      const newId = createFile(name, parentId, [], []);
+      selectFile(newId);
+    },
+    [
+      updateActiveFileContent,
+      components,
+      wires,
+      wireRouting,
+      currentWireColor,
+      pan,
+      zoom,
+      projectName,
+      createFile,
+      selectFile,
+    ]
+  );
+
+  // Debounced Auto-Save to active file
   useEffect(() => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
 
+    setSaveStatus('saving');
     saveTimeoutRef.current = setTimeout(() => {
       try {
-        const payload = latestDataRef.current;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        updateActiveFileContent({
+          components,
+          wires,
+          wireRouting,
+          currentWireColor,
+          pan,
+          zoom,
+          name: projectName,
+        });
         setSaveStatus('saved');
       } catch (err) {
-        console.error('Failed to auto-save circuit project to localStorage:', err);
+        console.error('Failed to auto-save circuit file:', err);
         setSaveStatus('saved');
       }
-    }, 800);
+    }, 600);
 
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [components, wires, projectName, wireRouting, currentWireColor]);
+  }, [
+    components,
+    wires,
+    projectName,
+    wireRouting,
+    currentWireColor,
+    pan,
+    zoom,
+    updateActiveFileContent,
+  ]);
+
+  // Handle Project Name change from TopBar
+  const handleProjectNameChange = useCallback(
+    (newName: string) => {
+      setProjectName(newName);
+      if (activeFile) {
+        renameFile(activeFile.id, newName);
+      }
+    },
+    [activeFile, renameFile]
+  );
 
   // Drawers & Modals
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
@@ -802,7 +870,7 @@ export function App() {
       <TopBar
         saveStatus={saveStatus}
         projectName={projectName}
-        onProjectNameChange={setProjectName}
+        onProjectNameChange={handleProjectNameChange}
         canUndo={canUndo}
         canRedo={canRedo}
         onUndo={undo}
@@ -835,7 +903,7 @@ export function App() {
 
       {/* Main Workspace Area */}
       <div className="flex-1 relative w-full h-[calc(100vh-3.5rem)] overflow-hidden">
-        {/* Left Component Catalog Drawer */}
+        {/* Left Drawer (Katalog Komponen & File Explorer) */}
         <ComponentLibrary
           isOpen={isLibraryOpen}
           onToggle={() => setIsLibraryOpen((prev) => !prev)}
@@ -844,6 +912,22 @@ export function App() {
             setStudioEditDef(def || null);
             setIsStudioOpen(true);
           }}
+          fileSystem={fileSystem}
+          activeFile={activeFile}
+          onSelectFile={handleSelectFile}
+          onCreateFile={handleCreateFile}
+          onCreateFolder={createFolder}
+          onRenameFile={renameFile}
+          onRenameFolder={renameFolder}
+          onDeleteFile={deleteFile}
+          onDeleteFolder={deleteFolder}
+          onMoveItem={moveItem}
+          onToggleFolder={toggleFolder}
+          onCollapseAll={collapseAllFolders}
+          onExpandAll={expandAllFolders}
+          onDuplicateFile={duplicateFile}
+          onImportFile={importFile}
+          onExportFile={exportFile}
         />
 
         {/* Interactive Infinite Circuit Canvas */}

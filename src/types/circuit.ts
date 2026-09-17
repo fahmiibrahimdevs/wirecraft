@@ -132,3 +132,32 @@ export interface CircuitProject {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CircuitFile {
+  id: string;
+  name: string;
+  parentId: string | null;
+  components: CircuitComponent[];
+  wires: Wire[];
+  wireRouting?: WireRouting;
+  currentWireColor?: string;
+  pan?: WirePoint;
+  zoom?: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface CircuitFolder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  isExpanded?: boolean;
+  createdAt: number;
+}
+
+export interface CircuitFileSystem {
+  activeFileId: string;
+  files: CircuitFile[];
+  folders: CircuitFolder[];
+}
+
