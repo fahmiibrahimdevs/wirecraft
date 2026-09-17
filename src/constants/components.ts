@@ -1151,23 +1151,6 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'sd-card-module': {
-    type: 'sd-card-module',
-    name: 'Micro SD Card Module (SPI)',
-    category: 'sensors',
-    description: 'Modul pembaca kartu Micro SD antarmuka SPI 6-pin male header (GND, VCC, MISO, MOSI, SCK, CS) dengan onboard LDO regulator 3.3V dan level shifter.',
-    width: 158.0,
-    height: 308.0,
-    icon: 'HardDrive',
-    pins: [
-      { id: 'gnd', name: 'GND', x: 35.5, y: 306.5, type: 'ground', description: 'Power Ground (0V)' },
-      { id: 'vcc', name: 'VCC', x: 52.5, y: 306.5, type: 'power', description: 'Power Supply (+3.3V / +5V DC)' },
-      { id: 'miso', name: 'MISO', x: 69.5, y: 306.5, type: 'spi', description: 'SPI Master In Slave Out / Data Out' },
-      { id: 'mosi', name: 'MOSI', x: 86.5, y: 306.5, type: 'spi', description: 'SPI Master Out Slave In / Data In' },
-      { id: 'sck', name: 'SCK', x: 103.5, y: 306.5, type: 'spi', description: 'SPI Serial Clock' },
-      { id: 'cs', name: 'CS', x: 120.5, y: 306.5, type: 'digital', description: 'SPI Chip Select / Slave Select (Active Low)' },
-    ],
-  },
 
   'sensor-soil-moisture': {
     type: 'sensor-soil-moisture',
@@ -1258,63 +1241,6 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'sensor-max31865': {
-    type: 'sensor-max31865',
-    name: 'MAX31865 RTD PT100/PT1000 Amplifier',
-    category: 'sensors',
-    description: 'Modul amplifier digital RTD PT100/PT1000 presisi 15-bit berbasis IC MAX31865 dengan 4 terminal sekrup untuk probe RTD (2/3/4-kawat) dan 8 pin header SPI ramah breadboard (pitch 17.0px).',
-    width: 170.3,
-    height: 188.5,
-    icon: 'Thermometer',
-    pins: [
-      // Top Screw Terminals (RTD Probe Input: 3.5mm Pitch Standard)
-      { id: 'f_neg', name: 'F-', x: 49.7, y: 24.9, type: 'passive', description: 'Force Negative / RTD- Return Lead' },
-      { id: 'rtd_neg', name: 'RTD-', x: 73.1, y: 24.9, type: 'passive', description: 'RTD Sense Negative Terminal' },
-      { id: 'rtd_pos', name: 'RTD+', x: 96.4, y: 24.9, type: 'passive', description: 'RTD Sense Positive Terminal' },
-      { id: 'f_pos', name: 'F+', x: 119.8, y: 24.9, type: 'passive', description: 'Force Positive / RTD+ Excitation Lead' },
-
-      // Bottom SPI & Power Headers (Pitch 17.0px Standard Breadboard Grid)
-      { id: 'vin', name: 'VIN', x: 25.4, y: 170.1, type: 'power', description: 'Tegangan Masukan Power Supply (3.3V - 5V DC)' },
-      { id: 'gnd', name: 'GND', x: 42.4, y: 170.1, type: 'ground', description: 'Power Ground (0V)' },
-      { id: '3v3', name: '3V3', x: 59.4, y: 170.1, type: 'power', description: 'Output Regulator 3.3V Onboard' },
-      { id: 'clk', name: 'CLK', x: 76.4, y: 170.1, type: 'spi', description: 'SPI Serial Clock (SCK)' },
-      { id: 'sdo', name: 'SDO', x: 93.4, y: 170.1, type: 'spi', description: 'SPI Serial Data Output / MISO' },
-      { id: 'sdi', name: 'SDI', x: 110.4, y: 170.1, type: 'spi', description: 'SPI Serial Data Input / MOSI' },
-      { id: 'cs', name: 'CS', x: 127.4, y: 170.1, type: 'digital', description: 'SPI Chip Select (Active Low)' },
-      { id: 'rdy', name: 'RDY', x: 144.4, y: 170.1, type: 'digital', description: 'Data Ready / Interrupt Indicator' },
-    ],
-  },
-
-  'sensor-ldr-module': {
-    type: 'sensor-ldr-module',
-    name: 'Sensor LDR Module (Light / Cahaya)',
-    category: 'sensors',
-    description: 'Modul sensor intensitas cahaya LDR (Light Dependent Resistor) berbasis komparator LM393 dengan 4 pin male header standar breadboard (pitch 17.0px), potentiometer sensitivitas, dan dual LED indikator.',
-    width: 86.5,
-    height: 285.5,
-    icon: 'Sun',
-    pins: [
-      { id: 'ao', name: 'AO', x: 18.0, y: 284.0, type: 'analog', description: 'Tegangan Analog Intensitas Cahaya (0 - 1023)' },
-      { id: 'do', name: 'DO', x: 35.0, y: 284.0, type: 'digital', description: 'Digital Output (Threshold LM393 Potensiometer)' },
-      { id: 'gnd', name: 'GND', x: 52.0, y: 284.0, type: 'ground', description: 'Power Ground (0V)' },
-      { id: 'vcc', name: 'VCC', x: 69.0, y: 284.0, type: 'power', description: 'Power Supply (+3.3V - +5V DC)' },
-    ],
-  },
-
-  'sensor-ir-obstacle': {
-    type: 'sensor-ir-obstacle',
-    name: 'Sensor Infrared Obstacle Avoidance',
-    category: 'sensors',
-    description: 'Modul sensor halangan inframerah (IR Obstacle Avoidance) dengan sepasang LED transmitter & photodiode receiver, komparator LM393, dan 3 pin header male standar breadboard (pitch 17.0px).',
-    width: 104.0,
-    height: 323.5,
-    icon: 'Radar',
-    pins: [
-      { id: 'out', name: 'OUT', x: 35.5, y: 321.0, type: 'digital', description: 'Digital Output (Active LOW saat rintangan terdeteksi)' },
-      { id: 'gnd', name: 'GND', x: 52.5, y: 321.0, type: 'ground', description: 'Power Ground (0V)' },
-      { id: 'vcc', name: 'VCC', x: 69.5, y: 321.0, type: 'power', description: 'Power Supply (+3.3V - +5V DC)' },
-    ],
-  },
 
   'sensor-touch-ttp223': {
     type: 'sensor-touch-ttp223',
@@ -1331,20 +1257,6 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'sensor-vibration-sw420': {
-    type: 'sensor-vibration-sw420',
-    name: 'Sensor Vibration Module SW-420',
-    category: 'sensors',
-    description: 'Modul sensor getaran presisi berbasis sakelar getar tabung SW-420 dan IC komparator LM393 dengan 3 pin header male standar breadboard (pitch 17.0px).',
-    width: 95.2,
-    height: 268.5,
-    icon: 'Activity',
-    pins: [
-      { id: 'do', name: 'DO', x: 29.0, y: 266.0, type: 'digital', description: 'Digital Output (Active HIGH / Pulse saat getaran terdeteksi)' },
-      { id: 'gnd', name: 'GND', x: 46.0, y: 266.0, type: 'ground', description: 'Power Ground (0V)' },
-      { id: 'vcc', name: 'VCC', x: 63.0, y: 266.0, type: 'power', description: 'Power Supply (+3.3V - +5V DC)' },
-    ],
-  },
 
   'display-lcd1602': {
     type: 'display-lcd1602',

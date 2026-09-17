@@ -103,17 +103,17 @@ void loop() {
         hasRfid = true;
       } else if (targetComp.type === 'sensor-soil-moisture') {
         hasSoilMoisture = true;
-      } else if (targetComp.type === 'sensor-max31865') {
+      } else if (targetComp.type.includes('max31865')) {
         hasMax31865 = true;
       } else if (targetComp.type === 'sensor-ads1115') {
         hasAds1115 = true;
-      } else if (targetComp.type === 'sensor-ldr' || targetComp.type === 'sensor-ldr-module') {
+      } else if (targetComp.type === 'sensor-ldr' || targetComp.type.includes('ldr')) {
         hasLdr = true;
-      } else if (targetComp.type === 'sensor-ir-obstacle') {
+      } else if (targetComp.type.includes('obstacle') || targetComp.type.includes('ir-obstacle')) {
         hasIrObstacle = true;
       } else if (targetComp.type === 'sensor-touch-ttp223') {
         hasTouch = true;
-      } else if (targetComp.type === 'sensor-vibration-sw420') {
+      } else if (targetComp.type.includes('vibration') || targetComp.type.includes('sw420')) {
         hasVibration = true;
       } else if (
         targetComp.type === 'display-lcd1602' ||

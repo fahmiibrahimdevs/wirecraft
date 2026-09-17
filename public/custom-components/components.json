@@ -522,5 +522,319 @@
     "imageUrl": "/components/esp32-30p.svg",
     "createdAt": "2026-09-16T23:26:41.072Z",
     "updatedAt": "2026-09-16T23:26:41.072Z"
+  },
+  "sdcard-module": {
+    "definition": {
+      "type": "sdcard-module",
+      "name": "SDCARD MODULE",
+      "category": "sensors",
+      "description": "Modul SD Card (SPI Adapter) adalah perangkat keras interkoneksi yang berfungsi untuk menjembatani komunikasi data antara mikrokontroler dengan kartu memori (Micro SD) menggunakan protokol SPI (Serial Peripheral Interface).",
+      "width": 159.3,
+      "height": 281.1,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "GND",
+          "x": 36,
+          "y": 280,
+          "type": "ground",
+          "description": "Power Ground (0V)"
+        },
+        {
+          "id": "pin_2",
+          "name": "VCC",
+          "x": 53,
+          "y": 280,
+          "type": "power",
+          "description": "Power Supply (+3.3V / 5V DC)"
+        },
+        {
+          "id": "pin_3",
+          "name": "MISO",
+          "x": 70,
+          "y": 280,
+          "type": "spi",
+          "description": "SPI Master In Slave Out / Data Out"
+        },
+        {
+          "id": "pin_4",
+          "name": "MOSI",
+          "x": 87,
+          "y": 280,
+          "type": "spi",
+          "description": "SPI Master Out Slave In / Data In"
+        },
+        {
+          "id": "pin_5",
+          "name": "SCK",
+          "x": 104,
+          "y": 280,
+          "type": "spi",
+          "description": "SPI Serial Clock"
+        },
+        {
+          "id": "pin_6",
+          "name": "CS",
+          "x": 121,
+          "y": 280,
+          "type": "digital",
+          "description": "SPI Chip Select / Slave Select (Active Low)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/sdcard-module.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sdcard-module.png",
+    "createdAt": "2026-09-17T01:51:03.712Z",
+    "updatedAt": "2026-09-17T01:51:03.712Z"
+  },
+  "ir-obstacle": {
+    "definition": {
+      "type": "ir-obstacle",
+      "name": "IR OBSTACLE",
+      "category": "sensors",
+      "description": "Modul Sensor IR Obstacle (Infrared Obstacle Avoidance Sensor) adalah modul sensor digital yang digunakan untuk mendeteksi keberadaan objek atau rintangan di depan sensor menggunakan pantulan gelombang cahaya inframerah.",
+      "width": 100.4,
+      "height": 313,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "OUT",
+          "x": 34,
+          "y": 311,
+          "type": "digital",
+          "description": "Digital Output (Active LOW saat rintangan terdeteksi)"
+        },
+        {
+          "id": "pin_2",
+          "name": "GND",
+          "x": 51,
+          "y": 311,
+          "type": "ground",
+          "description": "Power Ground (0V)"
+        },
+        {
+          "id": "pin_3",
+          "name": "VCC",
+          "x": 68,
+          "y": 311,
+          "type": "power",
+          "description": "Power Supply (3.3V - 5V DC)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/ir-obstacle.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/ir-obstacle.png",
+    "createdAt": "2026-09-17T02:10:53.245Z",
+    "updatedAt": "2026-09-17T02:10:53.245Z"
+  },
+  "ldr-module": {
+    "definition": {
+      "type": "ldr-module",
+      "name": "LDR MODULE",
+      "category": "sensors",
+      "description": "Modul Sensor LDR (Light Dependent Resistor) adalah perangkat elektronik yang berfungsi untuk mendeteksi intensitas cahaya ambien di sekitar sensor dan mengubahnya menjadi sinyal elektrik yang dapat diproses oleh mikrokontroler.",
+      "width": 87,
+      "height": 286.8,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "A0",
+          "x": 18,
+          "y": 284,
+          "type": "analog",
+          "description": "Tegangan Analog Intensitas Cahaya (0 - 1023)"
+        },
+        {
+          "id": "pin_2",
+          "name": "D0",
+          "x": 35,
+          "y": 284,
+          "type": "digital",
+          "description": "Digital Output (Treshold LM393 Potensiometer)"
+        },
+        {
+          "id": "pin_3",
+          "name": "GND",
+          "x": 52,
+          "y": 284,
+          "type": "ground",
+          "description": "Power Ground (0V)"
+        },
+        {
+          "id": "pin_4",
+          "name": "VCC",
+          "x": 69,
+          "y": 284,
+          "type": "power",
+          "description": "Power Supply (+3.3V - +5V DC)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/ldr-module.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/ldr-module.png",
+    "createdAt": "2026-09-17T02:15:41.674Z",
+    "updatedAt": "2026-09-17T02:15:41.674Z"
+  },
+  "vibration-sw420": {
+    "definition": {
+      "type": "vibration-sw420",
+      "name": "VIBRATION SW420",
+      "category": "sensors",
+      "description": "Modul Sensor Getaran SW-420 (Vibration/Tilt Sensor Module) adalah perangkat keras digital yang berfungsi untuk mendeteksi getaran, guncangan, atau kemiringan pada suatu objek.",
+      "width": 93,
+      "height": 262.4,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "D0",
+          "x": 28,
+          "y": 260,
+          "type": "digital",
+          "description": "Digital Output (Active HIGH / Pulse saat getaran terdeteksi)"
+        },
+        {
+          "id": "pin_2",
+          "name": "GND",
+          "x": 45,
+          "y": 260,
+          "type": "ground",
+          "description": "Power Ground (0V)"
+        },
+        {
+          "id": "pin_3",
+          "name": "VCC",
+          "x": 62,
+          "y": 260,
+          "type": "power",
+          "description": "Power Supply (+3.3V / +5V DC)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/vibration-sw420.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/vibration-sw420.png",
+    "createdAt": "2026-09-17T02:19:06.729Z",
+    "updatedAt": "2026-09-17T02:19:06.729Z"
+  },
+  "max31865-blue": {
+    "definition": {
+      "type": "max31865-blue",
+      "name": "MAX31865 BLUE",
+      "category": "sensors",
+      "description": "Modul Amplifier MAX31865 adalah chip converter analog-ke-digital (ADC) dengan presisi tinggi yang dirancang khusus untuk membaca sensor suhu resistif jenis RTD (Resistance Temperature Detector), seperti PT100 atau PT1000.Modul ini bertindak sebagai pengkondisi sinyal akurat yang mengubah nilai hambatan kecil dari RTD menjadi data digital yang siap dibaca oleh mikrokontroler.",
+      "width": 168,
+      "height": 185.9,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "VIN",
+          "x": 24.4,
+          "y": 168.3,
+          "type": "power",
+          "description": "Tegangan Masukan Power Supply (3.3V / 5V DC)"
+        },
+        {
+          "id": "pin_2",
+          "name": "GND",
+          "x": 41.4,
+          "y": 168.3,
+          "type": "ground",
+          "description": "Power Ground (0V)"
+        },
+        {
+          "id": "pin_3",
+          "name": "3V3",
+          "x": 58.4,
+          "y": 168.3,
+          "type": "power",
+          "description": "Output Regulator 3.3V Onboard"
+        },
+        {
+          "id": "pin_4",
+          "name": "CLK",
+          "x": 75.4,
+          "y": 168.3,
+          "type": "spi",
+          "description": "SPI Serial Clock (SCK)"
+        },
+        {
+          "id": "pin_5",
+          "name": "SDI",
+          "x": 109.4,
+          "y": 168.3,
+          "type": "spi",
+          "description": "SPI Serial Data Input / MOSI"
+        },
+        {
+          "id": "pin_6",
+          "name": "SDO",
+          "x": 92.4,
+          "y": 168.3,
+          "type": "spi",
+          "description": "SPI Serial Data Output / MISO"
+        },
+        {
+          "id": "pin_7",
+          "name": "CS",
+          "x": 126.4,
+          "y": 168.3,
+          "type": "digital",
+          "description": "SPI Chip Select (Active Low)"
+        },
+        {
+          "id": "pin_8",
+          "name": "RDY",
+          "x": 143.4,
+          "y": 168.3,
+          "type": "digital",
+          "description": "Data Ready / Interrupt Indicator"
+        },
+        {
+          "id": "pin_9",
+          "name": "F-",
+          "x": 49.1,
+          "y": 24.9,
+          "type": "passive",
+          "description": "Force Negative / RTD- Return Lead"
+        },
+        {
+          "id": "pin_10",
+          "name": "RTD-",
+          "x": 72.1,
+          "y": 24.9,
+          "type": "passive",
+          "description": "RTD Sense Negative Terminal"
+        },
+        {
+          "id": "pin_11",
+          "name": "RTD+",
+          "x": 95.2,
+          "y": 24.6,
+          "type": "passive",
+          "description": "RTD Sense Positive Terminal"
+        },
+        {
+          "id": "pin_12",
+          "name": "F+",
+          "x": 118.3,
+          "y": 24.9,
+          "type": "passive",
+          "description": "Force Positive / RTD+ Excitation Lead"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/max31865-blue.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/max31865-blue.png",
+    "createdAt": "2026-09-17T02:29:39.981Z",
+    "updatedAt": "2026-09-17T02:29:39.981Z"
   }
 }

@@ -1021,17 +1021,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      case 'sd-card-module':
-        return (
-          <image
-            href="/components/sdcard_module.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
 
       case 'sensor-soil-moisture':
         return (
@@ -1093,41 +1082,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      case 'sensor-max31865':
-        return (
-          <image
-            href="/components/sensor_max31865.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'sensor-ldr-module':
-        return (
-          <image
-            href="/components/sensor_ldr_module.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'sensor-ir-obstacle':
-        return (
-          <image
-            href="/components/sensor_ir_obstacle.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
 
       case 'sensor-touch-ttp223':
         return (
@@ -1141,17 +1095,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      case 'sensor-vibration-sw420':
-        return (
-          <image
-            href="/components/sensor_vibration_sw420.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
 
       case 'level-converter-4ch-blue':
         return (
@@ -1520,13 +1463,12 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             component.type === 'sensor-ds18b20' ||
             component.type === 'sensor-ds18b20-module';
           const isRfid = component.type === 'sensor-rfid-rc522';
-          const isSdCard = component.type === 'sd-card-module';
           const isSoilMoisture = component.type === 'sensor-soil-moisture';
           const isTds = component.type === 'sensor-tds';
           const isPh = component.type === 'sensor-ph4502c';
           const isPt100 = component.type === 'sensor-pt100';
           const isRtdTx = component.type === 'transmitter-rtd-pt100';
-          const isMax31865 = component.type === 'sensor-max31865';
+          const isMax31865 = component.type.includes('max31865');
           const isLcd =
             component.type === 'display-lcd1602' ||
             component.type === 'display-lcd1602-i2c' ||
@@ -1569,7 +1511,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             ? 3.2
             : isLed
             ? 2.5
-            : isPot || isUltrasonic || isDht || isDs18b20 || isRfid || isSdCard || isSoilMoisture || isTds || isPh || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRelayRed || isRtc || isTft || isKeypad || isMax31865 || isLevelConverter || isAds1115 || isJsnSr04t || isSim800l || component.type === 'sensor-ldr-module' || component.type === 'sensor-ir-obstacle' || component.type === 'sensor-touch-ttp223' || component.type === 'sensor-vibration-sw420'
+            : def.isCustom || isPot || isUltrasonic || isDht || isDs18b20 || isRfid || isSoilMoisture || isTds || isPh || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRelayRed || isRtc || isTft || isKeypad || isMax31865 || isLevelConverter || isAds1115 || isJsnSr04t || isSim800l || component.type === 'sensor-touch-ttp223'
             ? 2.8
             : isLcd
             ? 3.6
