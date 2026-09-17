@@ -2022,5 +2022,405 @@
     "imageUrl": "/components/rfid_rc522.png",
     "createdAt": "2026-09-17T05:55:34.508Z",
     "updatedAt": "2026-09-17T05:55:34.508Z"
+  },
+  "sensor-dht11": {
+    "definition": {
+      "type": "sensor-dht11",
+      "name": "DHT11 (No Module)",
+      "category": "sensors",
+      "description": "Sensor suhu dan kelembaban udara digital 4-pin standar breadboard (pitch 17.0px).",
+      "width": 86,
+      "height": 143,
+      "icon": "Thermometer",
+      "pins": [
+        {
+          "id": "vcc",
+          "name": "VCC",
+          "x": 17.5,
+          "y": 140,
+          "type": "power",
+          "description": "Power 3.3V - 5V"
+        },
+        {
+          "id": "data",
+          "name": "DATA",
+          "x": 34.5,
+          "y": 140,
+          "type": "digital",
+          "description": "Serial Data Output"
+        },
+        {
+          "id": "nc",
+          "name": "NC",
+          "x": 51.5,
+          "y": 140,
+          "type": "generic",
+          "description": "Not Connected"
+        },
+        {
+          "id": "gnd",
+          "name": "GND",
+          "x": 68.5,
+          "y": 140,
+          "type": "ground",
+          "description": "Ground (0V)"
+        }
+      ],
+      "imageUrl": "/components/sensor_dht11.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sensor_dht11.png",
+    "createdAt": "2026-09-17T05:58:19.285Z",
+    "updatedAt": "2026-09-17T05:58:19.285Z"
+  },
+  "sensor-dht11-module": {
+    "definition": {
+      "type": "sensor-dht11-module",
+      "name": "DHT11 (Module)",
+      "category": "sensors",
+      "description": "Modul sensor suhu & kelembaban DHT11 dengan breakout board 3-pin (GND, DAT, VCC), LED indikator daya, dan resistor pull-up onboard (pitch 17.0px).",
+      "width": 88.5,
+      "height": 228.5,
+      "icon": "Thermometer",
+      "pins": [
+        {
+          "id": "gnd",
+          "name": "GND",
+          "x": 27.5,
+          "y": 224,
+          "type": "ground",
+          "description": "Ground (0V)"
+        },
+        {
+          "id": "data",
+          "name": "DAT",
+          "x": 44.5,
+          "y": 224,
+          "type": "digital",
+          "description": "Serial Data Output (1-Wire)"
+        },
+        {
+          "id": "vcc",
+          "name": "VCC",
+          "x": 61.5,
+          "y": 224,
+          "type": "power",
+          "description": "Power Supply (+3.3V - +5V DC)"
+        }
+      ],
+      "imageUrl": "/components/sensor_dht11_module.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sensor_dht11_module.png",
+    "createdAt": "2026-09-17T05:58:19.285Z",
+    "updatedAt": "2026-09-17T05:58:19.285Z"
+  },
+  "sensor-dht22": {
+    "definition": {
+      "type": "sensor-dht22",
+      "name": "DHT22 (No Module)",
+      "category": "sensors",
+      "description": "Sensor suhu & kelembaban presisi tinggi 4-pin standar breadboard (pitch 17.0px).",
+      "width": 101.3,
+      "height": 207,
+      "icon": "Thermometer",
+      "pins": [
+        {
+          "id": "vcc",
+          "name": "VCC",
+          "x": 26.5,
+          "y": 205,
+          "type": "power",
+          "description": "Power 3.3V - 5V"
+        },
+        {
+          "id": "data",
+          "name": "DATA",
+          "x": 43.5,
+          "y": 205,
+          "type": "digital",
+          "description": "Serial Data"
+        },
+        {
+          "id": "nc",
+          "name": "NC",
+          "x": 60.5,
+          "y": 205,
+          "type": "generic",
+          "description": "Not Connected"
+        },
+        {
+          "id": "gnd",
+          "name": "GND",
+          "x": 77.5,
+          "y": 205,
+          "type": "ground",
+          "description": "Ground"
+        }
+      ],
+      "imageUrl": "/components/dht22_standalone.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/dht22_standalone.png",
+    "createdAt": "2026-09-17T05:58:19.285Z",
+    "updatedAt": "2026-09-17T05:58:19.285Z"
+  },
+  "sensor-dht22-module": {
+    "definition": {
+      "type": "sensor-dht22-module",
+      "name": "DHT22 (Module)",
+      "category": "sensors",
+      "description": "Modul sensor suhu & kelembaban presisi dengan breakout board 3-pin (pitch 17.0px).",
+      "width": 97.4,
+      "height": 269.4,
+      "icon": "Thermometer",
+      "pins": [
+        {
+          "id": "vcc",
+          "name": "VCC (+)",
+          "x": 32.7,
+          "y": 269.4,
+          "type": "power",
+          "description": "Power 3.3V - 5V"
+        },
+        {
+          "id": "data",
+          "name": "DATA (out)",
+          "x": 49.7,
+          "y": 269.4,
+          "type": "digital",
+          "description": "Serial Data"
+        },
+        {
+          "id": "gnd",
+          "name": "GND (-)",
+          "x": 66.7,
+          "y": 269.4,
+          "type": "ground",
+          "description": "Ground"
+        }
+      ],
+      "imageUrl": "/components/dht22_module.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/dht22_module.png",
+    "createdAt": "2026-09-17T05:58:19.285Z",
+    "updatedAt": "2026-09-17T05:58:19.285Z"
+  },
+  "sensor-ds18b20": {
+    "definition": {
+      "type": "sensor-ds18b20",
+      "name": "DS18B20 (Waterproof Probe)",
+      "category": "sensors",
+      "description": "Sensor suhu digital tahan air DS18B20 berbahan stainless steel dengan 3 kabel terurai (VCC Merah, DATA Kuning, GND Hitam) antarmuka 1-Wire presisi (pitch 17.0px).",
+      "width": 50,
+      "height": 218,
+      "icon": "Thermometer",
+      "pins": [
+        {
+          "id": "vcc",
+          "name": "VCC (Merah)",
+          "x": 8,
+          "y": 213,
+          "type": "power",
+          "description": "Power Supply (+3.0V - +5.5V DC, Kabel Merah)"
+        },
+        {
+          "id": "data",
+          "name": "DAT (Kuning)",
+          "x": 25,
+          "y": 216,
+          "type": "digital",
+          "description": "1-Wire Digital Data (Kabel Kuning)"
+        },
+        {
+          "id": "gnd",
+          "name": "GND (Hitam)",
+          "x": 42,
+          "y": 213,
+          "type": "ground",
+          "description": "Ground (0V, Kabel Hitam)"
+        }
+      ],
+      "imageUrl": "/components/sensor_ds18b20.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sensor_ds18b20.png",
+    "createdAt": "2026-09-17T05:58:19.285Z",
+    "updatedAt": "2026-09-17T05:58:19.285Z"
+  },
+  "sensor-ds18b20-module": {
+    "definition": {
+      "type": "sensor-ds18b20-module",
+      "name": "DS18B20 Module (Pluggable Terminal)",
+      "category": "sensors",
+      "description": "Modul breakout adapter DS18B20 dengan terminal sekrup 3-posisi hijau untuk probe kabel dan 3-pin male header untuk mikrokontroler (pitch 17.0px).",
+      "width": 134,
+      "height": 98,
+      "icon": "Thermometer",
+      "pins": [
+        {
+          "id": "term_dat",
+          "name": "DAT (Terminal)",
+          "x": 29.5,
+          "y": 30,
+          "type": "passive",
+          "description": "Terminal Sekrup Data Probe (Kabel Kuning)"
+        },
+        {
+          "id": "term_vcc",
+          "name": "VCC (Terminal)",
+          "x": 29.5,
+          "y": 47,
+          "type": "power",
+          "description": "Terminal Sekrup Daya Probe (Kabel Merah)"
+        },
+        {
+          "id": "term_gnd",
+          "name": "GND (Terminal)",
+          "x": 29.5,
+          "y": 64,
+          "type": "ground",
+          "description": "Terminal Sekrup Ground Probe (Kabel Hitam)"
+        },
+        {
+          "id": "dat",
+          "name": "DAT (Pin)",
+          "x": 128.5,
+          "y": 30,
+          "type": "digital",
+          "description": "1-Wire Data Output ke Mikrokontroler"
+        },
+        {
+          "id": "vcc",
+          "name": "VCC (Pin)",
+          "x": 128.5,
+          "y": 47,
+          "type": "power",
+          "description": "Power Supply (+3.0V - +5.5V DC)"
+        },
+        {
+          "id": "gnd",
+          "name": "GND (Pin)",
+          "x": 128.5,
+          "y": 64,
+          "type": "ground",
+          "description": "Ground (0V)"
+        }
+      ],
+      "imageUrl": "/components/sensor_ds18b20_module.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sensor_ds18b20_module.png",
+    "createdAt": "2026-09-17T05:58:19.285Z",
+    "updatedAt": "2026-09-17T05:58:19.285Z"
+  },
+  "sensor-pt100": {
+    "definition": {
+      "type": "sensor-pt100",
+      "name": "PT100 RTD Temperature Sensor Probe",
+      "category": "sensors",
+      "description": "Sensor suhu RTD PT100 3-kawat industri tahan panas dengan probe silinder stainless steel, kabel pelindung anyaman (braided shield), dan 3 terminal spade fork (2 merah compensation leg, 1 biru element leg).",
+      "width": 240,
+      "height": 196.5,
+      "icon": "Thermometer",
+      "pins": [
+        {
+          "id": "spade_red1",
+          "name": "RED 1 (Spade)",
+          "x": 74.5,
+          "y": 191.5,
+          "type": "passive",
+          "description": "Terminal Spade Merah 1 (RTD Sensing Element Leg A1)"
+        },
+        {
+          "id": "spade_red2",
+          "name": "RED 2 (Spade)",
+          "x": 116.2,
+          "y": 172.5,
+          "type": "passive",
+          "description": "Terminal Spade Merah 2 (RTD Compensation Wire Leg A2)"
+        },
+        {
+          "id": "spade_blue",
+          "name": "BLUE (Spade)",
+          "x": 144.6,
+          "y": 145.9,
+          "type": "passive",
+          "description": "Terminal Spade Biru/Putih (RTD Sensing Element Leg B)"
+        },
+        {
+          "id": "probe_tip",
+          "name": "PROBE (Tip)",
+          "x": 239.7,
+          "y": 81.3,
+          "type": "passive",
+          "description": "Ujung Probe Stainless Steel (Sensing Apex Contact)"
+        }
+      ],
+      "imageUrl": "/components/sensor_pt100.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/sensor_pt100.png",
+    "createdAt": "2026-09-17T05:58:19.285Z",
+    "updatedAt": "2026-09-17T05:58:19.285Z"
+  },
+  "transmitter-rtd-pt100": {
+    "definition": {
+      "type": "transmitter-rtd-pt100",
+      "name": "RTD Temperature Transmitter (Head-Mount 24V 4-20mA)",
+      "category": "sensors",
+      "description": "Transmitter pengkondisi sinyal RTD PT100 tipe head-mount (hockey puck) industri dengan suplai 24VDC, output loop arus 4~20mA linear (0-100 °C), dan 5 screw terminal berkode presisi.",
+      "width": 260,
+      "height": 250,
+      "icon": "Cpu",
+      "pins": [
+        {
+          "id": "power_neg",
+          "name": "- (Loop Out / 4-20mA)",
+          "x": 105.2,
+          "y": 29.7,
+          "type": "passive",
+          "description": "Output Loop Arus (4~20mA) / Ground Return (-)"
+        },
+        {
+          "id": "power_pos",
+          "name": "+ (Loop Power / 24VDC)",
+          "x": 155,
+          "y": 29.5,
+          "type": "power",
+          "description": "Tegangan Masukan Loop Power (+24V DC)"
+        },
+        {
+          "id": "rtd_1",
+          "name": "1 (RTD Red 1)",
+          "x": 74.1,
+          "y": 80.5,
+          "type": "passive",
+          "description": "Terminal Input RTD 1 (Kabel Merah 1)"
+        },
+        {
+          "id": "rtd_2",
+          "name": "2 (RTD Red 2)",
+          "x": 128.7,
+          "y": 79.6,
+          "type": "passive",
+          "description": "Terminal Input RTD 2 (Kabel Merah 2 Kompensasi)"
+        },
+        {
+          "id": "rtd_3",
+          "name": "3 (RTD White/Blue)",
+          "x": 185,
+          "y": 80.5,
+          "type": "passive",
+          "description": "Terminal Input RTD 3 (Kabel Biru/Putih)"
+        }
+      ],
+      "imageUrl": "/components/transmitter_rtd_pt100.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/transmitter_rtd_pt100.png",
+    "createdAt": "2026-09-17T05:58:19.285Z",
+    "updatedAt": "2026-09-17T05:58:19.285Z"
   }
 }

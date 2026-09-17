@@ -853,141 +853,19 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'sensor-dht11': {
-    type: 'sensor-dht11',
-    name: 'DHT11 (No Module)',
-    category: 'sensors',
-    description: 'Sensor suhu dan kelembaban udara digital 4-pin standar breadboard (pitch 17.0px).',
-    width: 86.0,
-    height: 143.0,
-    icon: 'Thermometer',
-    pins: [
-      { id: 'vcc', name: 'VCC', x: 17.5, y: 140.0, type: 'power', description: 'Power 3.3V - 5V' },
-      { id: 'data', name: 'DATA', x: 34.5, y: 140.0, type: 'digital', description: 'Serial Data Output' },
-      { id: 'nc', name: 'NC', x: 51.5, y: 140.0, type: 'generic', description: 'Not Connected' },
-      { id: 'gnd', name: 'GND', x: 68.5, y: 140.0, type: 'ground', description: 'Ground (0V)' },
-    ],
-  },
-
-  'sensor-dht11-module': {
-    type: 'sensor-dht11-module',
-    name: 'DHT11 (Module)',
-    category: 'sensors',
-    description: 'Modul sensor suhu & kelembaban DHT11 dengan breakout board 3-pin (GND, DAT, VCC), LED indikator daya, dan resistor pull-up onboard (pitch 17.0px).',
-    width: 88.5,
-    height: 228.5,
-    icon: 'Thermometer',
-    pins: [
-      { id: 'gnd', name: 'GND', x: 27.5, y: 224.0, type: 'ground', description: 'Ground (0V)' },
-      { id: 'data', name: 'DAT', x: 44.5, y: 224.0, type: 'digital', description: 'Serial Data Output (1-Wire)' },
-      { id: 'vcc', name: 'VCC', x: 61.5, y: 224.0, type: 'power', description: 'Power Supply (+3.3V - +5V DC)' },
-    ],
-  },
-
-  'sensor-dht22': {
-    type: 'sensor-dht22',
-    name: 'DHT22 (No Module)',
-    category: 'sensors',
-    description: 'Sensor suhu & kelembaban presisi tinggi 4-pin standar breadboard (pitch 17.0px).',
-    width: 101.3,
-    height: 207.0,
-    icon: 'Thermometer',
-    pins: [
-      { id: 'vcc', name: 'VCC', x: 26.5, y: 205.0, type: 'power', description: 'Power 3.3V - 5V' },
-      { id: 'data', name: 'DATA', x: 43.5, y: 205.0, type: 'digital', description: 'Serial Data' },
-      { id: 'nc', name: 'NC', x: 60.5, y: 205.0, type: 'generic', description: 'Not Connected' },
-      { id: 'gnd', name: 'GND', x: 77.5, y: 205.0, type: 'ground', description: 'Ground' },
-    ],
-  },
-
-  'sensor-dht22-module': {
-    type: 'sensor-dht22-module',
-    name: 'DHT22 (Module)',
-    category: 'sensors',
-    description: 'Modul sensor suhu & kelembaban presisi dengan breakout board 3-pin (pitch 17.0px).',
-    width: 97.4,
-    height: 269.4,
-    icon: 'Thermometer',
-    pins: [
-      { id: 'vcc', name: 'VCC (+)', x: 32.7, y: 269.4, type: 'power', description: 'Power 3.3V - 5V' },
-      { id: 'data', name: 'DATA (out)', x: 49.7, y: 269.4, type: 'digital', description: 'Serial Data' },
-      { id: 'gnd', name: 'GND (-)', x: 66.7, y: 269.4, type: 'ground', description: 'Ground' },
-    ],
-  },
-
-  'sensor-ds18b20': {
-    type: 'sensor-ds18b20',
-    name: 'DS18B20 (Waterproof Probe)',
-    category: 'sensors',
-    description: 'Sensor suhu digital tahan air DS18B20 berbahan stainless steel dengan 3 kabel terurai (VCC Merah, DATA Kuning, GND Hitam) antarmuka 1-Wire presisi (pitch 17.0px).',
-    width: 50.0,
-    height: 218.0,
-    icon: 'Thermometer',
-    pins: [
-      { id: 'vcc', name: 'VCC (Merah)', x: 8.0, y: 213.0, type: 'power', description: 'Power Supply (+3.0V - +5.5V DC, Kabel Merah)' },
-      { id: 'data', name: 'DAT (Kuning)', x: 25.0, y: 216.0, type: 'digital', description: '1-Wire Digital Data (Kabel Kuning)' },
-      { id: 'gnd', name: 'GND (Hitam)', x: 42.0, y: 213.0, type: 'ground', description: 'Ground (0V, Kabel Hitam)' },
-    ],
-  },
-
-  'sensor-ds18b20-module': {
-    type: 'sensor-ds18b20-module',
-    name: 'DS18B20 Module (Pluggable Terminal)',
-    category: 'sensors',
-    description: 'Modul breakout adapter DS18B20 dengan terminal sekrup 3-posisi hijau untuk probe kabel dan 3-pin male header untuk mikrokontroler (pitch 17.0px).',
-    width: 134.0,
-    height: 98.0,
-    icon: 'Thermometer',
-    pins: [
-      // Terminal Sekrup Sisi Kiri (Input Probe) - pitch 17.0px
-      { id: 'term_dat', name: 'DAT (Terminal)', x: 29.5, y: 30.0, type: 'passive', description: 'Terminal Sekrup Data Probe (Kabel Kuning)' },
-      { id: 'term_vcc', name: 'VCC (Terminal)', x: 29.5, y: 47.0, type: 'power', description: 'Terminal Sekrup Daya Probe (Kabel Merah)' },
-      { id: 'term_gnd', name: 'GND (Terminal)', x: 29.5, y: 64.0, type: 'ground', description: 'Terminal Sekrup Ground Probe (Kabel Hitam)' },
-      // Pin Header Male Sisi Kanan (Output MCU) - pitch 17.0px
-      { id: 'dat', name: 'DAT (Pin)', x: 128.5, y: 30.0, type: 'digital', description: '1-Wire Data Output ke Mikrokontroler' },
-      { id: 'vcc', name: 'VCC (Pin)', x: 128.5, y: 47.0, type: 'power', description: 'Power Supply (+3.0V - +5.5V DC)' },
-      { id: 'gnd', name: 'GND (Pin)', x: 128.5, y: 64.0, type: 'ground', description: 'Ground (0V)' },
-    ],
-  },
-
+  
+  
+  
+  
+  
+  
   
 
   
   
 
-  'sensor-pt100': {
-    type: 'sensor-pt100',
-    name: 'PT100 RTD Temperature Sensor Probe',
-    category: 'sensors',
-    description: 'Sensor suhu RTD PT100 3-kawat industri tahan panas dengan probe silinder stainless steel, kabel pelindung anyaman (braided shield), dan 3 terminal spade fork (2 merah compensation leg, 1 biru element leg).',
-    width: 240.0,
-    height: 196.5,
-    icon: 'Thermometer',
-    pins: [
-      { id: 'spade_red1', name: 'RED 1 (Spade)', x: 74.5, y: 191.5, type: 'passive', description: 'Terminal Spade Merah 1 (RTD Sensing Element Leg A1)' },
-      { id: 'spade_red2', name: 'RED 2 (Spade)', x: 116.2, y: 172.5, type: 'passive', description: 'Terminal Spade Merah 2 (RTD Compensation Wire Leg A2)' },
-      { id: 'spade_blue', name: 'BLUE (Spade)', x: 144.6, y: 145.9, type: 'passive', description: 'Terminal Spade Biru/Putih (RTD Sensing Element Leg B)' },
-      { id: 'probe_tip', name: 'PROBE (Tip)', x: 239.7, y: 81.3, type: 'passive', description: 'Ujung Probe Stainless Steel (Sensing Apex Contact)' },
-    ],
-  },
-
-  'transmitter-rtd-pt100': {
-    type: 'transmitter-rtd-pt100',
-    name: 'RTD Temperature Transmitter (Head-Mount 24V 4-20mA)',
-    category: 'sensors',
-    description: 'Transmitter pengkondisi sinyal RTD PT100 tipe head-mount (hockey puck) industri dengan suplai 24VDC, output loop arus 4~20mA linear (0-100 °C), dan 5 screw terminal berkode presisi.',
-    width: 260.0,
-    height: 250.0,
-    icon: 'Cpu',
-    pins: [
-      { id: 'power_neg', name: '- (Loop Out / 4-20mA)', x: 105.2, y: 29.7, type: 'passive', description: 'Output Loop Arus (4~20mA) / Ground Return (-)' },
-      { id: 'power_pos', name: '+ (Loop Power / 24VDC)', x: 155.0, y: 29.5, type: 'power', description: 'Tegangan Masukan Loop Power (+24V DC)' },
-      { id: 'rtd_1', name: '1 (RTD Red 1)', x: 74.1, y: 80.5, type: 'passive', description: 'Terminal Input RTD 1 (Kabel Merah 1)' },
-      { id: 'rtd_2', name: '2 (RTD Red 2)', x: 128.7, y: 79.6, type: 'passive', description: 'Terminal Input RTD 2 (Kabel Merah 2 Kompensasi)' },
-      { id: 'rtd_3', name: '3 (RTD White/Blue)', x: 185.0, y: 80.5, type: 'passive', description: 'Terminal Input RTD 3 (Kabel Biru/Putih)' },
-    ],
-  },
-
+  
+  
 
   
 
