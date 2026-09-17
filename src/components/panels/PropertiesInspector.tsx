@@ -13,6 +13,7 @@ import {
   Sparkles,
   Link,
   CheckCircle2,
+  Copy,
 } from 'lucide-react';
 
 interface PropertiesInspectorProps {
@@ -24,6 +25,7 @@ interface PropertiesInspectorProps {
   onToggleSnapGrid: () => void;
   onUpdateComponent: (id: string, updates: Partial<CircuitComponent>) => void;
   onDeleteComponent: (id: string) => void;
+  onDuplicateComponent?: (id: string) => void;
   onUpdateWire: (id: string, updates: Partial<Wire>) => void;
   onDeleteWire: (id: string) => void;
   isOpen: boolean;
@@ -192,6 +194,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   onToggleSnapGrid,
   onUpdateComponent,
   onDeleteComponent,
+  onDuplicateComponent,
   onUpdateWire,
   onDeleteWire,
   isOpen,
@@ -221,13 +224,24 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             <Sliders className="w-4 h-4 text-sky-400" />
             <h3 className="text-sm font-semibold text-slate-100">Properties Inspector</h3>
           </div>
-          <button
-            onClick={() => onDeleteComponent(selectedComponent.id)}
-            className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
-            title="Hapus Komponen (Delete)"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            {onDuplicateComponent && (
+              <button
+                onClick={() => onDuplicateComponent(selectedComponent.id)}
+                className="text-slate-400 hover:text-sky-400 p-1.5 rounded-lg hover:bg-sky-500/10 transition-colors cursor-pointer"
+                title="Duplikat Komponen (Ctrl+C / Ctrl+V atau Ctrl+D)"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={() => onDeleteComponent(selectedComponent.id)}
+              className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+              title="Hapus Komponen (Delete)"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-5">
@@ -248,19 +262,32 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             </div>
           </div>
 
-          {/* Transform & Rotation */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5">
-            <div className="text-xs font-medium text-slate-300 mb-2.5 flex items-center justify-between">
-              <span>Rotasi & Orientasi</span>
+          {/* Actions: Duplicate & Rotation */}
+          <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+            <div className="text-xs font-medium text-slate-300 flex items-center justify-between">
+              <span>Aksi Komponen</span>
               <span className="font-mono text-sky-400 text-xs">{selectedComponent.rotation}°</span>
             </div>
-            <button
-              onClick={handleRotate}
-              className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
-            >
-              <RotateCw className="w-3.5 h-3.5 text-sky-400" />
-              Putar 90° Searah Jarum Jam
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleRotate}
+                className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                title="Putar Komponen 90° (R / Space)"
+              >
+                <RotateCw className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <span>Putar 90°</span>
+              </button>
+              {onDuplicateComponent && (
+                <button
+                  onClick={() => onDuplicateComponent(selectedComponent.id)}
+                  className="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-slate-200 py-2 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                  title="Duplikat Komponen (Ctrl+C / Ctrl+V atau Ctrl+D)"
+                >
+                  <Copy className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                  <span>Duplikat</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Component Specific Config: 5-Band Metal Film Resistor */}

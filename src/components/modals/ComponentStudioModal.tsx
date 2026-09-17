@@ -285,6 +285,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   }[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const isUndoRedoActionRef = useRef<boolean>(false);
+  const clipboardPinRef = useRef<Pin | null>(null);
 
   // Multi-pin Generator state
   const [genCount, setGenCount] = useState<number>(6);
@@ -1963,6 +1964,94 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       } else if (isCmdOrCtrl && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         handleRedo();
+        return;
+      }
+
+      // Copy Pin (Ctrl+C / Cmd+C)
+      if (isCmdOrCtrl && e.key.toLowerCase() === 'c') {
+        if (selectedPinId) {
+          const pin = pins.find((p) => p.id === selectedPinId);
+          if (pin) {
+            e.preventDefault();
+            clipboardPinRef.current = pin;
+          }
+        }
+        return;
+      }
+
+      // Paste Pin (Ctrl+V / Cmd+V)
+      if (isCmdOrCtrl && e.key.toLowerCase() === 'v') {
+        if (clipboardPinRef.current) {
+          e.preventDefault();
+          const source = clipboardPinRef.current;
+          const newId = `pin_${pins.length + 1}`;
+          let nextX = source.x + 17.0;
+          let nextY = source.y;
+          if (snapToBreadboard) {
+            nextX = snapCoordinate(nextX, breadboardOffset.x % 17);
+            nextY = snapCoordinate(nextY, breadboardOffset.y % 17);
+          }
+
+          const numMatch = source.name.match(/^(.*?)(\d+)$/);
+          const nextName = numMatch
+            ? `${numMatch[1]}${parseInt(numMatch[2], 10) + 1}`
+            : `Pin ${pins.length + 1}`;
+
+          const profile = inferPinProfile(nextName);
+          const newPin: Pin = {
+            id: newId,
+            name: nextName,
+            x: Math.round(nextX * 10) / 10,
+            y: Math.round(nextY * 10) / 10,
+            type: profile.isConfident ? profile.type : source.type,
+            description: profile.isConfident ? profile.description : source.description,
+          };
+
+          const nextPins = [...pins, newPin];
+          setPins(nextPins);
+          setSelectedPinId(newId);
+          pushSnapshot({ pins: nextPins });
+          clipboardPinRef.current = newPin;
+        }
+        return;
+      }
+
+      // Direct Duplicate Pin (Ctrl+D / Cmd+D)
+      if (isCmdOrCtrl && e.key.toLowerCase() === 'd') {
+        if (selectedPinId) {
+          const source = pins.find((p) => p.id === selectedPinId);
+          if (source) {
+            e.preventDefault();
+            const newId = `pin_${pins.length + 1}`;
+            let nextX = source.x + 17.0;
+            let nextY = source.y;
+            if (snapToBreadboard) {
+              nextX = snapCoordinate(nextX, breadboardOffset.x % 17);
+              nextY = snapCoordinate(nextY, breadboardOffset.y % 17);
+            }
+
+            const numMatch = source.name.match(/^(.*?)(\d+)$/);
+            const nextName = numMatch
+              ? `${numMatch[1]}${parseInt(numMatch[2], 10) + 1}`
+              : `Pin ${pins.length + 1}`;
+
+            const profile = inferPinProfile(nextName);
+            const newPin: Pin = {
+              id: newId,
+              name: nextName,
+              x: Math.round(nextX * 10) / 10,
+              y: Math.round(nextY * 10) / 10,
+              type: profile.isConfident ? profile.type : source.type,
+              description: profile.isConfident ? profile.description : source.description,
+            };
+
+            const nextPins = [...pins, newPin];
+            setPins(nextPins);
+            setSelectedPinId(newId);
+            pushSnapshot({ pins: nextPins });
+            clipboardPinRef.current = newPin;
+          }
+        }
         return;
       }
 
