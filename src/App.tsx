@@ -24,6 +24,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/modals/AuthModal';
 import { ContextMenu, ContextMenuState } from './components/menu/ContextMenu';
 import { Zap } from 'lucide-react';
+import { showToast, showConfirm, showError } from './utils/alert';
 
 const STORAGE_KEY = 'wirecraft_saved_project_v1';
 
@@ -800,9 +801,10 @@ function CircuitAppContent() {
       link.download = `${projectName.toLowerCase().replace(/\s+/g, '_')}.png`;
       link.href = dataUrl;
       link.click();
+      showToast('success', 'Diagram rangkaian (PNG) berhasil diunduh!');
     } catch (err) {
       console.error('Failed to export PNG:', err);
-      alert('Gagal mengekspor diagram PNG.');
+      showError('Gagal Ekspor Gambar', 'Terjadi kesalahan saat mengekspor diagram rangkaian PNG.');
     }
   };
 
@@ -824,6 +826,7 @@ function CircuitAppContent() {
     link.download = `${projectName.toLowerCase().replace(/\s+/g, '_')}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    showToast('success', 'Berkas proyek (.json) berhasil diunduh!');
   };
 
   // Import JSON Project File
@@ -841,25 +844,36 @@ function CircuitAppContent() {
           });
           setSelectedComponentIds([]);
           setSelectedWireId(null);
+          showToast('success', `Proyek "${parsed.name || file.name}" berhasil dimuat!`);
         } else {
-          alert('Format file proyek JSON tidak valid.');
+          showError('Format Tidak Valid', 'Format file proyek JSON tidak valid atau struktur tidak dikenali.');
         }
       } catch (err) {
-        alert('Gagal membaca file proyek JSON.');
+        showError('Gagal Membaca File', 'Tidak dapat memproses atau membaca file proyek JSON.');
       }
     };
     reader.readAsText(file);
   };
 
   // Clear Canvas
-  const handleClearCanvas = () => {
-    if (window.confirm('Bersihkan seluruh kanvas sirkuit? Semua kabel dan komponen akan dihapus.')) {
+  const handleClearCanvas = async () => {
+    const isConfirmed = await showConfirm({
+      title: 'Bersihkan Seluruh Kanvas?',
+      text: 'Semua kabel dan komponen yang ada di kanvas aktif akan dihapus.',
+      icon: 'warning',
+      confirmText: 'Ya, Bersihkan',
+      cancelText: 'Batal',
+      isDanger: true,
+    });
+
+    if (isConfirmed) {
       commit({
         components: [],
         wires: [],
       });
       setSelectedComponentIds([]);
       setSelectedWireId(null);
+      showToast('info', 'Kanvas telah dibersihkan.');
     }
   };
 
@@ -944,9 +958,15 @@ function CircuitAppContent() {
         user={user}
         isAdmin={isAdmin}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
-        onLogout={logout}
+        onLogout={() => {
+          logout();
+          showToast('info', 'Anda telah keluar dari workspace.');
+        }}
         cloudSyncStatus={cloudSyncStatus}
-        onSyncToCloud={syncToCloudNow}
+        onSyncToCloud={async () => {
+          await syncToCloudNow();
+          showToast('success', 'Rangkaian berhasil disinkronkan ke Cloud!');
+        }}
       />
 
       {/* Main Workspace Area */}

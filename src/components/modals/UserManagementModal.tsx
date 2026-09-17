@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { User } from '../../types/auth';
 import { useAuth } from '../../context/AuthContext';
+import { showToast, showConfirm, showWarning, showError } from '../../utils/alert';
 
 interface UserManagementModalProps {
   isOpen: boolean;
@@ -64,20 +65,26 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
   const handleToggleStatus = async (targetUser: User) => {
     if (!token) return;
     if (targetUser.id === currentAdmin?.id) {
-      alert('Anda tidak dapat menonaktifkan akun Admin Anda sendiri.');
+      showWarning('Aksi Ditolak', 'Anda tidak dapat menonaktifkan akun Admin Anda sendiri.');
       return;
     }
 
     const newStatus = !targetUser.isActive;
-    const confirmMsg = newStatus
-      ? `Aktifkan kembali akun "${targetUser.username}"?`
-      : `Nonaktifkan akun "${targetUser.username}"? Pengguna tidak akan bisa login ke workspace.`;
+    const isConfirmed = await showConfirm({
+      title: newStatus ? 'Aktifkan Pengguna?' : 'Nonaktifkan Pengguna?',
+      text: newStatus
+        ? `Aktifkan kembali akun "${targetUser.username}" agar dapat mengakses workspace?`
+        : `Akun "${targetUser.username}" tidak akan dapat login atau mengakses sirkuit sampai diaktifkan kembali.`,
+      icon: newStatus ? 'info' : 'warning',
+      confirmText: newStatus ? 'Ya, Aktifkan' : 'Ya, Nonaktifkan',
+      cancelText: 'Batal',
+      isDanger: !newStatus,
+    });
 
-    if (!window.confirm(confirmMsg)) return;
+    if (!isConfirmed) return;
 
     setActionLoadingId(targetUser.id);
     setErrorMessage(null);
-    setSuccessMessage(null);
 
     try {
       const res = await fetch('/api/admin/users/status', {
@@ -97,13 +104,15 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
         setUsers((prev) =>
           prev.map((u) => (u.id === targetUser.id ? { ...u, isActive: newStatus } : u))
         );
-        setSuccessMessage(data.message || 'Status pengguna berhasil diperbarui.');
-        setTimeout(() => setSuccessMessage(null), 3500);
+        showToast(
+          newStatus ? 'success' : 'warning',
+          data.message || `Status ${targetUser.username} berhasil diubah.`
+        );
       } else {
-        setErrorMessage(data.error || 'Gagal mengubah status pengguna.');
+        showError('Gagal Mengubah Status', data.error || 'Terjadi kesalahan pada server.');
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Koneksi ke server gagal.');
+      showError('Kesalahan Koneksi', err.message || 'Gagal menghubungi server.');
     } finally {
       setActionLoadingId(null);
     }
@@ -112,17 +121,20 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
   const handleDeleteUser = async (targetUser: User) => {
     if (!token) return;
     if (targetUser.id === currentAdmin?.id) {
-      alert('Anda tidak dapat menghapus akun Anda sendiri.');
+      showWarning('Aksi Ditolak', 'Anda tidak dapat menghapus akun Anda sendiri.');
       return;
     }
 
-    if (
-      !window.confirm(
-        `PERINGATAN: Hapus permanen akun "${targetUser.username}" beserta seluruh berkas desain sirkuit miliknya? Tindakan ini tidak dapat dibatalkan.`
-      )
-    ) {
-      return;
-    }
+    const isConfirmed = await showConfirm({
+      title: 'Hapus Pengguna Permanen?',
+      text: `PERINGATAN: Seluruh berkas desain sirkuit dan data milik "${targetUser.username}" akan dihapus permanen dari cloud. Tindakan ini tidak dapat dibatalkan.`,
+      icon: 'warning',
+      confirmText: 'Ya, Hapus Permanen',
+      cancelText: 'Batal',
+      isDanger: true,
+    });
+
+    if (!isConfirmed) return;
 
     setActionLoadingId(targetUser.id);
     setErrorMessage(null);
@@ -139,13 +151,12 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
       const data = await res.json();
       if (data.success) {
         setUsers((prev) => prev.filter((u) => u.id !== targetUser.id));
-        setSuccessMessage(`Akun ${targetUser.username} telah dihapus.`);
-        setTimeout(() => setSuccessMessage(null), 3500);
+        showToast('success', `Akun ${targetUser.username} berhasil dihapus.`);
       } else {
-        setErrorMessage(data.error || 'Gagal menghapus pengguna.');
+        showError('Gagal Menghapus', data.error || 'Terjadi kesalahan pada server.');
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Koneksi ke server gagal.');
+      showError('Kesalahan Koneksi', err.message || 'Gagal menghubungi server.');
     } finally {
       setActionLoadingId(null);
     }

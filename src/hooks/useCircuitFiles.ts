@@ -8,6 +8,7 @@ import {
   WireRouting,
   WirePoint,
 } from '../types/circuit';
+import { showToast, showError } from '../utils/alert';
 
 const STORAGE_FILES_KEY = 'wirecraft_circuit_files_v1';
 const LEGACY_STORAGE_KEY = 'wirecraft_saved_project_v1';
@@ -705,9 +706,10 @@ export function useCircuitFiles(authToken?: string | null) {
           activeFileId: newId,
           files: [...prev.files, newFile],
         }));
+        showToast('success', `Berkas "${fileName}" berhasil diimpor!`);
       } catch (err) {
         console.error('Failed to parse imported circuit file:', err);
-        alert('Format file rangkaian tidak valid!');
+        showError('Format Tidak Valid', 'Format berkas rangkaian tidak valid atau rusak.');
       }
     };
     reader.readAsText(file);
@@ -726,6 +728,7 @@ export function useCircuitFiles(authToken?: string | null) {
     link.download = targetFile.name.endsWith('.wire') ? targetFile.name : `${targetFile.name}.wire`;
     link.click();
     URL.revokeObjectURL(url);
+    showToast('success', `Berkas "${targetFile.name}" berhasil diunduh!`);
   }, []);
 
   return {

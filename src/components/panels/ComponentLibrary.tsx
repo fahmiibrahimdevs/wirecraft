@@ -13,6 +13,7 @@ import {
   CircuitFileSystem,
 } from '../../types/circuit';
 import { CircuitFileExplorer } from './CircuitFileExplorer';
+import { showConfirm, showToast } from '../../utils/alert';
 import {
   Cpu,
   Radio,
@@ -356,9 +357,18 @@ export const ComponentLibrary: React.FC<ComponentLibraryProps> = ({
                               </button>
                             )}
                             <button
-                              onClick={() => {
-                                if (window.confirm(`Hapus komponen kustom "${def.name}"?`)) {
+                              onClick={async () => {
+                                const isConfirmed = await showConfirm({
+                                  title: 'Hapus Komponen Kustom?',
+                                  text: `Hapus komponen "${def.name}" dari Component Library?`,
+                                  icon: 'warning',
+                                  confirmText: 'Ya, Hapus',
+                                  cancelText: 'Batal',
+                                  isDanger: true,
+                                });
+                                if (isConfirmed) {
                                   deleteCustomComponent(def.type);
+                                  showToast('success', `Komponen "${def.name}" telah dihapus.`);
                                 }
                               }}
                               className="px-2 py-0.5 rounded bg-slate-800 hover:bg-rose-500/20 text-[10px] text-slate-400 hover:text-rose-300 border border-slate-700 hover:border-rose-500/40 flex items-center gap-1 transition-colors"

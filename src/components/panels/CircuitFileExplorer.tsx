@@ -19,6 +19,7 @@ import {
   Sparkles,
   Eye,
 } from 'lucide-react';
+import { showConfirm, showToast } from '../../utils/alert';
 
 interface ExplorerContextMenuState {
   x: number;
@@ -281,8 +282,16 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                       <Edit2 className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => {
-                        if (confirm(`Hapus folder "${folder.name}" beserta seluruh isinya?`)) {
+                      onClick={async () => {
+                        const isConfirmed = await showConfirm({
+                          title: 'Hapus Folder?',
+                          text: `Hapus folder "${folder.name}" beserta seluruh berkas rangkaian di dalamnya?`,
+                          icon: 'warning',
+                          confirmText: 'Ya, Hapus Folder',
+                          cancelText: 'Batal',
+                          isDanger: true,
+                        });
+                        if (isConfirmed) {
                           onDeleteFolder(folder.id);
                         }
                       }}
@@ -427,8 +436,16 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                     <Edit2 className="w-3 h-3" />
                   </button>
                   <button
-                    onClick={() => {
-                      if (confirm(`Hapus berkas rangkaian "${file.name}"?`)) {
+                    onClick={async () => {
+                      const isConfirmed = await showConfirm({
+                        title: 'Hapus Berkas?',
+                        text: `Hapus berkas rangkaian "${file.name}"?`,
+                        icon: 'warning',
+                        confirmText: 'Ya, Hapus',
+                        cancelText: 'Batal',
+                        isDanger: true,
+                      });
+                      if (isConfirmed) {
                         onDeleteFile(file.id);
                       }
                     }}
@@ -643,13 +660,23 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                   <div className="h-px bg-slate-800/80 my-1" />
 
                   <button
-                    onClick={() => {
-                      if (contextMenu.targetId) {
-                        if (confirm(`Hapus berkas rangkaian "${contextMenu.targetName || ''}"?`)) {
-                          onDeleteFile(contextMenu.targetId);
+                    onClick={async () => {
+                      const targetId = contextMenu.targetId;
+                      const targetName = contextMenu.targetName || '';
+                      setContextMenu(null);
+                      if (targetId) {
+                        const isConfirmed = await showConfirm({
+                          title: 'Hapus Berkas?',
+                          text: `Hapus berkas rangkaian "${targetName}"?`,
+                          icon: 'warning',
+                          confirmText: 'Ya, Hapus',
+                          cancelText: 'Batal',
+                          isDanger: true,
+                        });
+                        if (isConfirmed) {
+                          onDeleteFile(targetId);
                         }
                       }
-                      setContextMenu(null);
                     }}
                     className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-500/15 text-rose-300/90 hover:text-rose-400 text-left transition-colors cursor-pointer"
                   >
@@ -728,13 +755,23 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                   <div className="h-px bg-slate-800/80 my-1" />
 
                   <button
-                    onClick={() => {
-                      if (contextMenu.targetId) {
-                        if (confirm(`Hapus folder "${contextMenu.targetName || ''}" beserta seluruh isinya?`)) {
-                          onDeleteFolder(contextMenu.targetId);
+                    onClick={async () => {
+                      const targetId = contextMenu.targetId;
+                      const targetName = contextMenu.targetName || '';
+                      setContextMenu(null);
+                      if (targetId) {
+                        const isConfirmed = await showConfirm({
+                          title: 'Hapus Folder?',
+                          text: `Hapus folder "${targetName}" beserta seluruh berkas rangkaian di dalamnya?`,
+                          icon: 'warning',
+                          confirmText: 'Ya, Hapus Folder',
+                          cancelText: 'Batal',
+                          isDanger: true,
+                        });
+                        if (isConfirmed) {
+                          onDeleteFolder(targetId);
                         }
                       }
-                      setContextMenu(null);
                     }}
                     className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-500/15 text-rose-300/90 hover:text-rose-400 text-left transition-colors cursor-pointer"
                   >

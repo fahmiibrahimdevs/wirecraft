@@ -14,6 +14,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { showToast } from '../../utils/alert';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -59,6 +60,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsSubmitting(false);
 
     if (result.success) {
+      showToast('success', `Selamat datang kembali, ${identifier.trim()}!`);
       if (onClose) onClose();
     } else {
       setErrorMessage(result.error || 'Username atau kata sandi tidak cocok. Silakan periksa kembali.');
@@ -108,6 +110,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsSubmitting(false);
 
     if (result.success) {
+      showToast('success', `Akun ${cleanUsername} berhasil dibuat! Selamat datang di Wirecraft.`);
       if (onClose) onClose();
     } else {
       setErrorMessage(result.error || 'Gagal mendaftarkan akun baru.');

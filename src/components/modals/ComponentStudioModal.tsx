@@ -10,6 +10,7 @@ import {
   rotateSvgDataUrl,
 } from '../../utils/customComponents';
 import { inferPinProfile, COMMON_PIN_SUGGESTIONS } from '../../utils/pinInference';
+import { showToast, showError, showConfirm } from '../../utils/alert';
 import {
   Upload,
   Sparkles,
@@ -2271,10 +2272,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const res = saveCustomComponent(definition, imgToSave);
     if (res.success) {
       setSaveSuccess(true);
+      showToast('success', `Komponen "${definition.name}" berhasil disimpan ke Library!`);
       onComponentSaved?.(definition.type);
       setTimeout(() => setSaveSuccess(false), 3500);
     } else {
-      alert(`Gagal menyimpan: ${res.error || 'Memori browser penuh'}`);
+      showError('Gagal Menyimpan Komponen', res.error || 'Memori browser penuh atau data tidak valid.');
     }
   };
 
@@ -2284,6 +2286,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const code = generateTypeScriptCode(definition, `${definition.type.replace(/-/g, '_')}.png`);
     navigator.clipboard.writeText(code);
     setCopiedCode(true);
+    showToast('success', 'Kode TypeScript berhasil disalin ke clipboard!');
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
@@ -2314,9 +2317,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               setRawImageDataUrl(imgUrl);
               setImageDataUrl(imgUrl);
             }
+            showToast('success', `Definisi komponen "${def.name}" berhasil diimpor!`);
           }
         } catch (err) {
           console.error('Failed to import json:', err);
+          showError('Gagal Impor JSON', 'Format file JSON komponen tidak valid.');
         }
       }
     };
