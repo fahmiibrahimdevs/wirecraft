@@ -460,6 +460,53 @@ export function App() {
     setSelectedWireId(null);
   };
 
+  // Center View / Fit All Components to Screen
+  const handleCenterCanvas = useCallback(() => {
+    if (components.length === 0) {
+      setZoom(1);
+      setPan({ x: 120, y: 80 });
+      return;
+    }
+
+    const allDefs = getAllComponentDefinitions();
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    components.forEach((c) => {
+      const def = allDefs[c.type] || COMPONENT_DEFINITIONS[c.type];
+      const w = def?.width || 60;
+      const h = def?.height || 60;
+      minX = Math.min(minX, c.x);
+      minY = Math.min(minY, c.y);
+      maxX = Math.max(maxX, c.x + w);
+      maxY = Math.max(maxY, c.y + h);
+    });
+
+    const padding = 80;
+    const bboxWidth = maxX - minX + padding * 2;
+    const bboxHeight = maxY - minY + padding * 2;
+
+    const availWidth = window.innerWidth - (isInspectorOpen ? 320 : 0) - 70;
+    const availHeight = window.innerHeight - 60;
+
+    const scaleX = availWidth / Math.max(bboxWidth, 100);
+    const scaleY = availHeight / Math.max(bboxHeight, 100);
+    const newZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.35), 1.5);
+
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    const newPan = {
+      x: (availWidth / 2 + 70) - centerX * newZoom,
+      y: (availHeight / 2 + 50) - centerY * newZoom,
+    };
+
+    setZoom(Number(newZoom.toFixed(2)));
+    setPan(newPan);
+  }, [components, isInspectorOpen]);
+
   // 7. Select All Components (Ctrl+A)
   const handleSelectAll = useCallback(() => {
     setSelectedComponentIds(components.map((c) => c.id));
@@ -835,6 +882,7 @@ export function App() {
           allWires={wires}
           snapGrid={snapGrid}
           onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
+          onCenterCanvas={handleCenterCanvas}
           onUpdateComponent={handleUpdateComponent}
           onUpdateWire={handleUpdateWire}
           onDeleteComponent={(id) => handleDeleteComponents([id])}

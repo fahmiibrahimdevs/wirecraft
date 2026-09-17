@@ -16,6 +16,12 @@ import {
   Copy,
   Lock,
   Unlock,
+  Maximize2,
+  Cpu,
+  ShieldCheck,
+  AlertTriangle,
+  AlertCircle,
+  Zap,
 } from 'lucide-react';
 
 interface PropertiesInspectorProps {
@@ -26,6 +32,7 @@ interface PropertiesInspectorProps {
   allWires: Wire[];
   snapGrid: boolean;
   onToggleSnapGrid: () => void;
+  onCenterCanvas?: () => void;
   onUpdateComponent: (id: string, updates: Partial<CircuitComponent>) => void;
   onDeleteComponent: (id: string) => void;
   onDuplicateComponent?: (id: string) => void;
@@ -200,6 +207,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   allWires,
   snapGrid,
   onToggleSnapGrid,
+  onCenterCanvas,
   onUpdateComponent,
   onDeleteComponent,
   onDuplicateComponent,
@@ -925,11 +933,173 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   }
 
   // 3. Default Summary Panel when nothing is selected
+  const allDefs = getAllComponentDefinitions();
+
+  // Helper for pin category badges
+  const getPinTypeBadge = (type: string) => {
+    switch (type) {
+      case 'power':
+        return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+      case 'ground':
+        return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+      case 'i2c':
+        return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+      case 'spi':
+        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+      case 'analog':
+        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+      case 'pwm':
+        return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
+      case 'uart':
+        return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+      default:
+        return 'bg-slate-800 text-slate-300 border-slate-700';
+    }
+  };
+
+  // MCU Pin Allocations Table (Find all MCU boards and their connected pins)
+  const isMcuType = (t: string) =>
+    t === 'arduino-uno' ||
+    t === 'arduino-nano' ||
+    t.startsWith('esp32') ||
+    t.startsWith('wemos') ||
+    t.startsWith('nodemcu');
+
+  const mcuComps = allComponents.filter((c) => isMcuType(c.type));
+
+  const mcuPinMappings = mcuComps.map((mcu) => {
+    const def = allDefs[mcu.type] || COMPONENT_DEFINITIONS[mcu.type];
+    const wires = allWires.filter(
+      (w) => w.fromComponentId === mcu.id || w.toComponentId === mcu.id
+    );
+
+    const pins = wires.map((w) => {
+      const isFrom = w.fromComponentId === mcu.id;
+      const mcuPinId = isFrom ? w.fromPinId : w.toPinId;
+      const targetCompId = isFrom ? w.toComponentId : w.fromComponentId;
+      const targetPinId = isFrom ? w.toPinId : w.fromPinId;
+
+      const mcuPin = def?.pins.find((p) => p.id === mcuPinId);
+      const targetComp = allComponents.find((c) => c.id === targetCompId);
+      const targetDef = targetComp
+        ? allDefs[targetComp.type] || COMPONENT_DEFINITIONS[targetComp.type]
+        : null;
+      const targetPin = targetDef?.pins.find((p) => p.id === targetPinId);
+
+      return {
+        wireId: w.id,
+        wireColor: w.color,
+        mcuPinId,
+        mcuPinName: mcuPin?.name || mcuPinId,
+        mcuPinType: mcuPin?.type || 'digital',
+        targetCompLabel: targetComp?.label || targetComp?.name || targetCompId,
+        targetPinName: targetPin?.name || targetPinId,
+      };
+    });
+
+    return {
+      mcu,
+      def,
+      pins,
+    };
+  });
+
+  // Smart Circuit Health Check / Diagnostics
+  const circuitDiagnostics: { type: 'error' | 'warning'; title: string; detail: string }[] = [];
+
+  // 1. Direct Short Circuit Detection (Power directly connected to Ground)
+  for (const wire of allWires) {
+    const fromComp = allComponents.find((c) => c.id === wire.fromComponentId);
+    const toComp = allComponents.find((c) => c.id === wire.toComponentId);
+    if (!fromComp || !toComp) continue;
+
+    const fromDef = allDefs[fromComp.type] || COMPONENT_DEFINITIONS[fromComp.type];
+    const toDef = allDefs[toComp.type] || COMPONENT_DEFINITIONS[toComp.type];
+    const fromPin = fromDef?.pins.find((p) => p.id === wire.fromPinId);
+    const toPin = toDef?.pins.find((p) => p.id === wire.toPinId);
+
+    const isPower = (p?: { type?: string; name?: string }) =>
+      p?.type === 'power' ||
+      ['5v', '3v3', '3.3v', 'vcc', 'vin', '+'].includes((p?.name || '').toLowerCase());
+    const isGround = (p?: { type?: string; name?: string }) =>
+      p?.type === 'ground' ||
+      ['gnd', 'g', '-', 'ground'].includes((p?.name || '').toLowerCase());
+
+    if ((isPower(fromPin) && isGround(toPin)) || (isGround(fromPin) && isPower(toPin))) {
+      circuitDiagnostics.push({
+        type: 'error',
+        title: 'Potensi Korsleting (Short Circuit)',
+        detail: `${fromComp.label} (${fromPin?.name}) terhubung langsung ke Ground di ${toComp.label} (${toPin?.name}).`,
+      });
+    }
+  }
+
+  // 2. Floating Power / Ground Detection for active modules & sensors
+  const passiveTypes = [
+    'breadboard-half',
+    'breadboard-mini',
+    'breadboard-full',
+    'resistor',
+    'push-button',
+    'push-button-6mm',
+    'push-button-12mm',
+    'fitting-lamp',
+    'steker-switch',
+  ];
+  const activeComps = allComponents.filter((c) => !passiveTypes.includes(c.type));
+
+  for (const comp of activeComps) {
+    const def = allDefs[comp.type] || COMPONENT_DEFINITIONS[comp.type];
+    if (!def) continue;
+
+    const powerPins = def.pins.filter(
+      (p) => p.type === 'power' || ['vcc', '5v', '3v3', 'vin'].includes(p.name.toLowerCase())
+    );
+    const gndPins = def.pins.filter(
+      (p) => p.type === 'ground' || ['gnd', 'g'].includes(p.name.toLowerCase())
+    );
+
+    const compWires = allWires.filter(
+      (w) => w.fromComponentId === comp.id || w.toComponentId === comp.id
+    );
+
+    const isPinConnected = (pinId: string) =>
+      compWires.some(
+        (w) =>
+          (w.fromComponentId === comp.id && w.fromPinId === pinId) ||
+          (w.toComponentId === comp.id && w.toPinId === pinId)
+      );
+
+    const hasPowerConnected = powerPins.length === 0 || powerPins.some((p) => isPinConnected(p.id));
+    const hasGndConnected = gndPins.length === 0 || gndPins.some((p) => isPinConnected(p.id));
+
+    if (powerPins.length > 0 && !hasPowerConnected) {
+      circuitDiagnostics.push({
+        type: 'warning',
+        title: 'Catu Daya Belum Terhubung',
+        detail: `${comp.label} (${comp.name}) belum terhubung ke jalur VCC/Daya.`,
+      });
+    }
+
+    if (gndPins.length > 0 && !hasGndConnected) {
+      circuitDiagnostics.push({
+        type: 'warning',
+        title: 'Ground Belum Terhubung',
+        detail: `${comp.label} (${comp.name}) belum terhubung ke jalur GND/Ground.`,
+      });
+    }
+  }
+
   return (
     <aside className="fixed top-14 bottom-0 right-0 z-30 w-80 bg-slate-900/95 backdrop-blur-md border-l border-slate-800 flex flex-col shadow-2xl">
-      <div className="p-4 border-b border-slate-800 flex items-center gap-2">
-        <Layers className="w-4 h-4 text-sky-400" />
-        <h3 className="text-sm font-semibold text-slate-100">Ringkasan Sirkuit</h3>
+      <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Layers className="w-4 h-4 text-sky-400" />
+          <h3 className="text-sm font-semibold text-slate-100">Ringkasan Sirkuit</h3>
+        </div>
+        <span className="text-[10px] text-slate-400 font-mono bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+          Live Status
+        </span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -947,6 +1117,137 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
               {allWires.length}
             </div>
           </div>
+        </div>
+
+        {/* Action: Center Canvas View */}
+        {onCenterCanvas && (
+          <button
+            onClick={onCenterCanvas}
+            className="w-full flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 hover:border-sky-500/50 text-slate-200 py-2.5 px-3 rounded-xl text-xs font-medium transition-all shadow-sm cursor-pointer group"
+            title="Pusatkan pandangan ke seluruh komponen (Fit to Screen)"
+          >
+            <Maximize2 className="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform" />
+            <span>Pusatkan Semua Komponen (Fit View)</span>
+          </button>
+        )}
+
+        {/* Circuit Diagnostics / Health Check */}
+        <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+              <ShieldCheck className="w-4 h-4 text-sky-400" />
+              <span>Diagnosa Sirkuit</span>
+            </div>
+            <span
+              className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border ${
+                circuitDiagnostics.some((i) => i.type === 'error')
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                  : circuitDiagnostics.length > 0
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+              }`}
+            >
+              {circuitDiagnostics.some((i) => i.type === 'error')
+                ? 'Bahaya Korsleting'
+                : circuitDiagnostics.length > 0
+                ? `${circuitDiagnostics.length} Peringatan`
+                : 'Sirkuit Sehat'}
+            </span>
+          </div>
+
+          {circuitDiagnostics.length === 0 ? (
+            <div className="flex items-center gap-2 bg-emerald-950/30 border border-emerald-500/20 rounded-lg p-2.5 text-[11px] text-emerald-300">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Semua modul aktif terhubung dan tidak terdeteksi korsleting.</span>
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              {circuitDiagnostics.map((issue, idx) => (
+                <div
+                  key={idx}
+                  className={`p-2.5 rounded-lg border text-[11px] flex items-start gap-2 ${
+                    issue.type === 'error'
+                      ? 'bg-rose-950/40 border-rose-500/30 text-rose-200'
+                      : 'bg-amber-950/30 border-amber-500/25 text-amber-200'
+                  }`}
+                >
+                  {issue.type === 'error' ? (
+                    <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-[11px] leading-tight">{issue.title}</div>
+                    <div className="text-[10px] opacity-80 mt-0.5 leading-snug">{issue.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* MCU Pin Allocations Table */}
+        <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+              <Cpu className="w-4 h-4 text-sky-400" />
+              <span>Pemetaan Pin MCU</span>
+            </div>
+            <span className="text-[10px] text-slate-400 font-mono">
+              {mcuPinMappings.reduce((acc, m) => acc + m.pins.length, 0)} Terpakai
+            </span>
+          </div>
+
+          {mcuPinMappings.length === 0 ? (
+            <div className="text-[11px] text-slate-500 py-1 leading-relaxed">
+              Belum ada mikrokontroler (Arduino / ESP32 / WeMos) di kanvas.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {mcuPinMappings.map(({ mcu, def, pins }) => (
+                <div key={mcu.id} className="space-y-1.5">
+                  <div className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
+                    <span className="truncate">{mcu.label} ({def?.name || mcu.name})</span>
+                    <span className="text-[10px] text-sky-400 font-mono">{pins.length} koneksi</span>
+                  </div>
+
+                  {pins.length === 0 ? (
+                    <div className="text-[10px] text-slate-500 bg-slate-900/60 rounded-lg p-2">
+                      Belum ada pin terhubung pada board ini.
+                    </div>
+                  ) : (
+                    <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+                      {pins.map((p, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between bg-slate-900/80 border border-slate-800 rounded-lg px-2.5 py-1 text-[11px]"
+                        >
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border shrink-0 ${getPinTypeBadge(
+                                p.mcuPinType
+                              )}`}
+                            >
+                              {p.mcuPinName}
+                            </span>
+                            <span className="text-slate-500 text-[10px]">→</span>
+                            <span className="text-slate-200 truncate font-mono text-[10px]">
+                              {p.targetCompLabel}.<span className="text-emerald-400">{p.targetPinName}</span>
+                            </span>
+                          </div>
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 border border-slate-700 ml-1.5"
+                            style={{ backgroundColor: p.wireColor }}
+                            title={`Warna kabel: ${p.wireColor}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Canvas Options */}
@@ -977,19 +1278,22 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           </div>
           <ul className="text-[11px] text-slate-400 space-y-1.5 list-disc list-inside leading-relaxed">
             <li>
-              <strong className="text-slate-300">Kabel:</strong> Klik pin komponen $\rightarrow$ tarik $\rightarrow$ klik pin tujuan.
+              <strong className="text-slate-300">Pan Kanvas:</strong> Klik kiri & tahan drag pada background kosong.
+            </li>
+            <li>
+              <strong className="text-slate-300">Seleksi Banyak:</strong> Tahan <kbd className="bg-slate-800 px-1 rounded text-[10px] text-slate-300 font-mono">Ctrl</kbd> / <kbd className="bg-slate-800 px-1 rounded text-[10px] text-slate-300 font-mono">Shift</kbd> + klik drag kanvas.
+            </li>
+            <li>
+              <strong className="text-slate-300">Kabel:</strong> Klik pin awal $\rightarrow$ tarik $\rightarrow$ klik pin tujuan.
             </li>
             <li>
               <strong className="text-slate-300">Geser Komponen:</strong> Klik tahan dan geser komponen di kanvas.
             </li>
             <li>
-              <strong className="text-slate-300">Pan Kanvas:</strong> Tahan klik scroll tengah (mouse wheel) atau drag background.
-            </li>
-            <li>
               <strong className="text-slate-300">Zoom:</strong> Putar scroll wheel mouse ke atas/bawah.
             </li>
             <li>
-              <strong className="text-slate-300">Hapus:</strong> Pilih komponen atau kabel lalu tekan tombol <kbd className="bg-slate-800 px-1 rounded text-[10px] text-slate-300 font-mono">Del</kbd>.
+              <strong className="text-slate-300">Menu & Kunci:</strong> Klik kanan komponen untuk kunci (L), duplikat, dll.
             </li>
           </ul>
         </div>
