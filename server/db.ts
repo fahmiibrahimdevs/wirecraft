@@ -63,8 +63,9 @@ export function initDatabase() {
     // Column already exists, ignore
   }
 
-  // Seed default admin account if not exists
+  // Seed default admin and user accounts if not exist
   seedDefaultAdmin();
+  seedDefaultUser();
 }
 
 function hashPassword(password: string): string {
@@ -122,5 +123,56 @@ function seedDefaultAdmin() {
     );
 
     console.log('✅ [Database] Default admin account seeded: fahmiibrahimdev (role: admin)');
+  }
+}
+
+function seedDefaultUser() {
+  const stmt = db.prepare('SELECT id FROM users WHERE username = ?');
+  const existing = stmt.get('user') as { id: string } | undefined;
+
+  if (!existing) {
+    const userId = 'user_default_regular';
+    const now = new Date().toISOString();
+    const passwordHash = hashPassword('user123');
+
+    const insertStmt = db.prepare(`
+      INSERT INTO users (id, username, email, password_hash, role, avatar_url, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    insertStmt.run(
+      userId,
+      'user',
+      'user@wirecraft.io',
+      passwordHash,
+      'user',
+      '',
+      now,
+      now
+    );
+
+    const folderStmt = db.prepare(`
+      INSERT INTO circuit_folders (id, user_id, name, parent_id, is_expanded, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    folderStmt.run('folder_sample_user', userId, 'Proyek Saya', null, 1, now, now);
+
+    const fileStmt = db.prepare(`
+      INSERT INTO circuit_files (id, user_id, parent_id, name, components_json, wires_json, view_state_json, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    fileStmt.run(
+      'file_sample_user_circuit',
+      userId,
+      'folder_sample_user',
+      'Rangkaian Lampu LED Otomatis',
+      '[]',
+      '[]',
+      '{}',
+      now,
+      now
+    );
+
+    console.log('✅ [Database] Default user account seeded: user (role: user)');
   }
 }
