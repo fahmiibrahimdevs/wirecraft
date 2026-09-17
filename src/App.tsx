@@ -16,7 +16,6 @@ import { TopBar } from './components/navigation/TopBar';
 import { ComponentLibrary } from './components/panels/ComponentLibrary';
 import { CircuitCanvas } from './components/canvas/CircuitCanvas';
 import { PropertiesInspector } from './components/panels/PropertiesInspector';
-import { CodeEditorModal } from './components/modals/CodeEditorModal';
 import { BomModal } from './components/modals/BomModal';
 import { PresetsModal } from './components/modals/PresetsModal';
 import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
@@ -312,7 +311,6 @@ function CircuitAppContent() {
   // Drawers & Modals
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
-  const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [isBomModalOpen, setIsBomModalOpen] = useState(false);
   const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
@@ -616,7 +614,7 @@ function CircuitAppContent() {
 
       // Select All (Ctrl+A / Cmd+A)
       if (isCmdOrCtrl && e.key.toLowerCase() === 'a') {
-        if (!isStudioOpen && !isCodeModalOpen && !isBomModalOpen && !isPresetsModalOpen) {
+        if (!isStudioOpen && !isBomModalOpen && !isPresetsModalOpen) {
           e.preventDefault();
           handleSelectAll();
         }
@@ -628,7 +626,6 @@ function CircuitAppContent() {
         if (
           selectedComponentIds.length > 0 &&
           !isStudioOpen &&
-          !isCodeModalOpen &&
           !isBomModalOpen &&
           !isPresetsModalOpen
         ) {
@@ -645,7 +642,6 @@ function CircuitAppContent() {
         (e.key === 'l' || e.key === 'L') &&
         selectedComponentIds.length > 0 &&
         !isStudioOpen &&
-        !isCodeModalOpen &&
         !isBomModalOpen &&
         !isPresetsModalOpen
       ) {
@@ -663,7 +659,6 @@ function CircuitAppContent() {
         if (
           selectedComponentIds.length > 0 &&
           !isStudioOpen &&
-          !isCodeModalOpen &&
           !isBomModalOpen &&
           !isPresetsModalOpen
         ) {
@@ -677,7 +672,6 @@ function CircuitAppContent() {
       if (
         (e.key === 'Delete' || e.key === 'Backspace') &&
         !isStudioOpen &&
-        !isCodeModalOpen &&
         !isBomModalOpen &&
         !isPresetsModalOpen
       ) {
@@ -704,7 +698,6 @@ function CircuitAppContent() {
     selectedComponentIds,
     selectedWireId,
     isStudioOpen,
-    isCodeModalOpen,
     isBomModalOpen,
     isPresetsModalOpen,
     handleDuplicateComponents,
@@ -926,7 +919,6 @@ function CircuitAppContent() {
         snapGrid={snapGrid}
         onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
         onOpenPresets={() => setIsPresetsModalOpen(true)}
-        onOpenCodeEditor={() => setIsCodeModalOpen(true)}
         onOpenBom={() => setIsBomModalOpen(true)}
         onOpenStudio={
           isAdmin
@@ -1061,14 +1053,6 @@ function CircuitAppContent() {
           onClearCanvas={handleClearCanvas}
         />
       </div>
-
-      {/* Code Editor Modal */}
-      <CodeEditorModal
-        isOpen={isCodeModalOpen}
-        onClose={() => setIsCodeModalOpen(false)}
-        components={components}
-        wires={wires}
-      />
 
       {/* BOM (Bill of Materials) Modal */}
       <BomModal
