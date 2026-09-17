@@ -20,6 +20,8 @@ import { CodeEditorModal } from './components/modals/CodeEditorModal';
 import { BomModal } from './components/modals/BomModal';
 import { PresetsModal } from './components/modals/PresetsModal';
 import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthModal } from './components/modals/AuthModal';
 import { ContextMenu, ContextMenuState } from './components/menu/ContextMenu';
 
 const STORAGE_KEY = 'wirecraft_saved_project_v1';
@@ -111,10 +113,15 @@ const DEFAULT_STARTER_WIRES: Wire[] = [
 
 import { useCircuitFiles } from './hooks/useCircuitFiles';
 
-export function App() {
+function CircuitAppContent() {
+  const { user, isAdmin, token, logout } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   const {
     fileSystem,
     activeFile,
+    cloudSyncStatus,
+    syncToCloudNow,
     createFile,
     createFolder,
     renameFile,
@@ -130,7 +137,7 @@ export function App() {
     duplicateFile,
     importFile,
     exportFile,
-  } = useCircuitFiles();
+  } = useCircuitFiles(token);
 
   const [projectName, setProjectName] = useState(
     activeFile ? activeFile.name.replace(/\.wire$/, '') : 'Latihan Sirkuit Arduino'
@@ -891,14 +898,24 @@ export function App() {
         onOpenPresets={() => setIsPresetsModalOpen(true)}
         onOpenCodeEditor={() => setIsCodeModalOpen(true)}
         onOpenBom={() => setIsBomModalOpen(true)}
-        onOpenStudio={() => {
-          setStudioEditDef(null);
-          setIsStudioOpen(true);
-        }}
+        onOpenStudio={
+          isAdmin
+            ? () => {
+                setStudioEditDef(null);
+                setIsStudioOpen(true);
+              }
+            : undefined
+        }
         onExportPng={handleExportPng}
         onExportJson={handleExportJson}
         onImportJson={handleImportJson}
         onClearCanvas={handleClearCanvas}
+        user={user}
+        isAdmin={isAdmin}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onLogout={logout}
+        cloudSyncStatus={cloudSyncStatus}
+        onSyncToCloud={syncToCloudNow}
       />
 
       {/* Main Workspace Area */}
@@ -908,10 +925,14 @@ export function App() {
           isOpen={isLibraryOpen}
           onToggle={() => setIsLibraryOpen((prev) => !prev)}
           onAddComponent={handleAddComponent}
-          onOpenStudio={(def?: ComponentDefinition) => {
-            setStudioEditDef(def || null);
-            setIsStudioOpen(true);
-          }}
+          onOpenStudio={
+            isAdmin
+              ? (def?: ComponentDefinition) => {
+                  setStudioEditDef(def || null);
+                  setIsStudioOpen(true);
+                }
+              : undefined
+          }
           fileSystem={fileSystem}
           activeFile={activeFile}
           onSelectFile={handleSelectFile}
@@ -988,10 +1009,14 @@ export function App() {
           onDuplicate={handleDuplicateComponents}
           onRotate={handleRotateComponents}
           onDeleteComponents={handleDeleteComponents}
-          onEditInStudio={(def) => {
-            setStudioEditDef(def || null);
-            setIsStudioOpen(true);
-          }}
+          onEditInStudio={
+            isAdmin
+              ? (def) => {
+                  setStudioEditDef(def || null);
+                  setIsStudioOpen(true);
+                }
+              : undefined
+          }
           onUpdateWireColor={(wireId, color) => handleUpdateWire(wireId, { color })}
           onUpdateWireRouting={(wireId, routing) => handleUpdateWire(wireId, { routing })}
           onDeleteWire={handleDeleteWire}
@@ -1031,18 +1056,34 @@ export function App() {
       />
 
       {/* Component Studio (Admin Mode) Modal */}
-      <ComponentStudioModal
-        isOpen={isStudioOpen}
-        onClose={() => {
-          setIsStudioOpen(false);
-          setStudioEditDef(null);
-        }}
-        initialDefinition={studioEditDef}
-        onComponentSaved={(typeId) => {
-          handleAddComponent(typeId);
-        }}
+      {isAdmin && (
+        <ComponentStudioModal
+          isOpen={isStudioOpen}
+          onClose={() => {
+            setIsStudioOpen(false);
+            setStudioEditDef(null);
+          }}
+          initialDefinition={studioEditDef}
+          onComponentSaved={(typeId) => {
+            handleAddComponent(typeId);
+          }}
+        />
+      )}
+
+      {/* Auth Modal (Login / Register) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <CircuitAppContent />
+    </AuthProvider>
   );
 }
 

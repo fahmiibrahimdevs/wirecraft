@@ -223,8 +223,10 @@ function getInitialFileSystem(): CircuitFileSystem {
   };
 }
 
-export function useCircuitFiles() {
+export function useCircuitFiles(authToken?: string | null) {
   const [fileSystem, setFileSystem] = useState<CircuitFileSystem>(getInitialFileSystem);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<'synced' | 'syncing' | 'offline' | 'error'>('offline');
+  const syncTimeoutRef = useRef<any>(null);
 
   // Keep a ref to latest file system for immediate writes
   const fileSystemRef = useRef(fileSystem);
@@ -232,14 +234,131 @@ export function useCircuitFiles() {
     fileSystemRef.current = fileSystem;
   }, [fileSystem]);
 
-  // Save to localStorage whenever fileSystem changes
+  // Load from Cloud Database when logged in
+  useEffect(() => {
+    if (!authToken) {
+      setCloudSyncStatus('offline');
+      return;
+    }
+
+    let isMounted = true;
+    const fetchCloudFiles = async () => {
+      setCloudSyncStatus('syncing');
+      try {
+        const res = await fetch('/api/circuits/files', {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.fileSystem && isMounted) {
+            const cloudFiles = data.fileSystem.files || [];
+            const cloudFolders = data.fileSystem.folders || [];
+
+            if (cloudFiles.length > 0 || cloudFolders.length > 0) {
+              setFileSystem((prev) => ({
+                activeFileId: cloudFiles[0]?.id || prev.activeFileId,
+                folders: cloudFolders,
+                files: cloudFiles,
+              }));
+              setCloudSyncStatus('synced');
+              return;
+            } else {
+              // Cloud is empty for this user, upload initial local files to Cloud
+              await fetch('/api/circuits/sync', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${authToken}`,
+                },
+                body: JSON.stringify({
+                  folders: fileSystemRef.current.folders,
+                  files: fileSystemRef.current.files,
+                }),
+              });
+              setCloudSyncStatus('synced');
+              return;
+            }
+          }
+        }
+        if (isMounted) setCloudSyncStatus('error');
+      } catch (err) {
+        console.error('Failed to sync with cloud database:', err);
+        if (isMounted) setCloudSyncStatus('error');
+      }
+    };
+
+    fetchCloudFiles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [authToken]);
+
+  // Save to localStorage and debounce sync to Cloud Database
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_FILES_KEY, JSON.stringify(fileSystem));
     } catch (err) {
       console.error('Failed to save file system to localStorage:', err);
     }
-  }, [fileSystem]);
+
+    if (authToken) {
+      setCloudSyncStatus('syncing');
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+      syncTimeoutRef.current = setTimeout(async () => {
+        try {
+          const res = await fetch('/api/circuits/sync', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({
+              folders: fileSystem.folders,
+              files: fileSystem.files,
+            }),
+          });
+          if (res.ok) {
+            setCloudSyncStatus('synced');
+          } else {
+            setCloudSyncStatus('error');
+          }
+        } catch {
+          setCloudSyncStatus('error');
+        }
+      }, 1000);
+    }
+  }, [fileSystem, authToken]);
+
+  const syncToCloudNow = useCallback(async () => {
+    if (!authToken) return;
+    setCloudSyncStatus('syncing');
+    try {
+      const res = await fetch('/api/circuits/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          folders: fileSystemRef.current.folders,
+          files: fileSystemRef.current.files,
+        }),
+      });
+      if (res.ok) {
+        setCloudSyncStatus('synced');
+      } else {
+        setCloudSyncStatus('error');
+      }
+    } catch {
+      setCloudSyncStatus('error');
+    }
+  }, [authToken]);
 
   // Find active file
   const activeFile =
@@ -612,6 +731,8 @@ export function useCircuitFiles() {
   return {
     fileSystem,
     activeFile,
+    cloudSyncStatus,
+    syncToCloudNow,
     createFile,
     createFolder,
     renameFile,
