@@ -1101,31 +1101,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const spanX = maxX - minX;
     const spanY = maxY - minY;
 
-    let scale = 1.0;
-    let isHorizontalRow = false;
-    let isVerticalRow = false;
     let isDualHorizontalRow = false;
     let isDualVerticalCol = false;
+    let isHorizontalRow = false;
+    let isVerticalRow = false;
 
-    // Detect pin configuration:
-    // 1. Single Horizontal Row (e.g. DHT22, Potentiometer, Ultrasonic, I2C headers)
-    if (spanX > 5 && spanX >= spanY * 1.5) {
-      isHorizontalRow = true;
-      const sortedByX = [...pins].sort((a, b) => a.x - b.x);
-      const pinCount = sortedByX.length;
-      const targetSpanX = (pinCount - 1) * 17.0;
-      scale = targetSpanX / Math.max(1, spanX);
-    }
-    // 2. Single Vertical Row (e.g. vertical headers, SIP modules)
-    else if (spanY > 5 && spanY >= spanX * 1.5) {
-      isVerticalRow = true;
-      const sortedByY = [...pins].sort((a, b) => a.y - b.y);
-      const pinCount = sortedByY.length;
-      const targetSpanY = (pinCount - 1) * 17.0;
-      scale = targetSpanY / Math.max(1, spanY);
-    }
-    // 3. Dual Row / DIP / IC / Microcontroller Module
-    else if (pins.length >= 4) {
+    // Check Dual Row / Dual Column candidates first (when pins >= 4):
+    if (pins.length >= 4) {
       const midY = (minY + maxY) / 2;
       const topRow = pins.filter((p) => p.y < midY).sort((a, b) => a.x - b.x);
       const botRow = pins.filter((p) => p.y >= midY).sort((a, b) => a.x - b.x);
@@ -1134,6 +1116,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const botSpanX = botRow.length > 1 ? botRow[botRow.length - 1].x - botRow[0].x : 0;
       const topSpanY = topRow.length > 1 ? Math.max(...topRow.map((p) => p.y)) - Math.min(...topRow.map((p) => p.y)) : 0;
       const botSpanY = botRow.length > 1 ? Math.max(...botRow.map((p) => p.y)) - Math.min(...botRow.map((p) => p.y)) : 0;
+
+      const minBotY = botRow.length > 0 ? Math.min(...botRow.map((p) => p.y)) : 0;
+      const maxTopY = topRow.length > 0 ? Math.max(...topRow.map((p) => p.y)) : 0;
+      const rowGapY = minBotY - maxTopY;
 
       const midX = (minX + maxX) / 2;
       const leftCol = pins.filter((p) => p.x < midX).sort((a, b) => a.y - b.y);
@@ -1144,80 +1130,74 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const leftSpanX = leftCol.length > 1 ? Math.max(...leftCol.map((p) => p.x)) - Math.min(...leftCol.map((p) => p.x)) : 0;
       const rightSpanX = rightCol.length > 1 ? Math.max(...rightCol.map((p) => p.x)) - Math.min(...rightCol.map((p) => p.x)) : 0;
 
-      // 3A. Dual Horizontal Rows (Top Row & Bottom Row, e.g. ESP32-C3 Supermini, horizontal DIP)
+      const minRightX = rightCol.length > 0 ? Math.min(...rightCol.map((p) => p.x)) : 0;
+      const maxLeftX = leftCol.length > 0 ? Math.max(...leftCol.map((p) => p.x)) : 0;
+      const colGapX = minRightX - maxLeftX;
+
+      // 1. Dual Horizontal Rows (Top Row & Bottom Row, e.g. ESP32-C3 Supermini, horizontal DIP breakout)
       if (
         topRow.length >= 2 &&
         botRow.length >= 2 &&
+        rowGapY > 15 &&
         topSpanX >= topSpanY * 1.5 &&
         botSpanX >= botSpanY * 1.5 &&
         topSpanX > leftSpanY
       ) {
         isDualHorizontalRow = true;
-        const avgSpanX = (topSpanX + botSpanX) / 2;
-        const avgCount = (topRow.length + botRow.length) / 2;
-        const targetSpanX = (avgCount - 1) * 17.0;
-        scale = targetSpanX / Math.max(1, avgSpanX);
       }
-      // 3B. Dual Vertical Columns (Left Column & Right Column, e.g. Arduino Nano, ESP32 30/38P, Logic Level Converter)
+      // 2. Dual Vertical Columns (Left Column & Right Column, e.g. Arduino Nano, ESP32 30/38P, Logic Level Converter)
       else if (
         leftCol.length >= 2 &&
         rightCol.length >= 2 &&
+        colGapX > 15 &&
         leftSpanY >= leftSpanX * 1.5 &&
         rightSpanY >= rightSpanX * 1.5
       ) {
         isDualVerticalCol = true;
-        const avgSpanY = (leftSpanY + rightSpanY) / 2;
-        const avgCount = (leftCol.length + rightCol.length) / 2;
-        const targetSpanY = (avgCount - 1) * 17.0;
-        scale = targetSpanY / Math.max(1, avgSpanY);
-      } else {
-        // Fallback: estimate from average spacing between nearest neighbors
-        const sortedPins = [...pins].sort((a, b) => a.x - b.x || a.y - b.y);
-        let totalStepDist = 0;
-        let stepCount = 0;
-        for (let i = 0; i < sortedPins.length - 1; i++) {
-          const d = Math.hypot(sortedPins[i + 1].x - sortedPins[i].x, sortedPins[i + 1].y - sortedPins[i].y);
-          if (d > 3) {
-            totalStepDist += d;
-            stepCount++;
-          }
-        }
-        const avgDist = stepCount > 0 ? totalStepDist / stepCount : 17.0;
-        scale = 17.0 / Math.max(1, avgDist);
       }
-    } else {
-      // 2 or 3 pins in arbitrary orientation
-      const d = Math.hypot(spanX, spanY);
-      const targetD = (pins.length - 1) * 17.0;
-      scale = targetD / Math.max(1, d);
     }
 
-    // Sanity check on scale factor: clamp between 0.05 and 20.0
-    if (scale <= 0.02 || scale > 50 || !isFinite(scale)) {
-      scale = 1.0;
+    // 3. Single Horizontal Row (e.g. DHT22, Potentiometer, Ultrasonic, I2C headers)
+    if (!isDualHorizontalRow && !isDualVerticalCol) {
+      if (spanX > 5 && (spanY <= 15 || spanX >= spanY * 1.5)) {
+        isHorizontalRow = true;
+      }
+      // 4. Single Vertical Row (e.g. vertical headers, SIP modules)
+      else if (spanY > 5 && (spanX <= 15 || spanY >= spanX * 1.5)) {
+        isVerticalRow = true;
+      }
     }
 
-    // New Component Dimensions
-    const newWidth = Math.max(10, Math.round(width * scale * 10) / 10);
-    const newHeight = Math.max(10, Math.round(height * scale * 10) / 10);
-
+    let newWidth = width;
+    let newHeight = height;
     let newOffsetX = imageOffset.x;
     let newOffsetY = imageOffset.y;
     let newPins: Pin[] = [];
 
+    const bbOffX = breadboardOffset.x % 17;
+    const bbOffY = breadboardOffset.y % 17;
+
     if (isHorizontalRow) {
       const sortedByX = [...pins].sort((a, b) => a.x - b.x);
+      const pinCount = sortedByX.length;
+      const targetSpanX = (pinCount - 1) * 17.0;
+      let scale = targetSpanX / Math.max(1, spanX);
+      if (scale <= 0.02 || scale > 50 || !isFinite(scale)) scale = 1.0;
+
+      newWidth = Math.max(10, Math.round(width * scale * 10) / 10);
+      newHeight = Math.max(10, Math.round(height * scale * 10) / 10);
+
       const indexMap = new Map<string, number>();
       sortedByX.forEach((p, idx) => indexMap.set(p.id, idx));
 
       const firstPin = sortedByX[0];
-      let startHoleX = snapCoordinate(firstPin.x, breadboardOffset.x % 17);
-      let startHoleY = snapCoordinate(firstPin.y, breadboardOffset.y % 17);
+      let startHoleX = snapCoordinate(firstPin.x, bbOffX);
+      let startHoleY = snapCoordinate(firstPin.y, bbOffY);
 
       // If outside breadboard bounds, place at Column 4, Row E of breadboard
       if (startHoleX < 34.0 || startHoleX > 530.0 || startHoleY < 30.0 || startHoleY > 320.0) {
-        startHoleX = 68.0 + (breadboardOffset.x % 17);
-        startHoleY = 136.0 + (breadboardOffset.y % 17);
+        startHoleX = 68.0 + bbOffX;
+        startHoleY = 136.0 + bbOffY;
       }
 
       // Anchor image offset to the EXACT same firstPin
@@ -1236,16 +1216,24 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       });
     } else if (isVerticalRow) {
       const sortedByY = [...pins].sort((a, b) => a.y - b.y);
+      const pinCount = sortedByY.length;
+      const targetSpanY = (pinCount - 1) * 17.0;
+      let scale = targetSpanY / Math.max(1, spanY);
+      if (scale <= 0.02 || scale > 50 || !isFinite(scale)) scale = 1.0;
+
+      newWidth = Math.max(10, Math.round(width * scale * 10) / 10);
+      newHeight = Math.max(10, Math.round(height * scale * 10) / 10);
+
       const indexMap = new Map<string, number>();
       sortedByY.forEach((p, idx) => indexMap.set(p.id, idx));
 
       const firstPin = sortedByY[0];
-      let startHoleX = snapCoordinate(firstPin.x, breadboardOffset.x % 17);
-      let startHoleY = snapCoordinate(firstPin.y, breadboardOffset.y % 17);
+      let startHoleX = snapCoordinate(firstPin.x, bbOffX);
+      let startHoleY = snapCoordinate(firstPin.y, bbOffY);
 
       if (startHoleX < 34.0 || startHoleX > 530.0 || startHoleY < 30.0 || startHoleY > 320.0) {
-        startHoleX = 68.0 + (breadboardOffset.x % 17);
-        startHoleY = 68.0 + (breadboardOffset.y % 17);
+        startHoleX = 68.0 + bbOffX;
+        startHoleY = 68.0 + bbOffY;
       }
 
       const relFirstX = firstPin.x - imageOffset.x;
@@ -1266,23 +1254,67 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const topRow = pins.filter((p) => p.y < midY).sort((a, b) => a.x - b.x);
       const botRow = pins.filter((p) => p.y >= midY).sort((a, b) => a.x - b.x);
 
-      const firstTopPin = topRow[0];
-      let startTopHoleX = snapCoordinate(firstTopPin.x, breadboardOffset.x % 17);
-      let startTopHoleY = snapCoordinate(firstTopPin.y, breadboardOffset.y % 17);
+      const topSpanX = topRow.length > 1 ? topRow[topRow.length - 1].x - topRow[0].x : 0;
+      const botSpanX = botRow.length > 1 ? botRow[botRow.length - 1].x - botRow[0].x : 0;
+      const avgSpanX = (topSpanX + botSpanX) / 2;
+      const avgCount = (topRow.length + botRow.length) / 2;
+      const targetSpanX = (avgCount - 1) * 17.0;
 
-      if (startTopHoleX < 34.0 || startTopHoleX > 530.0 || startTopHoleY < 30.0 || startTopHoleY > 320.0) {
-        startTopHoleX = 68.0 + (breadboardOffset.x % 17);
-        startTopHoleY = 68.0 + (breadboardOffset.y % 17);
+      let scaleX = targetSpanX / Math.max(1, avgSpanX);
+      if (scaleX <= 0.02 || scaleX > 50 || !isFinite(scaleX)) scaleX = 1.0;
+
+      const avgTopY = topRow.reduce((sum, p) => sum + p.y, 0) / topRow.length;
+      const avgBotY = botRow.reduce((sum, p) => sum + p.y, 0) / botRow.length;
+      const rawRowDistY = Math.max(1, avgBotY - avgTopY);
+
+      // Target row steps: dual row components bridge the trough (at least 3 steps = 51.0px)
+      const targetRowSteps = Math.max(3, Math.round((rawRowDistY * scaleX) / 17.0));
+      const targetPadDistY = targetRowSteps * 17.0;
+
+      // Vertical scale factor to ensure 0 pad drift:
+      let scaleY = targetPadDistY / rawRowDistY;
+      if (scaleY <= 0.02 || scaleY > 50 || !isFinite(scaleY)) scaleY = scaleX;
+
+      newWidth = Math.max(10, Math.round(width * scaleX * 10) / 10);
+      newHeight = Math.max(10, Math.round(height * scaleY * 10) / 10);
+
+      const firstTopPin = topRow[0];
+
+      let startTopHoleX = snapCoordinate(firstTopPin.x, bbOffX);
+      if (startTopHoleX < 34.0 || startTopHoleX > 530.0) {
+        startTopHoleX = 68.0 + bbOffX;
       }
 
-      const rawRowHeight = (botRow[0].y - topRow[0].y) * scale;
-      const targetRowSteps = Math.max(1, Math.round(rawRowHeight / 17.0));
-      const targetBotHoleY = startTopHoleY + targetRowSteps * 17.0;
+      // Breadboard terminal banks:
+      // Top Bank (Rows A-E): 85.0 to 153.0
+      // Bottom Bank (Rows F-J): 204.0 to 272.0
+      const candidateTopY = snapCoordinate(firstTopPin.y, bbOffY);
+      const candidateBotY = candidateTopY + targetPadDistY;
+      const minTopBankY = 85.0 + bbOffY;
+      const maxTopBankY = 153.0 + bbOffY;
+      const minBotBankY = 204.0 + bbOffY;
+      const maxBotBankY = 272.0 + bbOffY;
+
+      let startTopHoleY: number;
+      if (
+        candidateTopY >= minTopBankY &&
+        candidateTopY <= maxTopBankY &&
+        candidateBotY >= minBotBankY &&
+        candidateBotY <= maxBotBankY
+      ) {
+        // Cleanly bridges top and bottom banks around user's vertical position
+        startTopHoleY = candidateTopY;
+      } else {
+        // Symmetrically bridge across the breadboard central trough (step 10.5)
+        const optimalTopStep = Math.max(5, Math.min(9, Math.floor(10.5 - targetRowSteps / 2)));
+        startTopHoleY = optimalTopStep * 17.0 + bbOffY;
+      }
+      const targetBotHoleY = startTopHoleY + targetPadDistY;
 
       const relFirstX = firstTopPin.x - imageOffset.x;
       const relFirstY = firstTopPin.y - imageOffset.y;
-      newOffsetX = Math.round((startTopHoleX - relFirstX * scale) * 10) / 10;
-      newOffsetY = Math.round((startTopHoleY - relFirstY * scale) * 10) / 10;
+      newOffsetX = Math.round((startTopHoleX - relFirstX * scaleX) * 10) / 10;
+      newOffsetY = Math.round((startTopHoleY - relFirstY * scaleY) * 10) / 10;
 
       const topMap = new Map<string, number>();
       topRow.forEach((p, idx) => topMap.set(p.id, idx));
@@ -1305,12 +1337,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             y: targetBotHoleY,
           };
         } else {
-          const scaledX = startTopHoleX + (p.x - firstTopPin.x) * scale;
-          const scaledY = startTopHoleY + (p.y - firstTopPin.y) * scale;
+          const scaledX = startTopHoleX + (p.x - firstTopPin.x) * scaleX;
+          const scaledY = startTopHoleY + (p.y - firstTopPin.y) * scaleY;
           return {
             ...p,
-            x: snapCoordinate(scaledX, breadboardOffset.x % 17),
-            y: snapCoordinate(scaledY, breadboardOffset.y % 17),
+            x: snapCoordinate(scaledX, bbOffX),
+            y: snapCoordinate(scaledY, bbOffY),
           };
         }
       });
@@ -1319,23 +1351,43 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const leftCol = pins.filter((p) => p.x < midX).sort((a, b) => a.y - b.y);
       const rightCol = pins.filter((p) => p.x >= midX).sort((a, b) => a.y - b.y);
 
+      const leftSpanY = leftCol.length > 1 ? leftCol[leftCol.length - 1].y - leftCol[0].y : 0;
+      const rightSpanY = rightCol.length > 1 ? rightCol[rightCol.length - 1].y - rightCol[0].y : 0;
+      const avgSpanY = (leftSpanY + rightSpanY) / 2;
+      const avgCount = (leftCol.length + rightCol.length) / 2;
+      const targetSpanY = (avgCount - 1) * 17.0;
+
+      let scaleY = targetSpanY / Math.max(1, avgSpanY);
+      if (scaleY <= 0.02 || scaleY > 50 || !isFinite(scaleY)) scaleY = 1.0;
+
+      const avgLeftX = leftCol.reduce((sum, p) => sum + p.x, 0) / leftCol.length;
+      const avgRightX = rightCol.reduce((sum, p) => sum + p.x, 0) / rightCol.length;
+      const rawColDistX = Math.max(1, avgRightX - avgLeftX);
+
+      const targetColSteps = Math.max(1, Math.round((rawColDistX * scaleY) / 17.0));
+      const targetPadDistX = targetColSteps * 17.0;
+
+      let scaleX = targetPadDistX / rawColDistX;
+      if (scaleX <= 0.02 || scaleX > 50 || !isFinite(scaleX)) scaleX = scaleY;
+
+      newWidth = Math.max(10, Math.round(width * scaleX * 10) / 10);
+      newHeight = Math.max(10, Math.round(height * scaleY * 10) / 10);
+
       const firstLeftPin = leftCol[0];
-      let startLeftHoleX = snapCoordinate(firstLeftPin.x, breadboardOffset.x % 17);
-      let startLeftHoleY = snapCoordinate(firstLeftPin.y, breadboardOffset.y % 17);
+
+      let startLeftHoleX = snapCoordinate(firstLeftPin.x, bbOffX);
+      let startLeftHoleY = snapCoordinate(firstLeftPin.y, bbOffY);
 
       if (startLeftHoleX < 34.0 || startLeftHoleX > 530.0 || startLeftHoleY < 30.0 || startLeftHoleY > 320.0) {
-        startLeftHoleX = 68.0 + (breadboardOffset.x % 17);
-        startLeftHoleY = 68.0 + (breadboardOffset.y % 17);
+        startLeftHoleX = 68.0 + bbOffX;
+        startLeftHoleY = 68.0 + bbOffY;
       }
-
-      const rawColWidth = (rightCol[0].x - leftCol[0].x) * scale;
-      const targetColSteps = Math.max(1, Math.round(rawColWidth / 17.0));
-      const targetRightHoleX = startLeftHoleX + targetColSteps * 17.0;
+      const targetRightHoleX = startLeftHoleX + targetPadDistX;
 
       const relFirstX = firstLeftPin.x - imageOffset.x;
       const relFirstY = firstLeftPin.y - imageOffset.y;
-      newOffsetX = Math.round((startLeftHoleX - relFirstX * scale) * 10) / 10;
-      newOffsetY = Math.round((startLeftHoleY - relFirstY * scale) * 10) / 10;
+      newOffsetX = Math.round((startLeftHoleX - relFirstX * scaleX) * 10) / 10;
+      newOffsetY = Math.round((startLeftHoleY - relFirstY * scaleY) * 10) / 10;
 
       const leftMap = new Map<string, number>();
       leftCol.forEach((p, idx) => leftMap.set(p.id, idx));
@@ -1358,24 +1410,41 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             y: Math.round((startLeftHoleY + idx * 17.0) * 10) / 10,
           };
         } else {
-          const scaledX = startLeftHoleX + (p.x - firstLeftPin.x) * scale;
-          const scaledY = startLeftHoleY + (p.y - firstLeftPin.y) * scale;
+          const scaledX = startLeftHoleX + (p.x - firstLeftPin.x) * scaleX;
+          const scaledY = startLeftHoleY + (p.y - firstLeftPin.y) * scaleY;
           return {
             ...p,
-            x: snapCoordinate(scaledX, breadboardOffset.x % 17),
-            y: snapCoordinate(scaledY, breadboardOffset.y % 17),
+            x: snapCoordinate(scaledX, bbOffX),
+            y: snapCoordinate(scaledY, bbOffY),
           };
         }
       });
     } else {
       // General proportional scale + snap each pin to closest 17px grid hole
+      const sortedPins = [...pins].sort((a, b) => a.x - b.x || a.y - b.y);
+      let totalStepDist = 0;
+      let stepCount = 0;
+      for (let i = 0; i < sortedPins.length - 1; i++) {
+        const d = Math.hypot(sortedPins[i + 1].x - sortedPins[i].x, sortedPins[i + 1].y - sortedPins[i].y);
+        if (d > 3) {
+          totalStepDist += d;
+          stepCount++;
+        }
+      }
+      const avgDist = stepCount > 0 ? totalStepDist / stepCount : 17.0;
+      let scale = 17.0 / Math.max(1, avgDist);
+      if (scale <= 0.02 || scale > 50 || !isFinite(scale)) scale = 1.0;
+
+      newWidth = Math.max(10, Math.round(width * scale * 10) / 10);
+      newHeight = Math.max(10, Math.round(height * scale * 10) / 10);
+
       const refPin = pins[0];
-      let targetRefX = snapCoordinate(refPin.x, breadboardOffset.x % 17);
-      let targetRefY = snapCoordinate(refPin.y, breadboardOffset.y % 17);
+      let targetRefX = snapCoordinate(refPin.x, bbOffX);
+      let targetRefY = snapCoordinate(refPin.y, bbOffY);
 
       if (targetRefX < 34.0 || targetRefX > 530.0 || targetRefY < 30.0 || targetRefY > 320.0) {
-        targetRefX = 68.0 + (breadboardOffset.x % 17);
-        targetRefY = 136.0 + (breadboardOffset.y % 17);
+        targetRefX = 68.0 + bbOffX;
+        targetRefY = 136.0 + bbOffY;
       }
 
       const relRefX = refPin.x - imageOffset.x;
@@ -1388,8 +1457,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         const scaledY = targetRefY + (p.y - refPin.y) * scale;
         return {
           ...p,
-          x: snapCoordinate(scaledX, breadboardOffset.x % 17),
-          y: snapCoordinate(scaledY, breadboardOffset.y % 17),
+          x: snapCoordinate(scaledX, bbOffX),
+          y: snapCoordinate(scaledY, bbOffY),
         };
       });
     }
