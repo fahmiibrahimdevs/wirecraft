@@ -146,16 +146,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      case 'wemos-d1-mini':
-        return (
-          <image
-            href="/components/wemos_d1_mini.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'nodemcu-v1':
         return (
           <image

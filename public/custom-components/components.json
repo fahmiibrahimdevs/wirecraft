@@ -997,7 +997,7 @@
           "name": "D12 (MISO)",
           "x": 37.5,
           "y": 8.4,
-          "type": "digital",
+          "type": "spi",
           "description": "General Purpose Digital Input/Output (D12) / SPI MISO"
         },
         {
@@ -1005,7 +1005,7 @@
           "name": "D11 (MOSI)",
           "x": 54.5,
           "y": 8.4,
-          "type": "digital",
+          "type": "spi",
           "description": "General Purpose Digital I/O dengan dukungan PWM (D11) / SPI MOSI"
         },
         {
@@ -1013,7 +1013,7 @@
           "name": "D10 (SS)",
           "x": 71.5,
           "y": 8.4,
-          "type": "digital",
+          "type": "spi",
           "description": "General Purpose Digital I/O dengan dukungan PWM (D10) / SPI SS"
         },
         {
@@ -1235,10 +1235,12 @@
       ],
       "icon": "Cpu",
       "imageUrl": "/components/arduino-nano.png",
+      "imageWidth": 301.2,
+      "imageHeight": 119,
       "isCustom": true
     },
     "imageUrl": "/components/arduino-nano.png",
     "createdAt": "2026-09-17T03:09:55.003Z",
-    "updatedAt": "2026-09-17T03:09:55.003Z"
+    "updatedAt": "2026-09-17T03:16:18.365Z"
   }
 }

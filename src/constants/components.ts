@@ -438,59 +438,6 @@ function createEsp32C3SuperminiPins(): Pin[] {
   return pins;
 }
 
-// Generate Wemos D1 Mini (ESP8266) 16-pin layout mapped to official 2D visual
-function createWemosD1MiniPins(): Pin[] {
-  const topLabels = [
-    { id: '3v3', name: '3V3', type: 'power' as const, description: '3.3V Power Output' },
-    { id: 'd8', name: 'D8 (CS)', type: 'spi' as const, description: 'GPIO15 / SPI CS / Boot selector' },
-    { id: 'd7', name: 'D7 (MOSI)', type: 'spi' as const, description: 'GPIO13 / SPI MOSI' },
-    { id: 'd6', name: 'D6 (MISO)', type: 'spi' as const, description: 'GPIO12 / SPI MISO' },
-    { id: 'd5', name: 'D5 (SCK)', type: 'spi' as const, description: 'GPIO14 / SPI SCK / Clock' },
-    { id: 'd0', name: 'D0', type: 'digital' as const, description: 'GPIO16 / Deep-Sleep Wake' },
-    { id: 'a0', name: 'A0', type: 'analog' as const, description: 'Analog Input (ADC0, 0-3.3V)' },
-    { id: 'rst', name: 'RST', type: 'generic' as const, description: 'Reset (Active Low)' },
-  ];
-
-  const botLabels = [
-    { id: '5v', name: '5V', type: 'power' as const, description: '5V Power Input (USB VBUS)' },
-    { id: 'gnd', name: 'G (GND)', type: 'ground' as const, description: 'Ground' },
-    { id: 'd4', name: 'D4 (LED)', type: 'pwm' as const, description: 'GPIO2 / Built-in Blue LED / PWM' },
-    { id: 'd3', name: 'D3', type: 'pwm' as const, description: 'GPIO0 / Flash button / 10k Pull-up / PWM' },
-    { id: 'd2', name: 'D2 (SDA)', type: 'i2c' as const, description: 'GPIO4 / I2C SDA' },
-    { id: 'd1', name: 'D1 (SCL)', type: 'i2c' as const, description: 'GPIO5 / I2C SCL' },
-    { id: 'rx', name: 'RX', type: 'uart' as const, description: 'GPIO3 / UART0 RX' },
-    { id: 'tx', name: 'TX', type: 'uart' as const, description: 'GPIO1 / UART0 TX' },
-  ];
-
-  const pins: Pin[] = [];
-  const startX = 61.3;
-  const stepX = 17.0; // Breadboard Grid Pitch
-
-  topLabels.forEach((item, i) => {
-    pins.push({
-      id: item.id,
-      name: item.name,
-      x: Math.round((startX + i * stepX) * 10) / 10,
-      y: 9.9,
-      type: item.type,
-      description: item.description,
-    });
-  });
-
-  botLabels.forEach((item, i) => {
-    pins.push({
-      id: item.id,
-      name: item.name,
-      x: Math.round((startX + i * stepX) * 10) / 10,
-      y: 162.9,
-      type: item.type,
-      description: item.description,
-    });
-  });
-
-  return pins;
-}
-
 // Generate NodeMCU ESP8266 V1 (Amica CP2102) 30-pin layout mapped to official 2D visual
 function createNodeMcuPins(): Pin[] {
   const topLabels = [
@@ -696,17 +643,6 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     height: 125.1,
     icon: 'Radio',
     pins: createEsp32C3SuperminiPins(),
-  },
-
-  'wemos-d1-mini': {
-    type: 'wemos-d1-mini',
-    name: 'Wemos D1 Mini (ESP8266)',
-    category: 'microcontrollers',
-    description: 'Modul WiFi ESP8266 ringkas 16-pin yang ramah breadboard.',
-    width: 229.3,
-    height: 172.4,
-    icon: 'Radio',
-    pins: createWemosD1MiniPins(),
   },
 
   'nodemcu-v1': {
