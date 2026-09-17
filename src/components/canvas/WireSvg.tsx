@@ -273,22 +273,6 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
 
   const isActive = isSelected || isHovered || Boolean(dragState);
 
-  const isDarkColor = (color: string): boolean => {
-    const c = color.toLowerCase().trim();
-    if (c === '#0f172a' || c === '#020617' || c === '#000000' || c === '#1e293b' || c === '#171717' || c === 'black') {
-      return true;
-    }
-    if (c.startsWith('#') && c.length === 7) {
-      const r = parseInt(c.slice(1, 3), 16);
-      const g = parseInt(c.slice(3, 5), 16);
-      const b = parseInt(c.slice(5, 7), 16);
-      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-      return lum < 50;
-    }
-    return false;
-  };
-  const isDarkWire = isDarkColor(wire.color);
-
   return (
     <g
       className="cursor-pointer group/wire"
@@ -302,22 +286,22 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         if (!dragState) setIsHovered(false);
       }}
     >
-      {/* 1. Outer Border / Casing - Uses contrast slate outline for dark/black wires */}
+      {/* 1. Outer Border / Casing */}
       <path
         d={pathD}
         fill="none"
-        stroke={isDarkWire ? '#475569' : '#020617'}
-        strokeWidth={isDarkWire ? 5.2 : 4.8}
+        stroke="#020617"
+        strokeWidth="4.8"
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity={isDarkWire ? 0.95 : 0.9}
+        opacity="0.9"
       />
 
       {/* 2. Main Colored Wire - Thick, rich and solid wire body */}
       <path
         d={pathD}
         fill="none"
-        stroke={isDarkWire ? '#1e293b' : wire.color}
+        stroke={wire.color}
         strokeWidth="3.6"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -329,8 +313,8 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         cx={startPoint.x}
         cy={startPoint.y}
         r="4"
-        fill={isDarkWire ? '#1e293b' : wire.color}
-        stroke={isDarkWire ? '#475569' : '#020617'}
+        fill={wire.color}
+        stroke="#020617"
         strokeWidth="1.2"
         className="pointer-events-none"
       />
@@ -338,8 +322,8 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         cx={endPoint.x}
         cy={endPoint.y}
         r="4"
-        fill={isDarkWire ? '#1e293b' : wire.color}
-        stroke={isDarkWire ? '#475569' : '#020617'}
+        fill={wire.color}
+        stroke="#020617"
         strokeWidth="1.2"
         className="pointer-events-none"
       />
