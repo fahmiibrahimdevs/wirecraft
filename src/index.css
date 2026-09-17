@@ -73,6 +73,11 @@
 /* ----------------------------------------------------
    SweetAlert2 Wirecraft Dark Theme Customizations
    ---------------------------------------------------- */
+:root {
+  --swal2-background: #0f172a;
+  --swal2-color: #f8fafc;
+}
+
 .swal2-container {
   z-index: 10000 !important;
 }
@@ -107,6 +112,38 @@ body.swal2-shown:not(.swal2-toast-shown) .swal2-container.swal2-backdrop-show {
   line-height: 1.5 !important;
 }
 
+.swal2-popup:not(.swal2-toast) .swal2-icon {
+  margin: 1.25rem auto 1rem !important;
+  border-width: 3px !important;
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success {
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-error {
+  border-color: #f43f5e !important;
+  color: #f43f5e !important;
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-warning {
+  border-color: #f59e0b !important;
+  color: #f59e0b !important;
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-info {
+  border-color: #0ea5e9 !important;
+  color: #0ea5e9 !important;
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success [class^=swal2-success-circular-line],
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success .swal2-success-fix {
+  background: transparent !important;
+}
+
 /* Toast Container (Transparent, non-blocking, clean) */
 body.swal2-toast-shown .swal2-container {
   background: transparent !important;
@@ -116,47 +153,36 @@ body.swal2-toast-shown .swal2-container {
   width: auto !important;
   max-width: 100% !important;
   height: auto !important;
-  padding: 0 !important;
+  padding: 1rem !important;
 }
 
 /* Toast Card */
 .swal2-popup.swal2-toast {
   background: rgba(15, 23, 42, 0.95) !important;
   border: 1px solid rgba(51, 65, 85, 0.9) !important;
-  border-radius: 0.75rem !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(12px) !important;
+  border-radius: 0.875rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(16px) !important;
   padding: 0.625rem 0.875rem !important;
   width: auto !important;
-  min-width: 250px !important;
-  max-width: 380px !important;
-  margin: 0.75rem !important;
+  min-width: 260px !important;
+  max-width: 420px !important;
+  margin: 0 !important;
   color: #f8fafc !important;
   font-family: inherit !important;
   pointer-events: auto !important;
+  overflow: hidden !important;
 }
 
-.swal2-toast .swal2-title {
-  color: #f8fafc !important;
-  font-size: 0.8125rem !important;
-  font-weight: 600 !important;
-  margin: 0 0.5rem !important;
-  line-height: 1.35 !important;
-}
-
-.swal2-toast .swal2-icon {
-  width: 1.5rem !important;
-  min-width: 1.5rem !important;
-  height: 1.5rem !important;
-  margin: 0 0.25rem 0 0 !important;
-  border-width: 2px !important;
-}
-
-.swal2-toast .swal2-icon .swal2-icon-content {
-  font-size: 1rem !important;
+.swal2-toast .swal2-html-container {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  text-align: left !important;
+  overflow: visible !important;
 }
 
 .swal2-toast .swal2-timer-progress-bar {
-  background: #38bdf8 !important;
   height: 2.5px !important;
+  bottom: 0 !important;
 }

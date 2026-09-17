@@ -15,6 +15,40 @@ const baseDarkOptions: SweetAlertOptions = {
 };
 
 /**
+ * Toast icon configurations with sharp SVG and glowing badges
+ */
+const TOAST_ICONS: Record<
+  SweetAlertIcon,
+  { svg: string; badgeClass: string; progressBar: string }
+> = {
+  success: {
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+    badgeClass: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+    progressBar: '#10b981',
+  },
+  error: {
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
+    badgeClass: 'bg-rose-500/15 border-rose-500/30 text-rose-400',
+    progressBar: '#f43f5e',
+  },
+  warning: {
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    badgeClass: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
+    progressBar: '#f59e0b',
+  },
+  info: {
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+    badgeClass: 'bg-sky-500/15 border-sky-500/30 text-sky-400',
+    progressBar: '#0ea5e9',
+  },
+  question: {
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    badgeClass: 'bg-purple-500/15 border-purple-500/30 text-purple-400',
+    progressBar: '#a855f7',
+  },
+};
+
+/**
  * Show a sleek dark-themed Toast notification at the top-right corner
  */
 export const showToast = (
@@ -22,6 +56,8 @@ export const showToast = (
   title: string,
   timer: number = 3000
 ) => {
+  const config = TOAST_ICONS[icon] || TOAST_ICONS.info;
+
   const Toast = Swal.mixin({
     toast: true,
     position: 'top-end',
@@ -31,12 +67,28 @@ export const showToast = (
     didOpen: (toast) => {
       toast.onmouseenter = Swal.stopTimer;
       toast.onmouseleave = Swal.resumeTimer;
+      const pb = toast.querySelector(
+        '.swal2-timer-progress-bar'
+      ) as HTMLElement | null;
+      if (pb) {
+        pb.style.backgroundColor = config.progressBar;
+      }
     },
   });
 
   return Toast.fire({
-    icon,
-    title,
+    html: `
+      <div class="flex items-center gap-3 w-full text-left py-0.5 select-none">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center border shrink-0 ${config.badgeClass}">
+          ${config.svg}
+        </div>
+        <div class="flex-1 min-w-0 pr-1">
+          <p class="text-xs font-semibold text-slate-100 tracking-tight leading-snug truncate">
+            ${title}
+          </p>
+        </div>
+      </div>
+    `,
   });
 };
 
