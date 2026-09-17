@@ -2422,5 +2422,597 @@
     "imageUrl": "/components/transmitter_rtd_pt100.png",
     "createdAt": "2026-09-17T05:58:19.285Z",
     "updatedAt": "2026-09-17T05:58:19.285Z"
+  },
+  "relay": {
+    "definition": {
+      "type": "relay",
+      "name": "Modul Relay 1-Channel (5V Blue)",
+      "category": "outputs",
+      "description": "Modul saklar relay elektromekanik 1-channel dengan proteksi optocoupler, pin metalik horizontal & terminal sekrup.",
+      "width": 256,
+      "height": 104,
+      "icon": "ToggleLeft",
+      "pins": [
+        {
+          "id": "in",
+          "name": "IN",
+          "x": 252,
+          "y": 35,
+          "type": "digital",
+          "description": "Signal Input (Trigger)"
+        },
+        {
+          "id": "gnd",
+          "name": "GND",
+          "x": 252,
+          "y": 52,
+          "type": "ground",
+          "description": "Ground (0V)"
+        },
+        {
+          "id": "vcc",
+          "name": "VCC",
+          "x": 252,
+          "y": 69,
+          "type": "power",
+          "description": "Power VCC (5V)"
+        },
+        {
+          "id": "no",
+          "name": "NO",
+          "x": 43,
+          "y": 21.5,
+          "type": "passive",
+          "description": "Normally Open (NO)"
+        },
+        {
+          "id": "com",
+          "name": "COM",
+          "x": 43,
+          "y": 52,
+          "type": "passive",
+          "description": "Common (COM)"
+        },
+        {
+          "id": "nc",
+          "name": "NC",
+          "x": 43,
+          "y": 82.5,
+          "type": "passive",
+          "description": "Normally Closed (NC)"
+        }
+      ],
+      "imageUrl": "/components/relay_1ch.svg",
+      "isCustom": true
+    },
+    "imageUrl": "/components/relay_1ch.svg",
+    "createdAt": "2026-09-17T06:00:15.105Z",
+    "updatedAt": "2026-09-17T06:00:15.105Z"
+  },
+  "relay-black": {
+    "definition": {
+      "type": "relay-black",
+      "name": "Modul Relay 1-Channel (Black KY-019)",
+      "category": "outputs",
+      "description": "Modul saklar relay 5V vertikal dengan kaki pin metalik 3-pin (S, +, -) dan terminal beban sekrup.",
+      "width": 160,
+      "height": 228,
+      "icon": "ToggleLeft",
+      "pins": [
+        {
+          "id": "signal",
+          "name": "S (Signal)",
+          "x": 79,
+          "y": 222,
+          "type": "digital",
+          "description": "Trigger Signal Input"
+        },
+        {
+          "id": "vcc",
+          "name": "+ (VCC 5V)",
+          "x": 96,
+          "y": 222,
+          "type": "power",
+          "description": "Power 5V"
+        },
+        {
+          "id": "gnd",
+          "name": "- (GND)",
+          "x": 113,
+          "y": 222,
+          "type": "ground",
+          "description": "Ground (0V)"
+        },
+        {
+          "id": "nc",
+          "name": "NC",
+          "x": 59,
+          "y": 35,
+          "type": "passive",
+          "description": "Normally Closed (NC)"
+        },
+        {
+          "id": "com",
+          "name": "COM",
+          "x": 86,
+          "y": 35,
+          "type": "passive",
+          "description": "Common (COM)"
+        },
+        {
+          "id": "no",
+          "name": "NO",
+          "x": 113,
+          "y": 35,
+          "type": "passive",
+          "description": "Normally Open (NO)"
+        }
+      ],
+      "imageUrl": "/components/relay_black.svg",
+      "isCustom": true
+    },
+    "imageUrl": "/components/relay_black.svg",
+    "createdAt": "2026-09-17T06:00:15.105Z",
+    "updatedAt": "2026-09-17T06:00:15.105Z"
+  },
+  "relay-red": {
+    "definition": {
+      "type": "relay-red",
+      "name": "Modul Relay 1-Channel (Red Optocoupler)",
+      "category": "outputs",
+      "description": "Modul saklar relay 5V dengan isolasi optocoupler, jumper pemilih High/Low level trigger, dan terminal sekrup ganda.",
+      "width": 220,
+      "height": 110,
+      "icon": "ToggleLeft",
+      "pins": [
+        {
+          "id": "vcc",
+          "name": "DC+ (VCC)",
+          "x": 18.1,
+          "y": 32.7,
+          "type": "power",
+          "description": "Power Supply 5V (DC+)"
+        },
+        {
+          "id": "gnd",
+          "name": "DC- (GND)",
+          "x": 18.1,
+          "y": 54.2,
+          "type": "ground",
+          "description": "Ground (DC-)"
+        },
+        {
+          "id": "in",
+          "name": "IN (Trigger)",
+          "x": 18.1,
+          "y": 75,
+          "type": "digital",
+          "description": "Trigger Signal Input (High/Low selectable)"
+        },
+        {
+          "id": "nc",
+          "name": "NC",
+          "x": 202.3,
+          "y": 33,
+          "type": "passive",
+          "description": "Normally Closed (NC)"
+        },
+        {
+          "id": "com",
+          "name": "COM",
+          "x": 202.3,
+          "y": 54.5,
+          "type": "passive",
+          "description": "Common Terminal (COM)"
+        },
+        {
+          "id": "no",
+          "name": "NO",
+          "x": 202.3,
+          "y": 75.4,
+          "type": "passive",
+          "description": "Normally Open (NO)"
+        }
+      ],
+      "imageUrl": "/components/relay_red.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/relay_red.png",
+    "createdAt": "2026-09-17T06:00:15.105Z",
+    "updatedAt": "2026-09-17T06:00:15.105Z"
+  },
+  "psu-smps-12v": {
+    "definition": {
+      "type": "psu-smps-12v",
+      "name": "PSU SMPS 12V (Switching)",
+      "category": "power",
+      "description": "Catu daya switching jaring metal enclosure (SMPS) input AC 100-240V, output DC 12V dengan 5-terminal sekrup (L, N, Earth, -V, +V).",
+      "width": 220,
+      "height": 340,
+      "icon": "Zap",
+      "pins": [
+        {
+          "id": "ac_l",
+          "name": "L (Live)",
+          "x": 46.1,
+          "y": 305.7,
+          "type": "power",
+          "description": "AC 100-240V Input Live / Fasa"
+        },
+        {
+          "id": "ac_n",
+          "name": "N (Neutral)",
+          "x": 74.8,
+          "y": 305.7,
+          "type": "passive",
+          "description": "AC 100-240V Input Netral"
+        },
+        {
+          "id": "earth",
+          "name": "FG (Earth)",
+          "x": 101.9,
+          "y": 305.7,
+          "type": "ground",
+          "description": "Frame Ground / Arde Pentanahan Sasis"
+        },
+        {
+          "id": "v_minus",
+          "name": "-V (GND)",
+          "x": 129.3,
+          "y": 305.7,
+          "type": "ground",
+          "description": "DC Output 0V (Ground / Return)"
+        },
+        {
+          "id": "v_plus",
+          "name": "+V (+12V)",
+          "x": 155.8,
+          "y": 305.7,
+          "type": "power",
+          "description": "DC Output Positive (+12V DC)"
+        }
+      ],
+      "imageUrl": "/components/psu_smps_12v.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/psu_smps_12v.png",
+    "createdAt": "2026-09-17T06:00:15.105Z",
+    "updatedAt": "2026-09-17T06:00:15.105Z"
+  },
+  "ac-outlet": {
+    "definition": {
+      "type": "ac-outlet",
+      "name": "Stopkontak AC (Schuko Outlet)",
+      "category": "power",
+      "description": "Stopkontak dinding/plafon AC 220V Schuko Tipe F dengan 2 lubang colokan steker (Fasa L & Netral N), klip grounding arde atas/bawah, serta terminal sekrup kabel samping.",
+      "width": 170,
+      "height": 165.3,
+      "icon": "Plug",
+      "pins": [
+        {
+          "id": "socket_l",
+          "name": "L (Colokan Fasa)",
+          "x": 62.3,
+          "y": 79.3,
+          "type": "power",
+          "description": "Lubang Colokan Kiri (Fasa / Live - 220V AC)"
+        },
+        {
+          "id": "socket_n",
+          "name": "N (Colokan Netral)",
+          "x": 107.2,
+          "y": 79.3,
+          "type": "passive",
+          "description": "Lubang Colokan Kanan (Netral / Neutral - AC Return)"
+        },
+        {
+          "id": "earth_top",
+          "name": "PE (Arde Atas)",
+          "x": 85,
+          "y": 38.5,
+          "type": "ground",
+          "description": "Klip Pentanahan / Grounding Arde Atas"
+        },
+        {
+          "id": "earth_bottom",
+          "name": "PE (Arde Bawah)",
+          "x": 85,
+          "y": 119.2,
+          "type": "ground",
+          "description": "Klip Pentanahan / Grounding Arde Bawah"
+        },
+        {
+          "id": "term_l",
+          "name": "L (Terminal Sekrup)",
+          "x": 16.4,
+          "y": 81.8,
+          "type": "power",
+          "description": "Terminal Sekrup Kabel Kiri (Fasa / Live)"
+        },
+        {
+          "id": "term_n",
+          "name": "N (Terminal Sekrup)",
+          "x": 153.6,
+          "y": 81.8,
+          "type": "passive",
+          "description": "Terminal Sekrup Kabel Kanan (Netral / Neutral)"
+        }
+      ],
+      "imageUrl": "/components/ac_outlet.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/ac_outlet.png",
+    "createdAt": "2026-09-17T06:00:15.105Z",
+    "updatedAt": "2026-09-17T06:00:15.105Z"
+  },
+  "dfplayer-mini": {
+    "definition": {
+      "type": "dfplayer-mini",
+      "name": "DFPlayer Mini MP3 Player",
+      "category": "outputs",
+      "description": "Modul pemutar audio MP3/WAV mini dengan slot Micro SD, kontrol serial UART (RX/TX), internal amplifier 3W (SPK1/SPK2), dan dual DAC.",
+      "width": 136.6,
+      "height": 143,
+      "icon": "Radio",
+      "pins": [
+        {
+          "id": "vcc",
+          "name": "VCC",
+          "x": 8.5,
+          "y": 8.5,
+          "type": "power",
+          "description": "Tegangan Masukan Daya (+3.3V - 5.0V DC, rek: 5V/4.2V)"
+        },
+        {
+          "id": "rx",
+          "name": "RX",
+          "x": 8.5,
+          "y": 25.5,
+          "type": "uart",
+          "description": "UART Serial Input (Hubungkan ke TX MCU via resistor 1k)"
+        },
+        {
+          "id": "tx",
+          "name": "TX",
+          "x": 8.5,
+          "y": 42.5,
+          "type": "uart",
+          "description": "UART Serial Output (Hubungkan ke RX MCU)"
+        },
+        {
+          "id": "dac_r",
+          "name": "DAC_R",
+          "x": 8.5,
+          "y": 59.5,
+          "type": "passive",
+          "description": "Audio DAC Right Channel (Headphone / Aux Amp)"
+        },
+        {
+          "id": "dac_l",
+          "name": "DAC_L",
+          "x": 8.5,
+          "y": 76.5,
+          "type": "passive",
+          "description": "Audio DAC Left Channel (Headphone / Aux Amp)"
+        },
+        {
+          "id": "spk_1",
+          "name": "SPK_1",
+          "x": 8.5,
+          "y": 93.5,
+          "type": "passive",
+          "description": "Speaker Output + (Langsung ke Speaker 3W / 4-8 Ohm)"
+        },
+        {
+          "id": "gnd_left",
+          "name": "GND",
+          "x": 8.5,
+          "y": 110.5,
+          "type": "ground",
+          "description": "Ground Daya / Sinyal (0V)"
+        },
+        {
+          "id": "spk_2",
+          "name": "SPK_2",
+          "x": 8.5,
+          "y": 127.5,
+          "type": "passive",
+          "description": "Speaker Output - (Langsung ke Speaker 3W / 4-8 Ohm)"
+        },
+        {
+          "id": "busy",
+          "name": "BUSY",
+          "x": 127.5,
+          "y": 8.5,
+          "type": "digital",
+          "description": "Status Putar Audio (LOW saat memutar musik, HIGH saat idle)"
+        },
+        {
+          "id": "usb_minus",
+          "name": "USB_N",
+          "x": 127.5,
+          "y": 25.5,
+          "type": "passive",
+          "description": "USB D- Data Line (Komunikasi PC / Flashdisk)"
+        },
+        {
+          "id": "usb_plus",
+          "name": "USB_P",
+          "x": 127.5,
+          "y": 42.5,
+          "type": "passive",
+          "description": "USB D+ Data Line (Komunikasi PC / Flashdisk)"
+        },
+        {
+          "id": "adkey_2",
+          "name": "ADKEY_2",
+          "x": 127.5,
+          "y": 59.5,
+          "type": "analog",
+          "description": "AD Key Port 2 (Input Resistor Ladder Tombol)"
+        },
+        {
+          "id": "adkey_1",
+          "name": "ADKEY_1",
+          "x": 127.5,
+          "y": 76.5,
+          "type": "analog",
+          "description": "AD Key Port 1 (Input Resistor Ladder Tombol)"
+        },
+        {
+          "id": "io_2",
+          "name": "IO_2",
+          "x": 127.5,
+          "y": 93.5,
+          "type": "digital",
+          "description": "Trigger Kontrol 2 (Klik: Next Track / Tahan: Volume +)"
+        },
+        {
+          "id": "gnd_right",
+          "name": "GND",
+          "x": 127.5,
+          "y": 110.5,
+          "type": "ground",
+          "description": "Ground Daya / Sinyal (0V)"
+        },
+        {
+          "id": "io_1",
+          "name": "IO_1",
+          "x": 127.5,
+          "y": 127.5,
+          "type": "digital",
+          "description": "Trigger Kontrol 1 (Klik: Prev Track / Tahan: Volume -)"
+        }
+      ],
+      "imageUrl": "/components/dfplayer_mini.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/dfplayer_mini.png",
+    "createdAt": "2026-09-17T06:00:15.105Z",
+    "updatedAt": "2026-09-17T06:00:15.105Z"
+  },
+  "pzem-004t": {
+    "definition": {
+      "type": "pzem-004t",
+      "name": "PZEM-004T-100A (V3.0)",
+      "category": "sensors",
+      "description": "Modul sensor pengukur daya listrik AC (Tegangan 80-260V, Arus hingga 100A via CT, Daya, Frekuensi, & Energi kWh) antarmuka UART TTL.",
+      "width": 495,
+      "height": 199.5,
+      "icon": "Zap",
+      "pins": [
+        {
+          "id": "5v",
+          "name": "5V (VCC)",
+          "x": 51.9,
+          "y": 75.9,
+          "type": "power",
+          "description": "Power Supply 5V DC untuk Optocoupler & TTL Interface"
+        },
+        {
+          "id": "rx",
+          "name": "RX",
+          "x": 51.9,
+          "y": 92.4,
+          "type": "uart",
+          "description": "UART RX Input (Sambungkan ke TX Mikrokontroler)"
+        },
+        {
+          "id": "tx",
+          "name": "TX",
+          "x": 51.9,
+          "y": 108.8,
+          "type": "uart",
+          "description": "UART TX Output (Sambungkan ke RX Mikrokontroler)"
+        },
+        {
+          "id": "gnd",
+          "name": "GND",
+          "x": 51.9,
+          "y": 125.2,
+          "type": "ground",
+          "description": "Power Ground DC (0V)"
+        },
+        {
+          "id": "ac_l",
+          "name": "AC (L)",
+          "x": 466.3,
+          "y": 52.5,
+          "type": "power",
+          "description": "AC Line / Live Phase Input (80V - 260VAC)"
+        },
+        {
+          "id": "ac_n",
+          "name": "AC (N)",
+          "x": 466.3,
+          "y": 85.2,
+          "type": "passive",
+          "description": "AC Neutral Input"
+        },
+        {
+          "id": "ct1",
+          "name": "CT (1)",
+          "x": 466.3,
+          "y": 117.9,
+          "type": "analog",
+          "description": "Current Transformer Coil Input (+)"
+        },
+        {
+          "id": "ct2",
+          "name": "CT (2)",
+          "x": 466.3,
+          "y": 150.6,
+          "type": "analog",
+          "description": "Current Transformer Coil Input (-)"
+        }
+      ],
+      "imageUrl": "/components/pzem_004t.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/pzem_004t.png",
+    "createdAt": "2026-09-17T06:00:15.105Z",
+    "updatedAt": "2026-09-17T06:00:15.105Z"
+  },
+  "sensor-ct-coil": {
+    "definition": {
+      "type": "sensor-ct-coil",
+      "name": "Current Transformer (CT Coil)",
+      "category": "sensors",
+      "description": "Sensor arus induksi donat toroidal (Closed-Core CT 100A) untuk modul PZEM-004T dengan rongga tembus pandang.",
+      "width": 220,
+      "height": 160,
+      "icon": "CircleDot",
+      "pins": [
+        {
+          "id": "ct_pos",
+          "name": "CT+ (Merah)",
+          "x": 206,
+          "y": 74,
+          "type": "analog",
+          "description": "Kabel output merah sensor CT (Sambungkan ke terminal CT 1 PZEM-004T)"
+        },
+        {
+          "id": "ct_neg",
+          "name": "CT- (Hitam)",
+          "x": 206,
+          "y": 86,
+          "type": "analog",
+          "description": "Kabel output hitam sensor CT (Sambungkan ke terminal CT 2 PZEM-004T)"
+        },
+        {
+          "id": "ac_pass",
+          "name": "Rongga CT (AC Wire)",
+          "x": 75,
+          "y": 80,
+          "type": "passive",
+          "description": "Titik pusat lubang donat CT untuk melewatkan kabel fasa listrik AC"
+        }
+      ],
+      "imageUrl": "/components/ct_coil.png",
+      "isCustom": true
+    },
+    "imageUrl": "/components/ct_coil.png",
+    "createdAt": "2026-09-17T06:00:15.105Z",
+    "updatedAt": "2026-09-17T06:00:15.105Z"
   }
 }

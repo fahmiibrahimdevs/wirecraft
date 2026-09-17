@@ -797,46 +797,8 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'pzem-004t': {
-    type: 'pzem-004t',
-    name: 'PZEM-004T-100A (V3.0)',
-    category: 'sensors',
-    description: 'Modul sensor pengukur daya listrik AC (Tegangan 80-260V, Arus hingga 100A via CT, Daya, Frekuensi, & Energi kWh) antarmuka UART TTL.',
-    width: 495.0,
-    height: 199.5,
-    icon: 'Zap',
-    pins: [
-      // Sisi Kiri: TTL Header 4-Pin ke Mikrokontroler (Pitch standar 16.4px / 2.54mm, tepat pada kaki logam perak)
-      { id: '5v', name: '5V (VCC)', x: 51.9, y: 75.9, type: 'power', description: 'Power Supply 5V DC untuk Optocoupler & TTL Interface' },
-      { id: 'rx', name: 'RX', x: 51.9, y: 92.4, type: 'uart', description: 'UART RX Input (Sambungkan ke TX Mikrokontroler)' },
-      { id: 'tx', name: 'TX', x: 51.9, y: 108.8, type: 'uart', description: 'UART TX Output (Sambungkan ke RX Mikrokontroler)' },
-      { id: 'gnd', name: 'GND', x: 51.9, y: 125.2, type: 'ground', description: 'Power Ground DC (0V)' },
-
-      // Sisi Kanan: AC Line & CT Screw Terminals (Green Terminal Block P4 - Titik pusat baut)
-      { id: 'ac_l', name: 'AC (L)', x: 466.3, y: 52.5, type: 'power', description: 'AC Line / Live Phase Input (80V - 260VAC)' },
-      { id: 'ac_n', name: 'AC (N)', x: 466.3, y: 85.2, type: 'passive', description: 'AC Neutral Input' },
-      { id: 'ct1', name: 'CT (1)', x: 466.3, y: 117.9, type: 'analog', description: 'Current Transformer Coil Input (+)' },
-      { id: 'ct2', name: 'CT (2)', x: 466.3, y: 150.6, type: 'analog', description: 'Current Transformer Coil Input (-)' },
-    ],
-  },
-
-  'sensor-ct-coil': {
-    type: 'sensor-ct-coil',
-    name: 'Current Transformer (CT Coil)',
-    category: 'sensors',
-    description: 'Sensor arus induksi donat toroidal (Closed-Core CT 100A) untuk modul PZEM-004T dengan rongga tembus pandang.',
-    width: 220.0,
-    height: 160.0,
-    icon: 'CircleDot',
-    pins: [
-      // Output Wires to PZEM-004T
-      { id: 'ct_pos', name: 'CT+ (Merah)', x: 206.0, y: 74.0, type: 'analog', description: 'Kabel output merah sensor CT (Sambungkan ke terminal CT 1 PZEM-004T)' },
-      { id: 'ct_neg', name: 'CT- (Hitam)', x: 206.0, y: 86.0, type: 'analog', description: 'Kabel output hitam sensor CT (Sambungkan ke terminal CT 2 PZEM-004T)' },
-      // Pass-through center hole for AC load line (Option B snap guide)
-      { id: 'ac_pass', name: 'Rongga CT (AC Wire)', x: 75.0, y: 80.0, type: 'passive', description: 'Titik pusat lubang donat CT untuk melewatkan kabel fasa listrik AC' },
-    ],
-  },
-
+  
+  
   'sensor-ultrasonic': {
     type: 'sensor-ultrasonic',
     name: 'HC-SR04 Ultrasonic',
@@ -1034,98 +996,10 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'relay': {
-    type: 'relay',
-    name: 'Modul Relay 1-Channel (5V Blue)',
-    category: 'outputs',
-    description: 'Modul saklar relay elektromekanik 1-channel dengan proteksi optocoupler, pin metalik horizontal & terminal sekrup.',
-    width: 256,
-    height: 104,
-    icon: 'ToggleLeft',
-    pins: [
-      // Control input header metalik horizontal (kanan) - pitch 17.0px breadboard aligned
-      { id: 'in', name: 'IN', x: 252.0, y: 35.0, type: 'digital', description: 'Signal Input (Trigger)' },
-      { id: 'gnd', name: 'GND', x: 252.0, y: 52.0, type: 'ground', description: 'Ground (0V)' },
-      { id: 'vcc', name: 'VCC', x: 252.0, y: 69.0, type: 'power', description: 'Power VCC (5V)' },
-      // Screw load terminals (kiri)
-      { id: 'no', name: 'NO', x: 43.0, y: 21.5, type: 'passive', description: 'Normally Open (NO)' },
-      { id: 'com', name: 'COM', x: 43.0, y: 52.0, type: 'passive', description: 'Common (COM)' },
-      { id: 'nc', name: 'NC', x: 43.0, y: 82.5, type: 'passive', description: 'Normally Closed (NC)' },
-    ],
-  },
-
-  'dfplayer-mini': {
-    type: 'dfplayer-mini',
-    name: 'DFPlayer Mini MP3 Player',
-    category: 'outputs',
-    description: 'Modul pemutar audio MP3/WAV mini dengan slot Micro SD, kontrol serial UART (RX/TX), internal amplifier 3W (SPK1/SPK2), dan dual DAC.',
-    width: 136.6,
-    height: 143.0,
-    icon: 'Radio',
-    pins: [
-      // Left Column Pins (Pin 1 - 8, Top to Bottom, X = 8.5)
-      { id: 'vcc', name: 'VCC', x: 8.5, y: 8.5, type: 'power', description: 'Tegangan Masukan Daya (+3.3V - 5.0V DC, rek: 5V/4.2V)' },
-      { id: 'rx', name: 'RX', x: 8.5, y: 25.5, type: 'uart', description: 'UART Serial Input (Hubungkan ke TX MCU via resistor 1k)' },
-      { id: 'tx', name: 'TX', x: 8.5, y: 42.5, type: 'uart', description: 'UART Serial Output (Hubungkan ke RX MCU)' },
-      { id: 'dac_r', name: 'DAC_R', x: 8.5, y: 59.5, type: 'passive', description: 'Audio DAC Right Channel (Headphone / Aux Amp)' },
-      { id: 'dac_l', name: 'DAC_L', x: 8.5, y: 76.5, type: 'passive', description: 'Audio DAC Left Channel (Headphone / Aux Amp)' },
-      { id: 'spk_1', name: 'SPK_1', x: 8.5, y: 93.5, type: 'passive', description: 'Speaker Output + (Langsung ke Speaker 3W / 4-8 Ohm)' },
-      { id: 'gnd_left', name: 'GND', x: 8.5, y: 110.5, type: 'ground', description: 'Ground Daya / Sinyal (0V)' },
-      { id: 'spk_2', name: 'SPK_2', x: 8.5, y: 127.5, type: 'passive', description: 'Speaker Output - (Langsung ke Speaker 3W / 4-8 Ohm)' },
-
-      // Right Column Pins (Pin 16 - 9, Top to Bottom, X = 127.5)
-      { id: 'busy', name: 'BUSY', x: 127.5, y: 8.5, type: 'digital', description: 'Status Putar Audio (LOW saat memutar musik, HIGH saat idle)' },
-      { id: 'usb_minus', name: 'USB_N', x: 127.5, y: 25.5, type: 'passive', description: 'USB D- Data Line (Komunikasi PC / Flashdisk)' },
-      { id: 'usb_plus', name: 'USB_P', x: 127.5, y: 42.5, type: 'passive', description: 'USB D+ Data Line (Komunikasi PC / Flashdisk)' },
-      { id: 'adkey_2', name: 'ADKEY_2', x: 127.5, y: 59.5, type: 'analog', description: 'AD Key Port 2 (Input Resistor Ladder Tombol)' },
-      { id: 'adkey_1', name: 'ADKEY_1', x: 127.5, y: 76.5, type: 'analog', description: 'AD Key Port 1 (Input Resistor Ladder Tombol)' },
-      { id: 'io_2', name: 'IO_2', x: 127.5, y: 93.5, type: 'digital', description: 'Trigger Kontrol 2 (Klik: Next Track / Tahan: Volume +)' },
-      { id: 'gnd_right', name: 'GND', x: 127.5, y: 110.5, type: 'ground', description: 'Ground Daya / Sinyal (0V)' },
-      { id: 'io_1', name: 'IO_1', x: 127.5, y: 127.5, type: 'digital', description: 'Trigger Kontrol 1 (Klik: Prev Track / Tahan: Volume -)' },
-    ],
-  },
-
-  'relay-black': {
-    type: 'relay-black',
-    name: 'Modul Relay 1-Channel (Black KY-019)',
-    category: 'outputs',
-    description: 'Modul saklar relay 5V vertikal dengan kaki pin metalik 3-pin (S, +, -) dan terminal beban sekrup.',
-    width: 160,
-    height: 228,
-    icon: 'ToggleLeft',
-    pins: [
-      // Control input header metalik (bawah) - pitch 17.0px breadboard aligned
-      { id: 'signal', name: 'S (Signal)', x: 79.0, y: 222.0, type: 'digital', description: 'Trigger Signal Input' },
-      { id: 'vcc', name: '+ (VCC 5V)', x: 96.0, y: 222.0, type: 'power', description: 'Power 5V' },
-      { id: 'gnd', name: '- (GND)', x: 113.0, y: 222.0, type: 'ground', description: 'Ground (0V)' },
-      // Screw load terminals (atas)
-      { id: 'nc', name: 'NC', x: 59.0, y: 35.0, type: 'passive', description: 'Normally Closed (NC)' },
-      { id: 'com', name: 'COM', x: 86.0, y: 35.0, type: 'passive', description: 'Common (COM)' },
-      { id: 'no', name: 'NO', x: 113.0, y: 35.0, type: 'passive', description: 'Normally Open (NO)' },
-    ],
-  },
-
-  'relay-red': {
-    type: 'relay-red',
-    name: 'Modul Relay 1-Channel (Red Optocoupler)',
-    category: 'outputs',
-    description: 'Modul saklar relay 5V dengan isolasi optocoupler, jumper pemilih High/Low level trigger, dan terminal sekrup ganda.',
-    width: 220,
-    height: 110,
-    icon: 'ToggleLeft',
-    pins: [
-      // Sisi Kiri: Terminal Sekrup Input Kontrol (DC+, DC-, IN)
-      { id: 'vcc', name: 'DC+ (VCC)', x: 18.1, y: 32.7, type: 'power', description: 'Power Supply 5V (DC+)' },
-      { id: 'gnd', name: 'DC- (GND)', x: 18.1, y: 54.2, type: 'ground', description: 'Ground (DC-)' },
-      { id: 'in', name: 'IN (Trigger)', x: 18.1, y: 75.0, type: 'digital', description: 'Trigger Signal Input (High/Low selectable)' },
-
-      // Sisi Kanan: Terminal Sekrup Beban Output (NC, COM, NO)
-      { id: 'nc', name: 'NC', x: 202.3, y: 33.0, type: 'passive', description: 'Normally Closed (NC)' },
-      { id: 'com', name: 'COM', x: 202.3, y: 54.5, type: 'passive', description: 'Common Terminal (COM)' },
-      { id: 'no', name: 'NO', x: 202.3, y: 75.4, type: 'passive', description: 'Normally Open (NO)' },
-    ],
-  },
-
+  
+  
+  
+  
   'rtc-ds3231': {
     type: 'rtc-ds3231',
     name: 'Modul RTC DS3231 (I2C)',
@@ -1254,23 +1128,7 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'psu-smps-12v': {
-    type: 'psu-smps-12v',
-    name: 'PSU SMPS 12V (Switching)',
-    category: 'power',
-    description: 'Catu daya switching jaring metal enclosure (SMPS) input AC 100-240V, output DC 12V dengan 5-terminal sekrup (L, N, Earth, -V, +V).',
-    width: 220.0,
-    height: 340.0,
-    icon: 'Zap',
-    pins: [
-      { id: 'ac_l', name: 'L (Live)', x: 46.1, y: 305.7, type: 'power', description: 'AC 100-240V Input Live / Fasa' },
-      { id: 'ac_n', name: 'N (Neutral)', x: 74.8, y: 305.7, type: 'passive', description: 'AC 100-240V Input Netral' },
-      { id: 'earth', name: 'FG (Earth)', x: 101.9, y: 305.7, type: 'ground', description: 'Frame Ground / Arde Pentanahan Sasis' },
-      { id: 'v_minus', name: '-V (GND)', x: 129.3, y: 305.7, type: 'ground', description: 'DC Output 0V (Ground / Return)' },
-      { id: 'v_plus', name: '+V (+12V)', x: 155.8, y: 305.7, type: 'power', description: 'DC Output Positive (+12V DC)' },
-    ],
-  },
-
+  
   'fitting-lamp': {
     type: 'fitting-lamp',
     name: 'Fitting Lampu (Bohlam LED)',
@@ -1285,24 +1143,7 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'ac-outlet': {
-    type: 'ac-outlet',
-    name: 'Stopkontak AC (Schuko Outlet)',
-    category: 'power',
-    description: 'Stopkontak dinding/plafon AC 220V Schuko Tipe F dengan 2 lubang colokan steker (Fasa L & Netral N), klip grounding arde atas/bawah, serta terminal sekrup kabel samping.',
-    width: 170.0,
-    height: 165.3,
-    icon: 'Plug',
-    pins: [
-      { id: 'socket_l', name: 'L (Colokan Fasa)', x: 62.3, y: 79.3, type: 'power', description: 'Lubang Colokan Kiri (Fasa / Live - 220V AC)' },
-      { id: 'socket_n', name: 'N (Colokan Netral)', x: 107.2, y: 79.3, type: 'passive', description: 'Lubang Colokan Kanan (Netral / Neutral - AC Return)' },
-      { id: 'earth_top', name: 'PE (Arde Atas)', x: 85.0, y: 38.5, type: 'ground', description: 'Klip Pentanahan / Grounding Arde Atas' },
-      { id: 'earth_bottom', name: 'PE (Arde Bawah)', x: 85.0, y: 119.2, type: 'ground', description: 'Klip Pentanahan / Grounding Arde Bawah' },
-      { id: 'term_l', name: 'L (Terminal Sekrup)', x: 16.4, y: 81.8, type: 'power', description: 'Terminal Sekrup Kabel Kiri (Fasa / Live)' },
-      { id: 'term_n', name: 'N (Terminal Sekrup)', x: 153.6, y: 81.8, type: 'passive', description: 'Terminal Sekrup Kabel Kanan (Netral / Neutral)' },
-    ],
-  },
-
+  
   'steker-switch': {
     type: 'steker-switch',
     name: 'Steker Saklar Arde (Broco AC Plug)',

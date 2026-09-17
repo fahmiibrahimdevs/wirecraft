@@ -104,28 +104,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             preserveAspectRatio="none"
           />
         );
-
-
-      case 'pzem-004t':
-        return (
-          <image
-            href="/components/pzem_004t.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'sensor-ct-coil':
-        return (
-          <image
-            href="/components/ct_coil.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'esp32-38p-cp2102':
         return (
           <image
@@ -997,43 +975,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             preserveAspectRatio="none"
           />
         );
-
-      case 'relay':
-        return (
-          <image
-            href="/components/relay_1ch.svg"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'relay-black':
-        return (
-          <image
-            href="/components/relay_black.svg"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'relay-red':
-        return (
-          <image
-            href="/components/relay_red.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'rtc-ds3231':
         return (
           <image
@@ -1107,19 +1048,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             <text x="52" y="25" fill="#38bdf8" fontSize="9" fontWeight="bold" textAnchor="middle">-</text>
           </g>
         );
-
-      case 'psu-smps-12v':
-        return (
-          <image
-            href="/components/psu_smps_12v.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'fitting-lamp': {
         const isOff = component.customProps?.isLedOn === false;
         return (
@@ -1133,19 +1061,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
       }
-
-      case 'ac-outlet':
-        return (
-          <image
-            href="/components/ac_outlet.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'steker-switch': {
         const isSwitchedOn = component.customProps?.isSwitchedOn !== false;
         return (
@@ -1159,19 +1074,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
       }
-
-      case 'dfplayer-mini':
-        return (
-          <image
-            href="/components/dfplayer_mini.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       default: {
         const customImg = (def as any)?.imageUrl || component.customProps?.customImage;
         const imgOffsetX = def.imageOffset?.x || 0;
