@@ -3,6 +3,7 @@ import { PinType } from '../types/circuit';
 export interface PinProfile {
   type: PinType;
   description: string;
+  isConfident: boolean;
 }
 
 export interface PinSuggestion {
@@ -21,7 +22,13 @@ export const COMMON_PIN_SUGGESTIONS: PinSuggestion[] = [
   { name: 'VIN', type: 'power', description: 'Tegangan Masukan Power Supply (+5V DC / Eksternal)', category: 'Power' },
   { name: '3V3', type: 'power', description: 'Keluaran Tegangan Teratur +3.3V DC (LDO Onboard)', category: 'Power' },
   { name: '5V', type: 'power', description: 'Tegangan Masukan / Keluaran Daya Teratur +5V DC', category: 'Power' },
+  { name: 'HV', type: 'power', description: 'High Voltage Supply Reference (+5V DC)', category: 'Power' },
+  { name: 'LV', type: 'power', description: 'Low Voltage Supply Reference (+3.3V DC)', category: 'Power' },
+  { name: 'HV (POWER)', type: 'power', description: 'High Voltage Supply Reference (+5V DC)', category: 'Power' },
+  { name: 'LV (POWER)', type: 'power', description: 'Low Voltage Supply Reference (+3.3V DC)', category: 'Power' },
   { name: 'GND', type: 'ground', description: 'Power Ground (Referensi Daya & Sinyal 0V)', category: 'Power' },
+  { name: 'GND_HV', type: 'ground', description: 'Power Ground Sisi High Voltage (0V)', category: 'Power' },
+  { name: 'GND_LV', type: 'ground', description: 'Power Ground Sisi Low Voltage (0V)', category: 'Power' },
   { name: 'IN+', type: 'power', description: 'Terminal Positif Tegangan Masukan (Power Input +)', category: 'Power' },
   { name: 'IN-', type: 'power', description: 'Terminal Negatif Tegangan Masukan (Power Input -)', category: 'Power' },
   { name: 'OUT+', type: 'power', description: 'Terminal Positif Tegangan Keluaran (Power Output +)', category: 'Power' },
@@ -29,6 +36,17 @@ export const COMMON_PIN_SUGGESTIONS: PinSuggestion[] = [
   { name: 'B+', type: 'power', description: 'Terminal Positif Baterai (+3.7V / +7.4V DC)', category: 'Power' },
   { name: 'B-', type: 'power', description: 'Terminal Negatif Baterai (Battery Ground -)', category: 'Power' },
   { name: 'AREF', type: 'power', description: 'Tegangan Referensi Analog (Analog Reference Voltage)', category: 'Power' },
+
+  // Logic Level Converter Channels
+  { name: 'HV1', type: 'digital', description: 'High Voltage Channel 1 (5V Side)', category: 'Logic' },
+  { name: 'HV2', type: 'digital', description: 'High Voltage Channel 2 (5V Side)', category: 'Logic' },
+  { name: 'HV3', type: 'digital', description: 'High Voltage Channel 3 (5V Side)', category: 'Logic' },
+  { name: 'HV4', type: 'digital', description: 'High Voltage Channel 4 (5V Side)', category: 'Logic' },
+  { name: 'LV1', type: 'digital', description: 'Low Voltage Channel 1 (3.3V Side)', category: 'Logic' },
+  { name: 'LV2', type: 'digital', description: 'Low Voltage Channel 2 (3.3V Side)', category: 'Logic' },
+  { name: 'LV3', type: 'digital', description: 'Low Voltage Channel 3 (3.3V Side)', category: 'Logic' },
+  { name: 'LV4', type: 'digital', description: 'Low Voltage Channel 4 (3.3V Side)', category: 'Logic' },
+  { name: 'OE', type: 'digital', description: 'Output Enable / Active High Control Pin', category: 'Control' },
 
   // I2C Protocol
   { name: 'SCL', type: 'i2c', description: 'I2C Serial Clock (SCL)', category: 'I2C' },
@@ -101,269 +119,319 @@ export const COMMON_PIN_SUGGESTIONS: PinSuggestion[] = [
 export function inferPinProfile(rawName: string): PinProfile {
   const name = rawName.trim();
   if (!name) {
-    return { type: 'digital', description: '' };
+    return { type: 'digital', description: '', isConfident: false };
   }
 
   const upper = name.toUpperCase().replace(/\s+/g, '_');
+  const cleanToken = upper.replace(/[\(\)\[\]\{\}]/g, '').replace(/_+/g, '_').replace(/^_|_$/g, '');
 
   // 1. EXACT & PREFIX GROUND MATCHES
   if (
-    upper === 'GND' ||
-    upper === '0V' ||
-    upper === 'VSS' ||
-    upper === 'DGND' ||
-    upper === 'AGND' ||
-    upper === 'PGND' ||
-    upper === 'COM' ||
-    upper === 'COMMON' ||
-    upper === 'GROUND' ||
-    /^GND(_|\d+|$)/i.test(upper)
+    cleanToken === 'GND' ||
+    cleanToken === '0V' ||
+    cleanToken === 'VSS' ||
+    cleanToken === 'DGND' ||
+    cleanToken === 'AGND' ||
+    cleanToken === 'PGND' ||
+    cleanToken === 'COM' ||
+    cleanToken === 'COMMON' ||
+    cleanToken === 'GROUND' ||
+    cleanToken === 'GND_HV' ||
+    cleanToken === 'GND_LV' ||
+    cleanToken === 'HV_GND' ||
+    cleanToken === 'LV_GND' ||
+    /^GND(_|\d+|$)/i.test(cleanToken)
   ) {
-    if (upper === 'AGND') {
-      return { type: 'ground', description: 'Analog Ground (Ground Khusus Sinyal Analog Bebas Noise)' };
+    if (cleanToken === 'AGND') {
+      return { type: 'ground', description: 'Analog Ground (Ground Khusus Sinyal Analog Bebas Noise)', isConfident: true };
     }
-    if (upper.startsWith('COM')) {
-      return { type: 'ground', description: 'Terminal Ground / Common Return (COM)' };
+    if (cleanToken.startsWith('COM')) {
+      return { type: 'ground', description: 'Terminal Ground / Common Return (COM)', isConfident: true };
     }
-    return { type: 'ground', description: 'Power Ground (Referensi Daya & Sinyal 0V)' };
+    if (cleanToken === 'GND_HV' || cleanToken === 'HV_GND') {
+      return { type: 'ground', description: 'Power Ground Sisi High Voltage (0V)', isConfident: true };
+    }
+    if (cleanToken === 'GND_LV' || cleanToken === 'LV_GND') {
+      return { type: 'ground', description: 'Power Ground Sisi Low Voltage (0V)', isConfident: true };
+    }
+    return { type: 'ground', description: 'Power Ground (Referensi Daya & Sinyal 0V)', isConfident: true };
   }
 
   // 2. POWER PINS MATCHES
   if (
-    upper === 'VIN' ||
-    upper === '5V' ||
-    upper === '+5V' ||
-    upper === '5V_IN' ||
-    upper === 'VBUS' ||
-    upper === 'RAW' ||
-    upper === 'PWR'
+    cleanToken === 'HV' ||
+    cleanToken === 'HV_POWER' ||
+    cleanToken === 'HV_5V' ||
+    cleanToken === 'HIGH_VOLTAGE'
   ) {
-    return { type: 'power', description: 'Tegangan Masukan Power Supply (+5V DC / Eksternal)' };
+    return { type: 'power', description: 'High Voltage Supply Reference (+5V DC)', isConfident: true };
   }
 
   if (
-    upper === '3V3' ||
-    upper === '3.3V' ||
-    upper === '+3.3V' ||
-    upper === '3V' ||
-    upper === '3V3_OUT'
+    cleanToken === 'LV' ||
+    cleanToken === 'LV_POWER' ||
+    cleanToken === 'LV_3V3' ||
+    cleanToken === 'LOW_VOLTAGE'
   ) {
-    return { type: 'power', description: 'Keluaran Tegangan Teratur +3.3V DC (LDO Onboard)' };
+    return { type: 'power', description: 'Low Voltage Supply Reference (+3.3V DC)', isConfident: true };
   }
 
   if (
-    upper === 'VCC' ||
-    upper === 'VDD' ||
-    upper === 'AVCC' ||
-    upper === '+V' ||
-    upper === 'V+'
+    cleanToken === 'VIN' ||
+    cleanToken === '5V' ||
+    cleanToken === '+5V' ||
+    cleanToken === '5V_IN' ||
+    cleanToken === '5V_POWER' ||
+    cleanToken === 'VBUS' ||
+    cleanToken === 'RAW' ||
+    cleanToken === 'PWR' ||
+    cleanToken === 'POWER'
   ) {
-    return { type: 'power', description: 'Tegangan Masukan Daya Positif (+3.3V / +5V DC)' };
-  }
-
-  if (upper === 'IN+' || upper === 'VIN+' || upper === 'V_IN+') {
-    return { type: 'power', description: 'Terminal Positif Tegangan Masukan (Power Input +)' };
-  }
-  if (upper === 'IN-' || upper === 'VIN-' || upper === 'V_IN-') {
-    return { type: 'power', description: 'Terminal Negatif Tegangan Masukan (Power Input -)' };
-  }
-  if (upper === 'OUT+' || upper === 'VOUT+' || upper === 'V_OUT+') {
-    return { type: 'power', description: 'Terminal Positif Tegangan Keluaran (Power Output +)' };
-  }
-  if (upper === 'OUT-' || upper === 'VOUT-' || upper === 'V_OUT-') {
-    return { type: 'power', description: 'Terminal Negatif Tegangan Keluaran (Power Output -)' };
-  }
-
-  if (upper === 'B+' || upper === 'BAT+' || upper === 'VBAT' || upper === 'BATTERY+') {
-    return { type: 'power', description: 'Terminal Positif Baterai (+3.7V / +7.4V DC)' };
-  }
-  if (upper === 'B-' || upper === 'BAT-' || upper === 'BATTERY-') {
-    return { type: 'power', description: 'Terminal Negatif Baterai (Battery Ground -)' };
-  }
-
-  if (upper === 'AREF' || upper === 'VREF') {
-    return { type: 'power', description: 'Tegangan Referensi Analog (Analog Reference Voltage)' };
-  }
-  if (upper === 'IOREF') {
-    return { type: 'power', description: 'Tegangan Referensi Logika I/O Mikrokontroler' };
-  }
-  if (upper === '12V' || upper === '+12V') {
-    return { type: 'power', description: 'Tegangan Masukan Daya Utama (+12V DC)' };
-  }
-  if (upper === '24V' || upper === '+24V') {
-    return { type: 'power', description: 'Tegangan Masukan Daya Utama (+24V DC)' };
-  }
-
-  // 3. I2C PROTOCOL
-  if (upper === 'SCL' || upper === 'I2C_SCL' || upper === 'SCLK_I2C') {
-    return { type: 'i2c', description: 'I2C Serial Clock (SCL)' };
-  }
-  if (upper === 'SDA' || upper === 'I2C_SDA' || upper === 'SDAT') {
-    return { type: 'i2c', description: 'I2C Serial Data (SDA)' };
-  }
-
-  // 4. SPI PROTOCOL
-  if (
-    upper === 'CLK' ||
-    upper === 'SCK' ||
-    upper === 'SCLK' ||
-    upper === 'SPI_CLK' ||
-    upper === 'SPI_SCK' ||
-    upper.includes('VSPI_SCK') ||
-    upper.includes('HSPI_CLK')
-  ) {
-    return { type: 'spi', description: 'SPI Serial Clock (SCK)' };
+    return { type: 'power', description: 'Tegangan Masukan Power Supply (+5V DC / Eksternal)', isConfident: true };
   }
 
   if (
-    upper === 'MOSI' ||
-    upper === 'SDI' ||
-    upper === 'DIN' ||
-    upper === 'SI' ||
-    upper.includes('VSPI_MOSI') ||
-    upper.includes('HSPI_MOSI') ||
-    upper === 'CMD'
+    cleanToken === '3V3' ||
+    cleanToken === '3.3V' ||
+    cleanToken === '+3.3V' ||
+    cleanToken === '3V' ||
+    cleanToken === '3V3_OUT' ||
+    cleanToken === '3V3_POWER'
   ) {
-    return { type: 'spi', description: 'SPI Serial Data Input / Master Out Slave In (MOSI/SDI)' };
+    return { type: 'power', description: 'Keluaran Tegangan Teratur +3.3V DC (LDO Onboard)', isConfident: true };
   }
 
   if (
-    upper === 'MISO' ||
-    upper === 'SDO' ||
-    upper === 'DOUT' ||
-    upper === 'SO' ||
-    upper.includes('VSPI_MISO') ||
-    upper.includes('HSPI_MISO')
+    cleanToken === 'VCC' ||
+    cleanToken === 'VDD' ||
+    cleanToken === 'AVCC' ||
+    cleanToken === '+V' ||
+    cleanToken === 'V+' ||
+    cleanToken === 'VCC_5V' ||
+    cleanToken === 'VCC_3V3' ||
+    cleanToken === 'VCC_IN' ||
+    cleanToken === 'VCC_POWER'
   ) {
-    return { type: 'spi', description: 'SPI Serial Data Output / Master In Slave Out (MISO/SDO)' };
+    return { type: 'power', description: 'Tegangan Masukan Daya Positif (+3.3V / +5V DC)', isConfident: true };
+  }
+
+  if (cleanToken === 'IN+' || cleanToken === 'VIN+' || cleanToken === 'V_IN+') {
+    return { type: 'power', description: 'Terminal Positif Tegangan Masukan (Power Input +)', isConfident: true };
+  }
+  if (cleanToken === 'IN-' || cleanToken === 'VIN-' || cleanToken === 'V_IN-') {
+    return { type: 'power', description: 'Terminal Negatif Tegangan Masukan (Power Input -)', isConfident: true };
+  }
+  if (cleanToken === 'OUT+' || cleanToken === 'VOUT+' || cleanToken === 'V_OUT+') {
+    return { type: 'power', description: 'Terminal Positif Tegangan Keluaran (Power Output +)', isConfident: true };
+  }
+  if (cleanToken === 'OUT-' || cleanToken === 'VOUT-' || cleanToken === 'V_OUT-') {
+    return { type: 'power', description: 'Terminal Negatif Tegangan Keluaran (Power Output -)', isConfident: true };
+  }
+
+  if (cleanToken === 'B+' || cleanToken === 'BAT+' || cleanToken === 'VBAT' || cleanToken === 'BATTERY+') {
+    return { type: 'power', description: 'Terminal Positif Baterai (+3.7V / +7.4V DC)', isConfident: true };
+  }
+  if (cleanToken === 'B-' || cleanToken === 'BAT-' || cleanToken === 'BATTERY-') {
+    return { type: 'power', description: 'Terminal Negatif Baterai (Battery Ground -)', isConfident: true };
+  }
+
+  if (cleanToken === 'AREF' || cleanToken === 'VREF') {
+    return { type: 'power', description: 'Tegangan Referensi Analog (Analog Reference Voltage)', isConfident: true };
+  }
+  if (cleanToken === 'IOREF') {
+    return { type: 'power', description: 'Tegangan Referensi Logika I/O Mikrokontroler', isConfident: true };
+  }
+  if (cleanToken === '12V' || cleanToken === '+12V') {
+    return { type: 'power', description: 'Tegangan Masukan Daya Utama (+12V DC)', isConfident: true };
+  }
+  if (cleanToken === '24V' || cleanToken === '+24V') {
+    return { type: 'power', description: 'Tegangan Masukan Daya Utama (+24V DC)', isConfident: true };
+  }
+
+  // 3. LOGIC LEVEL CONVERTER CHANNELS (HV1..HV8, LV1..LV8)
+  if (/^HV\d+$/i.test(cleanToken)) {
+    const ch = cleanToken.replace(/^HV/i, '');
+    return { type: 'digital', description: `High Voltage Channel ${ch} (5V Side)`, isConfident: true };
+  }
+  if (/^LV\d+$/i.test(cleanToken)) {
+    const ch = cleanToken.replace(/^LV/i, '');
+    return { type: 'digital', description: `Low Voltage Channel ${ch} (3.3V Side)`, isConfident: true };
+  }
+  if (cleanToken === 'OE' || cleanToken === 'OE_ENABLE' || cleanToken === 'OUTPUT_ENABLE') {
+    return { type: 'digital', description: 'Output Enable / Active High Control Pin', isConfident: true };
+  }
+
+  // 4. I2C PROTOCOL
+  if (cleanToken === 'SCL' || cleanToken === 'I2C_SCL' || cleanToken === 'SCLK_I2C') {
+    return { type: 'i2c', description: 'I2C Serial Clock (SCL)', isConfident: true };
+  }
+  if (cleanToken === 'SDA' || cleanToken === 'I2C_SDA' || cleanToken === 'SDAT') {
+    return { type: 'i2c', description: 'I2C Serial Data (SDA)', isConfident: true };
+  }
+
+  // 5. SPI PROTOCOL
+  if (
+    cleanToken === 'CLK' ||
+    cleanToken === 'SCK' ||
+    cleanToken === 'SCLK' ||
+    cleanToken === 'SPI_CLK' ||
+    cleanToken === 'SPI_SCK' ||
+    cleanToken.includes('VSPI_SCK') ||
+    cleanToken.includes('HSPI_CLK')
+  ) {
+    return { type: 'spi', description: 'SPI Serial Clock (SCK)', isConfident: true };
   }
 
   if (
-    upper === 'CS' ||
-    upper === 'SS' ||
-    upper === 'NSS' ||
-    upper === 'CSN' ||
-    upper.includes('VSPI_SS') ||
-    upper.includes('HSPI_CS') ||
-    upper === 'CHIP_SELECT'
+    cleanToken === 'MOSI' ||
+    cleanToken === 'SDI' ||
+    cleanToken === 'DIN' ||
+    cleanToken === 'SI' ||
+    cleanToken.includes('VSPI_MOSI') ||
+    cleanToken.includes('HSPI_MOSI') ||
+    cleanToken === 'CMD'
   ) {
-    return { type: 'digital', description: 'SPI Chip Select / Slave Select (Active LOW)' };
-  }
-
-  if (upper === 'RDY' || upper === 'DRDY' || upper === 'INT' || upper === 'IRQ') {
-    return { type: 'digital', description: 'Data Ready / Hardware Interrupt Indicator' };
-  }
-
-  // 5. UART / SERIAL PROTOCOL
-  if (
-    upper === 'TX' ||
-    upper === 'TXD' ||
-    upper === 'TX0' ||
-    upper === 'TX1' ||
-    upper === 'TX2' ||
-    upper === 'UART_TX' ||
-    upper === 'DOUT_UART' ||
-    upper === 'SOUT'
-  ) {
-    return { type: 'uart', description: `UART Serial Transmit / Serial TX (${name.toUpperCase()})` };
+    return { type: 'spi', description: 'SPI Serial Data Input / Master Out Slave In (MOSI/SDI)', isConfident: true };
   }
 
   if (
-    upper === 'RX' ||
-    upper === 'RXD' ||
-    upper === 'RX0' ||
-    upper === 'RX1' ||
-    upper === 'RX2' ||
-    upper === 'UART_RX' ||
-    upper === 'DIN_UART' ||
-    upper === 'SIN'
+    cleanToken === 'MISO' ||
+    cleanToken === 'SDO' ||
+    cleanToken === 'DOUT' ||
+    cleanToken === 'SO' ||
+    cleanToken.includes('VSPI_MISO') ||
+    cleanToken.includes('HSPI_MISO')
   ) {
-    return { type: 'uart', description: `UART Serial Receive / Serial RX (${name.toUpperCase()})` };
+    return { type: 'spi', description: 'SPI Serial Data Output / Master In Slave Out (MISO/SDO)', isConfident: true };
   }
 
-  // 6. ANALOG & RTD PINS
-  if (/^A\d+$/i.test(upper) || /^ADC\d*(_CH\d+)?$/i.test(upper)) {
-    return { type: 'analog', description: `Pin Masukan Analog ADC (Analog Input ${name.toUpperCase()})` };
-  }
-  if (upper === 'AO' || upper === 'AOUT' || upper === 'ANALOG_OUT' || /^DAC\d*$/i.test(upper)) {
-    return { type: 'analog', description: 'Keluaran Sinyal Analog / DAC (Analog Output)' };
-  }
-  if (upper === 'VP' || upper === 'SENSOR_VP') {
-    return { type: 'analog', description: 'GPIO36 / SENSOR_VP / ADC1_CH0 (Input Only)' };
-  }
-  if (upper === 'VN' || upper === 'SENSOR_VN') {
-    return { type: 'analog', description: 'GPIO39 / SENSOR_VN / ADC1_CH3 (Input Only)' };
-  }
-  if (upper === 'RTD+' || upper === 'RTD_POS') {
-    return { type: 'passive', description: 'RTD Sense Positive Terminal' };
-  }
-  if (upper === 'RTD-' || upper === 'RTD_NEG') {
-    return { type: 'passive', description: 'RTD Sense Negative Terminal' };
-  }
-  if (upper === 'F+' || upper === 'FORCE+' || upper === 'FORCE_POS') {
-    return { type: 'passive', description: 'Force Positive / RTD+ Excitation Lead' };
-  }
-  if (upper === 'F-' || upper === 'FORCE-' || upper === 'FORCE_NEG') {
-    return { type: 'passive', description: 'Force Negative / RTD- Return Lead' };
-  }
-  if (upper === 'TDS' || upper === 'PH' || upper === 'TEMP') {
-    return { type: 'analog', description: `Sinyal Masukan/Keluaran Sensor Analog (${name.toUpperCase()})` };
+  if (
+    cleanToken === 'CS' ||
+    cleanToken === 'SS' ||
+    cleanToken === 'NSS' ||
+    cleanToken === 'CSN' ||
+    cleanToken.includes('VSPI_SS') ||
+    cleanToken.includes('HSPI_CS') ||
+    cleanToken === 'CHIP_SELECT'
+  ) {
+    return { type: 'digital', description: 'SPI Chip Select / Slave Select (Active LOW)', isConfident: true };
   }
 
-  // 7. DIGITAL & PWM PINS
-  if (upper.startsWith('PWM') || upper.startsWith('~')) {
-    return { type: 'pwm', description: `Digital I/O dengan dukungan PWM Output (${name.toUpperCase()})` };
+  if (cleanToken === 'RDY' || cleanToken === 'DRDY' || cleanToken === 'INT' || cleanToken === 'IRQ') {
+    return { type: 'digital', description: 'Data Ready / Hardware Interrupt Indicator', isConfident: true };
   }
 
-  if (/^(D|IO|GPIO|P)\d+$/i.test(upper)) {
-    const num = parseInt(upper.replace(/\D/g, ''), 10);
+  // 6. UART / SERIAL PROTOCOL
+  if (
+    cleanToken === 'TX' ||
+    cleanToken === 'TXD' ||
+    cleanToken === 'TX0' ||
+    cleanToken === 'TX1' ||
+    cleanToken === 'TX2' ||
+    cleanToken === 'UART_TX' ||
+    cleanToken === 'DOUT_UART' ||
+    cleanToken === 'SOUT'
+  ) {
+    return { type: 'uart', description: `UART Serial Transmit / Serial TX (${name.toUpperCase()})`, isConfident: true };
+  }
+
+  if (
+    cleanToken === 'RX' ||
+    cleanToken === 'RXD' ||
+    cleanToken === 'RX0' ||
+    cleanToken === 'RX1' ||
+    cleanToken === 'RX2' ||
+    cleanToken === 'UART_RX' ||
+    cleanToken === 'DIN_UART' ||
+    cleanToken === 'SIN'
+  ) {
+    return { type: 'uart', description: `UART Serial Receive / Serial RX (${name.toUpperCase()})`, isConfident: true };
+  }
+
+  // 7. ANALOG & RTD PINS
+  if (/^A\d+$/i.test(cleanToken) || /^ADC\d*(_CH\d+)?$/i.test(cleanToken)) {
+    return { type: 'analog', description: `Pin Masukan Analog ADC (Analog Input ${name.toUpperCase()})`, isConfident: true };
+  }
+  if (cleanToken === 'AO' || cleanToken === 'AOUT' || cleanToken === 'ANALOG_OUT' || /^DAC\d*$/i.test(cleanToken)) {
+    return { type: 'analog', description: 'Keluaran Sinyal Analog / DAC (Analog Output)', isConfident: true };
+  }
+  if (cleanToken === 'VP' || cleanToken === 'SENSOR_VP') {
+    return { type: 'analog', description: 'GPIO36 / SENSOR_VP / ADC1_CH0 (Input Only)', isConfident: true };
+  }
+  if (cleanToken === 'VN' || cleanToken === 'SENSOR_VN') {
+    return { type: 'analog', description: 'GPIO39 / SENSOR_VN / ADC1_CH3 (Input Only)', isConfident: true };
+  }
+  if (cleanToken === 'RTD+' || cleanToken === 'RTD_POS') {
+    return { type: 'passive', description: 'RTD Sense Positive Terminal', isConfident: true };
+  }
+  if (cleanToken === 'RTD-' || cleanToken === 'RTD_NEG') {
+    return { type: 'passive', description: 'RTD Sense Negative Terminal', isConfident: true };
+  }
+  if (cleanToken === 'F+' || cleanToken === 'FORCE+' || cleanToken === 'FORCE_POS') {
+    return { type: 'passive', description: 'Force Positive / RTD+ Excitation Lead', isConfident: true };
+  }
+  if (cleanToken === 'F-' || cleanToken === 'FORCE-' || cleanToken === 'FORCE_NEG') {
+    return { type: 'passive', description: 'Force Negative / RTD- Return Lead', isConfident: true };
+  }
+  if (cleanToken === 'TDS' || cleanToken === 'PH' || cleanToken === 'TEMP') {
+    return { type: 'analog', description: `Sinyal Masukan/Keluaran Sensor Analog (${name.toUpperCase()})`, isConfident: true };
+  }
+
+  // 8. DIGITAL & PWM PINS
+  if (cleanToken.startsWith('PWM') || cleanToken.startsWith('~')) {
+    return { type: 'pwm', description: `Digital I/O dengan dukungan PWM Output (${name.toUpperCase()})`, isConfident: true };
+  }
+
+  if (/^(D|IO|GPIO|P)\d+$/i.test(cleanToken)) {
+    const num = parseInt(cleanToken.replace(/\D/g, ''), 10);
     // Arduino Uno standard PWM pins: D3, D5, D6, D9, D10, D11
-    const isUnoPwm = (upper.startsWith('D') || upper.startsWith('GPIO')) && [3, 5, 6, 9, 10, 11].includes(num);
-    if (isUnoPwm && upper.startsWith('D') && num <= 13) {
-      return { type: 'pwm', description: `General Purpose Digital I/O dengan dukungan PWM (${name.toUpperCase()})` };
+    const isUnoPwm = (cleanToken.startsWith('D') || cleanToken.startsWith('GPIO')) && [3, 5, 6, 9, 10, 11].includes(num);
+    if (isUnoPwm && cleanToken.startsWith('D') && num <= 13) {
+      return { type: 'pwm', description: `General Purpose Digital I/O dengan dukungan PWM (${name.toUpperCase()})`, isConfident: true };
     }
-    return { type: 'digital', description: `General Purpose Digital Input/Output (${name.toUpperCase()})` };
+    return { type: 'digital', description: `General Purpose Digital Input/Output (${name.toUpperCase()})`, isConfident: true };
   }
 
-  if (upper === 'DO' || upper === 'DOUT' || upper === 'DIGITAL_OUT' || upper === 'OUT') {
-    return { type: 'digital', description: 'Keluaran Sinyal Digital (Digital Output)' };
+  if (cleanToken === 'DO' || cleanToken === 'DOUT' || cleanToken === 'DIGITAL_OUT' || cleanToken === 'OUT') {
+    return { type: 'digital', description: 'Keluaran Sinyal Digital (Digital Output)', isConfident: true };
   }
-  if (upper === 'IN' || upper === 'DIN' || upper === 'DIGITAL_IN') {
-    return { type: 'digital', description: 'Masukan Sinyal Digital (Digital Input)' };
+  if (cleanToken === 'IN' || cleanToken === 'DIN' || cleanToken === 'DIGITAL_IN') {
+    return { type: 'digital', description: 'Masukan Sinyal Digital (Digital Input)', isConfident: true };
   }
-  if (upper === 'SIG' || upper === 'SIGNAL' || upper === 'IO') {
-    return { type: 'digital', description: 'Sinyal Digital I/O (Signal Pin)' };
+  if (cleanToken === 'SIG' || cleanToken === 'SIGNAL' || cleanToken === 'IO') {
+    return { type: 'digital', description: 'Sinyal Digital I/O (Signal Pin)', isConfident: true };
   }
-  if (upper === 'TRIG' || upper === 'TRIGGER') {
-    return { type: 'digital', description: 'Ultrasonic Trigger Pulse Input (10µs High Pulse)' };
+  if (cleanToken === 'TRIG' || cleanToken === 'TRIGGER') {
+    return { type: 'digital', description: 'Ultrasonic Trigger Pulse Input (10µs High Pulse)', isConfident: true };
   }
-  if (upper === 'ECHO') {
-    return { type: 'digital', description: 'Ultrasonic Echo Pulse Output (Lebar Pulsa Sinyal Jarak)' };
-  }
-
-  // 8. CONTROL & SPECIAL PINS
-  if (upper === 'EN' || upper === 'ENABLE' || upper === 'CHIP_PU') {
-    return { type: 'generic', description: 'Chip Enable / Module Activation Pin (Active LOW / HIGH)' };
-  }
-  if (upper === 'RST' || upper === 'RESET' || upper === 'MCLR') {
-    return { type: 'generic', description: 'System Hardware Reset Pin (Active LOW)' };
-  }
-  if (upper === 'BOOT' || upper === 'BOOT0' || upper === 'BOOT1' || upper === 'PROG') {
-    return { type: 'digital', description: 'Bootloader Mode / Flash Programming Selector' };
-  }
-  if (upper === 'ANODE' || upper === 'A' || upper === 'LED+' || upper === '+') {
-    return { type: 'passive', description: 'Anoda Positif (+)' };
-  }
-  if (upper === 'CATHODE' || upper === 'K' || upper === 'CAT' || upper === 'LED-' || upper === '-') {
-    return { type: 'passive', description: 'Katoda Negatif (-)' };
-  }
-  if (upper === 'NC' || upper === 'N/C' || upper === 'DNC' || upper === 'NOT_CONNECTED') {
-    return { type: 'passive', description: 'No Connection (Jangan Dihubungkan / Kosong)' };
+  if (cleanToken === 'ECHO') {
+    return { type: 'digital', description: 'Ultrasonic Echo Pulse Output (Lebar Pulsa Sinyal Jarak)', isConfident: true };
   }
 
-  // 9. FALLBACK
+  // 9. CONTROL & SPECIAL PINS
+  if (cleanToken === 'EN' || cleanToken === 'ENABLE' || cleanToken === 'CHIP_PU') {
+    return { type: 'generic', description: 'Chip Enable / Module Activation Pin (Active LOW / HIGH)', isConfident: true };
+  }
+  if (cleanToken === 'RST' || cleanToken === 'RESET' || cleanToken === 'MCLR') {
+    return { type: 'generic', description: 'System Hardware Reset Pin (Active LOW)', isConfident: true };
+  }
+  if (cleanToken === 'BOOT' || cleanToken === 'BOOT0' || cleanToken === 'BOOT1' || cleanToken === 'PROG') {
+    return { type: 'digital', description: 'Bootloader Mode / Flash Programming Selector', isConfident: true };
+  }
+  if (cleanToken === 'ANODE' || cleanToken === 'A' || cleanToken === 'LED+' || cleanToken === '+') {
+    return { type: 'passive', description: 'Anoda Positif (+)', isConfident: true };
+  }
+  if (cleanToken === 'CATHODE' || cleanToken === 'K' || cleanToken === 'CAT' || cleanToken === 'LED-' || cleanToken === '-') {
+    return { type: 'passive', description: 'Katoda Negatif (-)', isConfident: true };
+  }
+  if (cleanToken === 'NC' || cleanToken === 'N/C' || cleanToken === 'DNC' || cleanToken === 'NOT_CONNECTED') {
+    return { type: 'passive', description: 'No Connection (Jangan Dihubungkan / Kosong)', isConfident: true };
+  }
+
+  // 10. FALLBACK (NOT CONFIDENT)
   return {
     type: 'digital',
     description: `Terminal Pin ${name}`,
+    isConfident: false,
   };
 }

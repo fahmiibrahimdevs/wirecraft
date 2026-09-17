@@ -1290,7 +1290,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
   // Core pin name change function with auto-inference for pin type & description
   const applyPinNameChange = useCallback(
-    (pinId: string, newName: string) => {
+    (pinId: string, newName: string, explicitType?: PinType) => {
       const targetPin = pins.find((p) => p.id === pinId);
       if (!targetPin) return pins;
       const oldName = targetPin.name;
@@ -1309,10 +1309,24 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         oldDesc.trim() === oldProfile.description.trim() ||
         oldDesc.startsWith('Terminal Pin ');
 
+      // Determine PinType:
+      // 1. If explicitType is provided -> use it
+      // 2. If newProfile has a confident match (GND, Power, I2C, SPI, UART, etc.) -> use newProfile.type
+      // 3. If targetPin already had a non-default type (power/ground/etc.) and newProfile is unconfident -> PRESERVE targetPin.type!
+      // 4. Otherwise -> use newProfile.type
+      let nextType: PinType = targetPin.type;
+      if (explicitType) {
+        nextType = explicitType;
+      } else if (newProfile.isConfident) {
+        nextType = newProfile.type;
+      } else if (!targetPin.type || targetPin.type === 'generic' || targetPin.type === 'digital') {
+        nextType = newProfile.type;
+      }
+
       const updatedPin: Pin = {
         ...targetPin,
         name: newName,
-        type: newProfile.type,
+        type: nextType,
         description: isGenericOrAuto ? newProfile.description : oldDesc,
       };
 
@@ -2762,7 +2776,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                 if (!inlineEditingPin) return null;
                 const inlinePinIndex = pins.findIndex((p) => p.id === inlineEditPinId);
                 const inlineProfile = inferPinProfile(inlinePinName);
-                const inlineTypeDef = PIN_TYPES.find((t) => t.type === inlineProfile.type) || PIN_TYPES[0];
+                const inlineTypeDef = PIN_TYPES.find((t) => t.type === inlineEditingPin.type) || PIN_TYPES[0];
 
                 return (
                   <div
@@ -2850,14 +2864,27 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                       </button>
                     </div>
 
-                    {/* Live Auto-Inference Preview */}
-                    <div className="flex flex-col gap-0.5 pt-1 border-t border-slate-800/80">
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-slate-400">Tipe: <span className="font-semibold text-slate-200">{inlineTypeDef.label}</span></span>
-                        <span className="text-sky-400/80 font-mono text-[9px]">⚡ Auto-Inference</span>
+                    {/* Live Pin Type Dropdown & Description Preview */}
+                    <div className="flex flex-col gap-1.5 pt-1.5 border-t border-slate-800/80">
+                      <div className="flex items-center justify-between gap-2 text-[10px]">
+                        <span className="text-slate-400 shrink-0">Tipe Pin:</span>
+                        <select
+                          value={inlineEditingPin.type}
+                          onChange={(e) => {
+                            const newType = e.target.value as PinType;
+                            applyPinNameChange(inlineEditingPin.id, inlinePinName, newType);
+                          }}
+                          className="bg-slate-950 border border-slate-700/80 rounded px-2 py-0.5 text-[10px] text-slate-200 focus:border-sky-400 focus:outline-none cursor-pointer flex-1"
+                        >
+                          {PIN_TYPES.map((t) => (
+                            <option key={t.type} value={t.type}>
+                              {t.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                      <div className="text-[10px] text-slate-300 leading-tight bg-slate-950/70 px-2 py-1 rounded border border-slate-800/60 truncate font-mono" title={inlineProfile.description}>
-                        {inlineProfile.description || 'Deskripsi otomatis...'}
+                      <div className="text-[10px] text-slate-300 leading-tight bg-slate-950/70 px-2 py-1 rounded border border-slate-800/60 truncate font-mono" title={inlineEditingPin.description || inlineProfile.description}>
+                        {inlineEditingPin.description || inlineProfile.description || 'Deskripsi otomatis...'}
                       </div>
                     </div>
 
