@@ -178,6 +178,9 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     [pan, zoom]
   );
 
+  // Reference to prevent accidental double-click / immediate wire creation right after finishing a wire
+  const justFinishedWireRef = useRef<number>(0);
+
   // Helper to find pin world coordinate in O(1)
   const getPinCoords = useCallback(
     (compId: string, pinId: string): WirePoint | null => {
@@ -214,11 +217,24 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
         waypoints: drawingWire.waypoints,
       });
 
+      justFinishedWireRef.current = Date.now();
       setDrawingWire(null);
       setHoveredPinInfo(null);
     },
     [drawingWire, onAddWire, currentWireColor, wireRouting, onSelectWireColor]
   );
+
+  // Cancel drawing wire on Escape key
+  useEffect(() => {
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && drawingWire) {
+        setDrawingWire(null);
+        setHoveredPinInfo(null);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, [drawingWire]);
 
   // Handle Mouse Down on Canvas Background
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
@@ -584,6 +600,11 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       if (e.button !== 0) return;
 
       if (!drawingWire) {
+        // Prevent accidental wire creation right after finishing a wire connection
+        if (Date.now() - justFinishedWireRef.current < 250) {
+          return;
+        }
+
         const pinPos = getPinCoords(compId, pin.id);
         if (!pinPos) return;
 
@@ -961,12 +982,29 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       {drawingWire && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 border border-sky-500/40 text-slate-200 px-4 py-2 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-3 animate-fade-in">
           <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping" />
-          <div className="text-xs">
-            Menghubungkan <span className="text-sky-400 font-mono font-medium">{drawingWire.fromPin.name}</span>: Klik pin target untuk menyambungkan, atau klik canvas untuk belokan.
+          <div className="text-xs flex items-center gap-1.5 flex-wrap">
+            <span>Menghubungkan pin</span>
+            <span className="text-sky-400 font-mono font-bold bg-sky-500/15 px-1.5 py-0.5 rounded border border-sky-500/30">
+              {drawingWire.fromPin.name}
+            </span>
+            {hoveredPinInfo ? (
+              <>
+                <span className="text-slate-400">→</span>
+                <span className="text-emerald-400 font-mono font-bold bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                  {hoveredPinInfo.component.label || hoveredPinInfo.component.name}.{hoveredPinInfo.pin.name}
+                </span>
+                <span className="text-slate-400 text-[11px]">(Klik untuk menyambungkan)</span>
+              </>
+            ) : (
+              <span className="text-slate-400 text-[11px]">(Klik pin tujuan untuk menyambungkan, atau klik kanvas untuk belokan)</span>
+            )}
           </div>
           <button
-            onClick={() => setDrawingWire(null)}
-            className="text-[11px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded text-slate-300 transition-colors"
+            onClick={() => {
+              setDrawingWire(null);
+              setHoveredPinInfo(null);
+            }}
+            className="text-[11px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded text-slate-300 transition-colors cursor-pointer shrink-0"
           >
             Batal (Esc)
           </button>
