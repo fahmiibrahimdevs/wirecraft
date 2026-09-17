@@ -305,7 +305,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         strokeWidth="3.6"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className={`transition-all duration-150 ${isSelected ? 'brightness-125' : 'group-hover/wire:brightness-110'}`}
+        className={isSelected ? 'brightness-125' : 'group-hover/wire:brightness-110'}
       />
 
       {/* 3. Terminal Eyelets */}
@@ -403,7 +403,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
                   fill="#0284c7"
                   stroke="#38bdf8"
                   strokeWidth={1.5}
-                  className="pointer-events-none opacity-80 hover:opacity-100 transition-opacity"
+                  className="pointer-events-none opacity-80 hover:opacity-100"
                 />
               </g>
             );
