@@ -23,6 +23,7 @@ import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/modals/AuthModal';
 import { ContextMenu, ContextMenuState } from './components/menu/ContextMenu';
+import { Zap } from 'lucide-react';
 
 const STORAGE_KEY = 'wirecraft_saved_project_v1';
 
@@ -114,7 +115,7 @@ const DEFAULT_STARTER_WIRES: Wire[] = [
 import { useCircuitFiles } from './hooks/useCircuitFiles';
 
 function CircuitAppContent() {
-  const { user, isAdmin, token, logout } = useAuth();
+  const { user, isAdmin, token, logout, isLoading } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const {
@@ -867,7 +868,36 @@ function CircuitAppContent() {
     }
   };
 
-  // Derived selected component (single or first of multi)
+  // 1. Loading state while verifying stored session token
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center w-screen h-screen bg-[#020617] text-slate-100 select-none">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shadow-sm animate-pulse">
+            <Zap className="w-5 h-5" />
+          </div>
+          <div className="text-xs text-slate-400 font-medium">Memuat Circuit Electronics IDE...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated state: Lock canvas and show Auth Modal
+  if (!user) {
+    return (
+      <div className="flex flex-col w-screen h-screen bg-[#020617] text-slate-100 overflow-hidden select-none relative">
+        {/* Ambient Dark Grid Background */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px]" />
+
+        {/* Auth Modal with locked close */}
+        <AuthModal
+          isOpen={true}
+          canClose={false}
+        />
+      </div>
+    );
+  }
+
   const selectedComponent = components.find((c) => selectedComponentIds.includes(c.id)) || null;
   const selectedWire = wires.find((w) => w.id === selectedWireId) || null;
 
