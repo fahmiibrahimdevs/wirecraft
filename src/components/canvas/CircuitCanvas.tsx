@@ -242,16 +242,19 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       return;
     }
 
-    // Left click on empty canvas: Start Marquee selection box
+    // Left click on empty canvas: Smooth Left-Click Drag Pan (or Marquee Box if Ctrl/Cmd/Shift is held)
     if (e.button === 0 && (e.target === containerRef.current || (e.target as HTMLElement)?.tagName === 'svg')) {
-      const isCmdOrCtrl = e.ctrlKey || e.metaKey;
-      if (!isCmdOrCtrl) {
+      const isCmdOrCtrl = e.ctrlKey || e.metaKey || e.shiftKey;
+      if (isCmdOrCtrl) {
+        const worldPos = screenToWorld(e.clientX, e.clientY);
+        setMarqueeStart(worldPos);
+        setMarqueeCurrent(worldPos);
+      } else {
         onSelectComponents([]);
         onSelectWire(null);
+        setIsPanning(true);
+        setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
       }
-      const worldPos = screenToWorld(e.clientX, e.clientY);
-      setMarqueeStart(worldPos);
-      setMarqueeCurrent(worldPos);
     }
   };
 
