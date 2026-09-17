@@ -384,17 +384,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           </g>
         );
       }
-
-      case 'sensor-ultrasonic':
-        return (
-          <image
-            href="/components/hc_sr04.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'push-button':
       case 'push-button-6mm': {
         const isPressed = Boolean(component.customProps?.buttonPressed);
@@ -904,42 +893,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             height={height}
             preserveAspectRatio="none"
           />
-        );      case 'sensor-ads1115':
-        return (
-          <image
-            href="/components/sensor_ads1115.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
         );
-
-      case 'sensor-jsn-sr04t':
-        return (
-          <image
-            href="/components/sensor_jsn_sr04t.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'module-sim800l':
-        return (
-          <image
-            href="/components/module_sim800l.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'buzzer':
         return (
           <image
@@ -975,18 +929,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             preserveAspectRatio="none"
           />
         );
-      case 'rtc-ds3231':
-        return (
-          <image
-            href="/components/rtc_ds3231.svg"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'display-tft-28':
         return (
           <image
@@ -1010,31 +952,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             preserveAspectRatio="none"
           />
         );
-
-      case 'keypad-3x4':
-        return (
-          <image
-            href="/components/keypad_3x4.svg"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'keypad-4x4':
-        return (
-          <image
-            href="/components/keypad_4x4.svg"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'battery-9v':
         return (
           <g>

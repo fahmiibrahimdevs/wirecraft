@@ -40,20 +40,11 @@ export type ComponentType =
   | 'display-lcd2004-i2c'
   | 'display-oled'
   | 'display-tm1637'
-  | 'rtc-ds3231'
   | 'display-tft-28'
   | 'display-tft-28-touch'
-  | 'keypad-3x4'
-  | 'keypad-4x4'
   | 'battery-9v'
   | 'fitting-lamp'
   | 'steker-switch'
-  | 'level-converter-4ch-blue'
-  | 'level-converter-8ch-red'
-  | 'level-converter-4ch-red'
-  | 'sensor-ads1115'
-  | 'sensor-jsn-sr04t'
-  | 'module-sim800l'
   | (string & {});
 
 export type PinType = 'power' | 'ground' | 'digital' | 'analog' | 'pwm' | 'i2c' | 'spi' | 'uart' | 'passive' | 'generic';

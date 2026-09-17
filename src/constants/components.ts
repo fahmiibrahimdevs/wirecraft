@@ -799,22 +799,7 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
 
   
   
-  'sensor-ultrasonic': {
-    type: 'sensor-ultrasonic',
-    name: 'HC-SR04 Ultrasonic',
-    category: 'sensors',
-    description: 'Sensor jarak ultrasonik 2cm - 400cm 4-pin standar breadboard (pitch 17.0px).',
-    width: 300.0,
-    height: 165.6,
-    icon: 'Radar',
-    pins: [
-      { id: 'vcc', name: 'VCC', x: 126.1, y: 163.5, type: 'power', description: '5V Power' },
-      { id: 'trig', name: 'Trig', x: 143.1, y: 163.5, type: 'digital', description: 'Trigger Pin' },
-      { id: 'echo', name: 'Echo', x: 160.1, y: 163.5, type: 'digital', description: 'Echo Pin' },
-      { id: 'gnd', name: 'GND', x: 177.1, y: 163.5, type: 'ground', description: 'Ground' },
-    ],
-  },
-
+  
   
   
   
@@ -1000,31 +985,7 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
   
   
   
-  'rtc-ds3231': {
-    type: 'rtc-ds3231',
-    name: 'Modul RTC DS3231 (I2C)',
-    category: 'sensors',
-    description: 'Modul Real-Time Clock presisi tinggi chip DS3231 dengan EEPROM AT24C32, antarmuka I2C dan kaki pin metalik.',
-    width: 258,
-    height: 153,
-    icon: 'Clock',
-    pins: [
-      // Kanan: Port I2C Utama (Kaki Pin Metalik Horizontal) - Pitch 17.0px
-      { id: 'scl', name: 'SCL', x: 256.0, y: 51.0, type: 'i2c', description: 'I2C Serial Clock' },
-      { id: 'sda', name: 'SDA', x: 256.0, y: 68.0, type: 'i2c', description: 'I2C Serial Data' },
-      { id: 'vcc', name: 'VCC', x: 256.0, y: 85.0, type: 'power', description: 'Power 3.3V - 5.5V' },
-      { id: 'gnd', name: 'GND', x: 256.0, y: 102.0, type: 'ground', description: 'Ground (0V)' },
-
-      // Kiri: Port Tambahan (Kaki Pin Metalik Horizontal) - Pitch 17.0px
-      { id: 'pin32k', name: '32K', x: 2.0, y: 34.0, type: 'digital', description: '32.768 kHz Output' },
-      { id: 'sqw', name: 'SQW', x: 2.0, y: 51.0, type: 'digital', description: 'Square Wave / Alarm Interrupt' },
-      { id: 'scl_l', name: 'SCL (L)', x: 2.0, y: 68.0, type: 'i2c', description: 'I2C Serial Clock (Pass-through)' },
-      { id: 'sda_l', name: 'SDA (L)', x: 2.0, y: 85.0, type: 'i2c', description: 'I2C Serial Data (Pass-through)' },
-      { id: 'vcc_l', name: 'VCC (L)', x: 2.0, y: 102.0, type: 'power', description: 'Power Supply (Pass-through)' },
-      { id: 'gnd_l', name: 'GND (L)', x: 2.0, y: 119.0, type: 'ground', description: 'Ground (Pass-through)' },
-    ],
-  },
-
+  
   'display-tft-28': {
     type: 'display-tft-28',
     name: 'TFT LCD 2.8" SPI (ILI9341)',
@@ -1069,51 +1030,8 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'keypad-3x4': {
-    type: 'keypad-3x4',
-    name: 'Keypad Matriks 3x4 (Membrane)',
-    category: 'passives',
-    description: 'Modul keypad membran 12-tombol matriks (0-9, *, #) dengan kabel fleksibel dan header 7-pin (4 Baris, 3 Kolom).',
-    width: 240,
-    height: 400,
-    icon: 'Grid',
-    pins: [
-      // 4 Baris (Rows)
-      { id: 'r1', name: 'R1', x: 69.0, y: 394.0, type: 'digital', description: 'Row 1 (Tombol 1, 2, 3)' },
-      { id: 'r2', name: 'R2', x: 86.0, y: 394.0, type: 'digital', description: 'Row 2 (Tombol 4, 5, 6)' },
-      { id: 'r3', name: 'R3', x: 103.0, y: 394.0, type: 'digital', description: 'Row 3 (Tombol 7, 8, 9)' },
-      { id: 'r4', name: 'R4', x: 120.0, y: 394.0, type: 'digital', description: 'Row 4 (Tombol *, 0, #)' },
-
-      // 3 Kolom (Columns)
-      { id: 'c1', name: 'C1', x: 137.0, y: 394.0, type: 'digital', description: 'Column 1 (Tombol 1, 4, 7, *)' },
-      { id: 'c2', name: 'C2', x: 154.0, y: 394.0, type: 'digital', description: 'Column 2 (Tombol 2, 5, 8, 0)' },
-      { id: 'c3', name: 'C3', x: 171.0, y: 394.0, type: 'digital', description: 'Column 3 (Tombol 3, 6, 9, #)' },
-    ],
-  },
-
-  'keypad-4x4': {
-    type: 'keypad-4x4',
-    name: 'Keypad Matriks 4x4 (Membrane)',
-    category: 'passives',
-    description: 'Modul keypad membran 16-tombol matriks (0-9, A-D, *, #) dengan kabel fleksibel dan header 8-pin (4 Baris, 4 Kolom).',
-    width: 280,
-    height: 400,
-    icon: 'Grid',
-    pins: [
-      // 4 Baris (Rows)
-      { id: 'r1', name: 'R1', x: 80.5, y: 394.0, type: 'digital', description: 'Row 1 (Tombol 1, 2, 3, A)' },
-      { id: 'r2', name: 'R2', x: 97.5, y: 394.0, type: 'digital', description: 'Row 2 (Tombol 4, 5, 6, B)' },
-      { id: 'r3', name: 'R3', x: 114.5, y: 394.0, type: 'digital', description: 'Row 3 (Tombol 7, 8, 9, C)' },
-      { id: 'r4', name: 'R4', x: 131.5, y: 394.0, type: 'digital', description: 'Row 4 (Tombol *, 0, #, D)' },
-
-      // 4 Kolom (Columns)
-      { id: 'c1', name: 'C1', x: 148.5, y: 394.0, type: 'digital', description: 'Column 1 (Tombol 1, 4, 7, *)' },
-      { id: 'c2', name: 'C2', x: 165.5, y: 394.0, type: 'digital', description: 'Column 2 (Tombol 2, 5, 8, 0)' },
-      { id: 'c3', name: 'C3', x: 182.5, y: 394.0, type: 'digital', description: 'Column 3 (Tombol 3, 6, 9, #)' },
-      { id: 'c4', name: 'C4', x: 199.5, y: 394.0, type: 'digital', description: 'Column 4 (Tombol A, B, C, D)' },
-    ],
-  },
-
+  
+  
   'battery-9v': {
     type: 'battery-9v',
     name: 'Baterai 9V',
@@ -1159,68 +1077,9 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'sensor-ads1115': {
-    type: 'sensor-ads1115',
-    name: 'Modul ADC 16-Bit I2C (ADS1115)',
-    category: 'sensors',
-    description: 'Modul Analog-to-Digital Converter (ADC) 16-bit 4-channel presisi tinggi dengan PGA internal via antarmuka komunikasi I2C.',
-    width: 179.7,
-    height: 97.5,
-    icon: 'Cpu',
-    pins: [
-      { id: 'vdd', name: 'VDD', x: 12.7, y: 87.5, type: 'power', description: 'Power Supply (+2.0V - 5.5V DC)' },
-      { id: 'gnd', name: 'GND', x: 29.7, y: 87.5, type: 'ground', description: 'Ground Referensi (0V)' },
-      { id: 'scl', name: 'SCL', x: 46.7, y: 87.5, type: 'i2c', description: 'I2C Serial Clock' },
-      { id: 'sda', name: 'SDA', x: 63.7, y: 87.5, type: 'i2c', description: 'I2C Serial Data' },
-      { id: 'addr', name: 'ADDR', x: 80.7, y: 87.5, type: 'digital', description: 'I2C Address Pin (GND=0x48, VDD=0x49, SDA=0x4A, SCL=0x4B)' },
-      { id: 'alrt', name: 'ALRT', x: 97.7, y: 87.5, type: 'digital', description: 'Alert / Conversion Ready Output' },
-      { id: 'a0', name: 'A0', x: 114.7, y: 87.5, type: 'analog', description: 'Analog Input Channel 0' },
-      { id: 'a1', name: 'A1', x: 131.7, y: 87.5, type: 'analog', description: 'Analog Input Channel 1' },
-      { id: 'a2', name: 'A2', x: 148.7, y: 87.5, type: 'analog', description: 'Analog Input Channel 2' },
-      { id: 'a3', name: 'A3', x: 165.7, y: 87.5, type: 'analog', description: 'Analog Input Channel 3' },
-    ],
-  },
-
-  'sensor-jsn-sr04t': {
-    type: 'sensor-jsn-sr04t',
-    name: 'Sensor Jarak Waterproof (JSN-SR04T)',
-    category: 'sensors',
-    description: 'Modul sensor pengukur jarak ultrasonik tahan air (waterproof probe) terintegrasi dengan kabel dan transduser eksternal.',
-    width: 587.5,
-    height: 352.4,
-    icon: 'Radio',
-    pins: [
-      { id: 'vcc', name: '5V (VCC)', x: 15.6, y: 116.5, type: 'power', description: 'Power Supply (+5V DC)' },
-      { id: 'trig', name: 'TRIG (TX)', x: 15.6, y: 133.5, type: 'digital', description: 'Trigger Pulse Input / UART TX' },
-      { id: 'echo', name: 'ECHO (RX)', x: 15.6, y: 150.5, type: 'digital', description: 'Echo Pulse Output / UART RX' },
-      { id: 'gnd', name: 'GND', x: 15.6, y: 167.5, type: 'ground', description: 'Ground Referensi (0V)' },
-    ],
-  },
-
-  'module-sim800l': {
-    type: 'module-sim800l',
-    name: 'Modul GSM/GPRS (SIM800L)',
-    category: 'sensors',
-    description: 'Modul komunikasi nirkabel GSM/GPRS Quad-band SIM800L dengan konektor antena IPEX/U.FL, antarmuka serial UART, dan port audio (SPK/MIC).',
-    width: 176.4,
-    height: 155.3,
-    icon: 'Radio',
-    pins: [
-      { id: 'net', name: 'NET', x: 15.1, y: 37.3, type: 'passive', description: 'Status Indikator Jaringan GSM / Output Antena (Pad Kotak)' },
-      { id: 'vcc', name: 'VCC (3.7-4.2V)', x: 15.1, y: 54.4, type: 'power', description: 'Power Supply Masukan (+3.7V - 4.2V DC, rek: 4.0V ~2A Peak)' },
-      { id: 'rst', name: 'RST', x: 15.1, y: 71.4, type: 'generic', description: 'Hard Reset Pin (Active LOW)' },
-      { id: 'rxd', name: 'RXD', x: 15.1, y: 88.3, type: 'uart', description: 'UART Serial Data Input (2.8V - 3.3V Logic Level)' },
-      { id: 'txd', name: 'TXD', x: 15.1, y: 105.4, type: 'uart', description: 'UART Serial Data Output (2.8V - 3.3V Logic Level)' },
-      { id: 'gnd', name: 'GND', x: 15.1, y: 122.8, type: 'ground', description: 'Ground Referensi Daya & Sinyal (0V)' },
-      { id: 'ring', name: 'RING', x: 163.7, y: 54.4, type: 'digital', description: 'Ring Indicator (LOW saat ada Panggilan / SMS Masuk) (Pad Kotak)' },
-      { id: 'dtr', name: 'DTR', x: 163.7, y: 71.6, type: 'digital', description: 'Data Terminal Ready / Pin Bangun Sleep Mode (Active LOW)' },
-      { id: 'micp', name: 'MIC+', x: 163.7, y: 88.5, type: 'passive', description: 'Audio Microphone Input Positif (+)' },
-      { id: 'micn', name: 'MIC-', x: 163.7, y: 105.8, type: 'passive', description: 'Audio Microphone Input Negatif (-)' },
-      { id: 'spkp', name: 'SPK+', x: 163.7, y: 122.8, type: 'passive', description: 'Audio Speaker Output Positif (+)' },
-      { id: 'spkn', name: 'SPK-', x: 163.7, y: 139.8, type: 'passive', description: 'Audio Speaker Output Negatif (-)' },
-    ],
-  },
-};
+  
+  
+  };
 
 export const WIRE_COLORS = [
   { name: 'Red (5V / VCC)', value: '#ef4444' },
