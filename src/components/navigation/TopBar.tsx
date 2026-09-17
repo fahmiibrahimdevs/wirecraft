@@ -409,8 +409,8 @@ export const TopBar: React.FC<TopBarProps> = ({
                 >
                   <Sparkles className="w-4 h-4 text-sky-500 dark:text-sky-400" />
                   <div>
-                    <div className="font-semibold leading-tight text-slate-800 dark:text-slate-100">Export Skema & Diagram</div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">Super HD (PNG/SVG/JPEG) & Skrip</div>
+                    <div className="font-semibold leading-tight text-slate-800 dark:text-slate-100">Export Diagram & Berkas</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">Super HD (PNG/SVG) & Kode Proyek</div>
                   </div>
                 </button>
               )}

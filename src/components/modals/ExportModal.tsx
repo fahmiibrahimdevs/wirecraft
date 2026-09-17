@@ -422,14 +422,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                  Export Schema & Diagram
+                  Export Diagram & Berkas Rangkaian
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold">
                   HD Engine
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Pilih ekspor gambar diagram visual super jernih atau berkas skrip kode & proyek.
+                Ekspor gambar diagram visual resolusi tinggi atau unduh berkas proyek, sketsa Arduino, dan BOM.
               </p>
             </div>
           </div>
@@ -468,7 +468,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             }`}
           >
             <FileCode className="w-4 h-4" />
-            <span>Script Skema DDL & JSON</span>
+            <span>Berkas Proyek & Kode Rangkaian</span>
           </button>
         </div>
 
