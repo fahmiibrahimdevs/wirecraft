@@ -1680,14 +1680,40 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       let finalX = snapToBreadboard ? snapCoordinate(rawX, breadboardOffset.x % 17) : Math.round(rawX * 10) / 10;
       let finalY = snapToBreadboard ? snapCoordinate(rawY, breadboardOffset.y % 17) : Math.round(rawY * 10) / 10;
 
+      // Shift + Click: Pin Stamp (Auto 17.0px spacing along dominant axis from previous/selected pin)
+      if (e.shiftKey && pins.length > 0) {
+        const refPin = (selectedPinId ? pins.find((p) => p.id === selectedPinId) : null) || pins[pins.length - 1];
+        if (refPin) {
+          const dx = rawX - refPin.x;
+          const dy = rawY - refPin.y;
+          if (Math.abs(dx) >= Math.abs(dy)) {
+            // Horizontal stamp
+            const signX = dx >= 0 ? 1 : -1;
+            finalX = Math.round((refPin.x + signX * 17.0) * 10) / 10;
+            finalY = refPin.y;
+          } else {
+            // Vertical stamp
+            const signY = dy >= 0 ? 1 : -1;
+            finalX = refPin.x;
+            finalY = Math.round((refPin.y + signY * 17.0) * 10) / 10;
+          }
+          if (snapToBreadboard) {
+            finalX = snapCoordinate(finalX, breadboardOffset.x % 17);
+            finalY = snapCoordinate(finalY, breadboardOffset.y % 17);
+          }
+        }
+      }
+
       const newId = `pin_${pins.length + 1}`;
+      const newPinName = `Pin ${pins.length + 1}`;
+      const profile = inferPinProfile(newPinName);
       const newPin: Pin = {
         id: newId,
-        name: `Pin ${pins.length + 1}`,
+        name: newPinName,
         x: finalX,
         y: finalY,
-        type: 'digital',
-        description: `Pin ${pins.length + 1}`,
+        type: profile.type,
+        description: newPinName,
       };
 
       const nextPins = [...pins, newPin];
@@ -1953,8 +1979,24 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Enter key to start inline editing if a pin is selected
-      if (e.key === 'Enter' && selectedPinId && !inlineEditPinId) {
+      // Shortcut: Tab / Shift+Tab to cycle through pins sequentially
+      if (e.key === 'Tab' && pins.length > 0 && !inlineEditPinId) {
+        e.preventDefault();
+        const currentIndex = pins.findIndex((p) => p.id === selectedPinId);
+        let nextIndex = 0;
+        if (currentIndex === -1) {
+          nextIndex = e.shiftKey ? pins.length - 1 : 0;
+        } else {
+          nextIndex = e.shiftKey
+            ? (currentIndex - 1 + pins.length) % pins.length
+            : (currentIndex + 1) % pins.length;
+        }
+        setSelectedPinId(pins[nextIndex].id);
+        return;
+      }
+
+      // Enter key or F2 to start inline editing if a pin is selected
+      if ((e.key === 'Enter' || e.key === 'F2') && selectedPinId && !inlineEditPinId) {
         e.preventDefault();
         startInlineEdit(selectedPinId);
         return;
@@ -1967,7 +2009,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      const step = e.shiftKey ? 5.0 : e.altKey ? 0.1 : 1.0;
+      // Arrow Key Nudge Step: Default 0.5px (smooth), Shift 17.0px (1 BB hole), Alt 0.1px (ultra micro)
+      const step = e.shiftKey ? 17.0 : e.altKey ? 0.1 : 0.5;
 
       if (selectedPin) {
         if (e.key === 'ArrowUp') {
@@ -1992,8 +2035,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           setSelectedPinId(null);
         }
       } else {
-        // No pin selected: arrow keys nudge Image (or All if linkPinsToImage or Shift is pressed)
-        const isAll = linkPinsToImage || e.shiftKey;
+        // No pin selected: arrow keys nudge Image (or All if linkPinsToImage)
+        const isAll = linkPinsToImage;
         if (e.key === 'ArrowUp') {
           e.preventDefault();
           if (isAll) nudgeAll(0, -step);
@@ -2773,7 +2816,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                         ? 'bg-emerald-500 text-slate-950 shadow-md font-bold'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
                     }`}
-                    title="Klik kanvas untuk menambah pin baru"
+                    title="Tambah Pin: Klik kanvas untuk menambah pin baru. Tips: Tahan Shift + Klik untuk Pin Stamp otomatis (jarak pas 17px berurutan)!"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Tambah Pin</span>

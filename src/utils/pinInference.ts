@@ -140,9 +140,13 @@ export function inferPinProfile(rawName: string): PinProfile {
     cleanToken === 'GND_LV' ||
     cleanToken === 'HV_GND' ||
     cleanToken === 'LV_GND' ||
-    /^GND(_|\d+|$)/i.test(cleanToken)
+    /^GND(_|\d+|$)/i.test(cleanToken) ||
+    /^DGND(_|\d+|$)/i.test(cleanToken) ||
+    /^AGND(_|\d+|$)/i.test(cleanToken) ||
+    /^PGND(_|\d+|$)/i.test(cleanToken) ||
+    /^COM(_|\d+|$)/i.test(cleanToken)
   ) {
-    if (cleanToken === 'AGND') {
+    if (cleanToken.startsWith('AGND')) {
       return { type: 'ground', description: 'Analog Ground (Ground Khusus Sinyal Analog Bebas Noise)', isConfident: true };
     }
     if (cleanToken.startsWith('COM')) {
@@ -182,10 +186,13 @@ export function inferPinProfile(rawName: string): PinProfile {
     cleanToken === '+5V' ||
     cleanToken === '5V_IN' ||
     cleanToken === '5V_POWER' ||
+    cleanToken === '5V_OUT' ||
     cleanToken === 'VBUS' ||
     cleanToken === 'RAW' ||
     cleanToken === 'PWR' ||
-    cleanToken === 'POWER'
+    cleanToken === 'POWER' ||
+    /^VIN(_|\d+|$)/i.test(cleanToken) ||
+    /^5V(_|\d+|$)/i.test(cleanToken)
   ) {
     return { type: 'power', description: 'Tegangan Masukan Power Supply (+5V DC / Eksternal)', isConfident: true };
   }
@@ -194,9 +201,12 @@ export function inferPinProfile(rawName: string): PinProfile {
     cleanToken === '3V3' ||
     cleanToken === '3.3V' ||
     cleanToken === '+3.3V' ||
+    cleanToken === '+3V3' ||
     cleanToken === '3V' ||
     cleanToken === '3V3_OUT' ||
-    cleanToken === '3V3_POWER'
+    cleanToken === '3V3_POWER' ||
+    /^3V3(_|\d+|$)/i.test(cleanToken) ||
+    /^3\.3V(_|\d+|$)/i.test(cleanToken)
   ) {
     return { type: 'power', description: 'Keluaran Tegangan Teratur +3.3V DC (LDO Onboard)', isConfident: true };
   }
@@ -205,12 +215,16 @@ export function inferPinProfile(rawName: string): PinProfile {
     cleanToken === 'VCC' ||
     cleanToken === 'VDD' ||
     cleanToken === 'AVCC' ||
+    cleanToken === 'AVDD' ||
+    cleanToken === 'DVDD' ||
     cleanToken === '+V' ||
     cleanToken === 'V+' ||
     cleanToken === 'VCC_5V' ||
     cleanToken === 'VCC_3V3' ||
     cleanToken === 'VCC_IN' ||
-    cleanToken === 'VCC_POWER'
+    cleanToken === 'VCC_POWER' ||
+    /^VCC(_|\d+|$)/i.test(cleanToken) ||
+    /^VDD(_|\d+|$)/i.test(cleanToken)
   ) {
     return { type: 'power', description: 'Tegangan Masukan Daya Positif (+3.3V / +5V DC)', isConfident: true };
   }
@@ -262,11 +276,25 @@ export function inferPinProfile(rawName: string): PinProfile {
   }
 
   // 4. I2C PROTOCOL
-  if (cleanToken === 'SCL' || cleanToken === 'I2C_SCL' || cleanToken === 'SCLK_I2C') {
-    return { type: 'i2c', description: 'I2C Serial Clock (SCL)', isConfident: true };
+  if (
+    cleanToken === 'SCL' ||
+    cleanToken === 'I2C_SCL' ||
+    cleanToken === 'SCLK_I2C' ||
+    cleanToken === 'TWI_SCL' ||
+    /^SCL\d*$/i.test(cleanToken) ||
+    /^I2C\d*_SCL$/i.test(cleanToken)
+  ) {
+    return { type: 'i2c', description: `I2C Serial Clock (${name.toUpperCase()})`, isConfident: true };
   }
-  if (cleanToken === 'SDA' || cleanToken === 'I2C_SDA' || cleanToken === 'SDAT') {
-    return { type: 'i2c', description: 'I2C Serial Data (SDA)', isConfident: true };
+  if (
+    cleanToken === 'SDA' ||
+    cleanToken === 'I2C_SDA' ||
+    cleanToken === 'SDAT' ||
+    cleanToken === 'TWI_SDA' ||
+    /^SDA\d*$/i.test(cleanToken) ||
+    /^I2C\d*_SDA$/i.test(cleanToken)
+  ) {
+    return { type: 'i2c', description: `I2C Serial Data (${name.toUpperCase()})`, isConfident: true };
   }
 
   // 5. SPI PROTOCOL
@@ -277,9 +305,11 @@ export function inferPinProfile(rawName: string): PinProfile {
     cleanToken === 'SPI_CLK' ||
     cleanToken === 'SPI_SCK' ||
     cleanToken.includes('VSPI_SCK') ||
-    cleanToken.includes('HSPI_CLK')
+    cleanToken.includes('HSPI_CLK') ||
+    /^SCK\d*$/i.test(cleanToken) ||
+    /^SPI\d*_SCK$/i.test(cleanToken)
   ) {
-    return { type: 'spi', description: 'SPI Serial Clock (SCK)', isConfident: true };
+    return { type: 'spi', description: `SPI Serial Clock (${name.toUpperCase()})`, isConfident: true };
   }
 
   if (
@@ -289,9 +319,11 @@ export function inferPinProfile(rawName: string): PinProfile {
     cleanToken === 'SI' ||
     cleanToken.includes('VSPI_MOSI') ||
     cleanToken.includes('HSPI_MOSI') ||
-    cleanToken === 'CMD'
+    cleanToken === 'CMD' ||
+    /^MOSI\d*$/i.test(cleanToken) ||
+    /^SPI\d*_MOSI$/i.test(cleanToken)
   ) {
-    return { type: 'spi', description: 'SPI Serial Data Input / Master Out Slave In (MOSI/SDI)', isConfident: true };
+    return { type: 'spi', description: `SPI Serial Data Input / MOSI (${name.toUpperCase()})`, isConfident: true };
   }
 
   if (
@@ -300,9 +332,11 @@ export function inferPinProfile(rawName: string): PinProfile {
     cleanToken === 'DOUT' ||
     cleanToken === 'SO' ||
     cleanToken.includes('VSPI_MISO') ||
-    cleanToken.includes('HSPI_MISO')
+    cleanToken.includes('HSPI_MISO') ||
+    /^MISO\d*$/i.test(cleanToken) ||
+    /^SPI\d*_MISO$/i.test(cleanToken)
   ) {
-    return { type: 'spi', description: 'SPI Serial Data Output / Master In Slave Out (MISO/SDO)', isConfident: true };
+    return { type: 'spi', description: `SPI Serial Data Output / MISO (${name.toUpperCase()})`, isConfident: true };
   }
 
   if (
@@ -312,9 +346,12 @@ export function inferPinProfile(rawName: string): PinProfile {
     cleanToken === 'CSN' ||
     cleanToken.includes('VSPI_SS') ||
     cleanToken.includes('HSPI_CS') ||
-    cleanToken === 'CHIP_SELECT'
+    cleanToken === 'CHIP_SELECT' ||
+    /^CS\d*$/i.test(cleanToken) ||
+    /^SS\d*$/i.test(cleanToken) ||
+    /^SPI\d*_CS$/i.test(cleanToken)
   ) {
-    return { type: 'digital', description: 'SPI Chip Select / Slave Select (Active LOW)', isConfident: true };
+    return { type: 'digital', description: `SPI Chip Select / Slave Select (${name.toUpperCase()})`, isConfident: true };
   }
 
   if (cleanToken === 'RDY' || cleanToken === 'DRDY' || cleanToken === 'INT' || cleanToken === 'IRQ') {
@@ -325,12 +362,12 @@ export function inferPinProfile(rawName: string): PinProfile {
   if (
     cleanToken === 'TX' ||
     cleanToken === 'TXD' ||
-    cleanToken === 'TX0' ||
-    cleanToken === 'TX1' ||
-    cleanToken === 'TX2' ||
     cleanToken === 'UART_TX' ||
     cleanToken === 'DOUT_UART' ||
-    cleanToken === 'SOUT'
+    cleanToken === 'SOUT' ||
+    cleanToken === 'SERIAL_TX' ||
+    /^TX\d*$/i.test(cleanToken) ||
+    /^UART\d*_TX$/i.test(cleanToken)
   ) {
     return { type: 'uart', description: `UART Serial Transmit / Serial TX (${name.toUpperCase()})`, isConfident: true };
   }
@@ -338,12 +375,12 @@ export function inferPinProfile(rawName: string): PinProfile {
   if (
     cleanToken === 'RX' ||
     cleanToken === 'RXD' ||
-    cleanToken === 'RX0' ||
-    cleanToken === 'RX1' ||
-    cleanToken === 'RX2' ||
     cleanToken === 'UART_RX' ||
     cleanToken === 'DIN_UART' ||
-    cleanToken === 'SIN'
+    cleanToken === 'SIN' ||
+    cleanToken === 'SERIAL_RX' ||
+    /^RX\d*$/i.test(cleanToken) ||
+    /^UART\d*_RX$/i.test(cleanToken)
   ) {
     return { type: 'uart', description: `UART Serial Receive / Serial RX (${name.toUpperCase()})`, isConfident: true };
   }
@@ -373,7 +410,7 @@ export function inferPinProfile(rawName: string): PinProfile {
   if (cleanToken === 'F-' || cleanToken === 'FORCE-' || cleanToken === 'FORCE_NEG') {
     return { type: 'passive', description: 'Force Negative / RTD- Return Lead', isConfident: true };
   }
-  if (cleanToken === 'TDS' || cleanToken === 'PH' || cleanToken === 'TEMP') {
+  if (cleanToken === 'TDS' || cleanToken === 'PH' || cleanToken === 'TEMP' || cleanToken.startsWith('ANALOG')) {
     return { type: 'analog', description: `Sinyal Masukan/Keluaran Sensor Analog (${name.toUpperCase()})`, isConfident: true };
   }
 

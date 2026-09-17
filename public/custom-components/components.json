@@ -4103,321 +4103,323 @@
       "name": "ESP32 DevKit 38-Pin (CP2102)",
       "category": "microcontrollers",
       "description": "Modul IoT WiFi & Bluetooth dual-core Xtensa LX6 32-bit ESP-WROOM-32D 38-pin DIP dengan chip USB Silicon Labs CP2102, tombol EN/BOOT, regulator onboard, dan rentang Row A ke Row I (170.0px).",
-      "width": 191.7,
-      "height": 383.8,
-      "icon": "Radio",
+      "width": 386.8,
+      "height": 189.1,
       "pins": [
         {
           "id": "3v3",
           "name": "3V3",
-          "x": 10.8,
-          "y": 25,
+          "x": 361.4,
+          "y": 9.8,
           "type": "power",
           "description": "3.3V Power Output (dari LDO Onboard)"
         },
         {
           "id": "en",
           "name": "EN",
-          "x": 10.8,
-          "y": 42,
+          "x": 344.4,
+          "y": 9.8,
           "type": "generic",
           "description": "Enable / Reset (CHIP_PU, Active Low)"
         },
         {
           "id": "sp",
           "name": "SP (VP)",
-          "x": 10.8,
-          "y": 59,
+          "x": 327.4,
+          "y": 9.8,
           "type": "analog",
           "description": "GPIO36 / SENSOR_VP / ADC1_CH0 (Input Only)"
         },
         {
           "id": "sn",
           "name": "SN (VN)",
-          "x": 10.8,
-          "y": 76,
+          "x": 310.4,
+          "y": 9.8,
           "type": "analog",
           "description": "GPIO39 / SENSOR_VN / ADC1_CH3 (Input Only)"
         },
         {
           "id": "g34",
           "name": "G34",
-          "x": 10.8,
-          "y": 93,
+          "x": 293.4,
+          "y": 9.8,
           "type": "analog",
           "description": "GPIO34 / ADC1_CH6 (Input Only)"
         },
         {
           "id": "g35",
           "name": "G35",
-          "x": 10.8,
-          "y": 110,
+          "x": 276.4,
+          "y": 9.8,
           "type": "analog",
           "description": "GPIO35 / ADC1_CH7 (Input Only)"
         },
         {
           "id": "g32",
           "name": "G32",
-          "x": 10.8,
-          "y": 127,
+          "x": 259.4,
+          "y": 9.8,
           "type": "analog",
           "description": "GPIO32 / ADC1_CH4 / Touch 9"
         },
         {
           "id": "g33",
           "name": "G33",
-          "x": 10.8,
-          "y": 144,
+          "x": 242.4,
+          "y": 9.8,
           "type": "analog",
           "description": "GPIO33 / ADC1_CH5 / Touch 8"
         },
         {
           "id": "g25",
           "name": "G25",
-          "x": 10.8,
-          "y": 161,
+          "x": 225.4,
+          "y": 9.8,
           "type": "analog",
           "description": "GPIO25 / DAC1 / ADC2_CH8"
         },
         {
           "id": "g26",
           "name": "G26",
-          "x": 10.8,
-          "y": 178,
+          "x": 208.4,
+          "y": 9.8,
           "type": "analog",
           "description": "GPIO26 / DAC2 / ADC2_CH9"
         },
         {
           "id": "g27",
           "name": "G27",
-          "x": 10.8,
-          "y": 195,
+          "x": 191.4,
+          "y": 9.8,
           "type": "digital",
           "description": "GPIO27 / ADC2_CH7 / Touch 7"
         },
         {
           "id": "g14",
           "name": "G14",
-          "x": 10.8,
-          "y": 212,
+          "x": 174.4,
+          "y": 9.8,
           "type": "spi",
           "description": "GPIO14 / HSPI_CLK / ADC2_CH6 / Touch 6"
         },
         {
           "id": "g12",
           "name": "G12",
-          "x": 10.8,
-          "y": 229,
+          "x": 157.4,
+          "y": 9.8,
           "type": "spi",
           "description": "GPIO12 / HSPI_MISO / ADC2_CH5 / Touch 5"
         },
         {
           "id": "gnd_left",
           "name": "GND",
-          "x": 10.8,
-          "y": 246,
+          "x": 140.4,
+          "y": 9.8,
           "type": "ground",
           "description": "Power Ground (0V)"
         },
         {
           "id": "g13",
           "name": "G13",
-          "x": 10.8,
-          "y": 263,
+          "x": 123.4,
+          "y": 9.8,
           "type": "spi",
           "description": "GPIO13 / HSPI_MOSI / ADC2_CH4 / Touch 4"
         },
         {
           "id": "sd2",
           "name": "SD2",
-          "x": 10.8,
-          "y": 280,
+          "x": 106.4,
+          "y": 9.8,
           "type": "spi",
           "description": "GPIO9 / SPI FLASH D2 (Reserved)"
         },
         {
           "id": "sd3",
           "name": "SD3",
-          "x": 10.8,
-          "y": 297,
+          "x": 89.4,
+          "y": 9.8,
           "type": "spi",
           "description": "GPIO10 / SPI FLASH D3 (Reserved)"
         },
         {
           "id": "cmd",
           "name": "CMD",
-          "x": 10.8,
-          "y": 314,
+          "x": 72.4,
+          "y": 9.8,
           "type": "spi",
           "description": "GPIO11 / SPI FLASH CMD (Reserved)"
         },
         {
           "id": "5v",
           "name": "5V (VIN)",
-          "x": 10.8,
-          "y": 331,
+          "x": 55.4,
+          "y": 9.8,
           "type": "power",
           "description": "5V Power Input (USB VBUS / External 5V)"
         },
         {
           "id": "gnd_right1",
           "name": "GND",
-          "x": 180.8,
-          "y": 25,
+          "x": 361.4,
+          "y": 179.8,
           "type": "ground",
           "description": "Power Ground (0V)"
         },
         {
           "id": "g23",
           "name": "G23",
-          "x": 180.8,
-          "y": 42,
+          "x": 344.4,
+          "y": 179.8,
           "type": "spi",
           "description": "GPIO23 / VSPI_MOSI (SPI Master Out)"
         },
         {
           "id": "g22",
           "name": "G22",
-          "x": 180.8,
-          "y": 59,
+          "x": 327.4,
+          "y": 179.8,
           "type": "i2c",
           "description": "GPIO22 / I2C SCL (Wire Clock)"
         },
         {
           "id": "txd",
           "name": "TXD (TX0)",
-          "x": 180.8,
-          "y": 76,
+          "x": 310.4,
+          "y": 179.8,
           "type": "uart",
           "description": "GPIO1 / UART0 TX (Serial Transmit)"
         },
         {
           "id": "rxd",
           "name": "RXD (RX0)",
-          "x": 180.8,
-          "y": 93,
+          "x": 293.4,
+          "y": 179.8,
           "type": "uart",
           "description": "GPIO3 / UART0 RX (Serial Receive)"
         },
         {
           "id": "g21",
           "name": "G21",
-          "x": 180.8,
-          "y": 110,
+          "x": 276.4,
+          "y": 179.8,
           "type": "i2c",
           "description": "GPIO21 / I2C SDA (Wire Data)"
         },
         {
           "id": "gnd_right2",
           "name": "GND",
-          "x": 180.8,
-          "y": 127,
+          "x": 259.4,
+          "y": 179.8,
           "type": "ground",
           "description": "Power Ground (0V)"
         },
         {
           "id": "g19",
           "name": "G19",
-          "x": 180.8,
-          "y": 144,
+          "x": 242.4,
+          "y": 179.8,
           "type": "spi",
           "description": "GPIO19 / VSPI_MISO (SPI Master In)"
         },
         {
           "id": "g18",
           "name": "G18",
-          "x": 180.8,
-          "y": 161,
+          "x": 225.4,
+          "y": 179.8,
           "type": "spi",
           "description": "GPIO18 / VSPI_CLK (SPI Clock)"
         },
         {
           "id": "g5",
           "name": "G5",
-          "x": 180.8,
-          "y": 178,
+          "x": 208.4,
+          "y": 179.8,
           "type": "digital",
           "description": "GPIO5 / VSPI_CS (SPI Chip Select)"
         },
         {
           "id": "g17",
           "name": "G17",
-          "x": 180.8,
-          "y": 195,
+          "x": 191.4,
+          "y": 179.8,
           "type": "uart",
           "description": "GPIO17 / UART2 TX"
         },
         {
           "id": "g16",
           "name": "G16",
-          "x": 180.8,
-          "y": 212,
+          "x": 174.4,
+          "y": 179.8,
           "type": "uart",
           "description": "GPIO16 / UART2 RX"
         },
         {
           "id": "g4",
           "name": "G4",
-          "x": 180.8,
-          "y": 229,
+          "x": 157.4,
+          "y": 179.8,
           "type": "analog",
           "description": "GPIO4 / ADC2_CH0 / Touch 0"
         },
         {
           "id": "g0",
           "name": "G0",
-          "x": 180.8,
-          "y": 246,
+          "x": 140.4,
+          "y": 179.8,
           "type": "digital",
           "description": "GPIO0 / Boot Strapping / Touch 1"
         },
         {
           "id": "g2",
           "name": "G2",
-          "x": 180.8,
-          "y": 263,
+          "x": 123.4,
+          "y": 179.8,
           "type": "digital",
           "description": "GPIO2 / Onboard LED / Touch 2"
         },
         {
           "id": "g15",
           "name": "G15",
-          "x": 180.8,
-          "y": 280,
+          "x": 106.4,
+          "y": 179.8,
           "type": "spi",
           "description": "GPIO15 / HSPI_CS / Touch 3"
         },
         {
           "id": "sd1",
           "name": "SD1",
-          "x": 180.8,
-          "y": 297,
+          "x": 89.4,
+          "y": 179.8,
           "type": "spi",
           "description": "GPIO8 / SPI FLASH D1 (Reserved)"
         },
         {
           "id": "sd0",
           "name": "SD0",
-          "x": 180.8,
-          "y": 314,
+          "x": 72.4,
+          "y": 179.8,
           "type": "spi",
           "description": "GPIO7 / SPI FLASH D0 (Reserved)"
         },
         {
           "id": "clk",
           "name": "CLK",
-          "x": 180.8,
-          "y": 331,
+          "x": 55.4,
+          "y": 179.8,
           "type": "spi",
           "description": "GPIO6 / SPI FLASH SCK (Reserved)"
         }
       ],
-      "imageUrl": "/components/esp32_38p_cp2102.png",
+      "icon": "Cpu",
+      "imageUrl": "/components/esp32-38p-cp2102.png",
+      "imageWidth": 386.8,
+      "imageHeight": 189.1,
       "isCustom": true
     },
-    "imageUrl": "/components/esp32_38p_cp2102.png",
+    "imageUrl": "/components/esp32-38p-cp2102.png",
     "createdAt": "2026-09-17T06:06:17.116Z",
-    "updatedAt": "2026-09-17T06:06:17.116Z"
+    "updatedAt": "2026-09-17T06:29:01.143Z"
   },
   "esp32-c3-supermini": {
     "definition": {
@@ -4426,14 +4428,13 @@
       "category": "microcontrollers",
       "description": "Modul IoT ultra-ringkas berbasis SoC Espressif ESP32-C3FH4 RISC-V 32-bit single-core 160MHz dengan WiFi 2.4GHz & Bluetooth 5 (LE), USB Type-C, dan 16 pin header ramah breadboard (pitch 17.0px).",
       "width": 166,
-      "height": 125.1,
-      "icon": "Radio",
+      "height": 119.6,
       "pins": [
         {
           "id": "5v",
           "name": "5V",
           "x": 24.7,
-          "y": 9.4,
+          "y": 9,
           "type": "power",
           "description": "5V Power Input (VBUS / External 5V)"
         },
@@ -4441,7 +4442,7 @@
           "id": "gnd",
           "name": "G (GND)",
           "x": 41.7,
-          "y": 9.4,
+          "y": 9,
           "type": "ground",
           "description": "Power Ground (0V)"
         },
@@ -4449,7 +4450,7 @@
           "id": "3v3",
           "name": "3.3V",
           "x": 58.7,
-          "y": 9.4,
+          "y": 9,
           "type": "power",
           "description": "3.3V Power Output (LDO Onboard)"
         },
@@ -4457,7 +4458,7 @@
           "id": "rst",
           "name": "RST",
           "x": 75.7,
-          "y": 9.4,
+          "y": 9,
           "type": "generic",
           "description": "Reset (CHIP_EN, Active Low)"
         },
@@ -4465,7 +4466,7 @@
           "id": "io4",
           "name": "IO4",
           "x": 92.7,
-          "y": 9.4,
+          "y": 9,
           "type": "analog",
           "description": "GPIO4 / ADC1_CH4 / FSPIHD"
         },
@@ -4473,7 +4474,7 @@
           "id": "io3",
           "name": "IO3",
           "x": 109.7,
-          "y": 9.4,
+          "y": 9,
           "type": "analog",
           "description": "GPIO3 / ADC1_CH3"
         },
@@ -4481,7 +4482,7 @@
           "id": "io2",
           "name": "IO2",
           "x": 126.7,
-          "y": 9.4,
+          "y": 9,
           "type": "digital",
           "description": "GPIO2 / ADC1_CH2 / FSPIQ"
         },
@@ -4489,7 +4490,7 @@
           "id": "io0",
           "name": "IO0",
           "x": 143.7,
-          "y": 9.4,
+          "y": 9,
           "type": "analog",
           "description": "GPIO0 / ADC1_CH0 / Boot Strapping"
         },
@@ -4497,7 +4498,7 @@
           "id": "io9",
           "name": "IO9 (BOOT)",
           "x": 24.7,
-          "y": 116.1,
+          "y": 111,
           "type": "digital",
           "description": "GPIO9 / BOOT Button / Pull-up"
         },
@@ -4505,7 +4506,7 @@
           "id": "io8",
           "name": "IO8 (LED)",
           "x": 41.7,
-          "y": 116.1,
+          "y": 111,
           "type": "digital",
           "description": "GPIO8 / Onboard Blue LED"
         },
@@ -4513,7 +4514,7 @@
           "id": "io5",
           "name": "IO5",
           "x": 58.7,
-          "y": 116.1,
+          "y": 111,
           "type": "digital",
           "description": "GPIO5 / JTAG MTCK"
         },
@@ -4521,7 +4522,7 @@
           "id": "io6",
           "name": "IO6",
           "x": 75.7,
-          "y": 116.1,
+          "y": 111,
           "type": "spi",
           "description": "GPIO6 / FSPICLK (SPI Clock)"
         },
@@ -4529,7 +4530,7 @@
           "id": "io7",
           "name": "IO7",
           "x": 92.7,
-          "y": 116.1,
+          "y": 111,
           "type": "spi",
           "description": "GPIO7 / FSPID (SPI MOSI)"
         },
@@ -4537,7 +4538,7 @@
           "id": "io10",
           "name": "IO10",
           "x": 109.7,
-          "y": 116.1,
+          "y": 111,
           "type": "spi",
           "description": "GPIO10 / FSPICS0 (SPI CS)"
         },
@@ -4545,7 +4546,7 @@
           "id": "io20",
           "name": "IO20 (RX)",
           "x": 126.7,
-          "y": 116.1,
+          "y": 111,
           "type": "uart",
           "description": "GPIO20 / UART0 RX / USB D+"
         },
@@ -4553,17 +4554,20 @@
           "id": "io21",
           "name": "IO21 (TX)",
           "x": 143.7,
-          "y": 116.1,
+          "y": 111,
           "type": "uart",
           "description": "GPIO21 / UART0 TX / USB D-"
         }
       ],
+      "icon": "Cpu",
       "imageUrl": "/components/esp32_c3_supermini.png",
+      "imageWidth": 166,
+      "imageHeight": 119.6,
       "isCustom": true
     },
     "imageUrl": "/components/esp32_c3_supermini.png",
     "createdAt": "2026-09-17T06:06:17.116Z",
-    "updatedAt": "2026-09-17T06:06:17.116Z"
+    "updatedAt": "2026-09-17T06:24:28.991Z"
   },
   "buzzer": {
     "definition": {
