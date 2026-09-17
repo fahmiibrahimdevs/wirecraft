@@ -103,48 +103,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             height={height}
             preserveAspectRatio="none"
           />
-        );
-      case 'esp32-38p-cp2102':
-        return (
-          <image
-            href="/components/esp32_38p_cp2102.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'esp32-c3-supermini':
-        return (
-          <image
-            href="/components/esp32_c3_supermini.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'nodemcu-v1':
-        return (
-          <image
-            href="/components/nodemcu_v1.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'nodemcu-ch340':
-        return (
-          <image
-            href="/components/nodemcu_ch340.png"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'breadboard-mini':
+        );      case 'breadboard-mini':
         return (
           <image
             href="/components/breadboard_mini.svg"
@@ -894,30 +853,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             preserveAspectRatio="none"
           />
         );
-      case 'buzzer':
-        return (
-          <image
-            href="/components/buzzer.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
-      case 'speaker':
-        return (
-          <image
-            href="/components/speaker.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
-
       case 'servo':
         return (
           <image
