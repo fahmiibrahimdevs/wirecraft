@@ -193,40 +193,54 @@ export default function App() {
   // Auto-save Status: 'saved' | 'saving'
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestDataRef = useRef<StoredProjectData>({
+    projectName,
+    components,
+    wires,
+    wireRouting,
+    currentWireColor,
+    pan,
+    zoom,
+    timestamp: Date.now(),
+  });
 
-  // Debounced Auto-Save to localStorage (Like ERD Studio)
+  // Always keep latest refs updated without triggering re-renders
   useEffect(() => {
-    setSaveStatus('saving');
+    latestDataRef.current = {
+      projectName,
+      components,
+      wires,
+      wireRouting,
+      currentWireColor,
+      pan,
+      zoom,
+      timestamp: Date.now(),
+    };
+  });
+
+  // Debounced Auto-Save to localStorage (Smooth, non-blocking)
+  useEffect(() => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
 
     saveTimeoutRef.current = setTimeout(() => {
       try {
-        const payload: StoredProjectData = {
-          projectName,
-          components,
-          wires,
-          wireRouting,
-          currentWireColor,
-          pan,
-          zoom,
-          timestamp: Date.now(),
-        };
+        const payload = latestDataRef.current;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
         setSaveStatus('saved');
       } catch (err) {
         console.error('Failed to auto-save circuit project to localStorage:', err);
         setSaveStatus('saved');
       }
-    }, 600);
+    }, 800);
 
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [components, wires, projectName, wireRouting, currentWireColor, pan, zoom]);
+  }, [components, wires, projectName, wireRouting, currentWireColor]);
 
   // Drawers & Modals
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
@@ -236,8 +250,6 @@ export default function App() {
   const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [studioEditDef, setStudioEditDef] = useState<ComponentDefinition | null>(null);
-  // Clipboard state for Component Copy & Paste (Ctrl+C / Ctrl+V / Ctrl+D)
-  const clipboardComponentRef = useRef<CircuitComponent | null>(null);
 
   // Duplicate Component
   const handleDuplicateComponent = useCallback(
@@ -270,12 +282,11 @@ export default function App() {
       }));
       setSelectedComponentId(newComp.id);
       setSelectedWireId(null);
-      clipboardComponentRef.current = newComp;
     },
     [components, selectedComponentId, commit]
   );
 
-  // Global Keyboard Shortcuts (Ctrl+Z Undo, Ctrl+Y Redo, Ctrl+C Copy, Ctrl+V Paste, Ctrl+D Duplicate, R/Space Rotate)
+  // Global Keyboard Shortcuts (Ctrl+Z Undo, Ctrl+Y Redo, Ctrl+D Duplicate, R/Space Rotate)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['input', 'textarea', 'select'].includes((e.target as HTMLElement)?.tagName.toLowerCase())) {
@@ -297,63 +308,6 @@ export default function App() {
       } else if (isCmdOrCtrl && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         redo();
-        return;
-      }
-
-      // Copy Component (Ctrl+C / Cmd+C)
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'c') {
-        if (
-          selectedComponentId &&
-          !isStudioOpen &&
-          !isCodeModalOpen &&
-          !isBomModalOpen &&
-          !isPresetsModalOpen
-        ) {
-          const comp = components.find((c) => c.id === selectedComponentId);
-          if (comp) {
-            e.preventDefault();
-            clipboardComponentRef.current = comp;
-          }
-        }
-        return;
-      }
-
-      // Paste Component (Ctrl+V / Cmd+V)
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'v') {
-        if (
-          clipboardComponentRef.current &&
-          !isStudioOpen &&
-          !isCodeModalOpen &&
-          !isBomModalOpen &&
-          !isPresetsModalOpen
-        ) {
-          e.preventDefault();
-          const source = clipboardComponentRef.current;
-          const count = components.filter((c) => c.type === source.type).length + 1;
-          const prefixMatch = source.label.match(/^(.*?)(\d+)$/);
-          const newLabel = prefixMatch
-            ? `${prefixMatch[1]}${count}`
-            : `${source.label}_${count}`;
-
-          const newComp: CircuitComponent = {
-            id: `${source.type}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-            type: source.type,
-            name: source.name,
-            label: newLabel,
-            x: Math.round((source.x + 30) / 10) * 10,
-            y: Math.round((source.y + 30) / 10) * 10,
-            rotation: source.rotation,
-            customProps: { ...(source.customProps || {}) },
-          };
-
-          commit((prev) => ({
-            ...prev,
-            components: [...prev.components, newComp],
-          }));
-          setSelectedComponentId(newComp.id);
-          setSelectedWireId(null);
-          clipboardComponentRef.current = newComp;
-        }
         return;
       }
 

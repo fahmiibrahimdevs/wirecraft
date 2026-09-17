@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Wire, WirePoint } from '../../types/circuit';
 import {
   Point,
@@ -61,14 +61,15 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
   const [livePoints, setLivePoints] = useState<Point[] | null>(null);
 
   // Derive initial/effective waypoints
-  const basePoints: Point[] = livePoints
-    ? livePoints
-    : getEffectiveWaypoints(wire, startPoint, endPoint);
+  const waypoints = useMemo(() => {
+    const basePoints: Point[] = livePoints
+      ? livePoints
+      : getEffectiveWaypoints(wire, startPoint, endPoint);
 
-  const waypoints =
-    wire.routing === 'orthogonal'
+    return wire.routing === 'orthogonal'
       ? cleanAndSimplifyWaypoints(basePoints)
       : [startPoint, ...(wire.waypoints || []), endPoint];
+  }, [livePoints, wire, startPoint, endPoint]);
 
   // Register horizontal segments for electrical jump collision detection
   useEffect(() => {

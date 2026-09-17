@@ -285,7 +285,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   }[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const isUndoRedoActionRef = useRef<boolean>(false);
-  const clipboardPinRef = useRef<Pin | null>(null);
+
+  // Refs for zero-lag drag handling
+  const pinsRef = useRef<Pin[]>(pins);
+  pinsRef.current = pins;
+  const imageOffsetRef = useRef<{ x: number; y: number }>(imageOffset);
+  imageOffsetRef.current = imageOffset;
 
   // Multi-pin Generator state
   const [genCount, setGenCount] = useState<number>(6);
@@ -1495,15 +1500,20 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   useEffect(() => {
     if (!draggingPinId) return;
 
-    let finalPins = pins;
+    let finalPins = pinsRef.current;
+    let rafId: number | null = null;
+    let pendingCoords: { clientX: number; clientY: number; altKey: boolean } | null = null;
 
-    const handleWindowMouseMove = (e: MouseEvent) => {
-      const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
+    const updatePinPosition = () => {
+      rafId = null;
+      if (!pendingCoords) return;
+      const { clientX, clientY, altKey } = pendingCoords;
+      const { x: rawX, y: rawY } = getLogicalCoords(clientX, clientY);
       let finalX = rawX;
       let finalY = rawY;
 
       // When holding ALT: smooth precision drag (bypasses 17px snap)
-      const isSmoothMode = e.altKey;
+      const isSmoothMode = altKey;
 
       if (snapToBreadboard && !isSmoothMode) {
         finalX = snapCoordinate(rawX, breadboardOffset.x % 17);
@@ -1513,13 +1523,26 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         finalY = Math.round(rawY * 10) / 10;
       }
 
-      finalPins = pins.map((p) =>
-        p.id === draggingPinId ? { ...p, x: finalX, y: finalY } : p
-      );
-      setPins(finalPins);
+      setPins((prevPins) => {
+        finalPins = prevPins.map((p) =>
+          p.id === draggingPinId ? { ...p, x: finalX, y: finalY } : p
+        );
+        return finalPins;
+      });
+    };
+
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      pendingCoords = { clientX: e.clientX, clientY: e.clientY, altKey: e.altKey };
+      if (rafId === null) {
+        rafId = requestAnimationFrame(updatePinPosition);
+      }
     };
 
     const handleWindowMouseUp = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        updatePinPosition();
+      }
       setDraggingPinId(null);
       pushSnapshot({ pins: finalPins });
     };
@@ -1527,6 +1550,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     window.addEventListener('mousemove', handleWindowMouseMove);
     window.addEventListener('mouseup', handleWindowMouseUp);
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       window.removeEventListener('mousemove', handleWindowMouseMove);
       window.removeEventListener('mouseup', handleWindowMouseUp);
     };
@@ -1536,7 +1560,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     snapToBreadboard,
     breadboardOffset.x,
     breadboardOffset.y,
-    pins,
     pushSnapshot,
   ]);
 
@@ -1544,15 +1567,21 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   useEffect(() => {
     if (!isDraggingImage) return;
 
-    let latestOffset = imageOffset;
-    let latestPins = pins;
+    let latestOffset = imageOffsetRef.current;
+    let latestPins = pinsRef.current;
+    let rafId: number | null = null;
+    let pendingEvent: { clientX: number; clientY: number; altKey: boolean } | null = null;
 
-    const handleWindowMouseMove = (e: MouseEvent) => {
-      const deltaX = (e.clientX - imageDragStart.mouseX) / zoom;
-      const deltaY = (e.clientY - imageDragStart.mouseY) / zoom;
+    const updateImagePosition = () => {
+      rafId = null;
+      if (!pendingEvent) return;
+      const { clientX, clientY, altKey } = pendingEvent;
+
+      const deltaX = (clientX - imageDragStart.mouseX) / zoom;
+      const deltaY = (clientY - imageDragStart.mouseY) / zoom;
 
       // When holding ALT: smooth precision drag (bypasses 17px snap)
-      const isSmoothMode = e.altKey;
+      const isSmoothMode = altKey;
 
       let newX = imageDragStart.startX + deltaX;
       let newY = imageDragStart.startY + deltaY;
@@ -1599,7 +1628,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       setImageOffset(latestOffset);
     };
 
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      pendingEvent = { clientX: e.clientX, clientY: e.clientY, altKey: e.altKey };
+      if (rafId === null) {
+        rafId = requestAnimationFrame(updateImagePosition);
+      }
+    };
+
     const handleWindowMouseUp = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        updateImagePosition();
+      }
       setIsDraggingImage(false);
       pushSnapshot({ imageOffset: latestOffset, pins: latestPins });
     };
@@ -1607,6 +1647,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     window.addEventListener('mousemove', handleWindowMouseMove);
     window.addEventListener('mouseup', handleWindowMouseUp);
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       window.removeEventListener('mousemove', handleWindowMouseMove);
       window.removeEventListener('mouseup', handleWindowMouseUp);
     };
@@ -1618,8 +1659,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     breadboardOffset.x,
     breadboardOffset.y,
     pushSnapshot,
-    imageOffset,
-    pins,
     selectedPinId,
   ]);
 
@@ -1967,55 +2006,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Copy Pin (Ctrl+C / Cmd+C)
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'c') {
-        if (selectedPinId) {
-          const pin = pins.find((p) => p.id === selectedPinId);
-          if (pin) {
-            e.preventDefault();
-            clipboardPinRef.current = pin;
-          }
-        }
-        return;
-      }
-
-      // Paste Pin (Ctrl+V / Cmd+V)
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'v') {
-        if (clipboardPinRef.current) {
-          e.preventDefault();
-          const source = clipboardPinRef.current;
-          const newId = `pin_${pins.length + 1}`;
-          let nextX = source.x + 17.0;
-          let nextY = source.y;
-          if (snapToBreadboard) {
-            nextX = snapCoordinate(nextX, breadboardOffset.x % 17);
-            nextY = snapCoordinate(nextY, breadboardOffset.y % 17);
-          }
-
-          const numMatch = source.name.match(/^(.*?)(\d+)$/);
-          const nextName = numMatch
-            ? `${numMatch[1]}${parseInt(numMatch[2], 10) + 1}`
-            : `Pin ${pins.length + 1}`;
-
-          const profile = inferPinProfile(nextName);
-          const newPin: Pin = {
-            id: newId,
-            name: nextName,
-            x: Math.round(nextX * 10) / 10,
-            y: Math.round(nextY * 10) / 10,
-            type: profile.isConfident ? profile.type : source.type,
-            description: profile.isConfident ? profile.description : source.description,
-          };
-
-          const nextPins = [...pins, newPin];
-          setPins(nextPins);
-          setSelectedPinId(newId);
-          pushSnapshot({ pins: nextPins });
-          clipboardPinRef.current = newPin;
-        }
-        return;
-      }
-
       // Direct Duplicate Pin (Ctrl+D / Cmd+D)
       if (isCmdOrCtrl && e.key.toLowerCase() === 'd') {
         if (selectedPinId) {
@@ -2049,7 +2039,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             setPins(nextPins);
             setSelectedPinId(newId);
             pushSnapshot({ pins: nextPins });
-            clipboardPinRef.current = newPin;
           }
         }
         return;
