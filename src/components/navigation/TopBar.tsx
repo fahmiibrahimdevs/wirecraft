@@ -22,6 +22,7 @@ import {
   ChevronDown,
   Image as ImageIcon,
   Check,
+  Users,
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -45,6 +46,7 @@ interface TopBarProps {
   onOpenPresets: () => void;
   onOpenBom: () => void;
   onOpenStudio?: () => void;
+  onOpenUserManagement?: () => void;
   onExportPng: () => void;
   onExportJson: () => void;
   onImportJson: (file: File) => void;
@@ -77,6 +79,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onOpenPresets,
   onOpenBom,
   onOpenStudio,
+  onOpenUserManagement,
   onExportPng,
   onExportJson,
   onImportJson,
@@ -468,6 +471,24 @@ export const TopBar: React.FC<TopBarProps> = ({
                 </div>
 
                 <div className="py-1">
+                  {isAdmin && onOpenUserManagement && (
+                    <button
+                      onClick={() => {
+                        onOpenUserManagement();
+                        setUserMenuOpen(false);
+                      }}
+                      className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-500/15 hover:text-sky-300 text-left transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Users className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Kelola Pengguna</span>
+                      </span>
+                      <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-bold">
+                        ADMIN
+                      </span>
+                    </button>
+                  )}
+
                   {onSyncToCloud && (
                     <button
                       onClick={() => {

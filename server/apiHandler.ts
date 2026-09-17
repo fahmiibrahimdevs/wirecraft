@@ -42,14 +42,18 @@ export async function handleApiRequest(
   const url = new URL(req.url || '', `http://${req.headers.host || 'localhost'}`);
   const pathname = url.pathname;
 
-  // Only handle /api/auth and /api/circuits routes here
-  if (!pathname.startsWith('/api/auth') && !pathname.startsWith('/api/circuits')) {
+  // Only handle /api/auth, /api/circuits, and /api/admin routes here
+  if (
+    !pathname.startsWith('/api/auth') &&
+    !pathname.startsWith('/api/circuits') &&
+    !pathname.startsWith('/api/admin')
+  ) {
     return false;
   }
 
   // Set CORS headers for API
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
@@ -100,16 +104,18 @@ export async function handleApiRequest(
       const now = new Date().toISOString();
       const passwordHash = hashPassword(password);
       const role = 'user'; // Default role
+      const isActive = 1;
 
       db.prepare(`
-        INSERT INTO users (id, username, email, password_hash, role, avatar_url, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (id, username, email, password_hash, role, is_active, avatar_url, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         userId,
         username.trim(),
         email.trim().toLowerCase(),
         passwordHash,
         role,
+        isActive,
         '',
         now,
         now
@@ -130,6 +136,7 @@ export async function handleApiRequest(
           username: username.trim(),
           email: email.trim().toLowerCase(),
           role,
+          isActive: true,
           avatarUrl: '',
           createdAt: now,
         },
@@ -163,6 +170,15 @@ export async function handleApiRequest(
         return true;
       }
 
+      // Check active status
+      if (user.is_active === 0) {
+        sendJson(res, 403, {
+          success: false,
+          error: 'Akun Anda telah dinonaktifkan oleh Administrator. Hubungi admin untuk informasi lebih lanjut.',
+        });
+        return true;
+      }
+
       const token = createJWT({
         id: user.id,
         username: user.username,
@@ -178,6 +194,7 @@ export async function handleApiRequest(
           username: user.username,
           email: user.email,
           role: user.role,
+          isActive: Boolean(user.is_active !== 0),
           avatarUrl: user.avatar_url || '',
           createdAt: user.created_at,
         },
@@ -193,9 +210,14 @@ export async function handleApiRequest(
         return true;
       }
 
-      const user = db.prepare('SELECT id, username, email, role, avatar_url, created_at FROM users WHERE id = ?').get(authUser.id) as any;
+      const user = db.prepare('SELECT id, username, email, role, is_active, avatar_url, created_at FROM users WHERE id = ?').get(authUser.id) as any;
       if (!user) {
         sendJson(res, 404, { success: false, error: 'Pengguna tidak ditemukan.' });
+        return true;
+      }
+
+      if (user.is_active === 0) {
+        sendJson(res, 403, { success: false, error: 'Akun Anda telah dinonaktifkan oleh Administrator.' });
         return true;
       }
 
@@ -206,6 +228,7 @@ export async function handleApiRequest(
           username: user.username,
           email: user.email,
           role: user.role,
+          isActive: Boolean(user.is_active !== 0),
           avatarUrl: user.avatar_url || '',
           createdAt: user.created_at,
         },
@@ -214,10 +237,152 @@ export async function handleApiRequest(
     }
 
     // ----------------------------------------------------
+    // ADMIN USER MANAGEMENT ROUTES
+    // ----------------------------------------------------
+
+    // 4. GET /api/admin/users (List all users)
+    if (pathname === '/api/admin/users' && req.method === 'GET') {
+      const authUser = getUserFromRequest(req);
+      if (!authUser || authUser.role !== 'admin') {
+        sendJson(res, 403, { success: false, error: 'Akses ditolak: Hanya Administrator yang berwenang.' });
+        return true;
+      }
+
+      const rawUsers = db.prepare(`
+        SELECT u.id, u.username, u.email, u.role, u.is_active, u.avatar_url, u.created_at, u.updated_at,
+               (SELECT COUNT(*) FROM circuit_files cf WHERE cf.user_id = u.id) as file_count
+        FROM users u
+        ORDER BY u.created_at DESC
+      `).all() as any[];
+
+      const users = rawUsers.map((u) => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        role: u.role,
+        isActive: Boolean(u.is_active !== 0),
+        fileCount: u.file_count || 0,
+        avatarUrl: u.avatar_url || '',
+        createdAt: u.created_at,
+        updatedAt: u.updated_at,
+      }));
+
+      sendJson(res, 200, { success: true, users });
+      return true;
+    }
+
+    // 5. POST /api/admin/users/status (Toggle user active status)
+    if (pathname === '/api/admin/users/status' && req.method === 'POST') {
+      const authUser = getUserFromRequest(req);
+      if (!authUser || authUser.role !== 'admin') {
+        sendJson(res, 403, { success: false, error: 'Akses ditolak: Hanya Administrator yang berwenang.' });
+        return true;
+      }
+
+      const body = await parseJsonBody(req);
+      const { userId, isActive } = body;
+
+      if (!userId || typeof isActive !== 'boolean') {
+        sendJson(res, 400, { success: false, error: 'userId dan isActive wajib disertakan.' });
+        return true;
+      }
+
+      if (userId === authUser.id && !isActive) {
+        sendJson(res, 400, { success: false, error: 'Anda tidak dapat menonaktifkan akun Admin Anda sendiri.' });
+        return true;
+      }
+
+      const targetUser = db.prepare('SELECT id, username, role FROM users WHERE id = ?').get(userId) as any;
+      if (!targetUser) {
+        sendJson(res, 404, { success: false, error: 'Pengguna tidak ditemukan.' });
+        return true;
+      }
+
+      const now = new Date().toISOString();
+      db.prepare('UPDATE users SET is_active = ?, updated_at = ? WHERE id = ?').run(
+        isActive ? 1 : 0,
+        now,
+        userId
+      );
+
+      sendJson(res, 200, {
+        success: true,
+        message: `Status akun ${targetUser.username} berhasil diubah menjadi ${isActive ? 'Aktif' : 'Nonaktif'}.`,
+        user: {
+          id: targetUser.id,
+          username: targetUser.username,
+          isActive,
+        },
+      });
+      return true;
+    }
+
+    // 6. POST /api/admin/users/role (Change user role)
+    if (pathname === '/api/admin/users/role' && req.method === 'POST') {
+      const authUser = getUserFromRequest(req);
+      if (!authUser || authUser.role !== 'admin') {
+        sendJson(res, 403, { success: false, error: 'Akses ditolak: Hanya Administrator yang berwenang.' });
+        return true;
+      }
+
+      const body = await parseJsonBody(req);
+      const { userId, role } = body;
+
+      if (!userId || (role !== 'admin' && role !== 'user')) {
+        sendJson(res, 400, { success: false, error: 'userId dan role valid (admin/user) wajib disertakan.' });
+        return true;
+      }
+
+      if (userId === authUser.id) {
+        sendJson(res, 400, { success: false, error: 'Anda tidak dapat mengubah role akun Anda sendiri.' });
+        return true;
+      }
+
+      const now = new Date().toISOString();
+      db.prepare('UPDATE users SET role = ?, updated_at = ? WHERE id = ?').run(role, now, userId);
+
+      sendJson(res, 200, {
+        success: true,
+        message: `Role pengguna berhasil diubah menjadi ${role}.`,
+      });
+      return true;
+    }
+
+    // 7. POST /api/admin/users/delete (Delete user account)
+    if (pathname === '/api/admin/users/delete' && req.method === 'POST') {
+      const authUser = getUserFromRequest(req);
+      if (!authUser || authUser.role !== 'admin') {
+        sendJson(res, 403, { success: false, error: 'Akses ditolak: Hanya Administrator yang berwenang.' });
+        return true;
+      }
+
+      const body = await parseJsonBody(req);
+      const { userId } = body;
+
+      if (!userId) {
+        sendJson(res, 400, { success: false, error: 'userId wajib disertakan.' });
+        return true;
+      }
+
+      if (userId === authUser.id) {
+        sendJson(res, 400, { success: false, error: 'Anda tidak dapat menghapus akun Anda sendiri.' });
+        return true;
+      }
+
+      db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+
+      sendJson(res, 200, {
+        success: true,
+        message: 'Pengguna berhasil dihapus secara permanen.',
+      });
+      return true;
+    }
+
+    // ----------------------------------------------------
     // CIRCUIT FILES & FOLDERS CLOUD SYNC ROUTES
     // ----------------------------------------------------
 
-    // 4. GET /api/circuits/files
+    // 8. GET /api/circuits/files
     if (pathname === '/api/circuits/files' && req.method === 'GET') {
       const authUser = getUserFromRequest(req);
       if (!authUser) {
@@ -258,7 +423,7 @@ export async function handleApiRequest(
       return true;
     }
 
-    // 5. POST /api/circuits/sync (Full sync / merge from client)
+    // 9. POST /api/circuits/sync (Full sync / merge from client)
     if (pathname === '/api/circuits/sync' && req.method === 'POST') {
       const authUser = getUserFromRequest(req);
       if (!authUser) {

@@ -19,6 +19,7 @@ import { PropertiesInspector } from './components/panels/PropertiesInspector';
 import { BomModal } from './components/modals/BomModal';
 import { PresetsModal } from './components/modals/PresetsModal';
 import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
+import { UserManagementModal } from './components/modals/UserManagementModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/modals/AuthModal';
 import { ContextMenu, ContextMenuState } from './components/menu/ContextMenu';
@@ -314,6 +315,7 @@ function CircuitAppContent() {
   const [isBomModalOpen, setIsBomModalOpen] = useState(false);
   const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
+  const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
   const [studioEditDef, setStudioEditDef] = useState<ComponentDefinition | null>(null);
 
   // Context Menu state
@@ -928,6 +930,13 @@ function CircuitAppContent() {
               }
             : undefined
         }
+        onOpenUserManagement={
+          isAdmin
+            ? () => {
+                setIsUserManagementOpen(true);
+              }
+            : undefined
+        }
         onExportPng={handleExportPng}
         onExportJson={handleExportJson}
         onImportJson={handleImportJson}
@@ -1081,6 +1090,14 @@ function CircuitAppContent() {
           onComponentSaved={(typeId) => {
             handleAddComponent(typeId);
           }}
+        />
+      )}
+
+      {/* User Management (Admin Mode) Modal */}
+      {isAdmin && (
+        <UserManagementModal
+          isOpen={isUserManagementOpen}
+          onClose={() => setIsUserManagementOpen(false)}
         />
       )}
 

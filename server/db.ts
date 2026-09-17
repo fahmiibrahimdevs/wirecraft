@@ -25,6 +25,7 @@ export function initDatabase() {
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       role TEXT NOT NULL DEFAULT 'user',
+      is_active INTEGER NOT NULL DEFAULT 1,
       avatar_url TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -54,6 +55,13 @@ export function initDatabase() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
   `);
+
+  // Safe migration for existing users table
+  try {
+    db.exec('ALTER TABLE users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1;');
+  } catch {
+    // Column already exists, ignore
+  }
 
   // Seed default admin account if not exists
   seedDefaultAdmin();
