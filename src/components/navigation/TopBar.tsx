@@ -144,7 +144,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             <Zap className="w-4 h-4" />
           </div>
           <span className="text-xs font-bold text-slate-800 dark:text-slate-100 tracking-tight hidden sm:flex items-center gap-1.5">
-            Circuit Electronics
+            Wirecraft
             <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
               IDE
             </span>
@@ -371,110 +371,19 @@ export const TopBar: React.FC<TopBarProps> = ({
           className="hidden"
         />
 
-        {/* Unified Export & File Actions Dropdown */}
-        <div className="relative" ref={exportMenuRef}>
-          <div className="flex items-center">
-            <button
-              onClick={() => {
-                if (onOpenExportModal) {
-                  onOpenExportModal();
-                } else {
-                  setExportMenuOpen((prev) => !prev);
-                }
-              }}
-              title="Export Skema & Diagram HD / Berkas Proyek"
-              className="flex items-center gap-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 px-3 py-1.5 rounded-l-lg text-xs font-bold transition-all shadow-md shadow-sky-500/20 cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export</span>
-            </button>
-            <button
-              onClick={() => setExportMenuOpen((prev) => !prev)}
-              title="Opsi Berkas & Ekspor Lainnya"
-              className="bg-sky-500 hover:bg-sky-400 text-slate-950 px-1.5 py-1.5 rounded-r-lg text-xs font-bold border-l border-sky-600/30 transition-all shadow-md shadow-sky-500/20 cursor-pointer"
-            >
-              <ChevronDown className="w-3.5 h-3.5 opacity-80" />
-            </button>
-          </div>
-
-          {exportMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-700/80 rounded-xl shadow-2xl backdrop-blur-xl py-1 text-slate-800 dark:text-slate-200 text-xs z-50 animate-in fade-in zoom-in-95 duration-100">
-              {onOpenExportModal && (
-                <button
-                  onClick={() => {
-                    onOpenExportModal();
-                    setExportMenuOpen(false);
-                  }}
-                  className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 text-sky-500 dark:text-sky-400" />
-                  <div>
-                    <div className="font-semibold leading-tight text-slate-800 dark:text-slate-100">Export Diagram & Berkas</div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">Super HD (PNG/SVG) & Kode Proyek</div>
-                  </div>
-                </button>
-              )}
-
-              <button
-                onClick={() => {
-                  onExportPng();
-                  setExportMenuOpen(false);
-                }}
-                className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-              >
-                <ImageIcon className="w-4 h-4 text-sky-500 dark:text-sky-400" />
-                <div>
-                  <div className="font-semibold leading-tight text-slate-800 dark:text-slate-100">Quick Export PNG</div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Download gambar cepat</div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  onExportJson();
-                  setExportMenuOpen(false);
-                }}
-                className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-              >
-                <Download className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                <div>
-                  <div className="font-semibold leading-tight text-slate-800 dark:text-slate-100">Simpan Berkas (.json)</div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Download backup offline</div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  fileInputRef.current?.click();
-                  setExportMenuOpen(false);
-                }}
-                className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-              >
-                <FolderOpen className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                <div>
-                  <div className="font-semibold leading-tight text-slate-800 dark:text-slate-100">Buka Berkas (.json)</div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Import desain dari komputer</div>
-                </div>
-              </button>
-
-              <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
-
-              <button
-                onClick={() => {
-                  onClearCanvas();
-                  setExportMenuOpen(false);
-                }}
-                className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-rose-500/15 text-rose-600 dark:text-rose-300 hover:text-rose-700 dark:hover:text-rose-400 text-left transition-colors cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4 text-rose-500 dark:text-rose-400" />
-                <div>
-                  <div className="font-semibold leading-tight">Bersihkan Kanvas</div>
-                  <div className="text-[10px] text-rose-500/70 dark:text-rose-300/70">Hapus semua kabel & modul</div>
-                </div>
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Export Button (Opens HD Export Modal) */}
+        <button
+          onClick={() => {
+            if (onOpenExportModal) {
+              onOpenExportModal();
+            }
+          }}
+          title="Export Diagram & Berkas Rangkaian"
+          className="flex items-center gap-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md shadow-sky-500/20 cursor-pointer"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span>Export</span>
+        </button>
 
         {/* Divider */}
         <div className="h-5 w-px bg-slate-200 dark:bg-slate-800 mx-0.5" />

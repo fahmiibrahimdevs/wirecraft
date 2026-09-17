@@ -36,7 +36,7 @@ export const CodeEditorModal: React.FC<CodeEditorModalProps> = ({
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("Circuit Electronics Ready!");
+  Serial.println("WireCraft Ready!");
 }
 
 void loop() {
@@ -377,7 +377,7 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);`);
     }
 
     const fullCode = `/*
- * Kode Otomatis Dibuat oleh Circuit Electronics
+ * Kode Otomatis Dibuat oleh Wirecraft
  * Target Board: ${uno.name}
  * Tanggal: ${new Date().toLocaleDateString('id-ID')}
  */

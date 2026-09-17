@@ -250,7 +250,9 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                       className="bg-white dark:bg-slate-950 border border-sky-500 text-slate-900 dark:text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36"
                     />
                   ) : (
-                    <span className="truncate">{folder.name}</span>
+                    <span className="truncate flex-1" title={folder.name}>
+                      {folder.name}
+                    </span>
                   )}
                 </div>
 
@@ -258,7 +260,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                 {!isRenaming && (
                   <div
                     onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="hidden group-hover:flex items-center gap-0.5 shrink-0"
                   >
                     <button
                       onClick={() => startCreating('file', folder.id)}
@@ -399,8 +401,10 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                     className="bg-white dark:bg-slate-950 border border-sky-500 text-slate-900 dark:text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36"
                   />
                 ) : (
-                  <div className="flex flex-col min-w-0">
-                    <span className="truncate">{file.name}</span>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="truncate leading-tight text-slate-800 dark:text-slate-100" title={file.name}>
+                      {file.name}
+                    </span>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
                       {file.components.length} part • {file.wires.length} kabel
                     </span>
@@ -412,7 +416,7 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               {!isRenaming && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="hidden group-hover:flex items-center gap-0.5 shrink-0"
                 >
                   <button
                     onClick={() => onDuplicateFile(file.id)}
