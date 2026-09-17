@@ -2938,26 +2938,66 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                             />
                           )}
 
-                          {/* Outer Pin Body */}
-                          <circle
-                            cx={0}
-                            cy={0}
-                            r={5.5}
-                            fill={typeDef.color}
-                            stroke="#ffffff"
-                            strokeWidth={1.8}
-                            className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-                          />
-
-                          {/* Center Dot */}
-                          <circle cx={0} cy={0} r={1.8} fill="#ffffff" pointerEvents="none" />
+                          {/* Outer Pin Body & Precision Crosshair Mode */}
+                          {isDragging ? (
+                            <g pointerEvents="none">
+                              {/* Extended Sniper Guide Circle */}
+                              <circle
+                                cx={0}
+                                cy={0}
+                                r={12}
+                                fill="none"
+                                stroke="#38bdf8"
+                                strokeWidth={0.9}
+                                strokeDasharray="2 2"
+                                opacity={0.75}
+                              />
+                              {/* Translucent Pin Body */}
+                              <circle
+                                cx={0}
+                                cy={0}
+                                r={5.5}
+                                fill={typeDef.color}
+                                fillOpacity={0.2}
+                                stroke="#38bdf8"
+                                strokeWidth={1.5}
+                              />
+                              {/* Crosshair Horizontal & Vertical Hairlines */}
+                              <line x1={-10} y1={0} x2={-2.2} y2={0} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
+                              <line x1={2.2} y1={0} x2={10} y2={0} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
+                              <line x1={0} y1={-10} x2={0} y2={-2.2} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
+                              <line x1={0} y1={2.2} x2={0} y2={10} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
+                              {/* Micro Hollow Target Center Ring - 100% transparent center */}
+                              <circle cx={0} cy={0} r={2.0} fill="none" stroke="#ffffff" strokeWidth={1} />
+                              {/* Subtle Micro-pip center dot for exact subpixel reference */}
+                              <circle cx={0} cy={0} r={0.4} fill="#ffffff" opacity={0.9} />
+                            </g>
+                          ) : (
+                            <>
+                              {/* Normal Solid Outer Pin Body */}
+                              <circle
+                                cx={0}
+                                cy={0}
+                                r={5.5}
+                                fill={typeDef.color}
+                                stroke="#ffffff"
+                                strokeWidth={1.8}
+                                className="cursor-grab"
+                              />
+                              {/* Normal Center Dot */}
+                              <circle cx={0} cy={0} r={1.8} fill="#ffffff" pointerEvents="none" />
+                            </>
+                          )}
 
                           {/* Smart Directional Elbow Callout Annotation */}
                           {shouldShowLabel && (
                             <g
                               pointerEvents="none"
                               className="transition-all duration-150"
-                              style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.65))' }}
+                              style={{
+                                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.65))',
+                                opacity: isDragging ? 0.5 : 1,
+                              }}
                             >
                               {/* 1. Leader Line (Elbow) */}
                               <path
