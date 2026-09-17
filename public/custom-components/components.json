@@ -1242,5 +1242,73 @@
     "imageUrl": "/components/arduino-nano.png",
     "createdAt": "2026-09-17T03:09:55.003Z",
     "updatedAt": "2026-09-17T03:16:18.365Z"
+  },
+  "ftdi232-red": {
+    "definition": {
+      "type": "ftdi232-red",
+      "name": "FTDI232 RED",
+      "category": "microcontrollers",
+      "description": "Modul FTDI FT232RL Red (sering disebut FTDI USB-to-TTL Serial Adapter varian PCB merah) adalah modul konverter yang berfungsi untuk menjembatani komunikasi antarmuka USB komputer dengan komunikasi Serial level TTL pada mikrokontroler.",
+      "width": 124.5,
+      "height": 266.5,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "DTR",
+          "x": 18.4,
+          "y": 266.5,
+          "type": "digital",
+          "description": "Data Terminal Ready (Auto-Reset Arduino Pro Mini)"
+        },
+        {
+          "id": "pin_2",
+          "name": "RX",
+          "x": 35.4,
+          "y": 266.5,
+          "type": "uart",
+          "description": "UART Serial Receive / Serial RX (RX)"
+        },
+        {
+          "id": "pin_3",
+          "name": "TX",
+          "x": 52.4,
+          "y": 266.5,
+          "type": "uart",
+          "description": "UART Serial Transmit / Serial TX (TX)"
+        },
+        {
+          "id": "pin_4",
+          "name": "VCC",
+          "x": 69.4,
+          "y": 266.5,
+          "type": "power",
+          "description": "Tegangan Masukan Daya Positif (+3.3V / +5V DC)"
+        },
+        {
+          "id": "pin_5",
+          "name": "CTS",
+          "x": 86.4,
+          "y": 266.5,
+          "type": "passive",
+          "description": "Clear To Send (Hardware Flow Control)"
+        },
+        {
+          "id": "pin_6",
+          "name": "GND",
+          "x": 103.4,
+          "y": 266.5,
+          "type": "ground",
+          "description": "Power Ground (Referensi Daya & Sinyal 0V)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/ftdi232-red.png",
+      "imageWidth": 124.5,
+      "imageHeight": 266.4,
+      "isCustom": true
+    },
+    "imageUrl": "/components/ftdi232-red.png",
+    "createdAt": "2026-09-17T03:24:43.019Z",
+    "updatedAt": "2026-09-17T03:24:43.019Z"
   }
 }

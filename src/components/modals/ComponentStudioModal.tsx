@@ -48,6 +48,7 @@ import {
   Box,
   Tag,
   Magnet,
+  Target,
   Undo2,
   Redo2,
   Hand,
@@ -1012,6 +1013,41 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }
   }, [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, pushSnapshot]);
 
+  // 1-Click Auto Snap: Instantly snap component pins & image dead-center to nearest breadboard holes
+  const handleSnapPinsToBreadboard = () => {
+    if (pins.length === 0) {
+      const newX = snapCoordinate(imageOffset.x, breadboardOffset.x % 17);
+      const newY = snapCoordinate(imageOffset.y, breadboardOffset.y % 17);
+      const nextOffset = { x: newX, y: newY };
+      setImageOffset(nextOffset);
+      pushSnapshot({ imageOffset: nextOffset });
+      return;
+    }
+
+    // Use selected pin or first pin as the anchor
+    const refPin = selectedPin || pins[0];
+    const targetX = snapCoordinate(refPin.x, breadboardOffset.x % 17);
+    const targetY = snapCoordinate(refPin.y, breadboardOffset.y % 17);
+    const diffX = targetX - refPin.x;
+    const diffY = targetY - refPin.y;
+
+    if (Math.abs(diffX) < 0.001 && Math.abs(diffY) < 0.001) return;
+
+    const nextOffset = {
+      x: Math.round((imageOffset.x + diffX) * 10) / 10,
+      y: Math.round((imageOffset.y + diffY) * 10) / 10,
+    };
+    const nextPins = pins.map((p) => ({
+      ...p,
+      x: Math.round((p.x + diffX) * 10) / 10,
+      y: Math.round((p.y + diffY) * 10) / 10,
+    }));
+
+    setImageOffset(nextOffset);
+    setPins(nextPins);
+    pushSnapshot({ imageOffset: nextOffset, pins: nextPins });
+  };
+
   // Pin Dragging Mouse Event Listeners (UNCONSTRAINED - Can drag anywhere to match module pads!)
   useEffect(() => {
     if (!draggingPinId) return;
@@ -1023,7 +1059,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       let finalX = rawX;
       let finalY = rawY;
 
-      if (snapToBreadboard) {
+      // When holding ALT: smooth precision drag (bypasses 17px snap)
+      const isSmoothMode = e.altKey;
+
+      if (snapToBreadboard && !isSmoothMode) {
         finalX = snapCoordinate(rawX, breadboardOffset.x % 17);
         finalY = snapCoordinate(rawY, breadboardOffset.y % 17);
       } else {
@@ -1069,31 +1108,52 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const deltaX = (e.clientX - imageDragStart.mouseX) / zoom;
       const deltaY = (e.clientY - imageDragStart.mouseY) / zoom;
 
+      // When holding ALT: smooth precision drag (bypasses 17px snap)
+      const isSmoothMode = e.altKey;
+
       let newX = imageDragStart.startX + deltaX;
       let newY = imageDragStart.startY + deltaY;
-
-      if (snapToBreadboard) {
-        newX = snapCoordinate(newX, breadboardOffset.x % 17);
-        newY = snapCoordinate(newY, breadboardOffset.y % 17);
-      } else {
-        newX = Math.round(newX * 10) / 10;
-        newY = Math.round(newY * 10) / 10;
-      }
-
-      const diffX = newX - imageDragStart.startX;
-      const diffY = newY - imageDragStart.startY;
-
-      latestOffset = { x: newX, y: newY };
-      setImageOffset(latestOffset);
+      let diffX = deltaX;
+      let diffY = deltaY;
 
       if (imageDragStart.dragAll && imageDragStart.initialPins.length > 0) {
+        // Smart Alignment by Reference Pin:
+        const refPin = imageDragStart.initialPins.find((p) => p.id === selectedPinId) || imageDragStart.initialPins[0];
+        if (snapToBreadboard && !isSmoothMode && refPin) {
+          const rawPinX = refPin.x + deltaX;
+          const rawPinY = refPin.y + deltaY;
+          const snappedPinX = snapCoordinate(rawPinX, breadboardOffset.x % 17);
+          const snappedPinY = snapCoordinate(rawPinY, breadboardOffset.y % 17);
+          diffX = snappedPinX - refPin.x;
+          diffY = snappedPinY - refPin.y;
+          newX = Math.round((imageDragStart.startX + diffX) * 10) / 10;
+          newY = Math.round((imageDragStart.startY + diffY) * 10) / 10;
+        } else {
+          diffX = Math.round(deltaX * 10) / 10;
+          diffY = Math.round(deltaY * 10) / 10;
+          newX = Math.round((imageDragStart.startX + diffX) * 10) / 10;
+          newY = Math.round((imageDragStart.startY + diffY) * 10) / 10;
+        }
+
         latestPins = imageDragStart.initialPins.map((p) => ({
           ...p,
           x: Math.round((p.x + diffX) * 10) / 10,
           y: Math.round((p.y + diffY) * 10) / 10,
         }));
         setPins(latestPins);
+      } else {
+        // Dragging Image only
+        if (snapToBreadboard && !isSmoothMode) {
+          newX = snapCoordinate(newX, breadboardOffset.x % 17);
+          newY = snapCoordinate(newY, breadboardOffset.y % 17);
+        } else {
+          newX = Math.round(newX * 10) / 10;
+          newY = Math.round(newY * 10) / 10;
+        }
       }
+
+      latestOffset = { x: newX, y: newY };
+      setImageOffset(latestOffset);
     };
 
     const handleWindowMouseUp = () => {
@@ -1107,7 +1167,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       window.removeEventListener('mousemove', handleWindowMouseMove);
       window.removeEventListener('mouseup', handleWindowMouseUp);
     };
-  }, [isDraggingImage, imageDragStart, zoom, snapToBreadboard, breadboardOffset.x, breadboardOffset.y, pushSnapshot, imageOffset, pins]);
+  }, [
+    isDraggingImage,
+    imageDragStart,
+    zoom,
+    snapToBreadboard,
+    breadboardOffset.x,
+    breadboardOffset.y,
+    pushSnapshot,
+    imageOffset,
+    pins,
+    selectedPinId,
+  ]);
 
   // Handle Pin Mouse Down to start dragging pin directly in Smart Mode
   const handlePinMouseDown = (e: React.MouseEvent, pinId: string) => {
@@ -1288,6 +1359,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       if (['input', 'textarea', 'select'].includes((e.target as HTMLElement)?.tagName.toLowerCase())) {
+        return;
+      }
+
+      // Safeguard: NEVER intercept Alt key alone, Alt+Tab, Alt+F4, or system keys
+      if (e.key === 'Alt' || (e.altKey && (e.key === 'Tab' || e.key === 'F4' || e.key.startsWith('F')))) {
         return;
       }
 
@@ -1916,14 +1992,26 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
                     <ImageIcon className="w-3.5 h-3.5 text-sky-400" />
                     Posisi Offset Gambar
                   </span>
-                  <button
-                    onClick={handleFitBoxToImage}
-                    className="text-[10px] text-sky-400 hover:text-sky-300 font-medium hover:underline flex items-center gap-1"
-                    title="Paskan Bounding Box ke Gambar dan nolkan offset"
-                  >
-                    <Box className="w-3 h-3" />
-                    Paskan Box
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSnapPinsToBreadboard}
+                      className="text-[10px] text-emerald-400 hover:text-emerald-300 font-medium hover:underline flex items-center gap-1 cursor-pointer"
+                      title="Kunci posisi gambar & pin tepat ke lubang breadboard terdekat"
+                    >
+                      <Target className="w-3 h-3" />
+                      Paskan BB
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleFitBoxToImage}
+                      className="text-[10px] text-sky-400 hover:text-sky-300 font-medium hover:underline flex items-center gap-1 cursor-pointer"
+                      title="Paskan Bounding Box ke Gambar dan nolkan offset"
+                    >
+                      <Box className="w-3 h-3" />
+                      Paskan Box
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -2161,6 +2249,16 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
 
               {/* Guides, Overlays & Zoom */}
               <div className="flex items-center gap-2 shrink-0">
+                {/* 1-Click Auto Align / Snap to Breadboard Holes */}
+                <button
+                  onClick={handleSnapPinsToBreadboard}
+                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border bg-sky-500/15 hover:bg-sky-500/25 border-sky-500/40 text-sky-300 transition-all shadow-sm shrink-0 cursor-pointer"
+                  title="1-Klik: Kunci & paskan semua pin beserta gambar tepat ke lubang breadboard terdekat"
+                >
+                  <Target className="w-3.5 h-3.5 text-sky-400" />
+                  <span className="hidden md:inline">Paskan ke BB</span>
+                </button>
+
                 {/* Magnet Snap Toggle Button */}
                 <button
                   onClick={() => setSnapToBreadboard(!snapToBreadboard)}
@@ -2560,7 +2658,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 backdrop-blur text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
                 <Sparkles className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 <span>
-                  <b>Mode Pintar:</b> Tarik <b>Pin</b> untuk geser pin • Tarik <b>Gambar</b> untuk sesuaikan posisi visual (tahan <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-purple-300 font-bold">Shift</kbd> untuk geser semua) • Tarik <b>Kanvas</b> untuk pan • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> Putar 90°
+                  <b>Mode Pintar:</b> Tarik <b>Pin</b> / <b>Gambar</b> • Tahan <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-emerald-300 font-bold">Alt</kbd> untuk Geser Mulus (Bypass Snap) • Tahan <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-purple-300 font-bold">Shift</kbd> untuk Geser Semua • <kbd className="px-1 py-0.2 bg-slate-800 rounded border border-slate-700 font-mono text-sky-300 font-bold">R</kbd> Putar 90°
                 </span>
               </div>
             </div>
