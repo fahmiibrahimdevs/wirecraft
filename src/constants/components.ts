@@ -1006,26 +1006,6 @@ export const COMPONENT_DEFINITIONS: Record<string, ComponentDefinition> = {
     ],
   },
 
-  'sensor-ph4502c': {
-    type: 'sensor-ph4502c',
-    name: 'pH Sensor Module (pH-4502C / HW-828)',
-    category: 'sensors',
-    description: 'Modul sensor pengkondisi sinyal elektroda pH analog presisi dengan konektor BNC, dual trimpot kalibrasi (offset & limit threshold), IC NE5532 & LM393, sensor suhu internal (To), dan 6-pin male header horizontal.',
-    width: 450.0,
-    height: 209.0,
-    icon: 'Activity',
-    pins: [
-      // Pin Header Male Horizontal (Sisi Kanan) - Pitch 17.0px breadboard aligned
-      { id: 'vcc', name: 'V+ (VCC)', x: 448.0, y: 67.0, type: 'power', description: 'Tegangan Masukan Daya (+5.0V DC)' },
-      { id: 'gnd_1', name: 'G (GND 1)', x: 448.0, y: 84.0, type: 'ground', description: 'Ground Daya / Sinyal (0V)' },
-      { id: 'gnd_2', name: 'G (GND 2)', x: 448.0, y: 101.0, type: 'ground', description: 'Ground Daya / Sinyal (0V)' },
-      { id: 'po', name: 'Po (pH Analog)', x: 448.0, y: 118.0, type: 'analog', description: 'Output Tegangan Analog pH (0.0 - 5.0V DC, netral pH 7 ≈ 2.5V)' },
-      { id: 'do', name: 'Do (Digital Out)', x: 448.0, y: 135.0, type: 'digital', description: 'Output Digital Trigger / Alarm Batas pH (Active Low)' },
-      { id: 'to', name: 'To (Temp Analog)', x: 448.0, y: 152.0, type: 'analog', description: 'Output Analog Sensor Suhu Internal Modul' },
-      // Soket BNC Elektroda pH (Sisi Kiri)
-      { id: 'bnc', name: 'BNC (pH Probe)', x: 10.0, y: 104.5, type: 'passive', description: 'Soket Koaksial BNC untuk Elektroda Probe pH' },
-    ],
-  },
 
   'sensor-pt100': {
     type: 'sensor-pt100',

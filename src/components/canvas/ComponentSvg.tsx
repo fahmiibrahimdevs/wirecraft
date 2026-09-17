@@ -1037,17 +1037,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           />
         );
 
-      case 'sensor-ph4502c':
-        return (
-          <image
-            href="/components/sensor_ph4502c.png"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-            preserveAspectRatio="none"
-          />
-        );
 
       case 'sensor-pt100':
         return (
@@ -1421,7 +1410,6 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
           const isRfid = component.type === 'sensor-rfid-rc522';
           const isSoilMoisture = component.type === 'sensor-soil-moisture';
           const isTds = component.type === 'sensor-tds';
-          const isPh = component.type === 'sensor-ph4502c';
           const isPt100 = component.type === 'sensor-pt100';
           const isRtdTx = component.type === 'transmitter-rtd-pt100';
           const isMax31865 = component.type.includes('max31865');
@@ -1463,7 +1451,7 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             ? 3.2
             : isLed
             ? 2.5
-            : def.isCustom || isPot || isUltrasonic || isDht || isDs18b20 || isRfid || isSoilMoisture || isTds || isPh || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRelayRed || isRtc || isTft || isKeypad || isMax31865 || isAds1115 || isJsnSr04t || isSim800l || component.type === 'sensor-touch-ttp223'
+            : def.isCustom || isPot || isUltrasonic || isDht || isDs18b20 || isRfid || isSoilMoisture || isTds || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRelayRed || isRtc || isTft || isKeypad || isMax31865 || isAds1115 || isJsnSr04t || isSim800l || component.type === 'sensor-touch-ttp223'
             ? 2.8
             : isLcd
             ? 3.6

@@ -1722,5 +1722,73 @@
     "imageUrl": "/components/level-converter-8ch-red.png",
     "createdAt": "2026-09-17T04:00:17.555Z",
     "updatedAt": "2026-09-17T04:00:17.555Z"
+  },
+  "ph4502c": {
+    "definition": {
+      "type": "ph4502c",
+      "name": "PH4502C",
+      "category": "sensors",
+      "description": "Modul Sensor pH Meter PH-4502C adalah perangkat pengkondisi sinyal analog yang dirancang khusus untuk mengukur tingkat keasaman atau kebasaan suatu cairan. Modul ini bertindak sebagai jembatan yang mengubah sinyal tegangan milivolt (mV) mikro dari Probe Elektroda Kaca (konektor BNC) menjadi sinyal tegangan linear yang kompatibel dengan mikrokontroler seperti Arduino atau ESP32.",
+      "width": 209.6,
+      "height": 450.8,
+      "pins": [
+        {
+          "id": "pin_1",
+          "name": "To (Temp Analog)",
+          "x": 57.1,
+          "y": 446,
+          "type": "analog",
+          "description": "Output Analog Sensor Suhu Internal Modul"
+        },
+        {
+          "id": "pin_2",
+          "name": "Do (Digital Output)",
+          "x": 74.1,
+          "y": 446,
+          "type": "digital",
+          "description": "Output Digital Trigger / Alarm Batas pH (Active Low)"
+        },
+        {
+          "id": "pin_3",
+          "name": "Po (pH Analog)",
+          "x": 91.1,
+          "y": 446,
+          "type": "analog",
+          "description": "Output Tegangan Analog pH (0.0 - 5.0V DC, netral pH 7 ~ 2.5V)"
+        },
+        {
+          "id": "pin_4",
+          "name": "G (GND2)",
+          "x": 108.1,
+          "y": 446,
+          "type": "ground",
+          "description": "Ground Daya (0V)"
+        },
+        {
+          "id": "pin_5",
+          "name": "G (GND1)",
+          "x": 125.1,
+          "y": 446,
+          "type": "ground",
+          "description": "Ground Daya (0V)"
+        },
+        {
+          "id": "pin_6",
+          "name": "VCC",
+          "x": 142.1,
+          "y": 446,
+          "type": "power",
+          "description": "Tegangan Masukan Daya Positif (+3.3V / +5V DC)"
+        }
+      ],
+      "icon": "Cpu",
+      "imageUrl": "/components/ph4502c.png",
+      "imageWidth": 209.6,
+      "imageHeight": 450.8,
+      "isCustom": true
+    },
+    "imageUrl": "/components/ph4502c.png",
+    "createdAt": "2026-09-17T05:47:41.365Z",
+    "updatedAt": "2026-09-17T05:47:41.365Z"
   }
 }

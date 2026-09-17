@@ -57,7 +57,6 @@ export type ComponentType =
   | 'pzem-004t'
   | 'sensor-ct-coil'
   | 'sensor-tds'
-  | 'sensor-ph4502c'
   | 'sensor-pt100'
   | 'transmitter-rtd-pt100'
   | 'level-converter-4ch-blue'
