@@ -438,60 +438,22 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800/90 flex items-center justify-between bg-slate-50 dark:bg-slate-950/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400 shadow-sm shrink-0">
-              <Download className="w-5 h-5" />
-            </div>
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400 shadow-sm shrink-0"><Download className="w-5 h-5" /></div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                  Export Diagram & Berkas Rangkaian
-                </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold">
-                  HD Engine
-                </span>
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">Export Diagram & Berkas Rangkaian</h2>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold">HD Engine</span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Ekspor gambar diagram visual resolusi tinggi atau unduh berkas proyek, sketsa Arduino, dan BOM.
-              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ekspor gambar diagram visual resolusi tinggi atau unduh berkas proyek, sketsa Arduino, dan BOM.</p>
             </div>
           </div>
-
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"><X className="w-5 h-5" /></button>
         </div>
 
         {/* Tab Switcher */}
         <div className="flex border-b border-slate-200 dark:border-slate-800 px-5 bg-slate-50/50 dark:bg-slate-950/20 gap-6">
-          <button
-            onClick={() => setActiveTab('image')}
-            className={`py-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
-              activeTab === 'image'
-                ? 'border-sky-500 text-sky-600 dark:text-sky-400 font-bold'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <ImageIcon className="w-4 h-4" />
-            <span>Gambar Diagram (Super HD)</span>
-            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
-              AUTO CROP
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('files')}
-            className={`py-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
-              activeTab === 'files'
-                ? 'border-sky-500 text-sky-600 dark:text-sky-400 font-bold'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <FileCode className="w-4 h-4" />
-            <span>Berkas Proyek & Kode Rangkaian</span>
-          </button>
+          <button onClick={() => setActiveTab('image')} className={`py-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === 'image' ? 'border-sky-500 text-sky-600 dark:text-sky-400 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}><ImageIcon className="w-4 h-4" /><span>Gambar Diagram (Super HD)</span><span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">AUTO CROP</span></button>
+          <button onClick={() => setActiveTab('files')} className={`py-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${activeTab === 'files' ? 'border-sky-500 text-sky-600 dark:text-sky-400 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}><FileCode className="w-4 h-4" /><span>Berkas Proyek & Kode Rangkaian</span></button>
         </div>
 
         {/* Modal Body */}
@@ -502,39 +464,23 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               {/* Auto-Fit Bounding Box Snapshot Banner */}
               <div className="p-3.5 bg-sky-50/70 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/30 rounded-xl flex items-center justify-between gap-4 shadow-xs">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0"><Sparkles className="w-4 h-4" /></div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        {scope === 'auto' ? 'Auto-Fit Bounding Box Snapshot' : 'Camera Viewport Snapshot'}
-                      </span>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-400/40 uppercase">
-                        {scale === 1 ? '1x SD' : scale === 2 ? '2x RETINA HD' : scale === 3 ? '3x 4K SUPER HD' : '4x 8K ULTRA HD'}
-                      </span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{scope === 'auto' ? 'Auto-Fit Bounding Box Snapshot' : 'Camera Viewport Snapshot'}</span>
+                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-400/40 uppercase">{scale === 1 ? '1x SD' : scale === 2 ? '2x RETINA HD' : scale === 3 ? '3x 4K SUPER HD' : '4x 8K ULTRA HD'}</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                      {scope === 'auto'
-                        ? `Membingkai otomatis seluruh ${components.length} modul & ${wires.length} kabel jumper dengan margin presisi 60px.`
-                        : `Mengambil tangkapan sesuai area pan dan level zoom layar kanvas saat ini.`}
-                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{scope === 'auto' ? `Membingkai otomatis seluruh ${components.length} modul & ${wires.length} kabel jumper dengan margin presisi 60px.` : `Mengambil tangkapan sesuai area pan dan level zoom layar kanvas saat ini.`}</p>
                   </div>
                 </div>
-
-                <div className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300 shrink-0 shadow-xs">
-                  ~{estimatedResolution.width} × {estimatedResolution.height} px
-                </div>
+                <div className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300 shrink-0 shadow-xs">~{estimatedResolution.width} × {estimatedResolution.height} px</div>
               </div>
 
               {/* 2x2 Settings Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 1. Kerapatan Resolusi (Scale DPI) */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
-                    <Maximize2 className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-                    <span>Kerapatan Resolusi (Scale DPI)</span>
-                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"><Maximize2 className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" /><span>Kerapatan Resolusi (Scale DPI)</span></div>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { val: 1, title: '1x Standar', desc: 'Ukuran web standar' },
@@ -542,27 +488,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       { val: 3, title: '3x Super HD (4K)', desc: 'Sangat jernih & tajam', badge: 'BEST' },
                       { val: 4, title: '4x Ultra HD (8K)', desc: 'Maksimal untuk cetak' },
                     ].map((opt) => (
-                      <button
-                        key={opt.val}
-                        type="button"
-                        onClick={() => setScale(opt.val as ExportScale)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                          scale === opt.val
-                            ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-400 dark:border-sky-500 text-sky-900 dark:text-sky-100 shadow-sm ring-1 ring-sky-400/40'
-                            : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold">{opt.title}</span>
-                          {opt.badge && (
-                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-500 text-slate-950">
-                              {opt.badge}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                          {opt.desc}
-                        </span>
+                      <button key={opt.val} type="button" onClick={() => setScale(opt.val as ExportScale)} className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${scale === opt.val ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-400 dark:border-sky-500 text-sky-900 dark:text-sky-100 shadow-sm ring-1 ring-sky-400/40' : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'}`}>
+                        <div className="flex items-center justify-between"><span className="text-xs font-bold">{opt.title}</span>{opt.badge && <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-500 text-slate-950">{opt.badge}</span>}</div>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{opt.desc}</span>
                       </button>
                     ))}
                   </div>
@@ -570,30 +498,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
                 {/* 2. Format Berkas Gambar */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
-                    <Layers className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-                    <span>Format Berkas Gambar</span>
-                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"><Layers className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" /><span>Format Berkas Gambar</span></div>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { val: 'png', title: 'PNG Image', desc: 'Raster tajam / transparan' },
                       { val: 'svg', title: 'SVG Vector', desc: 'Vektor tak terbatas' },
                       { val: 'jpeg', title: 'JPEG Image', desc: 'File lebih hemat' },
                     ].map((opt) => (
-                      <button
-                        key={opt.val}
-                        type="button"
-                        onClick={() => setFormat(opt.val as ExportFormat)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                          format === opt.val
-                            ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-400 dark:border-sky-500 text-sky-900 dark:text-sky-100 shadow-sm ring-1 ring-sky-400/40'
-                            : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                        }`}
-                      >
+                      <button key={opt.val} type="button" onClick={() => setFormat(opt.val as ExportFormat)} className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${format === opt.val ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-400 dark:border-sky-500 text-sky-900 dark:text-sky-100 shadow-sm ring-1 ring-sky-400/40' : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'}`}>
                         <span className="text-xs font-bold">{opt.title}</span>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
-                          {opt.desc}
-                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">{opt.desc}</span>
                       </button>
                     ))}
                   </div>
@@ -601,10 +515,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
                 {/* 3. Latar Belakang (Background Canvas) */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
-                    <span className="w-2 h-2 rounded-full bg-sky-500" />
-                    <span>Latar Belakang (Background Canvas)</span>
-                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"><span className="w-2 h-2 rounded-full bg-sky-500" /><span>Latar Belakang (Background Canvas)</span></div>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { val: 'theme', title: 'Tema Saat Ini', desc: 'Otomatis Gelap / Terang' },
@@ -612,20 +523,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       { val: 'light', title: 'Clean Light', desc: 'Latar putih cerah (#ffffff)' },
                       { val: 'transparent', title: 'Transparan', desc: 'Tanpa latar (khusus PNG/SVG)' },
                     ].map((opt) => (
-                      <button
-                        key={opt.val}
-                        type="button"
-                        onClick={() => setBgOption(opt.val as BackgroundOption)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                          bgOption === opt.val
-                            ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-400 dark:border-sky-500 text-sky-900 dark:text-sky-100 shadow-sm ring-1 ring-sky-400/40'
-                            : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                        }`}
-                      >
+                      <button key={opt.val} type="button" onClick={() => setBgOption(opt.val as BackgroundOption)} className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${bgOption === opt.val ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-400 dark:border-sky-500 text-sky-900 dark:text-sky-100 shadow-sm ring-1 ring-sky-400/40' : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'}`}>
                         <span className="text-xs font-bold">{opt.title}</span>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                          {opt.desc}
-                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{opt.desc}</span>
                       </button>
                     ))}
                   </div>
@@ -633,37 +533,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
                 {/* 4. Cakupan Area Ekspor */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span>Cakupan Area Ekspor</span>
-                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span>Cakupan Area Ekspor</span></div>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      {
-                        val: 'auto',
-                        title: 'Seluruh Diagram (Auto)',
-                        desc: 'Otomatis membingkai semua modul & kabel',
-                      },
-                      {
-                        val: 'viewport',
-                        title: 'Kamera Layar Saat Ini',
-                        desc: 'Persis posisi pan & zoom layar sekarang',
-                      },
+                      { val: 'auto', title: 'Seluruh Diagram (Auto)', desc: 'Otomatis membingkai semua modul & kabel' },
+                      { val: 'viewport', title: 'Kamera Layar Saat Ini', desc: 'Persis posisi pan & zoom layar sekarang' },
                     ].map((opt) => (
-                      <button
-                        key={opt.val}
-                        type="button"
-                        onClick={() => setScope(opt.val as ExportScope)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                          scope === opt.val
-                            ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-400 dark:border-sky-500 text-sky-900 dark:text-sky-100 shadow-sm ring-1 ring-sky-400/40'
-                            : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                        }`}
-                      >
+                      <button key={opt.val} type="button" onClick={() => setScope(opt.val as ExportScope)} className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${scope === opt.val ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-400 dark:border-sky-500 text-sky-900 dark:text-sky-100 shadow-sm ring-1 ring-sky-400/40' : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60'}`}>
                         <span className="text-xs font-bold">{opt.title}</span>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                          {opt.desc}
-                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{opt.desc}</span>
                       </button>
                     ))}
                   </div>
@@ -678,147 +556,52 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               {/* Option 1: Native WireCraft .wire File */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-center justify-between gap-4 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0">
-                    <Zap className="w-5 h-5" />
-                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0"><Zap className="w-5 h-5" /></div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        Berkas Proyek WireCraft (.wire)
-                      </span>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400">
-                        Native
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Menyimpan seluruh komponen, pin wiring, posisi koordinat, dan metadata proyek.
-                    </p>
+                    <div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-900 dark:text-slate-100">Berkas Proyek WireCraft (.wire)</span><span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400">Native</span></div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Menyimpan seluruh komponen, pin wiring, posisi koordinat, dan metadata proyek.</p>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleExportProjectFile('wire')}
-                  className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download .wire</span>
-                </button>
+                <button type="button" onClick={() => handleExportProjectFile('wire')} className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs"><Download className="w-3.5 h-3.5" /><span>Download .wire</span></button>
               </div>
 
               {/* Option 2: Universal JSON Format */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-center justify-between gap-4 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
-                    <FileCode className="w-5 h-5" />
-                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0"><FileCode className="w-5 h-5" /></div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        Format Data JSON (.json)
-                      </span>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                        Universal
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Struktur data skema sirkuit terbuka untuk integrasi, backup, atau pertukaran data.
-                    </p>
+                    <div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-900 dark:text-slate-100">Format Data JSON (.json)</span><span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400">Universal</span></div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Struktur data skema sirkuit terbuka untuk integrasi, backup, atau pertukaran data.</p>
                   </div>
                 </div>
-
                 <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const jsonStr = JSON.stringify(
-                        {
-                          version: '1.0.0',
-                          name: projectName,
-                          components,
-                          wires,
-                        },
-                        null,
-                        2
-                      );
-                      copyText(jsonStr, 'json');
-                    }}
-                    className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium transition-colors cursor-pointer"
-                    title="Salin JSON ke Clipboard"
-                  >
-                    {copiedFile === 'json' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleExportProjectFile('json')}
-                    className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download .json</span>
-                  </button>
+                  <button type="button" onClick={() => { const jsonStr = JSON.stringify({ version: '1.0.0', name: projectName, components, wires }, null, 2); copyText(jsonStr, 'json'); }} className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium transition-colors cursor-pointer" title="Salin JSON ke Clipboard">{copiedFile === 'json' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}</button>
+                  <button type="button" onClick={() => handleExportProjectFile('json')} className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"><Download className="w-3.5 h-3.5" /><span>Download .json</span></button>
                 </div>
               </div>
 
               {/* Option 3: Arduino C++ Code (.ino) */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-center justify-between gap-4 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0">
-                    <Cpu className="w-5 h-5" />
-                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0"><Cpu className="w-5 h-5" /></div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        Sketsa Kode Arduino C++ (.ino)
-                      </span>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-teal-500/15 text-teal-600 dark:text-teal-400">
-                        Source Code
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Kode C++ Arduino IDE otomatis terkonfigurasi sesuai modul mikrokontroler dan pin terhubung.
-                    </p>
+                    <div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-900 dark:text-slate-100">Sketsa Kode Arduino C++ (.ino)</span><span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-teal-500/15 text-teal-600 dark:text-teal-400">Source Code</span></div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Kode C++ Arduino IDE otomatis terkonfigurasi sesuai modul mikrokontroler dan pin terhubung.</p>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleExportIno}
-                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download .ino</span>
-                </button>
+                <button type="button" onClick={handleExportIno} className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"><Download className="w-3.5 h-3.5" /><span>Download .ino</span></button>
               </div>
 
               {/* Option 4: Bill of Materials Spreadsheet (.csv) */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-center justify-between gap-4 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                    <FileSpreadsheet className="w-5 h-5" />
-                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0"><FileSpreadsheet className="w-5 h-5" /></div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        Bill of Materials CSV (.csv)
-                      </span>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                        Spreadsheet
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Daftar rincian kebutuhan komponen, kuantitas part, dan spesifikasi perakitan fisik.
-                    </p>
+                    <div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-900 dark:text-slate-100">Bill of Materials CSV (.csv)</span><span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">Spreadsheet</span></div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Daftar rincian kebutuhan komponen, kuantitas part, dan spesifikasi perakitan fisik.</p>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleExportBomCsv}
-                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download .csv</span>
-                </button>
+                <button type="button" onClick={handleExportBomCsv} className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"><Download className="w-3.5 h-3.5" /><span>Download .csv</span></button>
               </div>
             </div>
           )}
@@ -828,51 +611,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Status summary */}
           <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-            <span>{components.length} komponen</span>
-            <span>•</span>
-            <span>{wires.length} kabel</span>
-            <span>•</span>
-            <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[160px]">
-              {projectName}
-            </span>
+            <span>{components.length} komponen</span><span>•</span><span>{wires.length} kabel</span><span>•</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[160px]">{projectName}</span>
           </div>
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
             {activeTab === 'image' && (
               <>
-                <button
-                  type="button"
-                  onClick={handleCopyToClipboard}
-                  disabled={isCopying || isExporting}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-50"
-                >
-                  <Copy className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                  <span>{isCopying ? 'Menyalin...' : 'Salin ke Clipboard'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleDownloadImage}
-                  disabled={isExporting || isCopying}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 text-xs font-bold transition-all shadow-md shadow-sky-500/25 cursor-pointer disabled:opacity-50"
-                >
-                  <Download className={`w-4 h-4 ${isExporting ? 'animate-bounce' : ''}`} />
-                  <span>
-                    {isExporting ? 'Memproses...' : `Download Gambar (${format.toUpperCase()})`}
-                  </span>
-                </button>
+                <button type="button" onClick={handleCopyToClipboard} disabled={isCopying || isExporting} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-50"><Copy className="w-4 h-4 text-slate-500 dark:text-slate-400" /><span>{isCopying ? 'Menyalin...' : 'Salin ke Clipboard'}</span></button>
+                <button type="button" onClick={handleDownloadImage} disabled={isExporting || isCopying} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 text-xs font-bold transition-all shadow-md shadow-sky-500/25 cursor-pointer disabled:opacity-50"><Download className={`w-4 h-4 ${isExporting ? 'animate-bounce' : ''}`} /><span>{isExporting ? 'Memproses...' : `Download Gambar (${format.toUpperCase()})`}</span></button>
               </>
             )}
 
             {activeTab === 'files' && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-              >
-                Selesai
-              </button>
+              <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer">Selesai</button>
             )}
           </div>
         </div>

@@ -607,74 +607,22 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           {/* 1. Components Layer */}
           <g id="components-layer" className="pointer-events-auto">
             {sortedComponents.map((comp) => (
-              <g
-                key={comp.id}
-                onMouseDown={(e) => compDrag.handleComponentMouseDown(comp, e)}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                <ComponentSvg
-                  component={comp}
-                  isSelected={selectedComponentIds.includes(comp.id)}
-                  isHovered={false}
-                  activeWireStartPinId={
-                    wireGestures.drawingWire?.fromComponentId === comp.id
-                      ? wireGestures.drawingWire.fromPin?.id || null
-                      : null
-                  }
-                  activeWireTargetPinId={
-                    wireGestures.drawingWire &&
-                    wireGestures.hoveredPinInfo?.component.id === comp.id
-                      ? wireGestures.hoveredPinInfo.pin.id
-                      : null
-                  }
-                  onPinMouseDown={wireGestures.handlePinMouseDown}
-                  onPinMouseUp={wireGestures.handlePinMouseUp}
-                  onPinMouseEnter={wireGestures.handlePinMouseEnter}
-                  onPinMouseLeave={wireGestures.handlePinMouseLeave}
-                />
+              <g key={comp.id} onMouseDown={(e) => compDrag.handleComponentMouseDown(comp, e)} onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                <ComponentSvg component={comp} isSelected={selectedComponentIds.includes(comp.id)} isHovered={false} activeWireStartPinId={wireGestures.drawingWire?.fromComponentId === comp.id ? wireGestures.drawingWire.fromPin?.id || null : null} activeWireTargetPinId={wireGestures.drawingWire && wireGestures.hoveredPinInfo?.component.id === comp.id ? wireGestures.hoveredPinInfo.pin.id : null} onPinMouseDown={wireGestures.handlePinMouseDown} onPinMouseUp={wireGestures.handlePinMouseUp} onPinMouseEnter={wireGestures.handlePinMouseEnter} onPinMouseLeave={wireGestures.handlePinMouseLeave} />
               </g>
             ))}
           </g>
 
           {/* 2. Wires Layer */}
-          <g
-            id="wires-layer"
-            className={
-              wireGestures.drawingWire || wireGestures.draggingEndpoint
-                ? 'pointer-events-none'
-                : 'pointer-events-auto'
-            }
-          >
+          <g id="wires-layer" className={wireGestures.drawingWire || wireGestures.draggingEndpoint ? 'pointer-events-none' : 'pointer-events-auto'}>
             {sortedWires.map((wire) => {
               const resolved = resolvedWiresMap.get(wire.id);
-              let start =
-                resolved?.start ||
-                (wire.fromComponentId && wire.fromPinId
-                  ? getPinCoords(wire.fromComponentId, wire.fromPinId)
-                  : null);
-              let end =
-                resolved?.end ||
-                (wire.toComponentId && wire.toPinId
-                  ? getPinCoords(wire.toComponentId, wire.toPinId)
-                  : null);
-              const startDir =
-                resolved?.startDir ||
-                (wire.fromComponentId && wire.fromPinId
-                  ? getPinDirectionHelper(wire.fromComponentId, wire.fromPinId)
-                  : undefined);
-              const endDir =
-                resolved?.endDir ||
-                (wire.toComponentId && wire.toPinId
-                  ? getPinDirectionHelper(wire.toComponentId, wire.toPinId)
-                  : undefined);
+              let start = resolved?.start || (wire.fromComponentId && wire.fromPinId ? getPinCoords(wire.fromComponentId, wire.fromPinId) : null);
+              let end = resolved?.end || (wire.toComponentId && wire.toPinId ? getPinCoords(wire.toComponentId, wire.toPinId) : null);
+              const startDir = resolved?.startDir || (wire.fromComponentId && wire.fromPinId ? getPinDirectionHelper(wire.fromComponentId, wire.fromPinId) : undefined);
+              const endDir = resolved?.endDir || (wire.toComponentId && wire.toPinId ? getPinDirectionHelper(wire.toComponentId, wire.toPinId) : undefined);
 
-              if (
-                wireGestures.draggingEndpoint &&
-                wireGestures.draggingEndpoint.wireId === wire.id
-              ) {
+              if (wireGestures.draggingEndpoint && wireGestures.draggingEndpoint.wireId === wire.id) {
                 if (wireGestures.draggingEndpoint.endpoint === 'start') {
                   start = wireGestures.draggingEndpoint.currentPoint;
                 } else {
@@ -684,88 +632,16 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
               if (!start || !end) return null;
 
-              const fromComp = wire.fromComponentId
-                ? components.find((c) => c.id === wire.fromComponentId)
-                : undefined;
-              const toComp = wire.toComponentId
-                ? components.find((c) => c.id === wire.toComponentId)
-                : undefined;
-              const fromDef = fromComp
-                ? allDefs[fromComp.type] || COMPONENT_DEFINITIONS[fromComp.type]
-                : undefined;
-              const toDef = toComp
-                ? allDefs[toComp.type] || COMPONENT_DEFINITIONS[toComp.type]
-                : undefined;
-              const fromPin =
-                fromDef && wire.fromPinId
-                  ? fromDef.pins.find((p: Pin) => p.id === wire.fromPinId)
-                  : undefined;
-              const toPin =
-                toDef && wire.toPinId
-                  ? toDef.pins.find((p: Pin) => p.id === wire.toPinId)
-                  : undefined;
+              const fromComp = wire.fromComponentId ? components.find((c) => c.id === wire.fromComponentId) : undefined;
+              const toComp = wire.toComponentId ? components.find((c) => c.id === wire.toComponentId) : undefined;
+              const fromDef = fromComp ? allDefs[fromComp.type] || COMPONENT_DEFINITIONS[fromComp.type] : undefined;
+              const toDef = toComp ? allDefs[toComp.type] || COMPONENT_DEFINITIONS[toComp.type] : undefined;
+              const fromPin = fromDef && wire.fromPinId ? fromDef.pins.find((p: Pin) => p.id === wire.fromPinId) : undefined;
+              const toPin = toDef && wire.toPinId ? toDef.pins.find((p: Pin) => p.id === wire.toPinId) : undefined;
 
               return (
-                <g
-                  key={wire.id}
-                  onMouseDown={(e) => {
-                    if (e.button === 2) {
-                      gestures.isRightMouseDownRef.current = true;
-                      gestures.rightClickStartPosRef.current = { x: e.clientX, y: e.clientY };
-                      gestures.rightClickDidDragRef.current = false;
-                      const worldPos = gestures.screenToWorld(e.clientX, e.clientY);
-                      onSelectWire(wire.id);
-                      onSelectComponents([]);
-                      gestures.pendingContextMenuRef.current = {
-                        isOpen: true,
-                        x: e.clientX,
-                        y: e.clientY,
-                        worldX: worldPos.x,
-                        worldY: worldPos.y,
-                        targetType: 'wire',
-                        targetWire: wire,
-                      };
-                      gestures.setIsPanning(true);
-                      gestures.setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-                    }
-                  }}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
-                  <WireSvg
-                    wire={wire}
-                    startPoint={start}
-                    endPoint={end}
-                    startDir={startDir}
-                    endDir={endDir}
-                    netSignalName={resolvedNetSignals.get(wire.id)}
-                    resolvedWaypoints={resolved?.waypoints}
-                    connectedWireIds={resolved?.connectedWireIds}
-                    junctionPoints={
-                      wireGestures.liveWireJunctionsMap.get(wire.id) || resolved?.junctionPoints
-                    }
-                    liveWaypoints={wireGestures.liveWireWaypointsMap.get(wire.id)}
-                    isSelected={selectedWireId === wire.id}
-                    zoom={zoom}
-                    showWireMarkers={showWireMarkers}
-                    fromPinName={fromPin?.name}
-                    toPinName={toPin?.name}
-                    fromCompType={fromComp?.type}
-                    toCompType={toComp?.type}
-                    onSelect={(w, e) => {
-                      e.stopPropagation();
-                      onSelectWire(w.id);
-                      onSelectComponents([]);
-                    }}
-                    onResetWaypoints={onResetWireWaypoints}
-                    onStartEndpointDrag={wireGestures.handleStartEndpointDrag}
-                    onStartSegmentDrag={wireGestures.handleStartSegmentDrag}
-                    onStartJunctionDrag={wireGestures.handleStartJunctionDrag}
-                    onStartCornerDrag={wireGestures.handleStartCornerDrag}
-                    onStartMidpointDrag={wireGestures.handleStartMidpointDrag}
-                  />
+                <g key={wire.id} onMouseDown={(e) => { if (e.button === 2) { gestures.isRightMouseDownRef.current = true; gestures.rightClickStartPosRef.current = { x: e.clientX, y: e.clientY }; gestures.rightClickDidDragRef.current = false; const worldPos = gestures.screenToWorld(e.clientX, e.clientY); onSelectWire(wire.id); onSelectComponents([]); gestures.pendingContextMenuRef.current = { isOpen: true, x: e.clientX, y: e.clientY, worldX: worldPos.x, worldY: worldPos.y, targetType: 'wire', targetWire: wire }; gestures.setIsPanning(true); gestures.setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y }); } }} onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                  <WireSvg wire={wire} startPoint={start} endPoint={end} startDir={startDir} endDir={endDir} netSignalName={resolvedNetSignals.get(wire.id)} resolvedWaypoints={resolved?.waypoints} connectedWireIds={resolved?.connectedWireIds} junctionPoints={wireGestures.liveWireJunctionsMap.get(wire.id) || resolved?.junctionPoints} liveWaypoints={wireGestures.liveWireWaypointsMap.get(wire.id)} isSelected={selectedWireId === wire.id} zoom={zoom} showWireMarkers={showWireMarkers} fromPinName={fromPin?.name} toPinName={toPin?.name} fromCompType={fromComp?.type} toCompType={toComp?.type} onSelect={(w, e) => { e.stopPropagation(); onSelectWire(w.id); onSelectComponents([]); }} onResetWaypoints={onResetWireWaypoints} onStartEndpointDrag={wireGestures.handleStartEndpointDrag} onStartSegmentDrag={wireGestures.handleStartSegmentDrag} onStartJunctionDrag={wireGestures.handleStartJunctionDrag} onStartCornerDrag={wireGestures.handleStartCornerDrag} onStartMidpointDrag={wireGestures.handleStartMidpointDrag} />
                 </g>
               );
             })}
@@ -774,68 +650,18 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
             {wireGestures.drawingWire &&
               (() => {
                 const dw = wireGestures.drawingWire;
-                const start =
-                  dw.fromWireId && dw.fromPoint
-                    ? dw.fromPoint
-                    : dw.fromComponentId && dw.fromPin
-                    ? getPinCoords(dw.fromComponentId, dw.fromPin.id)
-                    : null;
-                const startDir =
-                  dw.fromComponentId && dw.fromPin
-                    ? getPinDirectionHelper(dw.fromComponentId, dw.fromPin.id)
-                    : undefined;
-                const endDir = wireGestures.hoveredPinInfo
-                  ? getPinDirectionHelper(
-                      wireGestures.hoveredPinInfo.component.id,
-                      wireGestures.hoveredPinInfo.pin.id
-                    )
-                  : undefined;
+                const start = dw.fromWireId && dw.fromPoint ? dw.fromPoint : dw.fromComponentId && dw.fromPin ? getPinCoords(dw.fromComponentId, dw.fromPin.id) : null;
+                const startDir = dw.fromComponentId && dw.fromPin ? getPinDirectionHelper(dw.fromComponentId, dw.fromPin.id) : undefined;
+                const endDir = wireGestures.hoveredPinInfo ? getPinDirectionHelper(wireGestures.hoveredPinInfo.component.id, wireGestures.hoveredPinInfo.pin.id) : undefined;
                 if (!start) return null;
-                const pathD = generateWirePath(
-                  start,
-                  dw.currentPoint,
-                  wireRouting,
-                  dw.waypoints,
-                  startDir,
-                  endDir
-                );
-                const previewColor = wireGestures.hoveredPinInfo
-                  ? dw.fromPin
-                    ? getAutoWireColor(
-                        dw.fromPin,
-                        wireGestures.hoveredPinInfo.pin,
-                        dw.color || currentWireColor
-                      )
-                    : dw.color || currentWireColor
-                  : wireGestures.hoveredWireSnap
-                  ? dw.color || wireGestures.hoveredWireSnap.wire.color || currentWireColor
-                  : dw.color || currentWireColor;
+                const pathD = generateWirePath(start, dw.currentPoint, wireRouting, dw.waypoints, startDir, endDir);
+                const previewColor = wireGestures.hoveredPinInfo ? dw.fromPin ? getAutoWireColor(dw.fromPin, wireGestures.hoveredPinInfo.pin, dw.color || currentWireColor) : dw.color || currentWireColor : wireGestures.hoveredWireSnap ? dw.color || wireGestures.hoveredWireSnap.wire.color || currentWireColor : dw.color || currentWireColor;
 
                 return (
                   <g className="pointer-events-none">
-                    <path
-                      d={pathD}
-                      fill="none"
-                      stroke={previewColor}
-                      strokeWidth="3.2"
-                      strokeLinecap="round"
-                      strokeDasharray="6 4"
-                      className="animate-pulse pointer-events-none"
-                    />
-                    <circle
-                      cx={start.x}
-                      cy={start.y}
-                      r={dw.fromWireId ? 3.8 : 3.4}
-                      fill={previewColor}
-                      className="pointer-events-none"
-                    />
-                    <circle
-                      cx={dw.currentPoint.x}
-                      cy={dw.currentPoint.y}
-                      r={wireGestures.hoveredWireSnap ? 3.8 : 3.4}
-                      fill={previewColor}
-                      className="pointer-events-none"
-                    />
+                    <path d={pathD} fill="none" stroke={previewColor} strokeWidth="3.2" strokeLinecap="round" strokeDasharray="6 4" className="animate-pulse pointer-events-none" />
+                    <circle cx={start.x} cy={start.y} r={dw.fromWireId ? 3.8 : 3.4} fill={previewColor} className="pointer-events-none" />
+                    <circle cx={dw.currentPoint.x} cy={dw.currentPoint.y} r={wireGestures.hoveredWireSnap ? 3.8 : 3.4} fill={previewColor} className="pointer-events-none" />
                   </g>
                 );
               })()}
@@ -843,34 +669,14 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
             {/* Interactive Endpoint Drag Preview Dot */}
             {wireGestures.draggingEndpoint && (
               <g className="pointer-events-none">
-                <circle
-                  cx={wireGestures.draggingEndpoint.currentPoint.x}
-                  cy={wireGestures.draggingEndpoint.currentPoint.y}
-                  r={wireGestures.hoveredWireSnap || wireGestures.hoveredPinInfo ? 5.5 : 4}
-                  fill={
-                    wireGestures.hoveredWireSnap
-                      ? wireGestures.hoveredWireSnap.wire.color || currentWireColor
-                      : currentWireColor
-                  }
-                  className="animate-pulse pointer-events-none"
-                />
+                <circle cx={wireGestures.draggingEndpoint.currentPoint.x} cy={wireGestures.draggingEndpoint.currentPoint.y} r={wireGestures.hoveredWireSnap || wireGestures.hoveredPinInfo ? 5.5 : 4} fill={wireGestures.hoveredWireSnap ? wireGestures.hoveredWireSnap.wire.color || currentWireColor : currentWireColor} className="animate-pulse pointer-events-none" />
               </g>
             )}
           </g>
 
           {/* 3. Marquee Selection Box */}
           {gestures.marqueeStart && gestures.marqueeCurrent && (
-            <rect
-              x={Math.min(gestures.marqueeStart.x, gestures.marqueeCurrent.x)}
-              y={Math.min(gestures.marqueeStart.y, gestures.marqueeCurrent.y)}
-              width={Math.abs(gestures.marqueeCurrent.x - gestures.marqueeStart.x)}
-              height={Math.abs(gestures.marqueeCurrent.y - gestures.marqueeStart.y)}
-              fill="rgba(56, 189, 248, 0.12)"
-              stroke="#38bdf8"
-              strokeWidth={1.5 / zoom}
-              strokeDasharray={`${4 / zoom} ${4 / zoom}`}
-              className="pointer-events-none"
-            />
+            <rect x={Math.min(gestures.marqueeStart.x, gestures.marqueeCurrent.x)} y={Math.min(gestures.marqueeStart.y, gestures.marqueeCurrent.y)} width={Math.abs(gestures.marqueeCurrent.x - gestures.marqueeStart.x)} height={Math.abs(gestures.marqueeCurrent.y - gestures.marqueeStart.y)} fill="rgba(56, 189, 248, 0.12)" stroke="#38bdf8" strokeWidth={1.5 / zoom} strokeDasharray={`${4 / zoom} ${4 / zoom}`} className="pointer-events-none" />
           )}
 
           {/* 4. Foreground Overlay Layer (e.g. CT Coil front arch) */}
@@ -881,16 +687,8 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                 const def = allDefs[comp.type] || COMPONENT_DEFINITIONS[comp.type];
                 if (!def) return null;
                 return (
-                  <g
-                    key={`fg-${comp.id}`}
-                    transform={`translate(${comp.x}, ${comp.y}) rotate(${comp.rotation || 0} ${def.width / 2} ${def.height / 2})`}
-                  >
-                    <image
-                      href="/components/ct_coil_front.png"
-                      width={def.width}
-                      height={def.height}
-                      preserveAspectRatio="none"
-                    />
+                  <g key={`fg-${comp.id}`} transform={`translate(${comp.x}, ${comp.y}) rotate(${comp.rotation || 0} ${def.width / 2} ${def.height / 2})`}>
+                    <image href="/components/ct_coil_front.png" width={def.width} height={def.height} preserveAspectRatio="none" />
                   </g>
                 );
               })}
@@ -899,27 +697,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       </svg>
 
       {/* Floating Tooltips, Drawing Banners, and Smart Auto-Wiring Overlays */}
-      <CanvasFloatingTooltips
-        hoveredPinInfo={wireGestures.hoveredPinInfo}
-        hoveredWireSnap={wireGestures.hoveredWireSnap}
-        drawingWire={wireGestures.drawingWire}
-        draggingEndpoint={wireGestures.draggingEndpoint}
-        detectedBusOptions={detectedBusOptions}
-        onCancelDrawing={() => {
-          wireGestures.setDrawingWire(null);
-          wireGestures.setHoveredPinInfo(null);
-          wireGestures.setHoveredWireSnap(null);
-        }}
-        onCancelEndpointDrag={() => {
-          wireGestures.setDraggingEndpoint(null);
-          wireGestures.setHoveredPinInfo(null);
-          wireGestures.setHoveredWireSnap(null);
-        }}
-        onConnectBus={(bus) => {
-          const newWires = generateBusWires(bus, wires, wireRouting);
-          if (onAddMultipleWires) onAddMultipleWires(newWires);
-        }}
-      />
+      <CanvasFloatingTooltips hoveredPinInfo={wireGestures.hoveredPinInfo} hoveredWireSnap={wireGestures.hoveredWireSnap} drawingWire={wireGestures.drawingWire} draggingEndpoint={wireGestures.draggingEndpoint} detectedBusOptions={detectedBusOptions} onCancelDrawing={() => { wireGestures.setDrawingWire(null); wireGestures.setHoveredPinInfo(null); wireGestures.setHoveredWireSnap(null); }} onCancelEndpointDrag={() => { wireGestures.setDraggingEndpoint(null); wireGestures.setHoveredPinInfo(null); wireGestures.setHoveredWireSnap(null); }} onConnectBus={(bus) => { const newWires = generateBusWires(bus, wires, wireRouting); if (onAddMultipleWires) onAddMultipleWires(newWires); }} />
     </div>
   );
 };

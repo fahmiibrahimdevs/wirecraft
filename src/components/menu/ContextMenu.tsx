@@ -168,40 +168,18 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         <>
           <div className="px-3 py-1.5 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center justify-between">
             <span className="truncate max-w-[150px] font-semibold text-slate-800 dark:text-slate-200">
-              {selectedIds.length > 1
-                ? `${selectedIds.length} Komponen Terpilih`
-                : menuState.targetComponent?.label || menuState.targetComponent?.name}
+              {selectedIds.length > 1 ? `${selectedIds.length} Komponen Terpilih` : menuState.targetComponent?.label || menuState.targetComponent?.name}
             </span>
-            {isLocked && (
-              <span className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-                <Lock className="w-2.5 h-2.5" /> Terkunci
-              </span>
-            )}
+            {isLocked && (<span className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20"><Lock className="w-2.5 h-2.5" /> Terkunci</span>)}
           </div>
 
           {/* Smart Auto-Wiring Section when 2 components are selected */}
           {detectedBusOptions.length > 0 && (
             <div className="py-1 border-b border-slate-200 dark:border-slate-800/80">
-              <div className="px-3 py-1 text-[10px] font-semibold tracking-wider text-sky-600 dark:text-sky-400 uppercase flex items-center gap-1.5">
-                <Zap className="w-3 h-3 text-sky-500 animate-pulse" /> Auto-Wiring Bus
-              </div>
+              <div className="px-3 py-1 text-[10px] font-semibold tracking-wider text-sky-600 dark:text-sky-400 uppercase flex items-center gap-1.5"><Zap className="w-3 h-3 text-sky-500 animate-pulse" /> Auto-Wiring Bus</div>
               {detectedBusOptions.map((bus) => (
-                <button
-                  key={bus.id}
-                  onClick={() => {
-                    if (onAddMultipleWires) {
-                      const newWires = generateBusWires(bus, allWires || [], wireRouting);
-                      onAddMultipleWires(newWires);
-                    }
-                    onClose();
-                  }}
-                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  title={bus.description}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    <Zap className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                    <span className="font-medium text-[11px] truncate">{bus.name}</span>
-                  </span>
+                <button key={bus.id} onClick={() => { if (onAddMultipleWires) { const newWires = generateBusWires(bus, allWires || [], wireRouting); onAddMultipleWires(newWires); } onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors cursor-pointer" title={bus.description}>
+                  <span className="flex items-center gap-2 truncate"><Zap className="w-3.5 h-3.5 text-sky-500 shrink-0" /><span className="font-medium text-[11px] truncate">{bus.name}</span></span>
                   <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold shrink-0 ml-1">⚡ Sambung</span>
                 </button>
               ))}
@@ -209,82 +187,26 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           )}
 
           <div className="py-1">
-            {/* Lock / Unlock */}
-            <button
-              onClick={() => {
-                onToggleLock(selectedIds);
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                {isLocked ? <Unlock className="w-4 h-4 text-amber-500 dark:text-amber-400" /> : <Lock className="w-4 h-4 text-slate-400" />}
-                <span>{isLocked ? 'Buka Kunci Posisi' : 'Kunci Posisi (Lock)'}</span>
-              </span>
+            <button onClick={() => { onToggleLock(selectedIds); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors">
+              <span className="flex items-center gap-2">{isLocked ? <Unlock className="w-4 h-4 text-amber-500 dark:text-amber-400" /> : <Lock className="w-4 h-4 text-slate-400" />}<span>{isLocked ? 'Buka Kunci Posisi' : 'Kunci Posisi (Lock)'}</span></span>
               <kbd className="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">L</kbd>
             </button>
-
-            {/* Duplicate */}
-            <button
-              onClick={() => {
-                onDuplicate(selectedIds);
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <Copy className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                <span>Duplikat</span>
-              </span>
+            <button onClick={() => { onDuplicate(selectedIds); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors">
+              <span className="flex items-center gap-2"><Copy className="w-4 h-4 text-sky-600 dark:text-sky-400" /><span>Duplikat</span></span>
               <kbd className="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Ctrl+D</kbd>
             </button>
-
-            {/* Rotate */}
-            <button
-              onClick={() => {
-                onRotate(selectedIds);
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <RotateCw className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Putar 90°</span>
-              </span>
+            <button onClick={() => { onRotate(selectedIds); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors">
+              <span className="flex items-center gap-2"><RotateCw className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /><span>Putar 90°</span></span>
               <kbd className="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">R</kbd>
             </button>
-
-            {/* Edit in Studio if custom definition exists */}
             {onEditInStudio && menuState.targetComponent && selectedIds.length === 1 && (
-              <button
-                onClick={() => {
-                  const allDefs = getAllComponentDefinitions();
-                  const def = allDefs[menuState.targetComponent!.type] || COMPONENT_DEFINITIONS[menuState.targetComponent!.type];
-                  if (def) onEditInStudio(def);
-                  onClose();
-                }}
-                className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-500/15 hover:text-purple-600 dark:hover:text-purple-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1"
-              >
-                <span className="flex items-center gap-2">
-                  <Edit3 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  <span>Edit di Studio</span>
-                </span>
+              <button onClick={() => { const allDefs = getAllComponentDefinitions(); const def = allDefs[menuState.targetComponent!.type] || COMPONENT_DEFINITIONS[menuState.targetComponent!.type]; if (def) onEditInStudio(def); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-500/15 hover:text-purple-600 dark:hover:text-purple-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1">
+                <span className="flex items-center gap-2"><Edit3 className="w-4 h-4 text-purple-600 dark:text-purple-400" /><span>Edit di Studio</span></span>
                 <Sparkles className="w-3 h-3 text-purple-600 dark:text-purple-400" />
               </button>
             )}
-
-            {/* Delete */}
-            <button
-              onClick={() => {
-                onDeleteComponents(selectedIds);
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1"
-            >
-              <span className="flex items-center gap-2">
-                <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                <span>Hapus Komponen</span>
-              </span>
+            <button onClick={() => { onDeleteComponents(selectedIds); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1">
+              <span className="flex items-center gap-2"><Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" /><span>Hapus Komponen</span></span>
               <kbd className="text-[10px] font-mono text-rose-600/80 dark:text-rose-400/80 bg-rose-500/10 px-1.5 py-0.5 rounded">Del</kbd>
             </button>
           </div>
@@ -299,47 +221,19 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           </div>
 
           <div className="py-1">
-            {/* Cabang Kabel (Branch Wire Tap) */}
             {onStartBranchWire && (
-              <button
-                onClick={() => {
-                  onStartBranchWire(menuState.targetWire!, { x: menuState.worldX, y: menuState.worldY });
-                  onClose();
-                }}
-                className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors border-b border-slate-200 dark:border-slate-800/80 mb-1"
-              >
-                <span className="flex items-center gap-2">
-                  <CircleDot className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                  <span className="font-semibold">Cabang Kabel Dari Sini</span>
-                </span>
+              <button onClick={() => { onStartBranchWire(menuState.targetWire!, { x: menuState.worldX, y: menuState.worldY }); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors border-b border-slate-200 dark:border-slate-800/80 mb-1">
+                <span className="flex items-center gap-2"><CircleDot className="w-4 h-4 text-sky-600 dark:text-sky-400" /><span className="font-semibold">Cabang Kabel Dari Sini</span></span>
               </button>
             )}
 
             {/* Fast Color Palette Grid */}
             <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800/80">
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 mb-1.5 flex items-center gap-1">
-                <Palette className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                <span>Pilih Warna Kabel:</span>
-              </div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 mb-1.5 flex items-center gap-1"><Palette className="w-3 h-3 text-sky-600 dark:text-sky-400" /><span>Pilih Warna Kabel:</span></div>
               <div className="grid grid-cols-5 gap-1.5">
                 {WIRE_COLORS.map((c) => (
-                  <button
-                    key={c.value}
-                    onClick={() => {
-                      onUpdateWireColor(menuState.targetWire!.id, c.value);
-                      onClose();
-                    }}
-                    title={c.name}
-                    className="w-7 h-7 rounded-md border flex items-center justify-center transition-transform hover:scale-110"
-                    style={{
-                      backgroundColor: c.value,
-                      borderColor: menuState.targetWire!.color === c.value ? '#38bdf8' : '#cbd5e1',
-                      boxShadow: menuState.targetWire!.color === c.value ? '0 0 8px rgba(56, 189, 248, 0.6)' : 'none',
-                    }}
-                  >
-                    {menuState.targetWire!.color === c.value && (
-                      <Check className="w-3.5 h-3.5 text-white drop-shadow" />
-                    )}
+                  <button key={c.value} onClick={() => { onUpdateWireColor(menuState.targetWire!.id, c.value); onClose(); }} title={c.name} className="w-7 h-7 rounded-md border flex items-center justify-center transition-transform hover:scale-110" style={{ backgroundColor: c.value, borderColor: menuState.targetWire!.color === c.value ? '#38bdf8' : '#cbd5e1', boxShadow: menuState.targetWire!.color === c.value ? '0 0 8px rgba(56, 189, 248, 0.6)' : 'none' }}>
+                    {menuState.targetWire!.color === c.value && (<Check className="w-3.5 h-3.5 text-white drop-shadow" />)}
                   </button>
                 ))}
               </div>
@@ -348,18 +242,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             {/* Routing Mode */}
             <div className="px-3 py-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">Mode Jalur:</div>
             {(['orthogonal', 'bezier', 'straight'] as WireRouting[]).map((r) => (
-              <button
-                key={r}
-                onClick={() => {
-                  onUpdateWireRouting(menuState.targetWire!.id, r);
-                  onClose();
-                }}
-                className={`w-full px-3 py-1 flex items-center justify-between text-left transition-colors ${
-                  menuState.targetWire!.routing === r
-                    ? 'bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 font-medium'
-                    : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                }`}
-              >
+              <button key={r} onClick={() => { onUpdateWireRouting(menuState.targetWire!.id, r); onClose(); }} className={`w-full px-3 py-1 flex items-center justify-between text-left transition-colors ${menuState.targetWire!.routing === r ? 'bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 font-medium' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'}`}>
                 <span>{r === 'orthogonal' ? 'Siku 90° (Orthogonal)' : r === 'bezier' ? 'Lengkung (Bezier)' : 'Garis Lurus'}</span>
                 {menuState.targetWire!.routing === r && <Check className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />}
               </button>
@@ -369,48 +252,17 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             {onUpdateWire && (
               <div className="border-t border-slate-200 dark:border-slate-800/80 pt-1.5 pb-1">
                 <div className="px-3 py-1 text-[10px] text-slate-500 dark:text-slate-400 font-medium flex items-center justify-between">
-                  <span className="flex items-center gap-1">
-                    <Tag className="w-3 h-3 text-sky-500" />
-                    <span>Marking Tube:</span>
-                  </span>
-                  {menuState.targetWire!.markerPosition === 'none' || menuState.targetWire!.label === '' ? (
-                    <span className="text-[9px] text-rose-500 font-mono">Mati</span>
-                  ) : (
-                    <span className="text-[9px] text-sky-600 font-mono capitalize">
-                      {menuState.targetWire!.markerPosition || 'Auto'}
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1"><Tag className="w-3 h-3 text-sky-500" /><span>Marking Tube:</span></span>
+                  {menuState.targetWire!.markerPosition === 'none' || menuState.targetWire!.label === '' ? (<span className="text-[9px] text-rose-500 font-mono">Mati</span>) : (<span className="text-[9px] text-sky-600 font-mono capitalize">{menuState.targetWire!.markerPosition || 'Auto'}</span>)}
                 </div>
                 <div className="grid grid-cols-3 gap-1 px-2.5 py-1 text-[10px]">
-                  {[
-                    { pos: 'auto', label: '⚡ Auto' },
-                    { pos: 'start', label: '📍 Awal' },
-                    { pos: 'end', label: '📍 Akhir' },
-                    { pos: 'both', label: '⇄ Kedua' },
-                    { pos: 'center', label: '• Tengah' },
-                    { pos: 'none', label: '🚫 Hapus' },
-                  ].map((p) => (
-                    <button
-                      key={p.pos}
-                      onClick={() => {
-                        if (p.pos === 'none') {
-                          onUpdateWire(menuState.targetWire!.id, { markerPosition: 'none', label: '' });
-                        } else if (p.pos === 'auto') {
-                          onUpdateWire(menuState.targetWire!.id, { markerPosition: 'auto', label: undefined });
-                        } else {
-                          onUpdateWire(menuState.targetWire!.id, {
-                            markerPosition: p.pos as WireMarkerPosition,
-                            label: menuState.targetWire!.label === '' ? undefined : menuState.targetWire!.label,
-                          });
-                        }
-                        onClose();
-                      }}
-                      className={`py-1 px-1 rounded text-center transition-colors cursor-pointer ${
-                        (menuState.targetWire!.markerPosition || 'auto') === p.pos
-                          ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-semibold'
-                          : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
+                  {[{ pos: 'auto', label: '⚡ Auto' }, { pos: 'start', label: '📍 Awal' }, { pos: 'end', label: '📍 Akhir' }, { pos: 'both', label: '⇄ Kedua' }, { pos: 'center', label: '• Tengah' }, { pos: 'none', label: '🚫 Hapus' }].map((p) => (
+                    <button key={p.pos} onClick={() => {
+                      if (p.pos === 'none') { onUpdateWire(menuState.targetWire!.id, { markerPosition: 'none', label: '' }); }
+                      else if (p.pos === 'auto') { onUpdateWire(menuState.targetWire!.id, { markerPosition: 'auto', label: undefined }); }
+                      else { onUpdateWire(menuState.targetWire!.id, { markerPosition: p.pos as WireMarkerPosition, label: menuState.targetWire!.label === '' ? undefined : menuState.targetWire!.label }); }
+                      onClose();
+                    }} className={`py-1 px-1 rounded text-center transition-colors cursor-pointer ${(menuState.targetWire!.markerPosition || 'auto') === p.pos ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-semibold' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'}`}>
                       {p.label}
                     </button>
                   ))}
@@ -419,17 +271,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             )}
 
             {/* Delete Wire */}
-            <button
-              onClick={() => {
-                onDeleteWire(menuState.targetWire!.id);
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1"
-            >
-              <span className="flex items-center gap-2">
-                <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                <span>Hapus Kabel</span>
-              </span>
+            <button onClick={() => { onDeleteWire(menuState.targetWire!.id); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1">
+              <span className="flex items-center gap-2"><Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" /><span>Hapus Kabel</span></span>
               <kbd className="text-[10px] font-mono text-rose-600/80 dark:text-rose-400/80 bg-rose-500/10 px-1.5 py-0.5 rounded">Del</kbd>
             </button>
           </div>
@@ -441,45 +284,24 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         <>
           <div className="px-3 py-1.5 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center justify-between">
             <span>Canvas Area</span>
-            <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">
-              ({Math.round(menuState.worldX)}, {Math.round(menuState.worldY)})
-            </span>
+            <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">({Math.round(menuState.worldX)}, {Math.round(menuState.worldY)})</span>
           </div>
 
           <div className="py-1">
-            {/* Quick Add Submenu Toggle */}
             <div className="relative">
-              <button
-                onMouseEnter={() => setActiveSubmenu('add')}
-                onClick={() => setActiveSubmenu((prev) => (prev === 'add' ? null : 'add'))}
-                className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Plus className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                  <span>Tambah Komponen</span>
-                </span>
+              <button onMouseEnter={() => setActiveSubmenu('add')} onClick={() => setActiveSubmenu((prev) => (prev === 'add' ? null : 'add'))} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors">
+                <span className="flex items-center gap-2"><Plus className="w-4 h-4 text-sky-600 dark:text-sky-400" /><span>Tambah Komponen</span></span>
                 <span className="text-slate-400">›</span>
               </button>
 
-              {/* Submenu Popout */}
               {activeSubmenu === 'add' && (
                 <div className="absolute left-[98%] top-0 min-w-[210px] bg-white/98 dark:bg-slate-900/98 border border-slate-200 dark:border-slate-700/80 rounded-xl shadow-2xl backdrop-blur-xl py-1.5 z-50 max-h-[300px] overflow-y-auto">
-                  <div className="px-2.5 py-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 mb-1">
-                    Tambah Cepat di Kursor
-                  </div>
+                  <div className="px-2.5 py-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 mb-1">Tambah Cepat di Kursor</div>
                   {quickComponents.map((item) => {
                     const Icon = item.icon;
                     return (
-                      <button
-                        key={item.type}
-                        onClick={() => {
-                          onQuickAddComponent(item.type, { x: menuState.worldX, y: menuState.worldY });
-                          onClose();
-                        }}
-                        className="w-full px-2.5 py-1.5 flex items-center gap-2 hover:bg-sky-50 dark:hover:bg-sky-500/20 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors text-xs text-slate-800 dark:text-slate-200"
-                      >
-                        <Icon className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
-                        <span className="truncate">{item.label}</span>
+                      <button key={item.type} onClick={() => { onQuickAddComponent(item.type, { x: menuState.worldX, y: menuState.worldY }); onClose(); }} className="w-full px-2.5 py-1.5 flex items-center gap-2 hover:bg-sky-50 dark:hover:bg-sky-500/20 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors text-xs text-slate-800 dark:text-slate-200">
+                        <Icon className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" /><span className="truncate">{item.label}</span>
                       </button>
                     );
                   })}
@@ -487,64 +309,22 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               )}
             </div>
 
-            {/* Snap Grid Toggle */}
-            <button
-              onClick={() => {
-                onToggleSnapGrid();
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <Grid className="w-4 h-4 text-slate-400" />
-                <span>Snap to Grid</span>
-              </span>
-              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${snapGrid ? 'bg-sky-500/15 text-sky-600 dark:bg-sky-500/20 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
-                {snapGrid ? 'ON' : 'OFF'}
-              </span>
+            <button onClick={() => { onToggleSnapGrid(); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors">
+              <span className="flex items-center gap-2"><Grid className="w-4 h-4 text-slate-400" /><span>Snap to Grid</span></span>
+              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${snapGrid ? 'bg-sky-500/15 text-sky-600 dark:bg-sky-500/20 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>{snapGrid ? 'ON' : 'OFF'}</span>
             </button>
 
-            {/* Reset / Center View */}
-            <button
-              onClick={() => {
-                onResetView();
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <Maximize2 className="w-4 h-4 text-slate-400" />
-                <span>Pusatkan View (Center)</span>
-              </span>
+            <button onClick={() => { onResetView(); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors">
+              <span className="flex items-center gap-2"><Maximize2 className="w-4 h-4 text-slate-400" /><span>Pusatkan View (Center)</span></span>
             </button>
 
-            {/* Select All */}
-            <button
-              onClick={() => {
-                onSelectAll();
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1"
-            >
-              <span className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-slate-400" />
-                <span>Pilih Semua Komponen</span>
-              </span>
+            <button onClick={() => { onSelectAll(); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1">
+              <span className="flex items-center gap-2"><Layers className="w-4 h-4 text-slate-400" /><span>Pilih Semua Komponen</span></span>
               <kbd className="text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Ctrl+A</kbd>
             </button>
 
-            {/* Clear Canvas */}
-            <button
-              onClick={() => {
-                onClearCanvas();
-                onClose();
-              }}
-              className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1"
-            >
-              <span className="flex items-center gap-2">
-                <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                <span>Bersihkan Canvas</span>
-              </span>
+            <button onClick={() => { onClearCanvas(); onClose(); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-left transition-colors border-t border-slate-200 dark:border-slate-800/80 mt-1">
+              <span className="flex items-center gap-2"><Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" /><span>Bersihkan Canvas</span></span>
             </button>
           </div>
         </>

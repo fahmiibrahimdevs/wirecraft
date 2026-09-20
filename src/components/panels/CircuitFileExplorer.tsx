@@ -216,92 +216,29 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                 }}
                 style={{ paddingLeft: `${depth * 14 + 8}px` }}
                 className={`group flex items-center justify-between py-1.5 pr-2 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-                  isTarget
-                    ? 'bg-sky-500/20 border border-dashed border-sky-400 text-sky-700 dark:text-sky-200'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100'
+                  isTarget ? 'bg-sky-500/20 border border-dashed border-sky-400 text-sky-700 dark:text-sky-200' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
                   <span className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 p-0.5 shrink-0">
-                    {isExpanded ? (
-                      <ChevronDown className="w-3.5 h-3.5" />
-                    ) : (
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    )}
+                    {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                   </span>
-                  {isExpanded ? (
-                    <FolderOpen className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
-                  ) : (
-                    <Folder className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
-                  )}
+                  {isExpanded ? <FolderOpen className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" /> : <Folder className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />}
 
                   {isRenaming ? (
-                    <input
-                      type="text"
-                      value={renameInput}
-                      onChange={(e) => setRenameInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') submitRenaming();
-                        if (e.key === 'Escape') setRenamingId(null);
-                      }}
-                      onBlur={submitRenaming}
-                      autoFocus
-                      onClick={(e) => e.stopPropagation()}
-                      className="bg-white dark:bg-slate-950 border border-sky-500 text-slate-900 dark:text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36"
-                    />
+                    <input type="text" value={renameInput} onChange={(e) => setRenameInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') submitRenaming(); if (e.key === 'Escape') setRenamingId(null); }} onBlur={submitRenaming} autoFocus onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-slate-950 border border-sky-500 text-slate-900 dark:text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36" />
                   ) : (
-                    <span className="truncate flex-1" title={folder.name}>
-                      {folder.name}
-                    </span>
+                    <span className="truncate flex-1" title={folder.name}>{folder.name}</span>
                   )}
                 </div>
 
                 {/* Folder Action Buttons on Hover */}
                 {!isRenaming && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="hidden group-hover:flex items-center gap-0.5 shrink-0"
-                  >
-                    <button
-                      onClick={() => startCreating('file', folder.id)}
-                      title="File Baru di folder ini"
-                      className="p-1 rounded text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"
-                    >
-                      <FilePlus className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => startCreating('folder', folder.id)}
-                      title="Sub-folder Baru"
-                      className="p-1 rounded text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"
-                    >
-                      <FolderPlus className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => startRenaming(folder.id, folder.name, 'folder')}
-                      title="Ubah Nama"
-                      className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={async () => {
-                        const isConfirmed = await showConfirm({
-                          title: 'Hapus Folder?',
-                          text: `Hapus folder "${folder.name}" beserta seluruh berkas rangkaian di dalamnya?`,
-                          icon: 'warning',
-                          confirmText: 'Ya, Hapus Folder',
-                          cancelText: 'Batal',
-                          isDanger: true,
-                        });
-                        if (isConfirmed) {
-                          onDeleteFolder(folder.id);
-                        }
-                      }}
-                      title="Hapus Folder"
-                      className="p-1 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                  <div onClick={(e) => e.stopPropagation()} className="hidden group-hover:flex items-center gap-0.5 shrink-0">
+                    <button onClick={() => startCreating('file', folder.id)} title="File Baru di folder ini" className="p-1 rounded text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"><FilePlus className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => startCreating('folder', folder.id)} title="Sub-folder Baru" className="p-1 rounded text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"><FolderPlus className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => startRenaming(folder.id, folder.name, 'folder')} title="Ubah Nama" className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"><Edit2 className="w-3 h-3" /></button>
+                    <button onClick={async () => { const isConfirmed = await showConfirm({ title: 'Hapus Folder?', text: `Hapus folder "${folder.name}" beserta seluruh berkas rangkaian di dalamnya?`, icon: 'warning', confirmText: 'Ya, Hapus Folder', cancelText: 'Batal', isDanger: true }); if (isConfirmed) onDeleteFolder(folder.id); }} title="Hapus Folder" className="p-1 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"><Trash2 className="w-3 h-3" /></button>
                   </div>
                 )}
               </div>
@@ -310,28 +247,9 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               {isExpanded && (
                 <div className="border-l border-slate-200 dark:border-slate-800/80 ml-3.5">
                   {creatingType && creatingParentId === folder.id && (
-                    <div
-                      style={{ paddingLeft: `${(depth + 1) * 14}px` }}
-                      className="flex items-center gap-1.5 py-1 pr-2"
-                    >
-                      {creatingType === 'folder' ? (
-                        <Folder className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
-                      ) : (
-                        <FileText className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
-                      )}
-                      <input
-                        type="text"
-                        value={createNameInput}
-                        onChange={(e) => setCreateNameInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') submitCreating();
-                          if (e.key === 'Escape') setCreatingType(null);
-                        }}
-                        onBlur={submitCreating}
-                        autoFocus
-                        placeholder={creatingType === 'file' ? 'nama_file' : 'nama_folder'}
-                        className="bg-white dark:bg-slate-950 border border-sky-500 text-slate-900 dark:text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36"
-                      />
+                    <div style={{ paddingLeft: `${(depth + 1) * 14}px` }} className="flex items-center gap-1.5 py-1 pr-2">
+                      {creatingType === 'folder' ? <Folder className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" /> : <FileText className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />}
+                      <input type="text" value={createNameInput} onChange={(e) => setCreateNameInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') submitCreating(); if (e.key === 'Escape') setCreatingType(null); }} onBlur={submitCreating} autoFocus placeholder={creatingType === 'file' ? 'nama_file' : 'nama_folder'} className="bg-white dark:bg-slate-950 border border-sky-500 text-slate-900 dark:text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36" />
                     </div>
                   )}
                   {renderTree(folder.id, depth + 1)}
@@ -376,88 +294,27 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 {/* Standard File Document Icon with active status dot */}
                 <div className="relative shrink-0 flex items-center justify-center">
-                  <FileText
-                    className={`w-4 h-4 ${
-                      isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400'
-                    }`}
-                  />
-                  {isActive && (
-                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                  )}
+                  <FileText className={`w-4 h-4 ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400'}`} />
+                  {isActive && <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />}
                 </div>
 
                 {isRenaming ? (
-                  <input
-                    type="text"
-                    value={renameInput}
-                    onChange={(e) => setRenameInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') submitRenaming();
-                      if (e.key === 'Escape') setRenamingId(null);
-                    }}
-                    onBlur={submitRenaming}
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                    className="bg-white dark:bg-slate-950 border border-sky-500 text-slate-900 dark:text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36"
-                  />
+                  <input type="text" value={renameInput} onChange={(e) => setRenameInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') submitRenaming(); if (e.key === 'Escape') setRenamingId(null); }} onBlur={submitRenaming} autoFocus onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-slate-950 border border-sky-500 text-slate-900 dark:text-slate-100 text-xs px-1.5 py-0.5 rounded outline-none w-36" />
                 ) : (
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="truncate leading-tight text-slate-800 dark:text-slate-100" title={file.name}>
-                      {file.name}
-                    </span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
-                      {file.components.length} part • {file.wires.length} kabel
-                    </span>
+                    <span className="truncate leading-tight text-slate-800 dark:text-slate-100" title={file.name}>{file.name}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">{file.components.length} part • {file.wires.length} kabel</span>
                   </div>
                 )}
               </div>
 
               {/* Action Buttons on Hover */}
               {!isRenaming && (
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="hidden group-hover:flex items-center gap-0.5 shrink-0"
-                >
-                  <button
-                    onClick={() => onDuplicateFile(file.id)}
-                    title="Duplikat Desain Rangkaian"
-                    className="p-1 rounded text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
-                  <button
-                    onClick={() => onExportFile(file.id)}
-                    title="Unduh File (.wire)"
-                    className="p-1 rounded text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"
-                  >
-                    <Download className="w-3 h-3" />
-                  </button>
-                  <button
-                    onClick={() => startRenaming(file.id, file.name, 'file')}
-                    title="Ubah Nama"
-                    className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"
-                  >
-                    <Edit2 className="w-3 h-3" />
-                  </button>
-                  <button
-                    onClick={async () => {
-                      const isConfirmed = await showConfirm({
-                        title: 'Hapus Berkas?',
-                        text: `Hapus berkas rangkaian "${file.name}"?`,
-                        icon: 'warning',
-                        confirmText: 'Ya, Hapus',
-                        cancelText: 'Batal',
-                        isDanger: true,
-                      });
-                      if (isConfirmed) {
-                        onDeleteFile(file.id);
-                      }
-                    }}
-                    title="Hapus File"
-                    className="p-1 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
+                <div onClick={(e) => e.stopPropagation()} className="hidden group-hover:flex items-center gap-0.5 shrink-0">
+                  <button onClick={() => onDuplicateFile(file.id)} title="Duplikat Desain Rangkaian" className="p-1 rounded text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"><Copy className="w-3 h-3" /></button>
+                  <button onClick={() => onExportFile(file.id)} title="Unduh File (.wire)" className="p-1 rounded text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"><Download className="w-3 h-3" /></button>
+                  <button onClick={() => startRenaming(file.id, file.name, 'file')} title="Ubah Nama" className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"><Edit2 className="w-3 h-3" /></button>
+                  <button onClick={async () => { const isConfirmed = await showConfirm({ title: 'Hapus Berkas?', text: `Hapus berkas rangkaian "${file.name}"?`, icon: 'warning', confirmText: 'Ya, Hapus', cancelText: 'Batal', isDanger: true }); if (isConfirmed) onDeleteFile(file.id); }} title="Hapus File" className="p-1 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-slate-700/60 cursor-pointer"><Trash2 className="w-3 h-3" /></button>
                 </div>
               )}
             </div>
@@ -470,45 +327,19 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
   return (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900 select-none">
       {/* Hidden File Input for Import */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileInputChange}
-        accept=".wire,.json"
-        className="hidden"
-      />
+      <input type="file" ref={fileInputRef} onChange={handleFileInputChange} accept=".wire,.json" className="hidden" />
 
       {/* Explorer Top Toolbar */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-800/90 flex items-center justify-between bg-slate-50 dark:bg-slate-900/95">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-sky-500 dark:text-sky-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-            BERKAS DESAIN
-          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">BERKAS DESAIN</span>
         </div>
 
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => startCreating('file', null)}
-            title="Buat Desain Rangkaian Baru (.wire)"
-            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
-          >
-            <FilePlus className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => startCreating('folder', null)}
-            title="Buat Folder Baru"
-            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
-          >
-            <FolderPlus className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            title="Import File Rangkaian (.wire / .json)"
-            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
-          >
-            <Upload className="w-3.5 h-3.5" />
-          </button>
+          <button onClick={() => startCreating('file', null)} title="Buat Desain Rangkaian Baru (.wire)" className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"><FilePlus className="w-3.5 h-3.5" /></button>
+          <button onClick={() => startCreating('folder', null)} title="Buat Folder Baru" className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"><FolderPlus className="w-3.5 h-3.5" /></button>
+          <button onClick={() => fileInputRef.current?.click()} title="Import File Rangkaian (.wire / .json)" className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"><Upload className="w-3.5 h-3.5" /></button>
         </div>
       </div>
 
@@ -604,92 +435,15 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               <>
                 <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 shrink-0" />
-                  <span className="truncate font-semibold text-slate-900 dark:text-slate-200">
-                    {contextMenu.targetName || 'Berkas Desain'}
-                  </span>
+                  <span className="truncate font-semibold text-slate-900 dark:text-slate-200">{contextMenu.targetName || 'Berkas Desain'}</span>
                 </div>
                 <div className="py-1">
-                  <button
-                    onClick={() => {
-                      if (contextMenu.targetId) onSelectFile(contextMenu.targetId);
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Eye className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-                      <span>Buka Desain</span>
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (contextMenu.targetId) onDuplicateFile(contextMenu.targetId);
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Copy className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Duplikat Desain</span>
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (contextMenu.targetId && contextMenu.targetName) {
-                        startRenaming(contextMenu.targetId, contextMenu.targetName, 'file');
-                      }
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Edit2 className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Ubah Nama</span>
-                    </span>
-                    <kbd className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700">F2</kbd>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (contextMenu.targetId) onExportFile(contextMenu.targetId);
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-emerald-700 dark:text-slate-200 dark:hover:text-emerald-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Download className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-                      <span>Ekspor Berkas (.wire)</span>
-                    </span>
-                  </button>
-
+                  <button onClick={() => { if (contextMenu.targetId) onSelectFile(contextMenu.targetId); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Eye className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" /><span>Buka Desain</span></span></button>
+                  <button onClick={() => { if (contextMenu.targetId) onDuplicateFile(contextMenu.targetId); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Copy className="w-3.5 h-3.5 text-slate-400" /><span>Duplikat Desain</span></span></button>
+                  <button onClick={() => { if (contextMenu.targetId && contextMenu.targetName) startRenaming(contextMenu.targetId, contextMenu.targetName, 'file'); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Edit2 className="w-3.5 h-3.5 text-slate-400" /><span>Ubah Nama</span></span><kbd className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700">F2</kbd></button>
+                  <button onClick={() => { if (contextMenu.targetId) onExportFile(contextMenu.targetId); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-emerald-700 dark:text-slate-200 dark:hover:text-emerald-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Download className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /><span>Ekspor Berkas (.wire)</span></span></button>
                   <div className="h-px bg-slate-200 dark:bg-slate-800/80 my-1" />
-
-                  <button
-                    onClick={async () => {
-                      const targetId = contextMenu.targetId;
-                      const targetName = contextMenu.targetName || '';
-                      setContextMenu(null);
-                      if (targetId) {
-                        const isConfirmed = await showConfirm({
-                          title: 'Hapus Berkas?',
-                          text: `Hapus berkas rangkaian "${targetName}"?`,
-                          icon: 'warning',
-                          confirmText: 'Ya, Hapus',
-                          cancelText: 'Batal',
-                          isDanger: true,
-                        });
-                        if (isConfirmed) {
-                          onDeleteFile(targetId);
-                        }
-                      }
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/15 text-rose-600 dark:text-rose-300/90 hover:text-rose-700 dark:hover:text-rose-400 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Trash2 className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
-                      <span>Hapus Berkas</span>
-                    </span>
-                    <kbd className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700">Del</kbd>
-                  </button>
+                  <button onClick={async () => { const targetId = contextMenu.targetId; const targetName = contextMenu.targetName || ''; setContextMenu(null); if (targetId) { const isConfirmed = await showConfirm({ title: 'Hapus Berkas?', text: `Hapus berkas rangkaian "${targetName}"?`, icon: 'warning', confirmText: 'Ya, Hapus', cancelText: 'Batal', isDanger: true }); if (isConfirmed) onDeleteFile(targetId); } }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/15 text-rose-600 dark:text-rose-300/90 hover:text-rose-700 dark:hover:text-rose-400 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Trash2 className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" /><span>Hapus Berkas</span></span><kbd className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700">Del</kbd></button>
                 </div>
               </>
             )}
@@ -699,91 +453,15 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
               <>
                 <div className="px-3 py-1.5 border-b border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
                   <Folder className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
-                  <span className="truncate font-semibold text-slate-900 dark:text-slate-200">
-                    {contextMenu.targetName || 'Folder'}
-                  </span>
+                  <span className="truncate font-semibold text-slate-900 dark:text-slate-200">{contextMenu.targetName || 'Folder'}</span>
                 </div>
                 <div className="py-1">
-                  <button
-                    onClick={() => {
-                      if (contextMenu.targetId) startCreating('file', contextMenu.targetId);
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <FilePlus className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-                      <span>Berkas Baru di Folder Ini</span>
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (contextMenu.targetId) startCreating('folder', contextMenu.targetId);
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-amber-700 dark:text-slate-200 dark:hover:text-amber-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <FolderPlus className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-                      <span>Folder Baru di Folder Ini</span>
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (contextMenu.targetId) onToggleFolder(contextMenu.targetId);
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <FolderOpen className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Buka / Tutup Folder</span>
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (contextMenu.targetId && contextMenu.targetName) {
-                        startRenaming(contextMenu.targetId, contextMenu.targetName, 'folder');
-                      }
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Edit2 className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Ubah Nama</span>
-                    </span>
-                    <kbd className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700">F2</kbd>
-                  </button>
-
+                  <button onClick={() => { if (contextMenu.targetId) startCreating('file', contextMenu.targetId); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><FilePlus className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" /><span>Berkas Baru di Folder Ini</span></span></button>
+                  <button onClick={() => { if (contextMenu.targetId) startCreating('folder', contextMenu.targetId); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-amber-700 dark:text-slate-200 dark:hover:text-amber-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><FolderPlus className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" /><span>Folder Baru di Folder Ini</span></span></button>
+                  <button onClick={() => { if (contextMenu.targetId) onToggleFolder(contextMenu.targetId); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><FolderOpen className="w-3.5 h-3.5 text-slate-400" /><span>Buka / Tutup Folder</span></span></button>
+                  <button onClick={() => { if (contextMenu.targetId && contextMenu.targetName) startRenaming(contextMenu.targetId, contextMenu.targetName, 'folder'); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Edit2 className="w-3.5 h-3.5 text-slate-400" /><span>Ubah Nama</span></span><kbd className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700">F2</kbd></button>
                   <div className="h-px bg-slate-200 dark:bg-slate-800/80 my-1" />
-
-                  <button
-                    onClick={async () => {
-                      const targetId = contextMenu.targetId;
-                      const targetName = contextMenu.targetName || '';
-                      setContextMenu(null);
-                      if (targetId) {
-                        const isConfirmed = await showConfirm({
-                          title: 'Hapus Folder?',
-                          text: `Hapus folder "${targetName}" beserta seluruh berkas rangkaian di dalamnya?`,
-                          icon: 'warning',
-                          confirmText: 'Ya, Hapus Folder',
-                          cancelText: 'Batal',
-                          isDanger: true,
-                        });
-                        if (isConfirmed) {
-                          onDeleteFolder(targetId);
-                        }
-                      }
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/15 text-rose-600 dark:text-rose-300/90 hover:text-rose-700 dark:hover:text-rose-400 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Trash2 className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
-                      <span>Hapus Folder</span>
-                    </span>
-                  </button>
+                  <button onClick={async () => { const targetId = contextMenu.targetId; const targetName = contextMenu.targetName || ''; setContextMenu(null); if (targetId) { const isConfirmed = await showConfirm({ title: 'Hapus Folder?', text: `Hapus folder "${targetName}" beserta seluruh berkas rangkaian di dalamnya?`, icon: 'warning', confirmText: 'Ya, Hapus Folder', cancelText: 'Batal', isDanger: true }); if (isConfirmed) onDeleteFolder(targetId); } }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-rose-50 dark:hover:bg-rose-500/15 text-rose-600 dark:text-rose-300/90 hover:text-rose-700 dark:hover:text-rose-400 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Trash2 className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" /><span>Hapus Folder</span></span></button>
                 </div>
               </>
             )}
@@ -796,69 +474,12 @@ export const CircuitFileExplorer: React.FC<CircuitFileExplorerProps> = ({
                   <span className="truncate font-semibold text-slate-900 dark:text-slate-200">Berkas Desain</span>
                 </div>
                 <div className="py-1">
-                  <button
-                    onClick={() => {
-                      startCreating('file', null);
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <FilePlus className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-                      <span>Berkas Desain Baru</span>
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      startCreating('folder', null);
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-amber-700 dark:text-slate-200 dark:hover:text-amber-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <FolderPlus className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-                      <span>Folder Baru</span>
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      fileInputRef.current?.click();
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-emerald-700 dark:text-slate-200 dark:hover:text-emerald-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Upload className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-                      <span>Impor Desain (.wire / .json)</span>
-                    </span>
-                  </button>
-
+                  <button onClick={() => { startCreating('file', null); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><FilePlus className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" /><span>Berkas Desain Baru</span></span></button>
+                  <button onClick={() => { startCreating('folder', null); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-amber-700 dark:text-slate-200 dark:hover:text-amber-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><FolderPlus className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" /><span>Folder Baru</span></span></button>
+                  <button onClick={() => { fileInputRef.current?.click(); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-emerald-700 dark:text-slate-200 dark:hover:text-emerald-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Upload className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /><span>Impor Desain (.wire / .json)</span></span></button>
                   <div className="h-px bg-slate-200 dark:bg-slate-800/80 my-1" />
-
-                  <button
-                    onClick={() => {
-                      onExpandAll();
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <FolderOpen className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Buka Semua Folder</span>
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onCollapseAll();
-                      setContextMenu(null);
-                    }}
-                    className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Folder className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Tutup Semua Folder</span>
-                    </span>
-                  </button>
+                  <button onClick={() => { onExpandAll(); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><FolderOpen className="w-3.5 h-3.5 text-slate-400" /><span>Buka Semua Folder</span></span></button>
+                  <button onClick={() => { onCollapseAll(); setContextMenu(null); }} className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 text-slate-700 hover:text-sky-700 dark:text-slate-200 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"><span className="flex items-center gap-2"><Folder className="w-3.5 h-3.5 text-slate-400" /><span>Tutup Semua Folder</span></span></button>
                 </div>
               </>
             )}

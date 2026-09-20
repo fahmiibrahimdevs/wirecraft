@@ -1637,103 +1637,29 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         {/* Modal Top Bar */}
         <div className="h-14 bg-slate-50 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 dark:bg-sky-500/20 dark:border-sky-500/40 flex items-center justify-center text-sky-600 dark:text-sky-400">
-              <Sliders className="w-4 h-4" />
-            </div>
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 dark:bg-sky-500/20 dark:border-sky-500/40 flex items-center justify-center text-sky-600 dark:text-sky-400"><Sliders className="w-4 h-4" /></div>
             <div className="flex flex-col">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                WireCraft Component Studio
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                  Admin Mode
-                </span>
-              </h2>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Visual Pin Calibrator & Breadboard Alignment Studio
-              </span>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">WireCraft Component Studio<span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">Admin Mode</span></h2>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">Visual Pin Calibrator & Breadboard Alignment Studio</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <input
-              type="file"
-              ref={jsonInputRef}
-              onChange={handleImportJsonFile}
-              accept=".json"
-              className="hidden"
-            />
-            <button
-              onClick={() => jsonInputRef.current?.click()}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Buka File JSON Komponen"
-            >
-              <FolderOpen className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-              <span>Import JSON</span>
-            </button>
-
-            <button
-              onClick={() => exportComponentJson(typeId)}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Export Definisi JSON Komponen"
-            >
-              <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Export JSON</span>
-            </button>
-
-            <button
-              onClick={handleCopyCode}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Copy TypeScript Definition Code"
-            >
-              {copiedCode ? (
-                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              ) : (
-                <Copy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              )}
-              {copiedCode ? 'Tersalin!' : 'Copy TS Code'}
-            </button>
-
-            <button
-              onClick={handleSaveComponent}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all cursor-pointer ${
-                saveSuccess
-                  ? 'bg-emerald-600 text-white shadow-emerald-500/30'
-                  : 'bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 shadow-sky-500/25'
-              }`}
-            >
-              {saveSuccess ? <Check className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
-              {saveSuccess ? 'Tersimpan di Library!' : 'Simpan ke Library'}
-            </button>
-
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-slate-100 flex items-center justify-center transition-colors ml-2 cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <input type="file" ref={jsonInputRef} onChange={handleImportJsonFile} accept=".json" className="hidden" />
+            <button onClick={() => jsonInputRef.current?.click()} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer" title="Buka File JSON Komponen"><FolderOpen className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" /><span>Import JSON</span></button>
+            <button onClick={() => exportComponentJson(typeId)} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer" title="Export Definisi JSON Komponen"><Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /><span>Export JSON</span></button>
+            <button onClick={handleCopyCode} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer" title="Copy TypeScript Definition Code">{copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}{copiedCode ? 'Tersalin!' : 'Copy TS Code'}</button>
+            <button onClick={handleSaveComponent} className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all cursor-pointer ${saveSuccess ? 'bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 shadow-sky-500/25'}`}>{saveSuccess ? <Check className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}{saveSuccess ? 'Tersimpan di Library!' : 'Simpan ke Library'}</button>
+            <button onClick={onClose} className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-slate-100 flex items-center justify-center transition-colors ml-2 cursor-pointer"><X className="w-4 h-4" /></button>
           </div>
         </div>
 
         {/* Floating Success Notification Banner */}
         {saveSuccess && (
           <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-950/95 border border-emerald-500/50 text-emerald-100 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-4 backdrop-blur-md animate-in fade-in slide-in-from-top-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
-              <Check className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-emerald-100">
-                Komponen Berhasil Disimpan!
-              </span>
-              <span className="text-[11px] text-emerald-300/80">
-                Telah masuk ke <b>Katalog Komponen (Tab &apos;Custom Studio&apos;)</b> dan
-                ditambahkan ke kanvas.
-              </span>
-            </div>
-            <button
-              onClick={onClose}
-              className="ml-2 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition-all hover:scale-105 cursor-pointer shrink-0"
-            >
-              Lihat di Kanvas
-            </button>
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0"><Check className="w-4 h-4" /></div>
+            <div className="flex flex-col"><span className="text-xs font-bold text-emerald-100">Komponen Berhasil Disimpan!</span><span className="text-[11px] text-emerald-300/80">Telah masuk ke <b>Katalog Komponen (Tab &apos;Custom Studio&apos;)</b> dan ditambahkan ke kanvas.</span></div>
+            <button onClick={onClose} className="ml-2 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition-all hover:scale-105 cursor-pointer shrink-0">Lihat di Kanvas</button>
           </div>
         )}
 

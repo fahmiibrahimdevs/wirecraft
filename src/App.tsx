@@ -703,207 +703,25 @@ function CircuitAppContent() {
   return (
     <div className="flex flex-col w-screen h-screen bg-slate-100 dark:bg-[#020617] text-slate-900 dark:text-slate-100 overflow-hidden select-none">
       {/* Top Header Navigation with Undo / Redo */}
-      <TopBar
-        saveStatus={saveStatus}
-        projectName={projectName}
-        onProjectNameChange={handleProjectNameChange}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        onUndo={undo}
-        onRedo={redo}
-        currentWireColor={currentWireColor}
-        onSelectWireColor={setCurrentWireColor}
-        wireRouting={wireRouting}
-        onSelectWireRouting={setWireRouting}
-        zoom={zoom}
-        onZoomIn={() => setZoom((z) => Math.min(z * 1.15, 3))}
-        onZoomOut={() => setZoom((z) => Math.max(z * 0.85, 0.25))}
-        onResetZoom={() => {
-          setZoom(1);
-          setPan({ x: 120, y: 80 });
-        }}
-        snapGrid={snapGrid}
-        onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
-        showWireMarkers={showWireMarkers}
-        onToggleWireMarkers={() => setShowWireMarkers((prev) => !prev)}
-        onOpenPresets={modals.openPresetsModal}
-        onOpenBom={modals.openBomModal}
-        onOpenWiringTable={modals.openWiringTable}
-        onOpenStudio={
-          isAdmin
-            ? () => modals.openStudio(null)
-            : undefined
-        }
-        onOpenUserManagement={
-          isAdmin
-            ? modals.openUserManagement
-            : undefined
-        }
-        onOpenExportModal={modals.openExportModal}
-        onExportPng={handleExportPng}
-        onExportJson={handleExportJson}
-        onImportJson={handleImportJson}
-        onClearCanvas={handleClearCanvas}
-        user={user}
-        isAdmin={isAdmin}
-        onOpenAuthModal={modals.openAuthModal}
-        onLogout={() => {
-          logout();
-          showToast('info', 'Anda telah keluar dari workspace.');
-        }}
-        cloudSyncStatus={cloudSyncStatus}
-        onSyncToCloud={async () => {
-          await syncToCloudNow();
-          showToast('success', 'Rangkaian berhasil disinkronkan ke Cloud!');
-        }}
-      />
+      <TopBar saveStatus={saveStatus} projectName={projectName} onProjectNameChange={handleProjectNameChange} canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} currentWireColor={currentWireColor} onSelectWireColor={setCurrentWireColor} wireRouting={wireRouting} onSelectWireRouting={setWireRouting} zoom={zoom} onZoomIn={() => setZoom((z) => Math.min(z * 1.15, 3))} onZoomOut={() => setZoom((z) => Math.max(z * 0.85, 0.25))} onResetZoom={() => { setZoom(1); setPan({ x: 120, y: 80 }); }} snapGrid={snapGrid} onToggleSnapGrid={() => setSnapGrid((prev) => !prev)} showWireMarkers={showWireMarkers} onToggleWireMarkers={() => setShowWireMarkers((prev) => !prev)} onOpenPresets={modals.openPresetsModal} onOpenBom={modals.openBomModal} onOpenWiringTable={modals.openWiringTable} onOpenStudio={isAdmin ? () => modals.openStudio(null) : undefined} onOpenUserManagement={isAdmin ? modals.openUserManagement : undefined} onOpenExportModal={modals.openExportModal} onExportPng={handleExportPng} onExportJson={handleExportJson} onImportJson={handleImportJson} onClearCanvas={handleClearCanvas} user={user} isAdmin={isAdmin} onOpenAuthModal={modals.openAuthModal} onLogout={() => { logout(); showToast('info', 'Anda telah keluar dari workspace.'); }} cloudSyncStatus={cloudSyncStatus} onSyncToCloud={async () => { await syncToCloudNow(); showToast('success', 'Rangkaian berhasil disinkronkan ke Cloud!'); }} />
 
       {/* Main Workspace Area */}
       <div className="flex-1 relative w-full h-[calc(100vh-3.5rem)] overflow-hidden">
         {/* Left Drawer (Katalog Komponen & File Explorer) */}
-        <ComponentLibrary
-          isOpen={modals.isLibraryOpen}
-          onToggle={modals.toggleLibrary}
-          onAddComponent={handleAddComponent}
-          onOpenStudio={
-            isAdmin
-              ? (def?: ComponentDefinition) => modals.openStudio(def || null)
-              : undefined
-          }
-          fileSystem={fileSystem}
-          activeFile={activeFile}
-          onSelectFile={handleSelectFile}
-          onCreateFile={handleCreateFile}
-          onCreateFolder={createFolder}
-          onRenameFile={renameFile}
-          onRenameFolder={renameFolder}
-          onDeleteFile={deleteFile}
-          onDeleteFolder={deleteFolder}
-          onMoveItem={moveItem}
-          onToggleFolder={toggleFolder}
-          onCollapseAll={collapseAllFolders}
-          onExpandAll={expandAllFolders}
-          onDuplicateFile={duplicateFile}
-          onImportFile={importFile}
-          onExportFile={exportFile}
-        />
+        <ComponentLibrary isOpen={modals.isLibraryOpen} onToggle={modals.toggleLibrary} onAddComponent={handleAddComponent} onOpenStudio={isAdmin ? (def?: ComponentDefinition) => modals.openStudio(def || null) : undefined} fileSystem={fileSystem} activeFile={activeFile} onSelectFile={handleSelectFile} onCreateFile={handleCreateFile} onCreateFolder={createFolder} onRenameFile={renameFile} onRenameFolder={renameFolder} onDeleteFile={deleteFile} onDeleteFolder={deleteFolder} onMoveItem={moveItem} onToggleFolder={toggleFolder} onCollapseAll={collapseAllFolders} onExpandAll={expandAllFolders} onDuplicateFile={duplicateFile} onImportFile={importFile} onExportFile={exportFile} />
 
         {/* Interactive Infinite Circuit Canvas */}
-        <CircuitCanvas
-          components={components}
-          wires={wires}
-          selectedComponentIds={selectedComponentIds}
-          selectedWireId={selectedWireId}
-          currentWireColor={currentWireColor}
-          onSelectWireColor={setCurrentWireColor}
-          wireRouting={wireRouting}
-          snapGrid={snapGrid}
-          showWireMarkers={showWireMarkers}
-          onSelectComponents={setSelectedComponentIds}
-          onSelectWire={setSelectedWireId}
-          onUpdateComponentPositions={handleUpdateComponentPositions}
-          onAddWire={handleAddWire}
-          onAddMultipleWires={handleAddMultipleWires}
-          onUpdateWire={handleUpdateWire}
-          onDeleteSelected={handleDeleteSelected}
-          onUpdateWireWaypoints={handleUpdateWireWaypoints}
-          onUpdateMultiWireWaypoints={handleUpdateMultiWireWaypoints}
-          onResetWireWaypoints={handleResetWireWaypoints}
-          zoom={zoom}
-          pan={pan}
-          onZoomChange={setZoom}
-          onPanChange={setPan}
-          onContextMenu={setContextMenuState}
-          onCursorMove={(pos) => {
-            lastCursorWorldPosRef.current = pos;
-          }}
-          startBranchWireRequest={startBranchWireRequest}
-        />
+        <CircuitCanvas components={components} wires={wires} selectedComponentIds={selectedComponentIds} selectedWireId={selectedWireId} currentWireColor={currentWireColor} onSelectWireColor={setCurrentWireColor} wireRouting={wireRouting} snapGrid={snapGrid} showWireMarkers={showWireMarkers} onSelectComponents={setSelectedComponentIds} onSelectWire={setSelectedWireId} onUpdateComponentPositions={handleUpdateComponentPositions} onAddWire={handleAddWire} onAddMultipleWires={handleAddMultipleWires} onUpdateWire={handleUpdateWire} onDeleteSelected={handleDeleteSelected} onUpdateWireWaypoints={handleUpdateWireWaypoints} onUpdateMultiWireWaypoints={handleUpdateMultiWireWaypoints} onResetWireWaypoints={handleResetWireWaypoints} zoom={zoom} pan={pan} onZoomChange={setZoom} onPanChange={setPan} onContextMenu={setContextMenuState} onCursorMove={(pos) => { lastCursorWorldPosRef.current = pos; }} startBranchWireRequest={startBranchWireRequest} />
 
         {/* Right Properties Inspector Drawer */}
-        <PropertiesInspector
-          selectedComponent={selectedComponent}
-          selectedComponentIds={selectedComponentIds}
-          selectedWire={selectedWire}
-          allComponents={components}
-          allWires={wires}
-          snapGrid={snapGrid}
-          onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
-          onCenterCanvas={handleCenterCanvas}
-          onOpenWiringTable={modals.openWiringTable}
-          onUpdateComponent={handleUpdateComponent}
-          onUpdateWire={handleUpdateWire}
-          onAddMultipleWires={handleAddMultipleWires}
-          onDeleteComponent={(id) => handleDeleteComponents([id])}
-          onDuplicateComponent={(id) => handleDuplicateComponents([id])}
-          onToggleLock={handleToggleLock}
-          onRotateComponents={handleRotateComponents}
-          onDuplicateComponents={handleDuplicateComponents}
-          onDeleteComponents={handleDeleteComponents}
-          onDeleteWire={handleDeleteWire}
-          isOpen={modals.isInspectorOpen}
-          onToggleOpen={modals.toggleInspector}
-        />
+        <PropertiesInspector selectedComponent={selectedComponent} selectedComponentIds={selectedComponentIds} selectedWire={selectedWire} allComponents={components} allWires={wires} snapGrid={snapGrid} onToggleSnapGrid={() => setSnapGrid((prev) => !prev)} onCenterCanvas={handleCenterCanvas} onOpenWiringTable={modals.openWiringTable} onUpdateComponent={handleUpdateComponent} onUpdateWire={handleUpdateWire} onAddMultipleWires={handleAddMultipleWires} onDeleteComponent={(id) => handleDeleteComponents([id])} onDuplicateComponent={(id) => handleDuplicateComponents([id])} onToggleLock={handleToggleLock} onRotateComponents={handleRotateComponents} onDuplicateComponents={handleDuplicateComponents} onDeleteComponents={handleDeleteComponents} onDeleteWire={handleDeleteWire} isOpen={modals.isInspectorOpen} onToggleOpen={modals.toggleInspector} />
 
         {/* Right-Click Context Menu */}
-        <ContextMenu
-          menuState={contextMenuState}
-          onClose={() => setContextMenuState((prev) => ({ ...prev, isOpen: false }))}
-          onToggleLock={handleToggleLock}
-          onDuplicate={handleDuplicateComponents}
-          onRotate={handleRotateComponents}
-          onDeleteComponents={handleDeleteComponents}
-          allComponents={components}
-          allWires={wires}
-          wireRouting={wireRouting}
-          onAddMultipleWires={handleAddMultipleWires}
-          onEditInStudio={
-            isAdmin
-              ? (def) => modals.openStudio(def || null)
-              : undefined
-          }
-          onUpdateWireColor={(wireId, color) => handleUpdateWire(wireId, { color })}
-          onUpdateWireRouting={(wireId, routing) => handleUpdateWire(wireId, { routing })}
-          onUpdateWire={handleUpdateWire}
-          onDeleteWire={handleDeleteWire}
-          onStartBranchWire={(wire, worldPos) => {
-            setStartBranchWireRequest({ wire, point: worldPos, timestamp: Date.now() });
-          }}
-          onQuickAddComponent={handleAddComponent}
-          onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
-          snapGrid={snapGrid}
-          onResetView={() => {
-            setZoom(1);
-            setPan({ x: 120, y: 80 });
-          }}
-          onSelectAll={handleSelectAll}
-          onClearCanvas={handleClearCanvas}
-        />
+        <ContextMenu menuState={contextMenuState} onClose={() => setContextMenuState((prev) => ({ ...prev, isOpen: false }))} onToggleLock={handleToggleLock} onDuplicate={handleDuplicateComponents} onRotate={handleRotateComponents} onDeleteComponents={handleDeleteComponents} allComponents={components} allWires={wires} wireRouting={wireRouting} onAddMultipleWires={handleAddMultipleWires} onEditInStudio={isAdmin ? (def) => modals.openStudio(def || null) : undefined} onUpdateWireColor={(wireId, color) => handleUpdateWire(wireId, { color })} onUpdateWireRouting={(wireId, routing) => handleUpdateWire(wireId, { routing })} onUpdateWire={handleUpdateWire} onDeleteWire={handleDeleteWire} onStartBranchWire={(wire, worldPos) => { setStartBranchWireRequest({ wire, point: worldPos, timestamp: Date.now() }); }} onQuickAddComponent={handleAddComponent} onToggleSnapGrid={() => setSnapGrid((prev) => !prev)} snapGrid={snapGrid} onResetView={() => { setZoom(1); setPan({ x: 120, y: 80 }); }} onSelectAll={handleSelectAll} onClearCanvas={handleClearCanvas} />
       </div>
 
       {/* Application Modals Container */}
-      <AppModalsContainer
-        modals={modals}
-        components={components}
-        wires={wires}
-        allDefs={getAllComponentDefinitions()}
-        projectName={projectName}
-        isAdmin={isAdmin}
-        onLoadPreset={handleLoadPreset}
-        onAddComponent={handleAddComponent}
-        onHighlightComponent={(compId) => {
-          if (compId) {
-            setSelectedComponentIds([compId]);
-            setSelectedWireId(null);
-          }
-        }}
-        onHighlightWire={(wireId) => {
-          if (wireId) {
-            setSelectedWireId(wireId);
-            setSelectedComponentIds([]);
-          }
-        }}
-      />
+      <AppModalsContainer modals={modals} components={components} wires={wires} allDefs={getAllComponentDefinitions()} projectName={projectName} isAdmin={isAdmin} onLoadPreset={handleLoadPreset} onAddComponent={handleAddComponent} onHighlightComponent={(compId) => { if (compId) { setSelectedComponentIds([compId]); setSelectedWireId(null); } }} onHighlightWire={(wireId) => { if (wireId) { setSelectedWireId(wireId); setSelectedComponentIds([]); } }} />
     </div>
   );
 }

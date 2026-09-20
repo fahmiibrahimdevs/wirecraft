@@ -40,66 +40,13 @@ export const AppModalsContainer: React.FC<AppModalsContainerProps> = ({
 }) => {
   return (
     <>
-      {/* BOM (Bill of Materials) Modal */}
-      <BomModal
-        isOpen={modals.isBomModalOpen}
-        onClose={modals.closeBomModal}
-        components={components}
-        wires={wires}
-      />
-
-      {/* Hardware Wiring Table Modal */}
-      <WiringTableModal
-        isOpen={modals.isWiringTableOpen}
-        onClose={modals.closeWiringTable}
-        components={components}
-        wires={wires}
-        allDefs={allDefs}
-        onHighlightComponent={onHighlightComponent}
-        onHighlightWire={onHighlightWire}
-      />
-
-      {/* Presets Modal */}
-      <PresetsModal
-        isOpen={modals.isPresetsModalOpen}
-        onClose={modals.closePresetsModal}
-        onLoadPreset={onLoadPreset}
-      />
-
-      {/* Component Studio (Admin Mode) Modal */}
-      {isAdmin && (
-        <ComponentStudioModal
-          isOpen={modals.isStudioOpen}
-          onClose={modals.closeStudio}
-          initialDefinition={modals.studioEditDef}
-          onComponentSaved={(typeId) => {
-            onAddComponent(typeId);
-          }}
-        />
-      )}
-
-      {/* User Management (Admin Mode) Modal */}
-      {isAdmin && (
-        <UserManagementModal
-          isOpen={modals.isUserManagementOpen}
-          onClose={modals.closeUserManagement}
-        />
-      )}
-
-      {/* HD Schema & Diagram Export Modal */}
-      <ExportModal
-        isOpen={modals.isExportModalOpen}
-        onClose={modals.closeExportModal}
-        projectName={projectName}
-        components={components}
-        wires={wires}
-      />
-
-      {/* Auth Modal (Login / Register) */}
-      <AuthModal
-        isOpen={modals.isAuthModalOpen}
-        onClose={modals.closeAuthModal}
-      />
+      <BomModal isOpen={modals.isBomModalOpen} onClose={modals.closeBomModal} components={components} wires={wires} />
+      <WiringTableModal isOpen={modals.isWiringTableOpen} onClose={modals.closeWiringTable} components={components} wires={wires} allDefs={allDefs} onHighlightComponent={onHighlightComponent} onHighlightWire={onHighlightWire} />
+      <PresetsModal isOpen={modals.isPresetsModalOpen} onClose={modals.closePresetsModal} onLoadPreset={onLoadPreset} />
+      {isAdmin && <ComponentStudioModal isOpen={modals.isStudioOpen} onClose={modals.closeStudio} initialDefinition={modals.studioEditDef} onComponentSaved={(typeId) => onAddComponent(typeId)} />}
+      {isAdmin && <UserManagementModal isOpen={modals.isUserManagementOpen} onClose={modals.closeUserManagement} />}
+      <ExportModal isOpen={modals.isExportModalOpen} onClose={modals.closeExportModal} projectName={projectName} components={components} wires={wires} />
+      <AuthModal isOpen={modals.isAuthModalOpen} onClose={modals.closeAuthModal} />
     </>
   );
 };
