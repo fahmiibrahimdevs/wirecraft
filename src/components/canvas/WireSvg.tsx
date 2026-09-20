@@ -402,8 +402,8 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         </>
       )}
 
-      {/* Interactive Endpoint Drag Handles (Re-connection & Junction Sliding) */}
-      {onStartEndpointDrag && (
+      {/* Interactive Endpoint Drag Handles (Re-connection & Junction Sliding - Only active when wire is selected) */}
+      {onStartEndpointDrag && isSelected && (
         <>
           {(isStartPin || isStartTap || isStartJunction) && (
             <circle cx={pStart.x} cy={pStart.y} r={12} fill="transparent" className="cursor-grab active:cursor-grabbing hover:scale-125" onPointerDown={(e) => { if (e.button !== 0) return; e.stopPropagation(); onStartEndpointDrag(wire, 'start', e); }}>

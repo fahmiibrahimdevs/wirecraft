@@ -1231,6 +1231,33 @@ export function useWireGestures({
           if (selectedWireId && onUpdateWire) {
             onUpdateWire(selectedWireId, { color: nextColor });
           }
+        } else if (e.key.toLowerCase() === 'w') {
+          // Shortcut W: Start drawing wire from hovered pin or complete wire connection
+          if (!drawingWire && hoveredPinInfo) {
+            e.preventDefault();
+            const pinPos = getPinCoords(hoveredPinInfo.component.id, hoveredPinInfo.pin.id);
+            if (pinPos) {
+              const autoColor = getAutoPinColor(hoveredPinInfo.pin) || currentWireColor;
+              if (onSelectWireColor) onSelectWireColor(autoColor);
+              setDrawingWire({
+                fromComponentId: hoveredPinInfo.component.id,
+                fromPin: hoveredPinInfo.pin,
+                currentPoint: pinPos,
+                waypoints: [],
+                color: autoColor,
+              });
+              onSelectComponents([]);
+              onSelectWire(null);
+            }
+          } else if (drawingWire) {
+            if (hoveredPinInfo) {
+              e.preventDefault();
+              finishWireConnection(hoveredPinInfo.component.id, hoveredPinInfo.pin);
+            } else if (hoveredWireSnap) {
+              e.preventDefault();
+              finishWireToWireConnection(hoveredWireSnap.wire, hoveredWireSnap.point);
+            }
+          }
         }
       }
     };
@@ -1239,9 +1266,16 @@ export function useWireGestures({
   }, [
     drawingWire,
     draggingEndpoint,
+    hoveredPinInfo,
+    hoveredWireSnap,
+    getPinCoords,
+    finishWireConnection,
+    finishWireToWireConnection,
     selectedWireId,
     currentWireColor,
     onSelectWireColor,
+    onSelectComponents,
+    onSelectWire,
     onUpdateWire,
   ]);
 
