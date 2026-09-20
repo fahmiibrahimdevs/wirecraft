@@ -602,16 +602,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       >
         {/* Dynamic Zoom & Pan Transform Layer */}
         <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
-          {/* 1. Components Layer */}
-          <g id="components-layer" className="pointer-events-auto">
-            {sortedComponents.map((comp) => (
-              <g key={comp.id} onMouseDown={(e) => compDrag.handleComponentMouseDown(comp, e)} onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                <ComponentSvg component={comp} isSelected={selectedComponentIds.includes(comp.id)} isHovered={false} activeWireStartPinId={wireGestures.drawingWire?.fromComponentId === comp.id ? wireGestures.drawingWire.fromPin?.id || null : null} activeWireTargetPinId={wireGestures.drawingWire && wireGestures.hoveredPinInfo?.component.id === comp.id ? wireGestures.hoveredPinInfo.pin.id : null} onPinMouseDown={wireGestures.handlePinMouseDown} onPinMouseUp={wireGestures.handlePinMouseUp} onPinMouseEnter={wireGestures.handlePinMouseEnter} onPinMouseLeave={wireGestures.handlePinMouseLeave} />
-              </g>
-            ))}
-          </g>
-
-          {/* 2. Wires Layer */}
+          {/* 1. Wires Layer (Rendered underneath component pins for zero-clutter pin interaction) */}
           <g id="wires-layer" className={wireGestures.drawingWire || wireGestures.draggingEndpoint ? 'pointer-events-none' : 'pointer-events-auto'}>
             {sortedWires.map((wire) => {
               const resolved = resolvedWiresMap.get(wire.id);
@@ -678,6 +669,15 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                 <circle cx={wireGestures.draggingEndpoint.currentPoint.x} cy={wireGestures.draggingEndpoint.currentPoint.y} r={wireGestures.hoveredWireSnap || wireGestures.hoveredPinInfo ? 5.5 : 4} fill={wireGestures.hoveredWireSnap ? wireGestures.hoveredWireSnap.wire.color || currentWireColor : currentWireColor} className="animate-pulse pointer-events-none" />
               </g>
             )}
+          </g>
+
+          {/* 2. Components Layer (Rendered on top of wires so pins are always accessible) */}
+          <g id="components-layer" className="pointer-events-auto">
+            {sortedComponents.map((comp) => (
+              <g key={comp.id} onMouseDown={(e) => compDrag.handleComponentMouseDown(comp, e)} onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                <ComponentSvg component={comp} isSelected={selectedComponentIds.includes(comp.id)} isHovered={false} activeWireStartPinId={wireGestures.drawingWire?.fromComponentId === comp.id ? wireGestures.drawingWire.fromPin?.id || null : null} activeWireTargetPinId={wireGestures.drawingWire && wireGestures.hoveredPinInfo?.component.id === comp.id ? wireGestures.hoveredPinInfo.pin.id : null} onPinMouseDown={wireGestures.handlePinMouseDown} onPinMouseUp={wireGestures.handlePinMouseUp} onPinMouseEnter={wireGestures.handlePinMouseEnter} onPinMouseLeave={wireGestures.handlePinMouseLeave} />
+              </g>
+            ))}
           </g>
 
           {/* 3. Marquee Selection Box */}

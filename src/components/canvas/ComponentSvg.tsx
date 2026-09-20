@@ -132,15 +132,15 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
             <g
               key={pin.id}
               transform={`translate(${pin.x}, ${pin.y})`}
-              className="cursor-pointer group/pin"
+              className="cursor-crosshair group/pin"
               style={{ pointerEvents: 'all' }}
               onMouseDown={(e) => onPinMouseDown(component.id, pin, e)}
               onMouseUp={(e) => onPinMouseUp?.(component.id, pin, e)}
               onMouseEnter={(e) => onPinMouseEnter(component.id, pin, e)}
               onMouseLeave={onPinMouseLeave}
             >
-              {/* Generous invisible hitbox for effortless wire connection (guaranteed pointer event capture) */}
-              <circle cx="0" cy="0" r={pin.id === 'ac_pass' ? 18 : isBreadboard ? 7.5 : isLed || isResistor || isPot || isUltrasonic || isDht || isOled || isBuzzer || isTm1637 || isServo || isRelay || isRelayBlack || isRtc ? 9 : 12} fill="#ffffff" opacity="0.001" style={{ pointerEvents: 'all' }} />
+              {/* Generous invisible hitbox for effortless wire connection (guaranteed pointer event capture, never blocked by wires) */}
+              <circle cx="0" cy="0" r={pin.id === 'ac_pass' ? 20 : isBreadboard ? 8.5 : 14} fill="#ffffff" opacity="0.001" style={{ pointerEvents: 'all' }} />
 
               {/* Special guide ring for CT center hole pass-through */}
               {pin.id === 'ac_pass' ? (
@@ -157,11 +157,31 @@ const ComponentSvgComponent: React.FC<ComponentSvgProps> = ({
                 />
               )}
 
-              {/* Glowing pin indicator when starting wire from this pin */}
-              {isStartPin && <circle cx="0" cy="0" r="10" fill="none" stroke="#38bdf8" strokeWidth="2" className="animate-ping" />}
+              {/* EasyEDA / Proteus magnetic snap crosshairs & target box on hover */}
+              <g className="opacity-0 group-hover/pin:opacity-100 transition-opacity pointer-events-none">
+                <circle cx="0" cy="0" r={pin.id === 'ac_pass' ? 16 : isBreadboard ? 6.5 : 8.5} fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" strokeWidth="1.5" />
+                <circle cx="0" cy="0" r={2.5} fill="#38bdf8" />
+                {/* Crosshair ticks */}
+                <line x1="0" y1={isBreadboard ? -4 : -5.5} x2="0" y2={isBreadboard ? -8 : -10.5} stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="0" y1={isBreadboard ? 4 : 5.5} x2="0" y2={isBreadboard ? 8 : 10.5} stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1={isBreadboard ? -4 : -5.5} y1="0" x2={isBreadboard ? -8 : -10.5} y2="0" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1={isBreadboard ? 4 : 5.5} y1="0" x2={isBreadboard ? 8 : 10.5} y2="0" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+              </g>
 
-              {/* Glowing target snap indicator when cursor hovers or nears this pin */}
-              {isTargetPin && <circle cx="0" cy="0" r="7.5" fill="none" stroke="#10b981" strokeWidth="2" className="animate-pulse" />}
+              {/* Glowing pin indicator when starting wire from this pin */}
+              {isStartPin && <circle cx="0" cy="0" r="11" fill="none" stroke="#38bdf8" strokeWidth="2.2" className="animate-ping" />}
+
+              {/* Active magnetic snap target when cursor draws wire near this pin */}
+              {isTargetPin && (
+                <g className="pointer-events-none animate-pulse">
+                  <circle cx="0" cy="0" r={pin.id === 'ac_pass' ? 18 : isBreadboard ? 7.5 : 9.5} fill="rgba(16, 185, 129, 0.25)" stroke="#10b981" strokeWidth="2" />
+                  <circle cx="0" cy="0" r={3} fill="#10b981" stroke="#ffffff" strokeWidth="1" />
+                  <line x1="0" y1={-6} x2="0" y2={-12} stroke="#10b981" strokeWidth="1.8" strokeLinecap="round" />
+                  <line x1="0" y1={6} x2="0" y2={12} stroke="#10b981" strokeWidth="1.8" strokeLinecap="round" />
+                  <line x1={-6} y1="0" x2={-12} y2="0" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round" />
+                  <line x1={6} y1="0" x2={12} y2="0" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round" />
+                </g>
+              )}
             </g>
           );
         })}
