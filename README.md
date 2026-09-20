@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/Thumbnail_Wirecraft.png" alt="Wirecraft Interactive Circuit & Wiring Simulator" width="100%" />
+</p>
+
 # ⚡ Wirecraft
 
 <div align="center">
