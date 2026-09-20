@@ -1,103 +1,143 @@
 # ⚡ Wirecraft
 
-> **Interactive Web-Based Circuit & IoT Electronics Simulator**  
-> Build, wire, and simulate realistic electronic circuits, microcontrollers, and high-voltage AC electrical fixtures directly in your browser.
+<div align="center">
+
+[![Version](https://img.shields.io/badge/version-2.0.0-38bdf8.svg?style=flat-square)](package.json)
+[![React](https://img.shields.io/badge/React-19.3.0-61dafb.svg?style=flat-square&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178c6.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.3.0-646cff.svg?style=flat-square&logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.3.3-38bdf8.svg?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Runtime](https://img.shields.io/badge/Runtime-Bun%20%2F%20Node-fbf0df.svg?style=flat-square&logo=bun)](https://bun.sh/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
+
+**Interactive Web-Based Circuit, IoT Electronics & High-Voltage Electrical Wiring Simulator**  
+Design, simulate, and export realistic electronic circuits, microcontroller prototypes, and photorealistic AC electrical fixtures with smart orthogonal wire routing directly in your browser.
+
+[Features](#-features-overview) • [Quick Start](#-quick-start) • [Tech Stack](#-tech-stack) • [Component Studio](#-component-studio) • [Shortcuts](#-keyboard-shortcuts--canvas-controls) • [Architecture](#-project-structure)
+
+</div>
 
 ---
 
 ## ✨ Features Overview
 
-### 🔌 Real-World AC 220V & Power Systems
-Unlike traditional simulators that only handle low-voltage DC, Wirecraft brings photorealistic high-voltage AC fixtures:
-- **AC Wall Outlet (Schuko Type-F)**: Complete with dual live/neutral sockets, brass earth clips, and side screw terminals.
-- **Ceiling Lamp Holder (Fitting Lampu E27)**: Real-time interactive LED bulb illumination state (ON / OFF) with live/neutral screw terminals.
-- **AC Plug with Rocker Switch (Steker Saklar Broco)**: Integrated switch toggle with glowing red neon indicator and 3-core cable terminations (L, PE, N).
-- **Industrial SMPS 12V Power Supply**: 5-terminal metal chassis with perforated mesh, AC live/neutral, frame ground, and DC -V/+V outputs.
-- **LM2596S DC-DC Buck Converter**: Step-down voltage regulator module with 4 precision screw pads.
+### 🎨 Custom Component Studio
+Create and calibrate your own electronic or electrical components without touching code:
+- **Visual Pin Editor**: Place custom pins with precision, define pin types (Digital, Analog, Power, Ground, AC Live/Neutral, Earth), labels, and signals.
+- **Image Calibration**: Upload PNG/SVG graphics, automatically remove backgrounds, crop, scale, and adjust offsets.
+- **Pin Grid Snapping & Pitch Distribution**: Align pins with standard 2.54mm breadboard pitch or distribute pins evenly along headers.
+- **Persistent Library**: Save custom components directly to your workspace or export/import them as reusable JSON definitions.
+
+### 🔌 Photorealistic AC 220V & Power Fixtures
+Bridge the gap between low-voltage electronics and real-world high-voltage wiring:
+- **AC Wall Outlet (Schuko Type-F)**: Dual live/neutral sockets, brass earth contact clips, and realistic screw terminal blocks.
+- **Ceiling Lamp Holder (Fitting Lampu E27)**: Live/neutral terminals with dynamic real-time LED bulb illumination states (ON / OFF).
+- **AC Plug with Rocker Switch (Steker Saklar Broco)**: Interactive switch toggle with glowing red neon indicator and 3-wire terminations (L, PE, N).
+- **Industrial SMPS 12V Power Supply**: Perforated metal mesh casing, dual AC input, frame ground, and dual DC output terminals.
+- **LM2596S DC-DC Buck Converter**: Adjustable step-down voltage regulator module with 4 precision screw pads.
 
 ### 🧠 Microcontrollers & Prototyping
-- **ESP32 NodeMCU (30-Pin)**: Dual header layout, full GPIO matrix, power rails, and accurate pin spacing.
-- **Arduino Uno R3**: Standard digital PWM, analog inputs, ICSP, and power bus pinout.
-- **Modular Breadboards**: Full-size (830 tie-points), Half-size (400 tie-points), and Mini (170 tie-points) with visual pin snap-grid.
+- **ESP32 NodeMCU (30-Pin)**: Accurate GPIO pin matrix, dual header spacing, ADC, DAC, capacitive touch, and power rails.
+- **Arduino Uno R3**: Standard digital PWM headers, analog input banks, ICSP headers, and DC barrel jack.
+- **Modular Breadboards**: Full-size (830 tie-points), Half-size (400 tie-points), and Mini (170 tie-points) with 2.54mm / 17px pin snap-grid.
 
-### 〰️ Smart Orthogonal Wire Routing
-- Interactive click-to-connect pin-to-pin wiring.
-- Intelligent **orthogonal pathfinding** router that keeps wire traces at clean 90-degree angles.
-- Color-coded jumper wire palette (VCC Red, GND Black, Signal Cyan, Data Emerald, PWM Orange, Clock Yellow, SDA Purple, White, Blue).
+### 〰️ Smart Orthogonal Wire Routing & Real-World Physics
+- **Intelligent Pathfinding Engine**: Calculates clean 90-degree orthogonal routes around components and obstacles.
+- **Wire Jump-Over Bridges**: Automatic semi-circular arc bridge rendering at wire intersections to eliminate visual ambiguity.
+- **Midpoint Bend Editing & Segment Dragging**: Interactive handles to adjust, split, and reshape wire routes with route lock support.
+- **Wire Gauges & Realism**: Configure wire gauge (AWG 18, 22, 24, 28), color-coded palettes, ferrule crimp terminal ends, and heat-shrink marking tube labels.
 
-### 🖥️ Displays & Human Machine Interfaces (HMI)
-- **LCD 1602 & LCD 2004**: Available in standard parallel and I2C backpack configurations with real-time text inspector.
-- **SSD1306 OLED 0.96"**: 128x64 I2C graphical display simulation.
-- **TFT 2.8" ILI9341**: Full-color 320x240 SPI display with resistive touch screen variant.
-- **TM1637 Display**: 4-digit 7-segment digital clock display.
-- **Matrix Keypads**: 3x4 and 4x4 matrix membrane keypads.
-- **Tactile Push Buttons & Potentiometer**: 6mm and 12mm tactile switches, plus rotary potentiometer with draggable percentage knob.
+### 🖥️ Displays, Sensors & HMI Modules
+- **Displays**: LCD 1602 & LCD 2004 (Parallel & I2C backpack), SSD1306 OLED (128x64 I2C), TFT 2.8" ILI9341 (SPI full-color), and TM1637 4-digit 7-segment clock display.
+- **Sensors**: HC-SR04 Ultrasonic, DHT11 & DHT22 Temperature/Humidity, Capacitive Soil Moisture, RC522 RFID 13.56MHz SPI, and DS3231 RTC.
+- **Actuators & Controls**: SG90 Micro Servo, Active Buzzers, 1-Channel Relay modules, 6mm/12mm tactile buttons, and rotary potentiometers with draggable dial angle.
 
-### 📡 Sensors & Actuators
-- **HC-SR04**: Ultrasonic distance sensor.
-- **DHT11 & DHT22**: Temperature and humidity sensors (standalone & module versions).
-- **Soil Moisture Sensor**: Capacitive probe & comparator board.
-- **RC522 RFID Reader**: 13.56MHz SPI module.
-- **DS3231 RTC**: High-precision real-time clock with coin-cell battery.
-- **1-Channel Relay Modules**: Blue, Black, and Red editions.
-- **Active Buzzer & SG90 Micro Servo**.
+### 📦 Export & Documentation Suite
+- **HD Schematic Snapshots**: Export ultra high-resolution circuit diagrams in PNG, SVG, or PDF format with customizable scale factors (1x, 2x, 4x) and Dark/Light themes.
+- **Bill of Materials (BOM)**: Automatic part counting, component categorization, and instant CSV export.
+- **Wiring Schedule Table**: Auto-generated wiring netlist listing Source Pin, Target Pin, Wire Color, Gauge, Length, and Net Name.
 
-### 🎨 Matte Dark Design System
-- Built on a modern **Slate-950 (`#020617`)** matte aesthetic with zero distracting neon glows.
-- Single unified **Sky/Cyan (`#38bdf8`)** accent token.
-- Responsive drag-and-drop canvas with smooth pan, zoom, grid snapping, and component rotation (0°, 90°, 180°, 270°).
+### 📁 Multi-File Circuit Workspace & Cloud Sync
+- **Virtual File Explorer**: Organize designs into folders, duplicate schematics, rename, and switch between circuits instantly.
+- **Project Import/Export**: Save and load complete workspaces as `.wirecraft` or `.json` archives.
+- **Cloud Collaboration & Auth**: Integrated authentication, user profile management, and cloud project storage.
+- **Embedded Code Editor**: Built-in code editor for Arduino C++ and MicroPython sketches accompanying your circuit designs.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Runtime & Package Manager**: [Bun](https://bun.sh/)
-- **Frontend Framework**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Bundler & Dev Server**: [Vite 8](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Canvas Rendering**: Custom Scalable Vector Graphics (SVG) + Orthogonal Routing Engine
+| Technology | Purpose |
+| :--- | :--- |
+| **[React 19](https://react.dev/)** | Modern component-driven UI architecture |
+| **[TypeScript 5.8](https://www.typescriptlang.org/)** | Strict type safety and robust domain models |
+| **[Vite 8](https://vitejs.dev/)** | Lightning-fast development server & optimized production bundler |
+| **[Tailwind CSS v4](https://tailwindcss.com/)** | High-performance atomic styling and dark-mode design system |
+| **[Bun](https://bun.sh/)** | Ultra-fast JavaScript runtime, test runner, and package manager |
+| **[Lucide React](https://lucide.dev/)** | Clean and consistent iconography |
+| **[SweetAlert2](https://sweetalert2.github.io/)** | Sleek modal dialogues and toast notifications |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-Ensure you have [Bun](https://bun.sh/) installed (v1.2+ recommended).
+Make sure you have **[Bun](https://bun.sh/)** (v1.2+ recommended) or **Node.js** (v20+ LTS) installed:
 
 ```bash
-# Verify bun installation
 bun --version
+# or: node --version
 ```
 
-### Installation
+### 1. Clone & Install
 
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/fahmiibrahimdevs/wirecraft.git
 
-# 2. Navigate to project directory
+# Navigate into the project
 cd wirecraft
 
-# 3. Install dependencies
+# Install dependencies using Bun (recommended) or npm
 bun install
+# or: npm install
 ```
 
-### Running Locally
+### 2. Run Development Server
 
 ```bash
-# Start development server
 bun run dev
+# or: npm run dev
 ```
-Open [http://localhost:5180](http://localhost:5180) (or the port shown in terminal) in your browser.
 
-### Building for Production
+Open [http://localhost:5180](http://localhost:5180) in your web browser.
+
+### 3. Build for Production
 
 ```bash
-# Typecheck and build production bundle
 bun run build
+# or: npm run build
 ```
-Production assets will be generated in the `dist/` directory.
+
+The optimized static production files will be output to the `dist/` directory.
+
+---
+
+## ⌨️ Keyboard Shortcuts & Canvas Controls
+
+| Action | Shortcut / Gesture |
+| :--- | :--- |
+| **Pan Canvas** | `Space + Drag` or `Middle Mouse Drag` |
+| **Zoom Canvas** | `Mouse Wheel` or `Ctrl + '+' / '-'` |
+| **Select All** | `Ctrl + A` |
+| **Delete Selected** | `Delete` or `Backspace` |
+| **Duplicate Selection** | `Ctrl + D` |
+| **Rotate Component (90°)** | `R` |
+| **Flip Component Horizontal** | `H` |
+| **Flip Component Vertical** | `V` |
+| **Undo / Redo** | `Ctrl + Z` / `Ctrl + Y` (`Ctrl + Shift + Z`) |
+| **Cancel Wire / Deselect** | `Escape` |
+| **Snap-to-Grid** | Automatic 17px (2.54mm pitch) snapping |
 
 ---
 
@@ -106,24 +146,28 @@ Production assets will be generated in the `dist/` directory.
 ```
 wirecraft/
 ├── public/
-│   ├── components/         # Photorealistic transparent component graphics
-│   └── vite.svg
+│   ├── components/                 # Photorealistic SVG & transparent component assets
+│   └── favicon.ico
 ├── src/
 │   ├── components/
-│   │   ├── canvas/         # SVG canvas, component renderer, and wire traces
-│   │   ├── layout/         # Header, status bars, navigation
-│   │   └── panels/         # Component Library drawer & Properties Inspector
-│   ├── constants/
-│   │   └── components.ts   # Component definitions, dimensions, and pin coordinates
-│   ├── types/
-│   │   └── circuit.ts      # TypeScript models for components, pins, and wires
-│   ├── utils/
-│   │   └── orthogonalRouter.ts # Smart wire routing algorithm
-│   ├── App.tsx             # Main canvas application state
-│   ├── index.css           # Tailwind CSS directives and custom styles
-│   └── main.tsx            # React application entry point
-├── GEMINI.md               # Agent guidelines and project context
+│   │   ├── canvas/                 # SVG Canvas, wire rendering & interactive hitboxes
+│   │   │   └── shapes/             # Custom SVG shape renderers (Resistors, Buttons, LCD, etc.)
+│   │   ├── menu/                   # Right-click context menus & quick actions
+│   │   ├── modals/                 # Feature modals (Export, BOM, Auth, Wiring Table, etc.)
+│   │   │   └── studio/             # Component Studio (Pin Editor, Form, Preview & Image Calibration)
+│   │   ├── navigation/             # Top navigation bar, tool selector & breadcrumb
+│   │   └── panels/                 # Component Library, File Explorer & Inspector sections
+│   │       └── inspector/          # Dedicated property editors (Wires, Components, Resistors)
+│   ├── constants/                  # Component definitions, pin databases, and starter circuits
+│   ├── context/                    # React Context providers for circuit files and state
+│   ├── hooks/                      # Custom hooks for gestures, hotkeys, dragging, wires, and modals
+│   ├── types/                      # TypeScript schemas (Circuit, Pins, Wires, Components, Auth)
+│   ├── utils/                      # Orthogonal router, wire translation, color maps & helpers
+│   ├── App.tsx                     # Main application layout and modal container integration
+│   ├── index.css                   # Tailwind CSS v4 stylesheets and typography
+│   └── main.tsx                    # React application root entry point
 ├── package.json
+├── tsconfig.json
 └── vite.config.ts
 ```
 
@@ -131,8 +175,10 @@ wirecraft/
 
 ## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
-Developed with ❤️ by [fahmiibrahimdevs](https://github.com/fahmiibrahimdevs).
+<div align="center">
+  Developed with ❤️ by <a href="https://github.com/fahmiibrahimdevs">fahmiibrahimdevs</a>
+</div>
