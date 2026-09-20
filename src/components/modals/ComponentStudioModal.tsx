@@ -3,60 +3,26 @@ import { Pin, PinType, ComponentDefinition } from '../../types/circuit';
 import {
   saveCustomComponent,
   optimizeImageForStorage,
-  getCustomComponents,
   generateTypeScriptCode,
   exportComponentJson,
-  importComponentJson,
   rotateSvgDataUrl,
 } from '../../utils/customComponents';
-import { inferPinProfile, COMMON_PIN_SUGGESTIONS } from '../../utils/pinInference';
-import { showToast, showError, showConfirm } from '../../utils/alert';
+import { inferPinProfile } from '../../utils/pinInference';
+import { showToast, showError } from '../../utils/alert';
 import {
-  Upload,
-  Sparkles,
-  Wand2,
-  Crop,
-  Grid,
-  Plus,
-  Trash2,
+  Sliders,
+  FolderOpen,
+  Download,
   Copy,
   Check,
-  Download,
-  FolderOpen,
+  Sparkles,
   X,
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-  RotateCcw,
-  RotateCw,
-  Layers,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Cpu,
-  Info,
-  Sliders,
-  Move,
-  ShieldCheck,
-  Globe,
-  Undo,
-  Image as ImageIcon,
-  AlignCenter,
-  Compass,
-  Box,
-  Tag,
-  Magnet,
-  Target,
-  Undo2,
-  Redo2,
-  Hand,
-  ChevronLeft,
-  ChevronRight,
-  Edit3,
 } from 'lucide-react';
+
+import { StudioMetadataForm } from './studio/StudioMetadataForm';
+import { StudioPinEditor } from './studio/StudioPinEditor';
+import { StudioCanvasPreview } from './studio/StudioCanvasPreview';
+import { removeImageBackground, autoCropImage } from './studio/studioImageUtils';
 
 interface ComponentStudioModalProps {
   isOpen: boolean;
@@ -64,132 +30,6 @@ interface ComponentStudioModalProps {
   onComponentSaved?: (typeId: string) => void;
   initialDefinition?: ComponentDefinition | null;
 }
-
-const PIN_TYPES: { type: PinType; label: string; color: string }[] = [
-  { type: 'power', label: 'Power / VCC', color: '#ef4444' },
-  { type: 'ground', label: 'Ground / GND', color: '#1e293b' },
-  { type: 'digital', label: 'Digital I/O', color: '#38bdf8' },
-  { type: 'analog', label: 'Analog Input', color: '#10b981' },
-  { type: 'pwm', label: 'PWM Output', color: '#f97316' },
-  { type: 'i2c', label: 'I2C (SDA/SCL)', color: '#a855f7' },
-  { type: 'spi', label: 'SPI Bus', color: '#eab308' },
-  { type: 'uart', label: 'UART (RX/TX)', color: '#06b6d4' },
-  { type: 'passive', label: 'Passive / Terminal', color: '#94a3b8' },
-  { type: 'generic', label: 'Generic Pin', color: '#64748b' },
-];
-
-const CATEGORIES = [
-  { id: 'sensors', label: 'Sensor' },
-  { id: 'microcontrollers', label: 'Mikrokontroler' },
-  { id: 'power', label: 'Daya / Power' },
-  { id: 'outputs', label: 'Output & Aktuator' },
-  { id: 'displays', label: 'Layar / Display' },
-  { id: 'passives', label: 'Pasif' },
-  { id: 'prototyping', label: 'Breadboard / Prototyping' },
-  { id: 'custom', label: 'Custom' },
-];
-
-// Physical to Pixel Conversion Helpers (Standard 2.54mm Breadboard Pitch = 17.0px)
-export const MM_PER_PX = 2.54 / 17.0; // ~0.14941176 mm per px
-export const PX_PER_MM = 17.0 / 2.54; // ~6.69291339 px per mm
-
-export const pxToMm = (px: number, decimals = 1): number => {
-  return Number((px * MM_PER_PX).toFixed(decimals));
-};
-
-export const mmToPx = (mm: number, decimals = 1): number => {
-  return Number((mm * PX_PER_MM).toFixed(decimals));
-};
-
-export interface CalloutGeometry {
-  dir: 'top' | 'bottom' | 'left' | 'right';
-  p0: { x: number; y: number };
-  p1: { x: number; y: number };
-  p2: { x: number; y: number };
-  badgeX: number;
-  badgeY: number;
-  badgeW: number;
-  badgeH: number;
-}
-
-export const getPinCalloutGeometry = (
-  pin: { x: number; y: number; name: string },
-  imageOffset: { x: number; y: number },
-  compWidth: number,
-  compHeight: number
-): CalloutGeometry => {
-  const centerX = imageOffset.x + compWidth / 2;
-  const centerY = imageOffset.y + compHeight / 2;
-
-  // Calculate distances to 4 bounding box edges of the component
-  const dTop = Math.abs(pin.y - imageOffset.y);
-  const dBottom = Math.abs(imageOffset.y + compHeight - pin.y);
-  const dLeft = Math.abs(pin.x - imageOffset.x);
-  const dRight = Math.abs(imageOffset.x + compWidth - pin.x);
-
-  const minDist = Math.min(dTop, dBottom, dLeft, dRight);
-  let dir: 'top' | 'bottom' | 'left' | 'right' = 'top';
-  if (minDist === dBottom) dir = 'bottom';
-  else if (minDist === dLeft) dir = 'left';
-  else if (minDist === dRight) dir = 'right';
-  else dir = 'top';
-
-  const isRightHalf = pin.x >= centerX;
-  const isBottomHalf = pin.y >= centerY;
-
-  const charWidth = 6.8;
-  const padX = 7;
-  const badgeW = Math.max(30, Math.round(pin.name.length * charWidth + padX * 2 + 6));
-  const badgeH = 15;
-
-  let p0 = { x: 0, y: 0 };
-  let p1 = { x: 0, y: 0 };
-  let p2 = { x: 0, y: 0 };
-  let badgeX = 0;
-  let badgeY = 0;
-
-  if (dir === 'top') {
-    p0 = { x: 0, y: -5.5 };
-    const sx = isRightHalf ? 1 : -1;
-    p1 = { x: sx * 8, y: -16 };
-    p2 = { x: sx * 16, y: -16 };
-    badgeX = p2.x + (sx * badgeW) / 2;
-    badgeY = -16;
-  } else if (dir === 'bottom') {
-    p0 = { x: 0, y: 5.5 };
-    const sx = isRightHalf ? 1 : -1;
-    p1 = { x: sx * 8, y: 16 };
-    p2 = { x: sx * 16, y: 16 };
-    badgeX = p2.x + (sx * badgeW) / 2;
-    badgeY = 16;
-  } else if (dir === 'left') {
-    p0 = { x: -5.5, y: 0 };
-    const sy = isBottomHalf ? 1 : -1;
-    p1 = { x: -12, y: sy * 7 };
-    p2 = { x: -18, y: sy * 7 };
-    badgeX = p2.x - badgeW / 2;
-    badgeY = p2.y;
-  } else {
-    // right
-    p0 = { x: 5.5, y: 0 };
-    const sy = isBottomHalf ? 1 : -1;
-    p1 = { x: 12, y: sy * 7 };
-    p2 = { x: 18, y: sy * 7 };
-    badgeX = p2.x + badgeW / 2;
-    badgeY = p2.y;
-  }
-
-  return {
-    dir,
-    p0,
-    p1,
-    p2,
-    badgeX,
-    badgeY,
-    badgeW,
-    badgeH,
-  };
-};
 
 export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   isOpen,
@@ -200,7 +40,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   // Measurement Unit: 'mm' (Physical Millimeters - Default) | 'px' (Canvas Pixels)
   const [unit, setUnit] = useState<'mm' | 'px'>('mm');
 
-  // Image state (raw original preserved for non-destructive re-runs)
+  // Image state
   const [rawImageDataUrl, setRawImageDataUrl] = useState<string>('');
   const [imageDataUrl, setImageDataUrl] = useState<string>('');
   const [originalImageSize, setOriginalImageSize] = useState<{ width: number; height: number }>({
@@ -218,7 +58,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [description, setDescription] = useState<string>('Modul kustom terkalibrasi');
   const [icon, setIcon] = useState<string>('Cpu');
 
-  // Dimension & Image Offset state (WireCraft logical units)
+  // Dimension & Image Offset state
   const [width, setWidth] = useState<number>(200);
   const [height, setHeight] = useState<number>(150);
   const [lockAspectRatio, setLockAspectRatio] = useState<boolean>(true);
@@ -250,7 +90,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const [breadboardType, setBreadboardType] = useState<'half' | 'mini' | 'grid'>('half');
   const [breadboardOpacity, setBreadboardOpacity] = useState<number>(0.7);
   const [snapToBreadboard, setSnapToBreadboard] = useState<boolean>(true);
-  const [breadboardOffset, setBreadboardOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [breadboardOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Tool mode: 'smart' (Auto/Smart drag) | 'add-pin'
   const [toolMode, setToolMode] = useState<'smart' | 'add-pin'>('smart');
@@ -308,7 +148,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const jsonInputRef = useRef<HTMLInputElement>(null);
 
-  // Cleanly initialize studio state whenever modal opens or initialDefinition changes
+  // Initialize studio state whenever modal opens or initialDefinition changes
   useEffect(() => {
     if (!isOpen) return;
 
@@ -345,7 +185,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       setZoom(1.8);
       setPan({ x: 0, y: 0 });
 
-      // Clean History Stack for this component
       const initSnap = {
         width: initW,
         height: initH,
@@ -357,7 +196,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       setHistory([initSnap]);
       setHistoryIndex(0);
     } else {
-      // Fresh new blank component initialization
       const freshSnap = {
         width: 200,
         height: 150,
@@ -401,10 +239,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const snap = {
         width: override?.width ?? width,
         height: override?.height ?? height,
-        pins: override?.pins ? JSON.parse(JSON.stringify(override.pins)) : JSON.parse(JSON.stringify(pins)),
+        pins: override?.pins
+          ? JSON.parse(JSON.stringify(override.pins))
+          : JSON.parse(JSON.stringify(pins)),
         imageOffset: override?.imageOffset ? { ...override.imageOffset } : { ...imageOffset },
         imageDataUrl: override?.imageDataUrl !== undefined ? override.imageDataUrl : imageDataUrl,
-        rawImageDataUrl: override?.rawImageDataUrl !== undefined ? override.rawImageDataUrl : rawImageDataUrl,
+        rawImageDataUrl:
+          override?.rawImageDataUrl !== undefined ? override.rawImageDataUrl : rawImageDataUrl,
       };
       setHistory((prev) => {
         const next = prev.slice(0, historyIndex + 1);
@@ -464,7 +305,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const rect = canvasRef.current.getBoundingClientRect();
       const screenX = clientX - rect.left;
       const screenY = clientY - rect.top;
-      // Account for <g transform="translate(pan.x + 120, pan.y + 80) scale(zoom)">
       const rawX = (screenX - (pan.x + 120)) / zoom;
       const rawY = (screenY - (pan.y + 80)) / zoom;
       return { x: rawX, y: rawY };
@@ -473,13 +313,16 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   );
 
   // Snap to nearest 17.0px breadboard hole
-  const snapCoordinate = (coord: number, offset: number = 0): number => {
-    if (!snapToBreadboard) return Math.round(coord * 10) / 10;
-    const pitch = 17.0;
-    const relative = coord - offset;
-    const snapped = Math.round(relative / pitch) * pitch + offset;
-    return Math.round(snapped * 10) / 10;
-  };
+  const snapCoordinate = useCallback(
+    (coord: number, offset: number = 0): number => {
+      if (!snapToBreadboard) return Math.round(coord * 10) / 10;
+      const pitch = 17.0;
+      const relative = coord - offset;
+      const snapped = Math.round(relative / pitch) * pitch + offset;
+      return Math.round(snapped * 10) / 10;
+    },
+    [snapToBreadboard]
+  );
 
   // Handle File Upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -501,7 +344,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           if (dataUrl.startsWith('data:image/svg+xml;base64,')) {
             svgText = atob(dataUrl.split(';base64,')[1]);
           } else {
-            svgText = decodeURIComponent(dataUrl.replace(/^data:image\/svg\+xml;?(charset=utf-8)?,?/, ''));
+            svgText = decodeURIComponent(
+              dataUrl.replace(/^data:image\/svg\+xml;?(charset=utf-8)?,?/, '')
+            );
           }
           const parser = new DOMParser();
           const doc = parser.parseFromString(svgText, 'image/svg+xml');
@@ -517,7 +362,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
             }
           }
         } catch {
-          // fallback to img natural size
+          // fallback
         }
       }
 
@@ -530,7 +375,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         setImageDataUrl(dataUrl);
         setImageOffset({ x: 0, y: 0 });
 
-        // Auto calculate initial logical dimensions
         const aspect = natW / natH;
         let initW = 200;
         let initH = Math.round((initW / aspect) * 10) / 10;
@@ -543,10 +387,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         setWidth(initW);
         setHeight(initH);
 
-        // Auto suggest typeId and name if untouched
         const baseName = file.name.replace(/\.[^/.]+$/, '').trim();
         if (typeId === 'custom-module-1' || !typeId) {
-          const slug = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          const slug = baseName
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
           setTypeId(slug || 'custom-module');
           setName(baseName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()));
         }
@@ -557,324 +403,71 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     e.target.value = '';
   };
 
-  // Reset to original image (Undo background removal)
   const handleResetToOriginal = () => {
     if (rawImageDataUrl) {
       setImageDataUrl(rawImageDataUrl);
     }
   };
 
-  // Helper: Trim transparent outer margins to wrap module body with exact bounds
-  const trimCanvasTransparent = (canvas: HTMLCanvasElement, alphaThreshold = 15): {
-    trimmedDataUrl: string;
-    cropX: number;
-    cropY: number;
-    cropW: number;
-    cropH: number;
-    originalW: number;
-    originalH: number;
-  } => {
-    const W = canvas.width;
-    const H = canvas.height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx || W === 0 || H === 0) {
-      return {
-        trimmedDataUrl: canvas.toDataURL('image/png'),
-        cropX: 0,
-        cropY: 0,
-        cropW: W,
-        cropH: H,
-        originalW: W,
-        originalH: H,
-      };
-    }
-
-    const imgData = ctx.getImageData(0, 0, W, H);
-    const data = imgData.data;
-
-    let minX = W;
-    let minY = H;
-    let maxX = -1;
-    let maxY = -1;
-
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        const alpha = data[(y * W + x) * 4 + 3];
-        if (alpha > alphaThreshold) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-        }
-      }
-    }
-
-    // If entire image is transparent or already tight
-    if (maxX < minX || maxY < minY || (minX === 0 && minY === 0 && maxX === W - 1 && maxY === H - 1)) {
-      return {
-        trimmedDataUrl: canvas.toDataURL('image/png'),
-        cropX: 0,
-        cropY: 0,
-        cropW: W,
-        cropH: H,
-        originalW: W,
-        originalH: H,
-      };
-    }
-
-    const cropW = maxX - minX + 1;
-    const cropH = maxY - minY + 1;
-
-    const croppedCanvas = document.createElement('canvas');
-    croppedCanvas.width = cropW;
-    croppedCanvas.height = cropH;
-    const croppedCtx = croppedCanvas.getContext('2d');
-    if (!croppedCtx) {
-      return {
-        trimmedDataUrl: canvas.toDataURL('image/png'),
-        cropX: 0,
-        cropY: 0,
-        cropW: W,
-        cropH: H,
-        originalW: W,
-        originalH: H,
-      };
-    }
-
-    croppedCtx.drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
-    const trimmedDataUrl = croppedCanvas.toDataURL('image/png');
-
-    return {
-      trimmedDataUrl,
-      cropX: minX,
-      cropY: minY,
-      cropW,
-      cropH,
-      originalW: W,
-      originalH: H,
-    };
-  };
-
-  // Magic Background Remover with Flood Fill (Protects internal silkscreen / white markings!)
-  const handleMagicRemoveBackground = () => {
+  const handleMagicRemoveBackground = async () => {
     const sourceImage = rawImageDataUrl || imageDataUrl;
     if (!sourceImage || isProcessingBg) return;
     setIsProcessingBg(true);
 
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        const W = img.naturalWidth;
-        const H = img.naturalHeight;
-        canvas.width = W;
-        canvas.height = H;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          setIsProcessingBg(false);
-          return;
-        }
+    try {
+      const trimResult = await removeImageBackground(sourceImage, bgTolerance, bgAlgorithm);
+      const cleanedDataUrl = trimResult.trimmedDataUrl;
 
-        ctx.drawImage(img, 0, 0);
-        const imgData = ctx.getImageData(0, 0, W, H);
-        const data = imgData.data;
+      setImageDataUrl(cleanedDataUrl);
+      setRawImageDataUrl(cleanedDataUrl);
+      setOriginalImageSize({ width: trimResult.cropW, height: trimResult.cropH });
 
-        // Sample background reference from 4 corners
-        const c00 = 0;
-        const c10 = (W - 1) * 4;
-        const c01 = (H - 1) * W * 4;
-        const c11 = ((H - 1) * W + (W - 1)) * 4;
-
-        const bgR = Math.round((data[c00] + data[c10] + data[c01] + data[c11]) / 4);
-        const bgG = Math.round((data[c00 + 1] + data[c10 + 1] + data[c01 + 1] + data[c11 + 1]) / 4);
-        const bgB = Math.round((data[c00 + 2] + data[c10 + 2] + data[c01 + 2] + data[c11 + 2]) / 4);
-
-        // Max Euclidean distance in RGB
-        const maxDist = (bgTolerance / 100) * 441.67;
-        const fadeRange = maxDist * 0.22;
-
-        const checkIsBg = (r: number, g: number, b: number, a: number) => {
-          if (a === 0) return true;
-          const distCorner = Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2);
-          const distWhite = Math.sqrt((r - 255) ** 2 + (g - 255) ** 2 + (b - 255) ** 2);
-          return Math.min(distCorner, distWhite) <= maxDist;
-        };
-
-        if (bgAlgorithm === 'flood-fill') {
-          // --- FLOOD FILL / EDGE BFS ALGORITHM (SILKSCREEN SAFE) ---
-          const visited = new Uint8Array(W * H);
-          const qx = new Int32Array(W * H);
-          const qy = new Int32Array(W * H);
-          let head = 0;
-          let tail = 0;
-
-          const enqueue = (x: number, y: number) => {
-            const idx = y * W + x;
-            if (visited[idx] !== 0) return;
-            const p = idx * 4;
-            if (checkIsBg(data[p], data[p + 1], data[p + 2], data[p + 3])) {
-              visited[idx] = 1;
-              qx[tail] = x;
-              qy[tail] = y;
-              tail++;
-            } else {
-              visited[idx] = 2; // Component boundary on border
-            }
-          };
-
-          for (let x = 0; x < W; x++) {
-            enqueue(x, 0);
-            enqueue(x, H - 1);
-          }
-          for (let y = 0; y < H; y++) {
-            enqueue(0, y);
-            enqueue(W - 1, y);
-          }
-
-          while (head < tail) {
-            const cx = qx[head];
-            const cy = qy[head];
-            head++;
-
-            const neighbors = [
-              [cx + 1, cy],
-              [cx - 1, cy],
-              [cx, cy + 1],
-              [cx, cy - 1],
-            ];
-
-            for (let i = 0; i < 4; i++) {
-              const nx = neighbors[i][0];
-              const ny = neighbors[i][1];
-
-              if (nx >= 0 && nx < W && ny >= 0 && ny < H) {
-                const nIdx = ny * W + nx;
-                if (visited[nIdx] === 0) {
-                  const p = nIdx * 4;
-                  if (checkIsBg(data[p], data[p + 1], data[p + 2], data[p + 3])) {
-                    visited[nIdx] = 1;
-                    qx[tail] = nx;
-                    qy[tail] = ny;
-                    tail++;
-                  } else {
-                    visited[nIdx] = 2;
-                  }
-                }
-              }
-            }
-          }
-
-          for (let y = 0; y < H; y++) {
-            for (let x = 0; x < W; x++) {
-              const idx = y * W + x;
-              const p = idx * 4;
-
-              if (visited[idx] === 1) {
-                data[p + 3] = 0;
-              } else if (visited[idx] === 2) {
-                const r = data[p];
-                const g = data[p + 1];
-                const b = data[p + 2];
-                const dist = Math.min(
-                  Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2),
-                  Math.sqrt((r - 255) ** 2 + (g - 255) ** 2 + (b - 255) ** 2)
-                );
-                if (dist < maxDist) {
-                  const factor = Math.max(0.1, (dist - (maxDist - fadeRange)) / fadeRange);
-                  data[p + 3] = Math.round(data[p + 3] * factor);
-                }
-              }
-            }
-          }
-        } else {
-          // --- GLOBAL CHROMA REMOVAL ---
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            const a = data[i + 3];
-
-            if (a === 0) continue;
-
-            const distCorner = Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2);
-            const distWhite = Math.sqrt((r - 255) ** 2 + (g - 255) ** 2 + (b - 255) ** 2);
-            const dist = Math.min(distCorner, distWhite);
-
-            if (dist < maxDist - fadeRange) {
-              data[i + 3] = 0;
-            } else if (dist < maxDist) {
-              const alphaFactor = (dist - (maxDist - fadeRange)) / fadeRange;
-              data[i + 3] = Math.round(a * alphaFactor);
-            }
-          }
-        }
-
-        ctx.putImageData(imgData, 0, 0);
-
-        // Auto-Trim Transparent Outer Padding to perfectly wrap module body!
-        const trimResult = trimCanvasTransparent(canvas, 15);
-        const cleanedDataUrl = trimResult.trimmedDataUrl;
-
-        setImageDataUrl(cleanedDataUrl);
-        setRawImageDataUrl(cleanedDataUrl);
-        setOriginalImageSize({ width: trimResult.cropW, height: trimResult.cropH });
-
-        let nextHeight = height;
-        if (lockAspectRatio && trimResult.cropW > 0) {
-          nextHeight = Math.round((width * (trimResult.cropH / trimResult.cropW)) * 10) / 10;
-          setHeight(nextHeight);
-        }
-
-        let nextPins = pins;
-        if (pins.length > 0 && (trimResult.cropX > 0 || trimResult.cropY > 0)) {
-          const scaleX = width / trimResult.originalW;
-          const scaleY = height / trimResult.originalH;
-          const shiftX = trimResult.cropX * scaleX;
-          const shiftY = trimResult.cropY * scaleY;
-          nextPins = pins.map((p) => ({
-            ...p,
-            x: Math.round((p.x - shiftX) * 10) / 10,
-            y: Math.round((p.y - shiftY) * 10) / 10,
-          }));
-          setPins(nextPins);
-        }
-
-        pushSnapshot({
-          width: width,
-          height: nextHeight,
-          pins: nextPins,
-          imageOffset: imageOffset,
-          imageDataUrl: cleanedDataUrl,
-          rawImageDataUrl: cleanedDataUrl,
-        });
-      } catch (err) {
-        console.error('Magic background removal failed:', err);
-      } finally {
-        setIsProcessingBg(false);
+      let nextHeight = height;
+      if (lockAspectRatio && trimResult.cropW > 0) {
+        nextHeight = Math.round((width * (trimResult.cropH / trimResult.cropW)) * 10) / 10;
+        setHeight(nextHeight);
       }
-    };
-    img.src = sourceImage;
+
+      let nextPins = pins;
+      if (pins.length > 0 && (trimResult.cropX > 0 || trimResult.cropY > 0)) {
+        const scaleX = width / trimResult.originalW;
+        const scaleY = height / trimResult.originalH;
+        const shiftX = trimResult.cropX * scaleX;
+        const shiftY = trimResult.cropY * scaleY;
+        nextPins = pins.map((p) => ({
+          ...p,
+          x: Math.round((p.x - shiftX) * 10) / 10,
+          y: Math.round((p.y - shiftY) * 10) / 10,
+        }));
+        setPins(nextPins);
+      }
+
+      pushSnapshot({
+        width: width,
+        height: nextHeight,
+        pins: nextPins,
+        imageOffset: imageOffset,
+        imageDataUrl: cleanedDataUrl,
+        rawImageDataUrl: cleanedDataUrl,
+      });
+    } catch (err) {
+      console.error('Magic background removal failed:', err);
+    } finally {
+      setIsProcessingBg(false);
+    }
   };
 
-  // Manual / Quick Auto-Crop Transparent Padding to Component Body
-  const handleAutoCropToContent = () => {
+  const handleAutoCropToContent = async () => {
     const source = imageDataUrl || rawImageDataUrl;
     if (!source) return;
 
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.drawImage(img, 0, 0);
-
-      const trimResult = trimCanvasTransparent(canvas, 15);
-      if (trimResult.cropW === img.naturalWidth && trimResult.cropH === img.naturalHeight) {
-        return; // Already tightly cropped
+    try {
+      const trimResult = await autoCropImage(source);
+      if (
+        trimResult.cropW === originalImageSize.width &&
+        trimResult.cropH === originalImageSize.height
+      ) {
+        return;
       }
 
       const finalDataUrl = trimResult.trimmedDataUrl;
@@ -910,30 +503,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         imageDataUrl: finalDataUrl,
         rawImageDataUrl: finalDataUrl,
       });
-    };
-    img.src = source;
-  };
-
-  // Dimension scaling handlers
-  const handleWidthChange = (newWidth: number) => {
-    if (newWidth <= 0) return;
-    setWidth(newWidth);
-    if (lockAspectRatio && originalImageSize.width > 0) {
-      const newHeight = Math.round((newWidth * (originalImageSize.height / originalImageSize.width)) * 10) / 10;
-      setHeight(newHeight);
+    } catch (err) {
+      console.error('Auto crop failed:', err);
     }
   };
 
-  const handleHeightChange = (newHeight: number) => {
-    if (newHeight <= 0) return;
-    setHeight(newHeight);
-    if (lockAspectRatio && originalImageSize.height > 0) {
-      const newWidth = Math.round((newHeight * (originalImageSize.width / originalImageSize.height)) * 10) / 10;
-      setWidth(newWidth);
-    }
-  };
-
-  // Image Offset Nudge (Moves ONLY the image visual)
   const nudgeImage = (dx: number, dy: number) => {
     const newOffset = {
       x: Math.round((imageOffset.x + dx) * 10) / 10,
@@ -943,7 +517,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     pushSnapshot({ imageOffset: newOffset });
   };
 
-  // Nudge All (Moves both Image and Pins together)
   const nudgeAll = (dx: number, dy: number) => {
     const newOffset = {
       x: Math.round((imageOffset.x + dx) * 10) / 10,
@@ -959,118 +532,102 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     pushSnapshot({ imageOffset: newOffset, pins: newPins });
   };
 
-  // Fit Bounding Box directly to image
-  const handleFitBoxToImage = () => {
-    if (imageOffset.x === 0 && imageOffset.y === 0) return;
-    const shiftX = imageOffset.x;
-    const shiftY = imageOffset.y;
+  const handleRotateClockwise = useCallback(
+    (shouldRotatePins: boolean = true) => {
+      const oldWidth = width;
+      const oldHeight = height;
 
-    // Normalize pins so their relative position on the image is preserved
-    const newPins = pins.map((p) => ({
-      ...p,
-      x: Math.round((p.x - shiftX) * 10) / 10,
-      y: Math.round((p.y - shiftY) * 10) / 10,
-    }));
-    setPins(newPins);
-    setImageOffset({ x: 0, y: 0 });
-    pushSnapshot({ imageOffset: { x: 0, y: 0 }, pins: newPins });
-  };
+      const newW = oldHeight;
+      const newH = oldWidth;
+      setWidth(newW);
+      setHeight(newH);
 
-  // Rotate component, image, and pins 90 degrees clockwise (R / Space Shortcut)
-  const handleRotateClockwise = useCallback((shouldRotatePins: boolean = true) => {
-    const oldWidth = width;
-    const oldHeight = height;
+      const centerX = imageOffset.x + oldWidth / 2;
+      const centerY = imageOffset.y + oldHeight / 2;
+      const newOffsetX = Math.round((centerX - newW / 2) * 10) / 10;
+      const newOffsetY = Math.round((centerY - newH / 2) * 10) / 10;
+      const nextOffset = { x: newOffsetX, y: newOffsetY };
+      setImageOffset(nextOffset);
 
-    // 1. Swap Canvas Dimensions
-    const newW = oldHeight;
-    const newH = oldWidth;
-    setWidth(newW);
-    setHeight(newH);
+      const newPins = shouldRotatePins
+        ? pins.map((p) => {
+            const relX = p.x - imageOffset.x;
+            const relY = p.y - imageOffset.y;
+            const relXRot = oldHeight - relY;
+            const relYRot = relX;
+            return {
+              ...p,
+              x: Math.round((newOffsetX + relXRot) * 10) / 10,
+              y: Math.round((newOffsetY + relYRot) * 10) / 10,
+            };
+          })
+        : pins;
 
-    // 2. Compute New Image Offset around the center of the component
-    const centerX = imageOffset.x + oldWidth / 2;
-    const centerY = imageOffset.y + oldHeight / 2;
-    const newOffsetX = Math.round((centerX - newW / 2) * 10) / 10;
-    const newOffsetY = Math.round((centerY - newH / 2) * 10) / 10;
-    const nextOffset = { x: newOffsetX, y: newOffsetY };
-    setImageOffset(nextOffset);
+      setPins(newPins);
 
-    // 3. Rotate All Pins mathematically around the component's relative box
-    const newPins = shouldRotatePins
-      ? pins.map((p) => {
-          const relX = p.x - imageOffset.x;
-          const relY = p.y - imageOffset.y;
-          const relXRot = oldHeight - relY;
-          const relYRot = relX;
-          return {
-            ...p,
-            x: Math.round((newOffsetX + relXRot) * 10) / 10,
-            y: Math.round((newOffsetY + relYRot) * 10) / 10,
+      const sourceImgUrl = imageDataUrl || rawImageDataUrl;
+      if (sourceImgUrl) {
+        if (sourceImgUrl.startsWith('data:image/svg+xml') || sourceImgUrl.includes('<svg')) {
+          const rotatedSvg = rotateSvgDataUrl(sourceImgUrl);
+          setImageDataUrl(rotatedSvg);
+          setRawImageDataUrl(rotatedSvg);
+          setOriginalImageSize((prev) => ({ width: prev.height, height: prev.width }));
+          pushSnapshot({
+            width: newW,
+            height: newH,
+            pins: newPins,
+            imageOffset: nextOffset,
+            imageDataUrl: rotatedSvg,
+            rawImageDataUrl: rotatedSvg,
+          });
+        } else {
+          const img = new Image();
+          img.crossOrigin = 'Anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalHeight;
+            canvas.height = img.naturalWidth;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (ctx) {
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
+              ctx.translate(canvas.width / 2, canvas.height / 2);
+              ctx.rotate((90 * Math.PI) / 180);
+              ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+              const rotatedDataUrl = canvas.toDataURL('image/png');
+              setImageDataUrl(rotatedDataUrl);
+              setRawImageDataUrl(rotatedDataUrl);
+              setOriginalImageSize({ width: img.naturalHeight, height: img.naturalWidth });
+              pushSnapshot({
+                width: newW,
+                height: newH,
+                pins: newPins,
+                imageOffset: nextOffset,
+                imageDataUrl: rotatedDataUrl,
+                rawImageDataUrl: rotatedDataUrl,
+              });
+            }
           };
-        })
-      : pins;
-
-    setPins(newPins);
-
-    // 4. Rotate Image (Pure Lossless Vector for SVG, High-Quality Canvas for Bitmaps)
-    const sourceImgUrl = imageDataUrl || rawImageDataUrl;
-    if (sourceImgUrl) {
-      if (sourceImgUrl.startsWith('data:image/svg+xml') || sourceImgUrl.includes('<svg')) {
-        const rotatedSvg = rotateSvgDataUrl(sourceImgUrl);
-        setImageDataUrl(rotatedSvg);
-        setRawImageDataUrl(rotatedSvg);
-        setOriginalImageSize((prev) => ({ width: prev.height, height: prev.width }));
+          img.src = sourceImgUrl;
+        }
+      } else {
         pushSnapshot({
           width: newW,
           height: newH,
           pins: newPins,
           imageOffset: nextOffset,
-          imageDataUrl: rotatedSvg,
-          rawImageDataUrl: rotatedSvg,
         });
-      } else {
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.naturalHeight;
-          canvas.height = img.naturalWidth;
-          const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          if (ctx) {
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate((90 * Math.PI) / 180);
-            ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
-            const rotatedDataUrl = canvas.toDataURL('image/png');
-            setImageDataUrl(rotatedDataUrl);
-            setRawImageDataUrl(rotatedDataUrl);
-            setOriginalImageSize({ width: img.naturalHeight, height: img.naturalWidth });
-            pushSnapshot({
-              width: newW,
-              height: newH,
-              pins: newPins,
-              imageOffset: nextOffset,
-              imageDataUrl: rotatedDataUrl,
-              rawImageDataUrl: rotatedDataUrl,
-            });
-          }
-        };
-        img.src = sourceImgUrl;
       }
-    } else {
-      pushSnapshot({
-        width: newW,
-        height: newH,
-        pins: newPins,
-        imageOffset: nextOffset,
-      });
-    }
-  }, [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, pushSnapshot]);
+    },
+    [width, height, pins, imageOffset, imageDataUrl, rawImageDataUrl, pushSnapshot]
+  );
 
-  // 1-Click Smart Auto-Scale & Snap to Breadboard:
-  // Dynamically measures pin spacing on the image, calculates exact scale factor to 2.54mm (17.0px) pitch,
-  // resizes component body image, and snaps all pins into exact breadboard hole coordinates!
+  const handleRotateCounterClockwise = () => {
+    handleRotateClockwise(true);
+    handleRotateClockwise(true);
+    handleRotateClockwise(true);
+  };
+
   const handleAutoScaleAndSnapToBreadboard = useCallback(() => {
     if (pins.length === 0) {
       const newX = snapCoordinate(imageOffset.x, breadboardOffset.x % 17);
@@ -1098,7 +655,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       return;
     }
 
-    // 2 or more pins:
     const xs = pins.map((p) => p.x);
     const ys = pins.map((p) => p.y);
     const minX = Math.min(...xs);
@@ -1108,72 +664,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     const spanX = maxX - minX;
     const spanY = maxY - minY;
 
-    let isDualHorizontalRow = false;
-    let isDualVerticalCol = false;
-    let isHorizontalRow = false;
-    let isVerticalRow = false;
-
-    // Check Dual Row / Dual Column candidates first (when pins >= 4):
-    if (pins.length >= 4) {
-      const midY = (minY + maxY) / 2;
-      const topRow = pins.filter((p) => p.y < midY).sort((a, b) => a.x - b.x);
-      const botRow = pins.filter((p) => p.y >= midY).sort((a, b) => a.x - b.x);
-
-      const topSpanX = topRow.length > 1 ? topRow[topRow.length - 1].x - topRow[0].x : 0;
-      const botSpanX = botRow.length > 1 ? botRow[botRow.length - 1].x - botRow[0].x : 0;
-      const topSpanY = topRow.length > 1 ? Math.max(...topRow.map((p) => p.y)) - Math.min(...topRow.map((p) => p.y)) : 0;
-      const botSpanY = botRow.length > 1 ? Math.max(...botRow.map((p) => p.y)) - Math.min(...botRow.map((p) => p.y)) : 0;
-
-      const minBotY = botRow.length > 0 ? Math.min(...botRow.map((p) => p.y)) : 0;
-      const maxTopY = topRow.length > 0 ? Math.max(...topRow.map((p) => p.y)) : 0;
-      const rowGapY = minBotY - maxTopY;
-
-      const midX = (minX + maxX) / 2;
-      const leftCol = pins.filter((p) => p.x < midX).sort((a, b) => a.y - b.y);
-      const rightCol = pins.filter((p) => p.x >= midX).sort((a, b) => a.y - b.y);
-
-      const leftSpanY = leftCol.length > 1 ? leftCol[leftCol.length - 1].y - leftCol[0].y : 0;
-      const rightSpanY = rightCol.length > 1 ? rightCol[rightCol.length - 1].y - rightCol[0].y : 0;
-      const leftSpanX = leftCol.length > 1 ? Math.max(...leftCol.map((p) => p.x)) - Math.min(...leftCol.map((p) => p.x)) : 0;
-      const rightSpanX = rightCol.length > 1 ? Math.max(...rightCol.map((p) => p.x)) - Math.min(...rightCol.map((p) => p.x)) : 0;
-
-      const minRightX = rightCol.length > 0 ? Math.min(...rightCol.map((p) => p.x)) : 0;
-      const maxLeftX = leftCol.length > 0 ? Math.max(...leftCol.map((p) => p.x)) : 0;
-      const colGapX = minRightX - maxLeftX;
-
-      // 1. Dual Horizontal Rows (Top Row & Bottom Row, e.g. ESP32-C3 Supermini, horizontal DIP breakout)
-      if (
-        topRow.length >= 2 &&
-        botRow.length >= 2 &&
-        rowGapY > 15 &&
-        topSpanX >= topSpanY * 1.5 &&
-        botSpanX >= botSpanY * 1.5 &&
-        topSpanX > leftSpanY
-      ) {
-        isDualHorizontalRow = true;
-      }
-      // 2. Dual Vertical Columns (Left Column & Right Column, e.g. Arduino Nano, ESP32 30/38P, Logic Level Converter)
-      else if (
-        leftCol.length >= 2 &&
-        rightCol.length >= 2 &&
-        colGapX > 15 &&
-        leftSpanY >= leftSpanX * 1.5 &&
-        rightSpanY >= rightSpanX * 1.5
-      ) {
-        isDualVerticalCol = true;
-      }
-    }
-
-    // 3. Single Horizontal Row (e.g. DHT22, Potentiometer, Ultrasonic, I2C headers)
-    if (!isDualHorizontalRow && !isDualVerticalCol) {
-      if (spanX > 5 && (spanY <= 15 || spanX >= spanY * 1.5)) {
-        isHorizontalRow = true;
-      }
-      // 4. Single Vertical Row (e.g. vertical headers, SIP modules)
-      else if (spanY > 5 && (spanX <= 15 || spanY >= spanX * 1.5)) {
-        isVerticalRow = true;
-      }
-    }
+    let isHorizontalRow = spanX > 5 && (spanY <= 15 || spanX >= spanY * 1.5);
+    let isVerticalRow = spanY > 5 && (spanX <= 15 || spanY >= spanX * 1.5);
 
     let newWidth = width;
     let newHeight = height;
@@ -1201,13 +693,11 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       let startHoleX = snapCoordinate(firstPin.x, bbOffX);
       let startHoleY = snapCoordinate(firstPin.y, bbOffY);
 
-      // If outside breadboard bounds, place at Column 4, Row E of breadboard
       if (startHoleX < 34.0 || startHoleX > 530.0 || startHoleY < 30.0 || startHoleY > 320.0) {
         startHoleX = 68.0 + bbOffX;
         startHoleY = 136.0 + bbOffY;
       }
 
-      // Anchor image offset to the EXACT same firstPin
       const relFirstX = firstPin.x - imageOffset.x;
       const relFirstY = firstPin.y - imageOffset.y;
       newOffsetX = Math.round((startHoleX - relFirstX * scale) * 10) / 10;
@@ -1256,183 +746,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           y: Math.round((startHoleY + idx * 17.0) * 10) / 10,
         };
       });
-    } else if (isDualHorizontalRow) {
-      const midY = (minY + maxY) / 2;
-      const topRow = pins.filter((p) => p.y < midY).sort((a, b) => a.x - b.x);
-      const botRow = pins.filter((p) => p.y >= midY).sort((a, b) => a.x - b.x);
-
-      const topSpanX = topRow.length > 1 ? topRow[topRow.length - 1].x - topRow[0].x : 0;
-      const botSpanX = botRow.length > 1 ? botRow[botRow.length - 1].x - botRow[0].x : 0;
-      const avgSpanX = (topSpanX + botSpanX) / 2;
-      const avgCount = (topRow.length + botRow.length) / 2;
-      const targetSpanX = (avgCount - 1) * 17.0;
-
-      let scaleX = targetSpanX / Math.max(1, avgSpanX);
-      if (scaleX <= 0.02 || scaleX > 50 || !isFinite(scaleX)) scaleX = 1.0;
-
-      const avgTopY = topRow.reduce((sum, p) => sum + p.y, 0) / topRow.length;
-      const avgBotY = botRow.reduce((sum, p) => sum + p.y, 0) / botRow.length;
-      const rawRowDistY = Math.max(1, avgBotY - avgTopY);
-
-      // Target row steps: dual row components bridge the trough (at least 3 steps = 51.0px)
-      const targetRowSteps = Math.max(3, Math.round((rawRowDistY * scaleX) / 17.0));
-      const targetPadDistY = targetRowSteps * 17.0;
-
-      // Vertical scale factor to ensure 0 pad drift:
-      let scaleY = targetPadDistY / rawRowDistY;
-      if (scaleY <= 0.02 || scaleY > 50 || !isFinite(scaleY)) scaleY = scaleX;
-
-      newWidth = Math.max(10, Math.round(width * scaleX * 10) / 10);
-      newHeight = Math.max(10, Math.round(height * scaleY * 10) / 10);
-
-      const firstTopPin = topRow[0];
-
-      let startTopHoleX = snapCoordinate(firstTopPin.x, bbOffX);
-      if (startTopHoleX < 34.0 || startTopHoleX > 530.0) {
-        startTopHoleX = 68.0 + bbOffX;
-      }
-
-      // Breadboard terminal banks:
-      // Top Bank (Rows A-E): 85.0 to 153.0
-      // Bottom Bank (Rows F-J): 204.0 to 272.0
-      const candidateTopY = snapCoordinate(firstTopPin.y, bbOffY);
-      const candidateBotY = candidateTopY + targetPadDistY;
-      const minTopBankY = 85.0 + bbOffY;
-      const maxTopBankY = 153.0 + bbOffY;
-      const minBotBankY = 204.0 + bbOffY;
-      const maxBotBankY = 272.0 + bbOffY;
-
-      let startTopHoleY: number;
-      if (
-        candidateTopY >= minTopBankY &&
-        candidateTopY <= maxTopBankY &&
-        candidateBotY >= minBotBankY &&
-        candidateBotY <= maxBotBankY
-      ) {
-        // Cleanly bridges top and bottom banks around user's vertical position
-        startTopHoleY = candidateTopY;
-      } else {
-        // Symmetrically bridge across the breadboard central trough (step 10.5)
-        const optimalTopStep = Math.max(5, Math.min(9, Math.floor(10.5 - targetRowSteps / 2)));
-        startTopHoleY = optimalTopStep * 17.0 + bbOffY;
-      }
-      const targetBotHoleY = startTopHoleY + targetPadDistY;
-
-      const relFirstX = firstTopPin.x - imageOffset.x;
-      const relFirstY = firstTopPin.y - imageOffset.y;
-      newOffsetX = Math.round((startTopHoleX - relFirstX * scaleX) * 10) / 10;
-      newOffsetY = Math.round((startTopHoleY - relFirstY * scaleY) * 10) / 10;
-
-      const topMap = new Map<string, number>();
-      topRow.forEach((p, idx) => topMap.set(p.id, idx));
-      const botMap = new Map<string, number>();
-      botRow.forEach((p, idx) => botMap.set(p.id, idx));
-
-      newPins = pins.map((p) => {
-        if (topMap.has(p.id)) {
-          const idx = topMap.get(p.id)!;
-          return {
-            ...p,
-            x: Math.round((startTopHoleX + idx * 17.0) * 10) / 10,
-            y: startTopHoleY,
-          };
-        } else if (botMap.has(p.id)) {
-          const idx = botMap.get(p.id)!;
-          return {
-            ...p,
-            x: Math.round((startTopHoleX + idx * 17.0) * 10) / 10,
-            y: targetBotHoleY,
-          };
-        } else {
-          const scaledX = startTopHoleX + (p.x - firstTopPin.x) * scaleX;
-          const scaledY = startTopHoleY + (p.y - firstTopPin.y) * scaleY;
-          return {
-            ...p,
-            x: snapCoordinate(scaledX, bbOffX),
-            y: snapCoordinate(scaledY, bbOffY),
-          };
-        }
-      });
-    } else if (isDualVerticalCol) {
-      const midX = (minX + maxX) / 2;
-      const leftCol = pins.filter((p) => p.x < midX).sort((a, b) => a.y - b.y);
-      const rightCol = pins.filter((p) => p.x >= midX).sort((a, b) => a.y - b.y);
-
-      const leftSpanY = leftCol.length > 1 ? leftCol[leftCol.length - 1].y - leftCol[0].y : 0;
-      const rightSpanY = rightCol.length > 1 ? rightCol[rightCol.length - 1].y - rightCol[0].y : 0;
-      const avgSpanY = (leftSpanY + rightSpanY) / 2;
-      const avgCount = (leftCol.length + rightCol.length) / 2;
-      const targetSpanY = (avgCount - 1) * 17.0;
-
-      let scaleY = targetSpanY / Math.max(1, avgSpanY);
-      if (scaleY <= 0.02 || scaleY > 50 || !isFinite(scaleY)) scaleY = 1.0;
-
-      const avgLeftX = leftCol.reduce((sum, p) => sum + p.x, 0) / leftCol.length;
-      const avgRightX = rightCol.reduce((sum, p) => sum + p.x, 0) / rightCol.length;
-      const rawColDistX = Math.max(1, avgRightX - avgLeftX);
-
-      const targetColSteps = Math.max(1, Math.round((rawColDistX * scaleY) / 17.0));
-      const targetPadDistX = targetColSteps * 17.0;
-
-      let scaleX = targetPadDistX / rawColDistX;
-      if (scaleX <= 0.02 || scaleX > 50 || !isFinite(scaleX)) scaleX = scaleY;
-
-      newWidth = Math.max(10, Math.round(width * scaleX * 10) / 10);
-      newHeight = Math.max(10, Math.round(height * scaleY * 10) / 10);
-
-      const firstLeftPin = leftCol[0];
-
-      let startLeftHoleX = snapCoordinate(firstLeftPin.x, bbOffX);
-      let startLeftHoleY = snapCoordinate(firstLeftPin.y, bbOffY);
-
-      if (startLeftHoleX < 34.0 || startLeftHoleX > 530.0 || startLeftHoleY < 30.0 || startLeftHoleY > 320.0) {
-        startLeftHoleX = 68.0 + bbOffX;
-        startLeftHoleY = 68.0 + bbOffY;
-      }
-      const targetRightHoleX = startLeftHoleX + targetPadDistX;
-
-      const relFirstX = firstLeftPin.x - imageOffset.x;
-      const relFirstY = firstLeftPin.y - imageOffset.y;
-      newOffsetX = Math.round((startLeftHoleX - relFirstX * scaleX) * 10) / 10;
-      newOffsetY = Math.round((startLeftHoleY - relFirstY * scaleY) * 10) / 10;
-
-      const leftMap = new Map<string, number>();
-      leftCol.forEach((p, idx) => leftMap.set(p.id, idx));
-      const rightMap = new Map<string, number>();
-      rightCol.forEach((p, idx) => rightMap.set(p.id, idx));
-
-      newPins = pins.map((p) => {
-        if (leftMap.has(p.id)) {
-          const idx = leftMap.get(p.id)!;
-          return {
-            ...p,
-            x: startLeftHoleX,
-            y: Math.round((startLeftHoleY + idx * 17.0) * 10) / 10,
-          };
-        } else if (rightMap.has(p.id)) {
-          const idx = rightMap.get(p.id)!;
-          return {
-            ...p,
-            x: targetRightHoleX,
-            y: Math.round((startLeftHoleY + idx * 17.0) * 10) / 10,
-          };
-        } else {
-          const scaledX = startLeftHoleX + (p.x - firstLeftPin.x) * scaleX;
-          const scaledY = startLeftHoleY + (p.y - firstLeftPin.y) * scaleY;
-          return {
-            ...p,
-            x: snapCoordinate(scaledX, bbOffX),
-            y: snapCoordinate(scaledY, bbOffY),
-          };
-        }
-      });
     } else {
-      // General proportional scale + snap each pin to closest 17px grid hole
       const sortedPins = [...pins].sort((a, b) => a.x - b.x || a.y - b.y);
       let totalStepDist = 0;
       let stepCount = 0;
       for (let i = 0; i < sortedPins.length - 1; i++) {
-        const d = Math.hypot(sortedPins[i + 1].x - sortedPins[i].x, sortedPins[i + 1].y - sortedPins[i].y);
+        const d = Math.hypot(
+          sortedPins[i + 1].x - sortedPins[i].x,
+          sortedPins[i + 1].y - sortedPins[i].y
+        );
         if (d > 3) {
           totalStepDist += d;
           stepCount++;
@@ -1470,7 +792,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       });
     }
 
-    // Apply updates to state
     setWidth(newWidth);
     setHeight(newHeight);
     setImageOffset({ x: newOffsetX, y: newOffsetY });
@@ -1487,17 +808,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     width,
     height,
     imageOffset,
-    selectedPinId,
-    snapToBreadboard,
+    snapCoordinate,
     breadboardOffset.x,
     breadboardOffset.y,
     pushSnapshot,
   ]);
 
-  // Fast direct snap (translation without scale)
-  const handleSnapPinsToBreadboard = handleAutoScaleAndSnapToBreadboard;
-
-  // Pin Dragging Mouse Event Listeners (UNCONSTRAINED - Can drag anywhere to match module pads!)
+  // Pin Dragging Window Listeners
   useEffect(() => {
     if (!draggingPinId) return;
 
@@ -1513,7 +830,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       let finalX = rawX;
       let finalY = rawY;
 
-      // When holding ALT: smooth precision drag (bypasses 17px snap)
       const isSmoothMode = altKey;
 
       if (snapToBreadboard && !isSmoothMode) {
@@ -1559,12 +875,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     draggingPinId,
     getLogicalCoords,
     snapToBreadboard,
+    snapCoordinate,
     breadboardOffset.x,
     breadboardOffset.y,
     pushSnapshot,
   ]);
 
-  // Image / All Dragging Mouse Event Listeners
+  // Image Dragging Window Listeners
   useEffect(() => {
     if (!isDraggingImage) return;
 
@@ -1581,7 +898,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const deltaX = (clientX - imageDragStart.mouseX) / zoom;
       const deltaY = (clientY - imageDragStart.mouseY) / zoom;
 
-      // When holding ALT: smooth precision drag (bypasses 17px snap)
       const isSmoothMode = altKey;
 
       let newX = imageDragStart.startX + deltaX;
@@ -1590,8 +906,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       let diffY = deltaY;
 
       if (imageDragStart.dragAll && imageDragStart.initialPins.length > 0) {
-        // Smart Alignment by Reference Pin:
-        const refPin = imageDragStart.initialPins.find((p) => p.id === selectedPinId) || imageDragStart.initialPins[0];
+        const refPin =
+          imageDragStart.initialPins.find((p) => p.id === selectedPinId) ||
+          imageDragStart.initialPins[0];
         if (snapToBreadboard && !isSmoothMode && refPin) {
           const rawPinX = refPin.x + deltaX;
           const rawPinY = refPin.y + deltaY;
@@ -1615,7 +932,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         }));
         setPins(latestPins);
       } else {
-        // Dragging Image only
         if (snapToBreadboard && !isSmoothMode) {
           newX = snapCoordinate(newX, breadboardOffset.x % 17);
           newY = snapCoordinate(newY, breadboardOffset.y % 17);
@@ -1657,21 +973,19 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     imageDragStart,
     zoom,
     snapToBreadboard,
+    snapCoordinate,
     breadboardOffset.x,
     breadboardOffset.y,
     pushSnapshot,
     selectedPinId,
   ]);
 
-
-  // Handle Mouse Wheel Zoom centered on cursor position
   const handleCanvasWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
-    // Zoom factor: smooth exponential for trackpad pinch (ctrlKey), responsive for mouse wheel
     let zoomFactor = 1;
     if (e.ctrlKey) {
       zoomFactor = Math.exp(-e.deltaY * 0.01);
@@ -1694,7 +1008,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setPan(newPan);
   };
 
-  // Handle Image / Component Mouse Down (Direct Smart Drag - Shift or linkPinsToImage drags All)
   const handleImageMouseDown = (e: React.MouseEvent, forceDragAll = false) => {
     if (e.button !== 0) return;
     if (toolMode === 'add-pin') return;
@@ -1712,28 +1025,30 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     });
   };
 
-  // Canvas click handler (places pin in add-pin mode, or deselects in smart mode)
   const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
     if (isPanning || draggingPinId || isDraggingImage || hasMovedPanRef.current) return;
     const { x: rawX, y: rawY } = getLogicalCoords(e.clientX, e.clientY);
 
     if (toolMode === 'add-pin') {
-      let finalX = snapToBreadboard ? snapCoordinate(rawX, breadboardOffset.x % 17) : Math.round(rawX * 10) / 10;
-      let finalY = snapToBreadboard ? snapCoordinate(rawY, breadboardOffset.y % 17) : Math.round(rawY * 10) / 10;
+      let finalX = snapToBreadboard
+        ? snapCoordinate(rawX, breadboardOffset.x % 17)
+        : Math.round(rawX * 10) / 10;
+      let finalY = snapToBreadboard
+        ? snapCoordinate(rawY, breadboardOffset.y % 17)
+        : Math.round(rawY * 10) / 10;
 
-      // Shift + Click: Pin Stamp (Auto 17.0px spacing along dominant axis from previous/selected pin)
       if (e.shiftKey && pins.length > 0) {
-        const refPin = (selectedPinId ? pins.find((p) => p.id === selectedPinId) : null) || pins[pins.length - 1];
+        const refPin =
+          (selectedPinId ? pins.find((p) => p.id === selectedPinId) : null) ||
+          pins[pins.length - 1];
         if (refPin) {
           const dx = rawX - refPin.x;
           const dy = rawY - refPin.y;
           if (Math.abs(dx) >= Math.abs(dy)) {
-            // Horizontal stamp
             const signX = dx >= 0 ? 1 : -1;
             finalX = Math.round((refPin.x + signX * 17.0) * 10) / 10;
             finalY = refPin.y;
           } else {
-            // Vertical stamp
             const signY = dy >= 0 ? 1 : -1;
             finalX = refPin.x;
             finalY = Math.round((refPin.y + signY * 17.0) * 10) / 10;
@@ -1766,8 +1081,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }
   };
 
-  // Selected Pin manipulation
-  const selectedPin = pins.find((p) => p.id === selectedPinId);
+  const selectedPin = pins.find((p) => p.id === selectedPinId) || null;
 
   const updateSelectedPin = (fields: Partial<Pin>) => {
     if (!selectedPinId) return;
@@ -1780,7 +1094,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setPins(nextPins);
   };
 
-  // Core pin name change function with auto-inference for pin type & description
   const applyPinNameChange = useCallback(
     (pinId: string, newName: string, explicitType?: PinType, explicitDesc?: string) => {
       const targetPin = pins.find((p) => p.id === pinId);
@@ -1790,7 +1103,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const oldProfile = inferPinProfile(oldName);
       const newProfile = inferPinProfile(newName);
 
-      // Auto-update description if explicitDesc is not supplied
       let finalDescription = explicitDesc !== undefined ? explicitDesc : oldDesc;
       if (explicitDesc === undefined) {
         const isGenericOrAuto =
@@ -1801,7 +1113,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         finalDescription = isGenericOrAuto ? newProfile.description : oldDesc;
       }
 
-      // Determine PinType:
       let nextType: PinType = targetPin.type;
       if (explicitType) {
         nextType = explicitType;
@@ -1825,14 +1136,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     [pins]
   );
 
-  // Smart pin name change handler with auto-inference for pin type & description
   const handlePinNameChange = (newName: string) => {
     if (!selectedPinId) return;
     const nextPins = applyPinNameChange(selectedPinId, newName);
     pushSnapshot({ pins: nextPins });
   };
 
-  // Start inline editing for a pin on canvas
   const startInlineEdit = useCallback(
     (pinId: string) => {
       const pin = pins.find((p) => p.id === pinId);
@@ -1850,11 +1159,15 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     [pins]
   );
 
-  // Commit and navigate inline edit (Tab / Shift+Tab / Enter / Close)
   const commitAndNavigateInlineEdit = useCallback(
     (direction: 'next' | 'prev' | 'close') => {
       if (!inlineEditPinId) return;
-      const nextPins = applyPinNameChange(inlineEditPinId, inlinePinName, undefined, inlinePinDescription);
+      const nextPins = applyPinNameChange(
+        inlineEditPinId,
+        inlinePinName,
+        undefined,
+        inlinePinDescription
+      );
       pushSnapshot({ pins: nextPins });
 
       if (direction === 'close') {
@@ -1903,9 +1216,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     [inlineEditPinId, inlinePinName, inlinePinDescription, applyPinNameChange, pushSnapshot]
   );
 
-  // Handle Pin Mouse Down to start dragging pin directly in Smart Mode with double click support
   const handlePinMouseDown = (e: React.MouseEvent, pinId: string) => {
-    if (e.button !== 0) return; // Left click only
+    if (e.button !== 0) return;
     if (toolMode === 'add-pin') return;
     e.stopPropagation();
     e.preventDefault();
@@ -1966,7 +1278,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     pushSnapshot({ pins: remaining });
   };
 
-  // Micro-nudge pin with keyboard arrow keys
   const nudgePin = (dx: number, dy: number) => {
     if (!selectedPin) return;
     const newX = Math.round((selectedPin.x + dx) * 10) / 10;
@@ -1976,7 +1287,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     pushSnapshot({ pins: nextPins });
   };
 
-  // Keyboard navigation & Shortcuts (R / Space for Rotate, Ctrl+Z Undo, Ctrl+Y Redo, Arrows for Nudge)
+  // Keyboard navigation & Shortcuts inside Studio
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -1984,7 +1295,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Safeguard: NEVER intercept Alt key alone, Alt+Tab, Alt+F4, or system keys
       if (e.key === 'Alt' || (e.altKey && (e.key === 'Tab' || e.key === 'F4' || e.key.startsWith('F')))) {
         return;
       }
@@ -1992,7 +1302,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
 
-      // Undo / Redo Shortcuts inside Studio
       if (isCmdOrCtrl && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         if (e.shiftKey) {
@@ -2007,7 +1316,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Direct Duplicate Pin (Ctrl+D / Cmd+D)
       if (isCmdOrCtrl && e.key.toLowerCase() === 'd') {
         if (selectedPinId) {
           const source = pins.find((p) => p.id === selectedPinId);
@@ -2045,12 +1353,10 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // If user presses Ctrl+R or Cmd+R, DO NOT INTERCEPT (allow browser refresh!)
       if (isCmdOrCtrl) {
         return;
       }
 
-      // Shortcut: R to Rotate 90° Clockwise (Alt/Shift for image only)
       if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
         const shouldRotatePins = !e.altKey;
@@ -2058,7 +1364,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Shortcut: Tab / Shift+Tab to cycle through pins sequentially
       if (e.key === 'Tab' && pins.length > 0 && !inlineEditPinId) {
         e.preventDefault();
         const currentIndex = pins.findIndex((p) => p.id === selectedPinId);
@@ -2074,21 +1379,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
         return;
       }
 
-      // Enter key or F2 to start inline editing if a pin is selected
       if ((e.key === 'Enter' || e.key === 'F2') && selectedPinId && !inlineEditPinId) {
         e.preventDefault();
         startInlineEdit(selectedPinId);
         return;
       }
 
-      // Space key for Hand/Pan tool
       if (!isCmdOrCtrl && (e.code === 'Space' || e.key === ' ')) {
         e.preventDefault();
         setIsSpacePressed(true);
         return;
       }
 
-      // Arrow Key Nudge Step: Default 0.5px (smooth), Shift 17.0px (1 BB hole), Alt 0.1px (ultra micro)
       const step = e.shiftKey ? 17.0 : e.altKey ? 0.1 : 0.5;
 
       if (selectedPin) {
@@ -2114,7 +1416,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           setSelectedPinId(null);
         }
       } else {
-        // No pin selected: arrow keys nudge Image (or All if linkPinsToImage)
         const isAll = linkPinsToImage;
         if (e.key === 'ArrowUp') {
           e.preventDefault();
@@ -2155,17 +1456,18 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     inlineEditPinId,
     startInlineEdit,
     linkPinsToImage,
-    width,
-    height,
     handleRotateClockwise,
     handleUndo,
     handleRedo,
     pins,
-    imageOffset,
+    snapToBreadboard,
+    snapCoordinate,
+    breadboardOffset.x,
+    breadboardOffset.y,
     pushSnapshot,
   ]);
 
-  // Smooth global canvas pan dragging (continues smoothly even when cursor leaves canvas)
+  // Global mouse listeners for panning
   useEffect(() => {
     if (!isPanning) return;
 
@@ -2192,8 +1494,8 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   // Generate multi-pin / DIP Row
   const handleGeneratePinRow = () => {
     if (genCount < 1) return;
-    const startX = selectedPin ? selectedPin.x : (imageOffset.x + 17.0);
-    const startY = selectedPin ? selectedPin.y : (imageOffset.y + 17.0);
+    const startX = selectedPin ? selectedPin.x : imageOffset.x + 17.0;
+    const startY = selectedPin ? selectedPin.y : imageOffset.y + 17.0;
 
     const newGeneratedPins: Pin[] = [];
     for (let i = 0; i < genCount; i++) {
@@ -2218,11 +1520,9 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     }
   };
 
-  // Helper to get auto-normalized component definition (Origin at 0,0)
   const getNormalizedDefinition = (): ComponentDefinition => {
     const cleanTypeId = typeId.trim().toLowerCase().replace(/\s+/g, '-');
 
-    // Calculate bounding box enclosing both the image and all pins
     const xs = [imageOffset.x, imageOffset.x + width, ...pins.map((p) => p.x)];
     const ys = [imageOffset.y, imageOffset.y + height, ...pins.map((p) => p.y)];
 
@@ -2255,14 +1555,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       pins: normPins,
       icon: icon || 'Cpu',
       imageUrl: imageDataUrl,
-      imageOffset: (normOffset.x !== 0 || normOffset.y !== 0) ? normOffset : undefined,
+      imageOffset: normOffset.x !== 0 || normOffset.y !== 0 ? normOffset : undefined,
       imageWidth: width,
       imageHeight: height,
       isCustom: true,
     };
   };
 
-  // Save component definition
   const handleSaveComponent = async () => {
     const definition = getNormalizedDefinition();
     let imgToSave = imageDataUrl;
@@ -2276,11 +1575,13 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
       onComponentSaved?.(definition.type);
       setTimeout(() => setSaveSuccess(false), 3500);
     } else {
-      showError('Gagal Menyimpan Komponen', res.error || 'Memori browser penuh atau data tidak valid.');
+      showError(
+        'Gagal Menyimpan Komponen',
+        res.error || 'Memori browser penuh atau data tidak valid.'
+      );
     }
   };
 
-  // Copy TypeScript code
   const handleCopyCode = () => {
     const definition = getNormalizedDefinition();
     const code = generateTypeScriptCode(definition, `${definition.type.replace(/-/g, '_')}.png`);
@@ -2290,7 +1591,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  // Import / Export JSON
   const handleImportJsonFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -2334,7 +1634,7 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md select-none overflow-hidden animate-in fade-in duration-200">
       <div className="flex flex-col w-[96vw] h-[94vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden">
-        {/* 1. Modal Top Bar */}
+        {/* Modal Top Bar */}
         <div className="h-14 bg-slate-50 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 dark:bg-sky-500/20 dark:border-sky-500/40 flex items-center justify-center text-sky-600 dark:text-sky-400">
@@ -2354,7 +1654,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Import JSON */}
             <input
               type="file"
               ref={jsonInputRef}
@@ -2371,7 +1670,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <span>Import JSON</span>
             </button>
 
-            {/* Export JSON */}
             <button
               onClick={() => exportComponentJson(typeId)}
               className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
@@ -2381,17 +1679,19 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <span>Export JSON</span>
             </button>
 
-            {/* Copy TS Code */}
             <button
               onClick={handleCopyCode}
               className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Copy TypeScript Definition Code"
             >
-              {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
+              {copiedCode ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              )}
               {copiedCode ? 'Tersalin!' : 'Copy TS Code'}
             </button>
 
-            {/* Save Button */}
             <button
               onClick={handleSaveComponent}
               className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-md transition-all cursor-pointer ${
@@ -2404,7 +1704,6 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               {saveSuccess ? 'Tersimpan di Library!' : 'Simpan ke Library'}
             </button>
 
-            {/* Close Button */}
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-slate-100 flex items-center justify-center transition-colors ml-2 cursor-pointer"
@@ -2421,9 +1720,12 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
               <Check className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-emerald-100">Komponen Berhasil Disimpan!</span>
+              <span className="text-xs font-bold text-emerald-100">
+                Komponen Berhasil Disimpan!
+              </span>
               <span className="text-[11px] text-emerald-300/80">
-                Telah masuk ke <b>Katalog Komponen (Tab &apos;Custom Studio&apos;)</b> dan ditambahkan ke kanvas.
+                Telah masuk ke <b>Katalog Komponen (Tab &apos;Custom Studio&apos;)</b> dan
+                ditambahkan ke kanvas.
               </span>
             </div>
             <button
@@ -2435,1486 +1737,136 @@ export const ComponentStudioModal: React.FC<ComponentStudioModalProps> = ({
           </div>
         )}
 
-        {/* 2. Main Studio Workspace (3 Columns) */}
+        {/* Main Studio Workspace (3 Modular Columns) */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel: Image Upload, Background Cleaner & Component Meta */}
-          <div className="w-80 bg-slate-50 dark:bg-slate-950/60 border-r border-slate-200 dark:border-slate-800 p-4 flex flex-col gap-4 overflow-y-auto">
-            {/* Upload Box */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-                <span>1. Visual Asset Image</span>
-                {imageDataUrl && (
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                    {originalImageSize.width} × {originalImageSize.height} px
-                  </span>
-                )}
-              </label>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-
-              {!imageDataUrl ? (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-28 border-2 border-dashed border-slate-300 hover:border-sky-500 dark:border-slate-700 dark:hover:border-sky-500/60 rounded-xl bg-white/70 hover:bg-white dark:bg-slate-900/50 dark:hover:bg-slate-900 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all p-3 text-center"
-                >
-                  <Upload className="w-6 h-6 text-sky-600 dark:text-sky-400" />
-                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Klik atau Drop Gambar Komponen
-                  </span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500">PNG, JPG, WebP (Rekomendasi HD)</span>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <div className="relative h-28 bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-700/80 p-2 flex items-center justify-center overflow-hidden shadow-xs">
-                    <img
-                      src={imageDataUrl}
-                      alt="Component Preview"
-                      className="max-h-full max-w-full object-contain"
-                    />
-                    <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                      {rawImageDataUrl && rawImageDataUrl !== imageDataUrl && (
-                        <button
-                          onClick={handleResetToOriginal}
-                          className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 text-[10px] text-amber-600 dark:text-amber-300 border border-slate-200 dark:border-slate-600 shadow flex items-center gap-1 cursor-pointer"
-                          title="Kembalikan gambar asli sebelum remove bg"
-                        >
-                          <Undo className="w-3 h-3" />
-                          Reset
-                        </button>
-                      )}
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 text-[10px] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 shadow cursor-pointer"
-                      >
-                        Ganti
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Magic Background Remover */}
-                  <div className="p-3 bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5 shadow-xs">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                        <Wand2 className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-                        Auto Remove Background
-                      </span>
-                      <span className="text-[10px] text-sky-600 dark:text-sky-400 font-mono font-bold">{bgTolerance}%</span>
-                    </div>
-
-                    {/* Mode Algorithm Selector */}
-                    <div className="grid grid-cols-2 gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px]">
-                      <button
-                        type="button"
-                        onClick={() => setBgAlgorithm('flood-fill')}
-                        className={`py-1 px-1.5 rounded flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                          bgAlgorithm === 'flood-fill'
-                            ? 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40 font-semibold shadow-xs'
-                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                        }`}
-                        title="Hanya hapus background luar. Silkscreen/sablon putih di dalam board AMAN!"
-                      >
-                        <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <span>Tepi Luar (Aman)</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setBgAlgorithm('global')}
-                        className={`py-1 px-1.5 rounded flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                          bgAlgorithm === 'global'
-                            ? 'bg-amber-500/15 text-amber-700 border border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 font-semibold shadow-xs'
-                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                        }`}
-                        title="Hapus semua warna putih di seluruh gambar"
-                      >
-                        <Globe className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
-                        <span>Global (Semua)</span>
-                      </button>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-                        <span>Toleransi Warna</span>
-                        <span>{bgTolerance <= 15 ? 'Ketat' : bgTolerance <= 35 ? 'Sedang' : 'Tinggi'}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="5"
-                        max="70"
-                        value={bgTolerance}
-                        onChange={(e) => setBgTolerance(Number(e.target.value))}
-                        className="w-full accent-sky-500 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg cursor-pointer"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <button
-                        onClick={handleMagicRemoveBackground}
-                        disabled={isProcessingBg}
-                        className="py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 dark:text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-                        title="Hapus background luar dan otomatis pangkas (crop) ke batas fisik bodi modul"
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>{isProcessingBg ? 'Memproses...' : 'Hapus BG'}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleAutoCropToContent}
-                        className="py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-700 dark:bg-sky-500/15 dark:hover:bg-sky-500/25 dark:text-sky-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-                        title="Pangkas (crop) sisa area transparan di pinggir agar ukuran mm pas ke bodi modul"
-                      >
-                        <Crop className="w-3.5 h-3.5" />
-                        <span>Crop Bodi</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Dimension, Rotation & Image Positioning Controls */}
-            <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">2. Ukuran & Posisi</label>
-
-                <div className="flex items-center gap-1.5">
-                  {/* Unit Switcher: mm / px */}
-                  <div className="flex bg-slate-100 dark:bg-slate-950 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
-                    <button
-                      onClick={() => setUnit('mm')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                        unit === 'mm'
-                          ? 'bg-sky-500 text-white dark:text-slate-950 shadow-xs'
-                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                      }`}
-                      title="Gunakan satuan Milimeter (mm) - Standar Fisik Komponen"
-                    >
-                      mm
-                    </button>
-                    <button
-                      onClick={() => setUnit('px')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                        unit === 'px'
-                          ? 'bg-sky-500 text-white dark:text-slate-950 shadow-xs'
-                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                      }`}
-                      title="Gunakan satuan Pixel (px) - Standar Kanvas"
-                    >
-                      px
-                    </button>
-                  </div>
-
-                  {/* Rotate 90 deg button */}
-                  <button
-                    onClick={() => handleRotateClockwise(true)}
-                    className="px-2 py-0.5 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-slate-700 dark:text-slate-300 text-[10px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                    title="Putar Komponen 90° (Gambar + Pin)"
-                  >
-                    <RotateCw className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                    <span>90°</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* 1-Click Auto Scale & Snap to Breadboard Button */}
-              <button
-                type="button"
-                onClick={handleAutoScaleAndSnapToBreadboard}
-                className="w-full py-2 px-3 rounded-xl border border-sky-500/40 bg-gradient-to-r from-sky-500/15 to-indigo-500/15 hover:from-sky-500/25 hover:to-indigo-500/25 text-sky-200 font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
-                title="Titiki pin di kaki-kaki gambar, lalu klik ini untuk otomatis me-resize gambar & menancapkan semua pin tepat di lubang breadboard (Pitch 17px)"
-              >
-                <Sparkles className="w-4 h-4 text-sky-400" />
-                <span>✨ Auto-Scale & Paskan ke BB</span>
-              </button>
-
-              {/* Width & Height */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Lebar ({unit})</span>
-                    <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
-                      {unit === 'mm' ? `≈ ${width} px` : `≈ ${pxToMm(width, 1)} mm`}
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    value={unit === 'mm' ? pxToMm(width, 1) : width}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      const pxVal = unit === 'mm' ? mmToPx(val, 1) : val;
-                      handleWidthChange(pxVal);
-                    }}
-                    step={unit === 'mm' ? '0.1' : '1'}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Tinggi ({unit})</span>
-                    <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
-                      {unit === 'mm' ? `≈ ${height} px` : `≈ ${pxToMm(height, 1)} mm`}
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    value={unit === 'mm' ? pxToMm(height, 1) : height}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      const pxVal = unit === 'mm' ? mmToPx(val, 1) : val;
-                      handleHeightChange(pxVal);
-                    }}
-                    step={unit === 'mm' ? '0.1' : '1'}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={lockAspectRatio}
-                  onChange={(e) => setLockAspectRatio(e.target.checked)}
-                  className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sky-500 focus:ring-0 w-3.5 h-3.5"
-                />
-                <span className="text-xs text-slate-700 dark:text-slate-300">Kunci Rasio Aspek (Aspect Ratio)</span>
-              </label>
-
-              {/* Image Offset X & Y with Nudge & Fit Box Controls */}
-              <div className="p-2.5 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2 shadow-xs">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-800 dark:text-slate-300 font-medium flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                    Posisi Offset Gambar
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleSnapPinsToBreadboard}
-                      className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-medium hover:underline flex items-center gap-1 cursor-pointer"
-                      title="Kunci posisi gambar & pin tepat ke lubang breadboard terdekat"
-                    >
-                      <Target className="w-3 h-3" />
-                      Paskan BB
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleFitBoxToImage}
-                      className="text-[10px] text-sky-600 dark:text-sky-400 hover:text-sky-500 font-medium hover:underline flex items-center gap-1 cursor-pointer"
-                      title="Paskan Bounding Box ke Gambar dan nolkan offset"
-                    >
-                      <Box className="w-3 h-3" />
-                      Paskan Box
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Offset X ({unit})</span>
-                      <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
-                        {unit === 'mm' ? `≈ ${imageOffset.x} px` : `≈ ${pxToMm(imageOffset.x, 2)} mm`}
-                      </span>
-                    </div>
-                    <input
-                      type="number"
-                      value={unit === 'mm' ? pxToMm(imageOffset.x, 2) : imageOffset.x}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        const pxVal = unit === 'mm' ? mmToPx(val, 1) : val;
-                        const next = { ...imageOffset, x: pxVal };
-                        setImageOffset(next);
-                        pushSnapshot({ imageOffset: next });
-                      }}
-                      step={unit === 'mm' ? '0.1' : '0.5'}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Offset Y ({unit})</span>
-                      <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
-                        {unit === 'mm' ? `≈ ${imageOffset.y} px` : `≈ ${pxToMm(imageOffset.y, 2)} mm`}
-                      </span>
-                    </div>
-                    <input
-                      type="number"
-                      value={unit === 'mm' ? pxToMm(imageOffset.y, 2) : imageOffset.y}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        const pxVal = unit === 'mm' ? mmToPx(val, 1) : val;
-                        const next = { ...imageOffset, y: pxVal };
-                        setImageOffset(next);
-                        pushSnapshot({ imageOffset: next });
-                      }}
-                      step={unit === 'mm' ? '0.1' : '0.5'}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
-                    />
-                  </div>
-                </div>
-
-                {/* Micro Nudge Image Buttons */}
-                <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-950 p-1.5 rounded-lg border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Nudge Gambar:</span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => nudgeImage(unit === 'mm' ? -mmToPx(0.5, 1) : -1.0, 0)}
-                      className="p-1 rounded bg-white hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
-                      title={`Geser Gambar Kiri (-${unit === 'mm' ? '0.5mm' : '1px'})`}
-                    >
-                      <ArrowLeft className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => nudgeImage(0, unit === 'mm' ? -mmToPx(0.5, 1) : -1.0)}
-                      className="p-1 rounded bg-white hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
-                      title={`Geser Gambar Atas (-${unit === 'mm' ? '0.5mm' : '1px'})`}
-                    >
-                      <ArrowUp className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => nudgeImage(0, unit === 'mm' ? mmToPx(0.5, 1) : 1.0)}
-                      className="p-1 rounded bg-white hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
-                      title={`Geser Gambar Bawah (+${unit === 'mm' ? '0.5mm' : '1px'})`}
-                    >
-                      <ArrowDown className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => nudgeImage(unit === 'mm' ? mmToPx(0.5, 1) : 1.0, 0)}
-                      className="p-1 rounded bg-white hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 cursor-pointer"
-                      title={`Geser Gambar Kanan (+${unit === 'mm' ? '0.5mm' : '1px'})`}
-                    >
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Component Metadata */}
-            <div className="flex flex-col gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
-              <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">3. Informasi Komponen</label>
-
-              <div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">ID Tipe (slug unik)</span>
-                <input
-                  type="text"
-                  value={typeId}
-                  onChange={(e) => setTypeId(e.target.value)}
-                  placeholder="sensor-nama-modul"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Nama Tampilan</span>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Modul Sensor..."
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Kategori</span>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none cursor-pointer"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Deskripsi</span>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={2}
-                  placeholder="Keterangan singkat fungsi modul..."
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none resize-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Center Canvas: Interactive Pin & Image Visualizer */}
-          <div className="flex-1 flex flex-col bg-[#f1f5f9] dark:bg-slate-950 relative overflow-hidden">
-            {/* Canvas Toolbar - Sleek Pro Single-Line Bar */}
-            <div className="min-h-[46px] bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-1.5 flex items-center justify-between z-10 gap-3 overflow-x-auto no-scrollbar select-none">
-              {/* Primary Tool Mode Switch, Undo/Redo & Rotate */}
-              <div className="flex items-center gap-2 shrink-0">
-                {/* Undo / Redo Buttons */}
-                <div className="flex bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
-                  <button
-                    onClick={handleUndo}
-                    disabled={historyIndex <= 0}
-                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer"
-                    title="Undo (Ctrl+Z)"
-                  >
-                    <Undo2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={handleRedo}
-                    disabled={historyIndex >= history.length - 1}
-                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-colors cursor-pointer"
-                    title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
-                  >
-                    <Redo2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Smart Mode & Add Pin Segmented Control */}
-                <div className="flex bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
-                  <button
-                    onClick={() => setToolMode('smart')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                      toolMode === 'smart'
-                        ? 'bg-sky-500 text-white dark:text-slate-950 shadow-xs font-bold'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800/80'
-                    }`}
-                    title="Mode Pintar: Langsung geser Pin, Gambar, atau Kanvas secara otomatis tanpa gonta-ganti tombol"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Mode Pintar</span>
-                  </button>
-
-                  <button
-                    onClick={() => setToolMode('add-pin')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                      toolMode === 'add-pin'
-                        ? 'bg-emerald-500 text-white dark:text-slate-950 shadow-xs font-bold'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800/80'
-                    }`}
-                    title="Tambah Pin: Klik kanvas untuk menambah pin baru. Tips: Tahan Shift + Klik untuk Pin Stamp otomatis (jarak pas 17px berurutan)!"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Tambah Pin</span>
-                  </button>
-                </div>
-
-                {/* Geser Bersama (Link Pins) Toggle Button */}
-                <button
-                  onClick={() => setLinkPinsToImage(!linkPinsToImage)}
-                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer ${
-                    linkPinsToImage
-                      ? 'bg-purple-500/15 border-purple-500/40 text-purple-700 dark:bg-purple-500/20 dark:border-purple-500/60 dark:text-purple-300'
-                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-slate-800 dark:text-slate-400 dark:hover:text-slate-300'
-                  }`}
-                  title="Geser Bersama: Saat aktif, menggeser gambar otomatis menggeser semua pin bersamaan (atau tahan Shift saat tarik gambar)"
-                >
-                  <Layers className={`w-3.5 h-3.5 ${linkPinsToImage ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`} />
-                  <span className="hidden sm:inline">Geser Bersama</span>
-                  <span className="text-[10px] font-mono px-1 py-0.2 bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-800">
-                    Shift
-                  </span>
-                </button>
-
-                {/* Direct Rotate Actions */}
-                <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <button
-                    onClick={() => handleRotateClockwise(true)}
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                    title="Putar Seluruh Komponen (Bodi + Gambar + Semua Pin) 90° (Shortcut: Tombol R)"
-                  >
-                    <RotateCw className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                    <span>Putar 90°</span>
-                    <span className="text-[10px] font-mono font-bold px-1 py-0.2 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-800">
-                      R
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => handleRotateClockwise(false)}
-                    className="px-2 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors border-l border-slate-200 dark:border-slate-800 cursor-pointer"
-                    title="Putar visual gambar saja 90° (Pin TIDAK ikut berputar untuk kalibrasi visual)"
-                  >
-                    <RotateCw className="w-3 h-3 text-amber-500 dark:text-amber-400" />
-                    <span className="hidden md:inline">Gbr Saja</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Guides, Overlays & Zoom */}
-              <div className="flex items-center gap-2 shrink-0">
-                {/* 1-Click Smart Auto-Scale & Snap to Breadboard Holes */}
-                <button
-                  onClick={handleAutoScaleAndSnapToBreadboard}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border bg-gradient-to-r from-sky-500/10 to-indigo-500/10 hover:from-sky-500/20 hover:to-indigo-500/20 dark:from-sky-500/20 dark:to-indigo-500/20 dark:hover:from-sky-500/30 dark:hover:to-indigo-500/30 border-sky-500/30 dark:border-sky-500/40 text-sky-700 dark:text-sky-200 transition-all shadow-xs shrink-0 cursor-pointer"
-                  title="1-Klik: Otomatis resize gambar sesuai jarak pin & kunci semua pin tepat di lubang breadboard (Pitch 17px / 2.54mm)"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                  <span className="hidden md:inline">Paskan Skala & Pin ke BB</span>
-                  <span className="md:hidden">Paskan BB</span>
-                </button>
-
-                {/* Magnet Snap Toggle Button */}
-                <button
-                  onClick={() => setSnapToBreadboard(!snapToBreadboard)}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-xs shrink-0 cursor-pointer ${
-                    snapToBreadboard
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:bg-emerald-500/15 dark:border-emerald-500/40 dark:text-emerald-300'
-                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:text-slate-300'
-                  }`}
-                  title={
-                    unit === 'mm'
-                      ? 'Kunci posisi pin tepat di lubang breadboard (Pitch 2.54mm / 17px)'
-                      : 'Kunci posisi pin tepat di lubang breadboard (Pitch 17px)'
-                  }
-                >
-                  <Magnet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>{unit === 'mm' ? 'Snap 2.54mm' : 'Snap 17px'}</span>
-                </button>
-
-                {/* Pin Callout Toggle Button */}
-                <button
-                  onClick={() => setAlwaysShowLabels(!alwaysShowLabels)}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all shadow-xs shrink-0 cursor-pointer ${
-                    alwaysShowLabels
-                      ? 'bg-sky-500/10 border-sky-500/30 text-sky-700 dark:bg-sky-500/15 dark:border-sky-500/40 dark:text-sky-300'
-                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:text-slate-300'
-                  }`}
-                  title={alwaysShowLabels ? 'Callout selalu tampil' : 'Callout tampil saat pin di-hover / dipilih (Default)'}
-                >
-                  <Tag className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                  <span>Callout</span>
-                </button>
-
-                {/* Breadboard Capsule */}
-                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs shrink-0">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-700 dark:text-slate-300 select-none">
-                    <input
-                      type="checkbox"
-                      checked={showBreadboard}
-                      onChange={(e) => setShowBreadboard(e.target.checked)}
-                      className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sky-500 w-3.5 h-3.5 cursor-pointer"
-                    />
-                    <span className="font-semibold text-xs">Breadboard</span>
-                  </label>
-
-                  {showBreadboard && (
-                    <>
-                      <select
-                        value={breadboardType}
-                        onChange={(e) => setBreadboardType(e.target.value as any)}
-                        className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 text-[11px] rounded-lg px-2 py-0.5 outline-none focus:border-sky-500 cursor-pointer"
-                      >
-                        <option value="half">Half (400)</option>
-                        <option value="mini">Mini (170)</option>
-                        <option value="grid">Grid 17px</option>
-                      </select>
-
-                      <div className="flex items-center gap-1 pl-1 border-l border-slate-200 dark:border-slate-800" title="Transparansi Breadboard">
-                        <input
-                          type="range"
-                          min="0.1"
-                          max="1.0"
-                          step="0.05"
-                          value={breadboardOpacity}
-                          onChange={(e) => setBreadboardOpacity(Number(e.target.value))}
-                          className="w-14 accent-sky-500 h-1 bg-slate-200 dark:bg-slate-800 rounded cursor-pointer"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Zoom Capsule */}
-                <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-900 px-1 py-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs shrink-0">
-                  <button
-                    onClick={() => setZoom((z) => Math.max(0.4, z - 0.2))}
-                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
-                    title="Zoom Out"
-                  >
-                    <ZoomOut className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="text-[11px] font-mono text-slate-800 dark:text-slate-300 font-bold px-1 min-w-[38px] text-center">
-                    {Math.round(zoom * 100)}%
-                  </span>
-                  <button
-                    onClick={() => setZoom((z) => Math.min(4.0, z + 0.2))}
-                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
-                    title="Zoom In"
-                  >
-                    <ZoomIn className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setZoom(1.8);
-                      setPan({ x: 0, y: 0 });
-                    }}
-                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-300 transition-colors ml-0.5 border-l border-slate-200 dark:border-slate-800 cursor-pointer"
-                    title="Reset Posisi & Zoom"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* SVG Interactive Canvas */}
-            <div
-              className={`flex-1 overflow-hidden relative bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] select-none ${
-                isPanning
-                  ? 'cursor-grabbing'
-                  : isSpacePressed
-                  ? 'cursor-grab'
-                  : toolMode === 'add-pin'
-                  ? 'cursor-crosshair'
-                  : 'cursor-grab active:cursor-grabbing'
-              }`}
-              onWheel={handleCanvasWheel}
-              onMouseDown={(e) => {
-                hasMovedPanRef.current = false;
-                // Middle click, space pressed, alt/shift, or left click on empty background
-                if (
-                  e.button === 1 ||
-                  isSpacePressed ||
-                  e.altKey ||
-                  (e.button === 0 && toolMode !== 'add-pin')
-                ) {
-                  setIsPanning(true);
-                  setStartPanPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-                }
-              }}
-            >
-              <svg
-                ref={canvasRef}
-                className="w-full h-full select-none"
-                onClick={handleCanvasClick}
-              >
-                <g transform={`translate(${pan.x + 120}, ${pan.y + 80}) scale(${zoom})`}>
-                  {/* REALISTIC BREADBOARD OVERLAY (HALF / MINI / GRID) */}
-                  {showBreadboard && (
-                    <g opacity={breadboardOpacity} pointerEvents="none">
-                      {breadboardType === 'half' ? (
-                        /* Photorealistic Half Breadboard (400 Tie-Point) with Exact 17px Pitch & Aligned Hole Centers */
-                        <g transform={`translate(${breadboardOffset.x + 8.216667}, ${breadboardOffset.y})`}>
-                          <image
-                            href="/components/breadboard_half.svg"
-                            x={0}
-                            y={0}
-                            width={578.554}
-                            height={357.0}
-                            preserveAspectRatio="none"
-                          />
-                        </g>
-                      ) : breadboardType === 'mini' ? (
-                        /* Photorealistic Mini Breadboard (170 Tie-Point) with Exact 17px Pitch */
-                        <g transform={`translate(${breadboardOffset.x - 0.288}, ${breadboardOffset.y - 8.63})`}>
-                          <image
-                            href="/components/breadboard_mini.svg"
-                            x={0}
-                            y={0}
-                            width={306.56}
-                            height={238.27}
-                            preserveAspectRatio="none"
-                          />
-                        </g>
-                      ) : (
-                        /* Clean 17px Cyan Grid Overlay */
-                        <g opacity={0.4}>
-                          {Array.from({ length: Math.max(22, Math.ceil(height / 17) + 8) }).map((_, r) => (
-                            <React.Fragment key={`row-${r}`}>
-                              {Array.from({ length: Math.max(35, Math.ceil(width / 17) + 12) }).map((_, c) => {
-                                const hx = c * 17.0 + breadboardOffset.x;
-                                const hy = r * 17.0 + breadboardOffset.y;
-                                return (
-                                  <circle
-                                    key={`bb-${r}-${c}`}
-                                    cx={hx}
-                                    cy={hy}
-                                    r={2.2}
-                                    fill="#38bdf8"
-                                    stroke="#0284c7"
-                                    strokeWidth={0.8}
-                                  />
-                                );
-                              })}
-                            </React.Fragment>
-                          ))}
-                        </g>
-                      )}
-                    </g>
-                  )}
-
-                  {/* Component Border Box - Follows Image Position */}
-                  <rect
-                    x={imageOffset.x}
-                    y={imageOffset.y}
-                    width={width}
-                    height={height}
-                    fill="#0f172a"
-                    fillOpacity={0.4}
-                    stroke="#38bdf8"
-                    strokeWidth={1.5}
-                    strokeDasharray="4 4"
-                    rx={4}
-                    className={toolMode === 'add-pin' ? 'cursor-crosshair' : 'cursor-grab active:cursor-grabbing hover:stroke-sky-400'}
-                    onMouseDown={(e) => handleImageMouseDown(e)}
-                  />
-
-                  {/* Component Image (with direct interactive drag & custom offset) */}
-                  {imageDataUrl && (
-                    <image
-                      href={imageDataUrl}
-                      x={imageOffset.x}
-                      y={imageOffset.y}
-                      width={width}
-                      height={height}
-                      preserveAspectRatio="none"
-                      className={
-                        toolMode === 'add-pin'
-                          ? 'cursor-crosshair'
-                          : 'cursor-grab active:cursor-grabbing hover:opacity-95 transition-opacity duration-150'
-                      }
-                      onMouseDown={(e) => handleImageMouseDown(e)}
-                    />
-                  )}
-
-                  {/* Render Pins & Smart Elbow Callouts with Live Grab & Drag */}
-                  {pins
-                    .slice()
-                    .sort((a, b) => {
-                      if (a.id === selectedPinId) return 1;
-                      if (b.id === selectedPinId) return -1;
-                      if (a.id === hoveredPinId) return 1;
-                      if (b.id === hoveredPinId) return -1;
-                      return 0;
-                    })
-                    .map((pin) => {
-                      const isSelected = pin.id === selectedPinId;
-                      const isHovered = pin.id === hoveredPinId;
-                      const isDragging = pin.id === draggingPinId;
-                      const shouldShowLabel = isHovered || isSelected || isDragging || alwaysShowLabels;
-                      const typeDef = PIN_TYPES.find((t) => t.type === pin.type) || PIN_TYPES[0];
-                      const callout = getPinCalloutGeometry(pin, imageOffset, width, height);
-                      const badgeColor = isSelected ? '#38bdf8' : isHovered ? '#38bdf8' : typeDef.color;
-                      const strokeW = isSelected ? 1.6 : isHovered ? 1.4 : 1.1;
-
-                      return (
-                        <g
-                          key={pin.id}
-                          transform={`translate(${pin.x}, ${pin.y})`}
-                          style={{ pointerEvents: 'all' }}
-                          onMouseEnter={() => setHoveredPinId(pin.id)}
-                          onMouseLeave={() => setHoveredPinId(null)}
-                          onMouseDown={(e) => handlePinMouseDown(e, pin.id)}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedPinId(pin.id);
-                          }}
-                          onDoubleClick={(e) => {
-                            e.stopPropagation();
-                            startInlineEdit(pin.id);
-                          }}
-                        >
-                          {/* Invisible Large Hit Area Circle for Easy Grabbing & Hover */}
-                          <circle
-                            cx={0}
-                            cy={0}
-                            r={14}
-                            fill="transparent"
-                            className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-                          />
-
-                          {/* Selected Glowing Ring */}
-                          {isSelected && (
-                            <circle
-                              cx={0}
-                              cy={0}
-                              r={10}
-                              fill="none"
-                              stroke="#38bdf8"
-                              strokeWidth={2}
-                              strokeDasharray="3 3"
-                              className="animate-spin"
-                              style={{ animationDuration: '4s' }}
-                            />
-                          )}
-
-                          {/* Outer Pin Body & Precision Crosshair Mode */}
-                          {isDragging ? (
-                            <g pointerEvents="none">
-                              {/* Extended Sniper Guide Circle */}
-                              <circle
-                                cx={0}
-                                cy={0}
-                                r={12}
-                                fill="none"
-                                stroke="#38bdf8"
-                                strokeWidth={0.9}
-                                strokeDasharray="2 2"
-                                opacity={0.75}
-                              />
-                              {/* Translucent Pin Body */}
-                              <circle
-                                cx={0}
-                                cy={0}
-                                r={5.5}
-                                fill={typeDef.color}
-                                fillOpacity={0.2}
-                                stroke="#38bdf8"
-                                strokeWidth={1.5}
-                              />
-                              {/* Crosshair Horizontal & Vertical Hairlines */}
-                              <line x1={-10} y1={0} x2={-2.2} y2={0} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
-                              <line x1={2.2} y1={0} x2={10} y2={0} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
-                              <line x1={0} y1={-10} x2={0} y2={-2.2} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
-                              <line x1={0} y1={2.2} x2={0} y2={10} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
-                              {/* Micro Hollow Target Center Ring - 100% transparent center */}
-                              <circle cx={0} cy={0} r={2.0} fill="none" stroke="#ffffff" strokeWidth={1} />
-                              {/* Subtle Micro-pip center dot for exact subpixel reference */}
-                              <circle cx={0} cy={0} r={0.4} fill="#ffffff" opacity={0.9} />
-                            </g>
-                          ) : (
-                            <>
-                              {/* Normal Solid Outer Pin Body */}
-                              <circle
-                                cx={0}
-                                cy={0}
-                                r={5.5}
-                                fill={typeDef.color}
-                                stroke="#ffffff"
-                                strokeWidth={1.8}
-                                className="cursor-grab"
-                              />
-                              {/* Normal Center Dot */}
-                              <circle cx={0} cy={0} r={1.8} fill="#ffffff" pointerEvents="none" />
-                            </>
-                          )}
-
-                          {/* Smart Directional Elbow Callout Annotation */}
-                          {shouldShowLabel && (
-                            <g
-                              pointerEvents="none"
-                              className="transition-all duration-150"
-                              style={{
-                                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.65))',
-                                opacity: isDragging ? 0.5 : 1,
-                              }}
-                            >
-                              {/* 1. Leader Line (Elbow) */}
-                              <path
-                                d={`M ${callout.p0.x} ${callout.p0.y} L ${callout.p1.x} ${callout.p1.y} L ${callout.p2.x} ${callout.p2.y}`}
-                                fill="none"
-                                stroke={badgeColor}
-                                strokeWidth={strokeW}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                opacity={0.95}
-                              />
-
-                              {/* 2. Anchor Dot on Pin Pad Rim */}
-                              <circle
-                                cx={callout.p0.x}
-                                cy={callout.p0.y}
-                                r={1.6}
-                                fill={badgeColor}
-                              />
-
-                              {/* 3. Callout Badge Box */}
-                              <rect
-                                x={callout.badgeX - callout.badgeW / 2}
-                                y={callout.badgeY - callout.badgeH / 2}
-                                width={callout.badgeW}
-                                height={callout.badgeH}
-                                rx={3.5}
-                                fill="#020617"
-                                fillOpacity={0.96}
-                                stroke={badgeColor}
-                                strokeWidth={strokeW}
-                              />
-
-                              {/* 4. Mini Pin Type Color Dot inside Badge */}
-                              <circle
-                                cx={callout.badgeX - callout.badgeW / 2 + 5.5}
-                                cy={callout.badgeY}
-                                r={2}
-                                fill={typeDef.color}
-                              />
-
-                              {/* 5. Pin Label Text */}
-                              <text
-                                x={callout.badgeX + 3}
-                                y={callout.badgeY + 3.2}
-                                fill="#f8fafc"
-                                fontSize={8.5}
-                                fontWeight="bold"
-                                textAnchor="middle"
-                                fontFamily="monospace"
-                                letterSpacing="0.02em"
-                              >
-                                {pin.name}
-                              </text>
-                            </g>
-                          )}
-                        </g>
-                      );
-                    })}
-                </g>
-              </svg>
-
-              {/* Floating Inline Pin Quick Edit Popover */}
-              {(() => {
-                const inlineEditingPin = pins.find((p) => p.id === inlineEditPinId);
-                if (!inlineEditingPin) return null;
-                const inlinePinIndex = pins.findIndex((p) => p.id === inlineEditPinId);
-                const inlineProfile = inferPinProfile(inlinePinName);
-                const inlineTypeDef = PIN_TYPES.find((t) => t.type === inlineEditingPin.type) || PIN_TYPES[0];
-
-                return (
-                  <div
-                    className="absolute z-30 flex flex-col gap-2 p-3 bg-slate-900/95 border border-sky-500 rounded-xl shadow-2xl backdrop-blur-md min-w-[280px] max-w-[340px] select-none"
-                    style={{
-                      left: `${inlineEditingPin.x * zoom + pan.x + 120}px`,
-                      top: `${inlineEditingPin.y * zoom + pan.y + 80 - 18}px`,
-                      transform: 'translate(-50%, -100%)',
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseDown={(e) => e.stopPropagation()}
-                  >
-                    {/* Popover Header */}
-                    <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-1.5">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full ring-2 ring-slate-800" style={{ backgroundColor: inlineTypeDef.color }} />
-                        <span className="text-[11px] font-bold text-sky-300 font-mono">
-                          Pin {inlinePinIndex + 1}/{pins.length}
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">({inlineEditingPin.id})</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => commitAndNavigateInlineEdit('prev')}
-                          disabled={inlinePinIndex <= 0}
-                          className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer"
-                          title="Pin Sebelumnya (Shift + Tab)"
-                        >
-                          <ChevronLeft className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => commitAndNavigateInlineEdit('next')}
-                          disabled={inlinePinIndex >= pins.length - 1}
-                          className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 disabled:opacity-25 disabled:hover:bg-transparent transition-colors cursor-pointer"
-                          title="Pin Berikutnya (Tab / Enter)"
-                        >
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => commitAndNavigateInlineEdit('close')}
-                          className="p-1 rounded hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 ml-1 transition-colors cursor-pointer"
-                          title="Selesai / Tutup (Esc)"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Input field with Auto-Complete */}
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        ref={inlineInputRef}
-                        type="text"
-                        list="pin-name-suggestions"
-                        value={inlinePinName}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setInlinePinName(val);
-                          const profile = inferPinProfile(val);
-                          const shouldSyncDesc =
-                            !inlinePinDescription ||
-                            inlinePinDescription === inlineProfile.description ||
-                            /^Pin\s*\d+$/i.test(inlinePinDescription) ||
-                            inlinePinDescription.startsWith('Terminal Pin ');
-                          const nextDesc = shouldSyncDesc ? profile.description : inlinePinDescription;
-                          if (shouldSyncDesc) {
-                            setInlinePinDescription(profile.description);
-                          }
-                          applyPinNameChange(inlineEditingPin.id, val, undefined, nextDesc);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Tab') {
-                            e.preventDefault();
-                            commitAndNavigateInlineEdit(e.shiftKey ? 'prev' : 'next');
-                          } else if (e.key === 'Enter') {
-                            e.preventDefault();
-                            commitAndNavigateInlineEdit(inlinePinIndex < pins.length - 1 ? 'next' : 'close');
-                          } else if (e.key === 'Escape') {
-                            e.preventDefault();
-                            commitAndNavigateInlineEdit('close');
-                          }
-                        }}
-                        placeholder="Label Pin (cth: VIN, GND, D2...)"
-                        className="flex-1 bg-slate-950 border border-sky-500/70 focus:border-sky-400 rounded-lg px-2.5 py-1 text-xs text-slate-100 font-bold focus:outline-none focus:ring-1 focus:ring-sky-400 shadow-inner"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => commitAndNavigateInlineEdit(inlinePinIndex < pins.length - 1 ? 'next' : 'close')}
-                        className="px-2.5 py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow"
-                        title={inlinePinIndex < pins.length - 1 ? "Simpan & Lanjut ke Pin Berikutnya (Enter / Tab)" : "Simpan & Selesai (Enter)"}
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {/* Live Pin Type Dropdown & Editable Tooltip Description */}
-                    <div className="flex flex-col gap-1.5 pt-1.5 border-t border-slate-800/80">
-                      <div className="flex items-center justify-between gap-2 text-[10px]">
-                        <span className="text-slate-400 shrink-0 font-medium">Tipe Pin:</span>
-                        <select
-                          value={inlineEditingPin.type}
-                          onChange={(e) => {
-                            const newType = e.target.value as PinType;
-                            applyPinNameChange(inlineEditingPin.id, inlinePinName, newType, inlinePinDescription);
-                          }}
-                          className="bg-slate-950 border border-slate-700/80 rounded px-2 py-0.5 text-[10px] text-slate-200 focus:border-sky-400 focus:outline-none cursor-pointer flex-1"
-                        >
-                          {PIN_TYPES.map((t) => (
-                            <option key={t.type} value={t.type}>
-                              {t.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Tooltip Description Input */}
-                      <div className="flex flex-col gap-0.5">
-                        <div className="flex items-center justify-between text-[10px]">
-                          <span className="text-slate-400 font-medium">Deskripsi Tooltip:</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const profile = inferPinProfile(inlinePinName);
-                              setInlinePinDescription(profile.description);
-                              applyPinNameChange(inlineEditingPin.id, inlinePinName, undefined, profile.description);
-                            }}
-                            className="text-[9px] text-sky-400 hover:text-sky-300 flex items-center gap-1 hover:underline cursor-pointer"
-                            title="Auto isi deskripsi dari nama pin"
-                          >
-                            <Sparkles className="w-2.5 h-2.5" />
-                            Auto
-                          </button>
-                        </div>
-                        <input
-                          type="text"
-                          value={inlinePinDescription}
-                          onChange={(e) => {
-                            setInlinePinDescription(e.target.value);
-                            applyPinNameChange(inlineEditingPin.id, inlinePinName, undefined, e.target.value);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              commitAndNavigateInlineEdit(inlinePinIndex < pins.length - 1 ? 'next' : 'close');
-                            } else if (e.key === 'Escape') {
-                              e.preventDefault();
-                              commitAndNavigateInlineEdit('close');
-                            }
-                          }}
-                          placeholder="Deskripsi tooltip (cth: Ground / Power 5V)..."
-                          className="w-full bg-slate-950 border border-slate-700/80 focus:border-sky-400 rounded px-2 py-0.5 text-[10px] text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-sky-400"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Shortcut Tips Footer */}
-                    <div className="flex items-center justify-between text-[9px] text-slate-400 pt-0.5 font-mono">
-                      <span><kbd className="bg-slate-800 px-1 py-0.2 rounded text-slate-300 border border-slate-700">Tab</kbd> / <kbd className="bg-slate-800 px-1 py-0.2 rounded text-slate-300 border border-slate-700">↵</kbd> Lanjut</span>
-                      <span><kbd className="bg-slate-800 px-1 py-0.2 rounded text-slate-300 border border-slate-700">Shift+Tab</kbd> Balik</span>
-                      <span><kbd className="bg-slate-800 px-1 py-0.2 rounded text-slate-300 border border-slate-700">Esc</kbd> Tutup</span>
-                    </div>
-
-                    {/* Downward pointing arrow */}
-                    <div
-                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-r border-b border-sky-500 rotate-45"
-                    />
-                  </div>
-                );
-              })()}
-
-              {/* Instructions badge */}
-              <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 backdrop-blur text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-2 pointer-events-none shadow-lg">
-                <Sparkles className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 shrink-0" />
-                <span>
-                  <b>Mode Pintar:</b> Tarik <b>Pin</b> / <b>Gambar</b> • <b>Double-Click Pin / <kbd className="px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono text-sky-600 dark:text-sky-300 font-bold">↵</kbd></b> Edit Cepat di Canvas • <kbd className="px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono text-emerald-600 dark:text-emerald-300 font-bold">Alt</kbd> Geser Mulus • <kbd className="px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono text-purple-600 dark:text-purple-300 font-bold">Shift</kbd> Geser Semua • <kbd className="px-1 py-0.2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono text-sky-600 dark:text-sky-300 font-bold">R</kbd> Putar 90°
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Panel: Pin Inspector & Header DIP Generator */}
-          <div className="w-80 bg-slate-50 dark:bg-slate-950/60 border-l border-slate-200 dark:border-slate-800 p-4 flex flex-col gap-4 overflow-y-auto">
-            {/* Multi-pin Header Generator */}
-            <div className="p-3 bg-white dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5 shadow-sm">
-              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-                Auto Header / DIP Generator
-              </span>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Jumlah Pin</span>
-                  <input
-                    type="number"
-                    value={genCount}
-                    onChange={(e) => setGenCount(Number(e.target.value))}
-                    min="1"
-                    max="60"
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Pitch ({unit})</span>
-                    <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
-                      {unit === 'mm' ? `≈ ${genPitch} px` : `≈ ${pxToMm(genPitch, 2)} mm`}
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    value={unit === 'mm' ? pxToMm(genPitch, 2) : genPitch}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      const pxVal = unit === 'mm' ? mmToPx(val, 2) : val;
-                      setGenPitch(pxVal);
-                    }}
-                    step={unit === 'mm' ? '0.01' : '0.5'}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
-                  />
-                </div>
-              </div>
-
-              {/* Quick Pitch Pills */}
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setGenPitch(17.0)}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
-                    Math.abs(genPitch - 17.0) < 0.1
-                      ? 'bg-sky-50 dark:bg-sky-500/20 border-sky-300 dark:border-sky-500/50 text-sky-700 dark:text-sky-300 font-bold'
-                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-                  title="Standar Breadboard / DIP (2.54 mm / 17 px)"
-                >
-                  2.54mm (DIP)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGenPitch(mmToPx(2.0, 2))}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
-                    Math.abs(genPitch - mmToPx(2.0, 2)) < 0.1
-                      ? 'bg-sky-50 dark:bg-sky-500/20 border-sky-300 dark:border-sky-500/50 text-sky-700 dark:text-sky-300 font-bold'
-                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-                  title="Pitch 2.0 mm (XBee / Mini Modules)"
-                >
-                  2.00mm
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGenPitch(mmToPx(1.27, 2))}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
-                    Math.abs(genPitch - mmToPx(1.27, 2)) < 0.1
-                      ? 'bg-sky-50 dark:bg-sky-500/20 border-sky-300 dark:border-sky-500/50 text-sky-700 dark:text-sky-300 font-bold'
-                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-                  title="Pitch 1.27 mm (SMD / SOP)"
-                >
-                  1.27mm
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Orientasi</span>
-                  <select
-                    value={genOrientation}
-                    onChange={(e) => setGenOrientation(e.target.value as any)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100"
-                  >
-                    <option value="vertical">Vertikal</option>
-                    <option value="horizontal">Horizontal</option>
-                  </select>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Prefix ID</span>
-                  <input
-                    type="text"
-                    value={genPrefix}
-                    onChange={(e) => setGenPrefix(e.target.value)}
-                    placeholder="p / d / pin"
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={handleGeneratePinRow}
-                className="w-full py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 dark:bg-sky-500/15 dark:hover:bg-sky-500/25 border border-sky-400/40 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Generate Deretan Pin ({unit === 'mm' ? `${pxToMm(genPitch, 2)}mm` : `${genPitch}px`})
-              </button>
-            </div>
-
-            {/* Selected Pin Details Inspector */}
-            {selectedPin ? (
-              <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-sky-400/40 dark:border-sky-500/30 flex flex-col gap-3 shadow-md">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-                  <span className="text-xs font-bold text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-sky-500 dark:bg-sky-400" />
-                    Edit Pin Terpilih
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => startInlineEdit(selectedPin.id)}
-                      className="px-2 py-0.5 rounded bg-sky-500/10 hover:bg-sky-500/20 dark:bg-sky-500/15 dark:hover:bg-sky-500/25 border border-sky-400/40 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-[10px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
-                      title="Buka Edit Cepat di Canvas (Shortcut: Enter)"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                      Canvas (↵)
-                    </button>
-                    <button
-                      onClick={() => deletePin(selectedPin.id)}
-                      className="p-1 rounded hover:bg-rose-500/10 dark:hover:bg-rose-500/20 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-                      title="Hapus Pin"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">ID Pin (Unik)</span>
-                    <input
-                      type="text"
-                      value={selectedPin.id}
-                      onChange={(e) => updateSelectedPin({ id: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Nama / Label</span>
-                    <input
-                      type="text"
-                      list="pin-name-suggestions"
-                      value={selectedPin.name}
-                      onChange={(e) => handlePinNameChange(e.target.value)}
-                      placeholder="cth: VCC, GND..."
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-bold focus:border-sky-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Native Autocomplete Datalist for Pin Names */}
-                <datalist id="pin-name-suggestions">
-                  {COMMON_PIN_SUGGESTIONS.map((s) => (
-                    <option key={s.name} value={s.name}>
-                      {s.description} ({s.category})
-                    </option>
-                  ))}
-                </datalist>
-
-                <div>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Tipe Pin</span>
-                  <select
-                    value={selectedPin.type}
-                    onChange={(e) => updateSelectedPin({ type: e.target.value as PinType })}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none"
-                  >
-                    {PIN_TYPES.map((t) => (
-                      <option key={t.type} value={t.type}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Koordinat X ({unit})</span>
-                      <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
-                        {unit === 'mm' ? `≈ ${selectedPin.x} px` : `≈ ${pxToMm(selectedPin.x, 2)} mm`}
-                      </span>
-                    </div>
-                    <input
-                      type="number"
-                      value={unit === 'mm' ? pxToMm(selectedPin.x, 2) : selectedPin.x}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        const pxVal = unit === 'mm' ? mmToPx(val, 2) : val;
-                        updateSelectedPin({ x: pxVal });
-                      }}
-                      step={unit === 'mm' ? '0.1' : '0.1'}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400">Koordinat Y ({unit})</span>
-                      <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
-                        {unit === 'mm' ? `≈ ${selectedPin.y} px` : `≈ ${pxToMm(selectedPin.y, 2)} mm`}
-                      </span>
-                    </div>
-                    <input
-                      type="number"
-                      value={unit === 'mm' ? pxToMm(selectedPin.y, 2) : selectedPin.y}
-                      onChange={(e) => {
-                        const val = Number(e.target.value);
-                        const pxVal = unit === 'mm' ? mmToPx(val, 2) : val;
-                        updateSelectedPin({ y: pxVal });
-                      }}
-                      step={unit === 'mm' ? '0.1' : '0.1'}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 font-mono"
-                    />
-                  </div>
-                </div>
-
-                {/* Micro Nudge Buttons */}
-                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Micro Nudge:</span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => nudgePin(unit === 'mm' ? -mmToPx(0.5, 1) : -0.5, 0)}
-                      className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
-                      title={`Nudge Kiri (-${unit === 'mm' ? '0.5mm' : '0.5px'})`}
-                    >
-                      <ArrowLeft className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => nudgePin(0, unit === 'mm' ? -mmToPx(0.5, 1) : -0.5)}
-                      className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
-                      title={`Nudge Atas (-${unit === 'mm' ? '0.5mm' : '0.5px'})`}
-                    >
-                      <ArrowUp className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => nudgePin(0, unit === 'mm' ? mmToPx(0.5, 1) : 0.5)}
-                      className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
-                      title={`Nudge Bawah (+${unit === 'mm' ? '0.5mm' : '0.5px'})`}
-                    >
-                      <ArrowDown className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => nudgePin(unit === 'mm' ? mmToPx(0.5, 1) : 0.5, 0)}
-                      className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
-                      title={`Nudge Kanan (+${unit === 'mm' ? '0.5mm' : '0.5px'})`}
-                    >
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Deskripsi Tooltip</span>
-                    <button
-                      type="button"
-                      onClick={handleAutoFillPinProfile}
-                      className="text-[10px] text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 font-medium hover:underline cursor-pointer"
-                      title="Otomatiskan Tipe Pin dan Deskripsi dari Nama Pin"
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      Auto Isi
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    value={selectedPin.description || ''}
-                    onChange={(e) => updateSelectedPin({ description: e.target.value })}
-                    placeholder="Contoh: Power 5V / Signal Input..."
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 bg-slate-100/70 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500">
-                Pilih pin pada canvas untuk mengedit atau geser gambar/pin langsung dengan cursor mouse.
-              </div>
-            )}
-
-            {/* List of All Pins */}
-            <div className="flex-1 flex flex-col gap-1.5 min-h-[140px]">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 px-1">
-                <span>Daftar Pin ({pins.length})</span>
-                {pins.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleAutoInferAllPins}
-                      className="text-[10px] text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 hover:underline cursor-pointer font-medium"
-                      title="Otomatiskan Tipe dan Deskripsi semua pin berdasarkan namanya"
-                    >
-                      <Sparkles className="w-2.5 h-2.5" />
-                      Auto Semua
-                    </button>
-                    <button
-                      onClick={() => setPins([])}
-                      className="text-[10px] text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
-                    >
-                      Hapus Semua
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 max-h-48">
-                {pins.map((pin) => {
-                  const isSelected = pin.id === selectedPinId;
-                  const typeDef = PIN_TYPES.find((t) => t.type === pin.type) || PIN_TYPES[0];
-
-                  return (
-                    <div
-                      key={pin.id}
-                      onClick={() => setSelectedPinId(pin.id)}
-                      onDoubleClick={() => startInlineEdit(pin.id)}
-                      onMouseEnter={() => setHoveredPinId(pin.id)}
-                      onMouseLeave={() => setHoveredPinId(null)}
-                      title="Double-click untuk Edit Cepat"
-                      className={`px-2.5 py-1.5 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
-                        isSelected
-                          ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-300 dark:border-sky-500/50 text-sky-800 dark:text-sky-200 shadow-sm'
-                          : 'bg-white dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-800 dark:text-slate-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: typeDef.color }}
-                        />
-                        <span className="font-bold">{pin.name}</span>
-                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">({pin.id})</span>
-                      </div>
-                      <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                        {unit === 'mm'
-                          ? `${pxToMm(pin.x, 1)}, ${pxToMm(pin.y, 1)}`
-                          : `${pin.x.toFixed(1)}, ${pin.y.toFixed(1)}`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          {/* Column 1: Metadata Form */}
+          <StudioMetadataForm
+            typeId={typeId}
+            setTypeId={setTypeId}
+            name={name}
+            setName={setName}
+            category={category}
+            setCategory={setCategory}
+            description={description}
+            setDescription={setDescription}
+            icon={icon}
+            setIcon={setIcon}
+            width={width}
+            setWidth={setWidth}
+            height={height}
+            setHeight={setHeight}
+            unit={unit}
+            setUnit={setUnit}
+            lockAspectRatio={lockAspectRatio}
+            setLockAspectRatio={setLockAspectRatio}
+            imageOffset={imageOffset}
+            setImageOffset={setImageOffset}
+            linkPinsToImage={linkPinsToImage}
+            setLinkPinsToImage={setLinkPinsToImage}
+            imageDataUrl={imageDataUrl}
+            rawImageDataUrl={rawImageDataUrl}
+            originalImageSize={originalImageSize}
+            bgTolerance={bgTolerance}
+            setBgTolerance={setBgTolerance}
+            bgAlgorithm={bgAlgorithm}
+            setBgAlgorithm={setBgAlgorithm}
+            isProcessingBg={isProcessingBg}
+            fileInputRef={fileInputRef}
+            onFileUpload={handleFileUpload}
+            onResetToOriginal={handleResetToOriginal}
+            onMagicRemoveBackground={handleMagicRemoveBackground}
+            onAutoCropToContent={handleAutoCropToContent}
+            onRotateClockwise={() => handleRotateClockwise(true)}
+            onRotateCounterClockwise={handleRotateCounterClockwise}
+            nudgeImage={nudgeImage}
+            nudgeAll={nudgeAll}
+          />
+
+          {/* Column 2: Center Interactive Canvas Preview */}
+          <StudioCanvasPreview
+            canvasRef={canvasRef}
+            inlineInputRef={inlineInputRef}
+            width={width}
+            height={height}
+            unit={unit}
+            imageOffset={imageOffset}
+            imageDataUrl={imageDataUrl}
+            pins={pins}
+            selectedPinId={selectedPinId}
+            setSelectedPinId={setSelectedPinId}
+            hoveredPinId={hoveredPinId}
+            setHoveredPinId={setHoveredPinId}
+            draggingPinId={draggingPinId}
+            alwaysShowLabels={alwaysShowLabels}
+            setAlwaysShowLabels={setAlwaysShowLabels}
+            toolMode={toolMode}
+            setToolMode={setToolMode}
+            linkPinsToImage={linkPinsToImage}
+            setLinkPinsToImage={setLinkPinsToImage}
+            zoom={zoom}
+            setZoom={setZoom}
+            pan={pan}
+            setPan={setPan}
+            isPanning={isPanning}
+            setIsPanning={setIsPanning}
+            setStartPanPos={setStartPanPos}
+            isSpacePressed={isSpacePressed}
+            hasMovedPanRef={hasMovedPanRef}
+            showBreadboard={showBreadboard}
+            setShowBreadboard={setShowBreadboard}
+            breadboardType={breadboardType}
+            setBreadboardType={setBreadboardType}
+            breadboardOpacity={breadboardOpacity}
+            setBreadboardOpacity={setBreadboardOpacity}
+            snapToBreadboard={snapToBreadboard}
+            setSnapToBreadboard={setSnapToBreadboard}
+            breadboardOffset={breadboardOffset}
+            inlineEditPinId={inlineEditPinId}
+            inlinePinName={inlinePinName}
+            setInlinePinName={setInlinePinName}
+            inlinePinDescription={inlinePinDescription}
+            setInlinePinDescription={setInlinePinDescription}
+            historyIndex={historyIndex}
+            historyLength={history.length}
+            handleUndo={handleUndo}
+            handleRedo={handleRedo}
+            handleRotateClockwise={handleRotateClockwise}
+            handleAutoScaleAndSnapToBreadboard={handleAutoScaleAndSnapToBreadboard}
+            handleCanvasWheel={handleCanvasWheel}
+            handleCanvasClick={handleCanvasClick}
+            handleImageMouseDown={handleImageMouseDown}
+            handlePinMouseDown={handlePinMouseDown}
+            startInlineEdit={startInlineEdit}
+            commitAndNavigateInlineEdit={commitAndNavigateInlineEdit}
+            applyPinNameChange={applyPinNameChange}
+          />
+
+          {/* Column 3: Right Pin Editor & Multi-Pin Generator */}
+          <StudioPinEditor
+            pins={pins}
+            setPins={setPins}
+            selectedPin={selectedPin}
+            selectedPinId={selectedPinId}
+            setSelectedPinId={setSelectedPinId}
+            setHoveredPinId={setHoveredPinId}
+            unit={unit}
+            genCount={genCount}
+            setGenCount={setGenCount}
+            genPitch={genPitch}
+            setGenPitch={setGenPitch}
+            genOrientation={genOrientation}
+            setGenOrientation={setGenOrientation}
+            genPrefix={genPrefix}
+            setGenPrefix={setGenPrefix}
+            onGeneratePinRow={handleGeneratePinRow}
+            updateSelectedPin={updateSelectedPin}
+            deletePin={deletePin}
+            startInlineEdit={startInlineEdit}
+            handlePinNameChange={handlePinNameChange}
+            handleAutoFillPinProfile={handleAutoFillPinProfile}
+            handleAutoInferAllPins={handleAutoInferAllPins}
+            nudgePin={nudgePin}
+          />
         </div>
       </div>
     </div>

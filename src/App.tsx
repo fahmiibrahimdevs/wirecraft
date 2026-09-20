@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { toPng } from 'html-to-image';
 import {
   CircuitComponent,
   Wire,
   ComponentType,
   WirePoint,
   WireRouting,
-  CircuitProject,
   ComponentDefinition,
 } from './types/circuit';
 import { COMPONENT_DEFINITIONS } from './constants/components';
 import { getAllComponentDefinitions } from './utils/customComponents';
 import { cleanAndSimplifyWaypoints } from './utils/orthogonalRouter';
+import { translateComponentsAndWires } from './utils/wireTranslation';
 import { useCircuitHistory } from './hooks/useCircuitHistory';
 import { useAppModals } from './hooks/useAppModals';
 import { useCanvasHotkeys } from './hooks/useCanvasHotkeys';
+import { useProjectIO } from './hooks/useProjectIO';
+import { useCircuitFiles } from './hooks/useCircuitFiles';
 import { TopBar } from './components/navigation/TopBar';
 import { ComponentLibrary } from './components/panels/ComponentLibrary';
 import { CircuitCanvas } from './components/canvas/CircuitCanvas';
@@ -25,96 +26,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthModal } from './components/modals/AuthModal';
 import { ContextMenu, ContextMenuState } from './components/menu/ContextMenu';
 import { Zap } from 'lucide-react';
-import { showToast, showConfirm, showError } from './utils/alert';
-
-const STORAGE_KEY = 'wirecraft_saved_project_v1';
-
-interface StoredProjectData {
-  projectName: string;
-  components: CircuitComponent[];
-  wires: Wire[];
-  wireRouting: WireRouting;
-  currentWireColor: string;
-  pan: WirePoint;
-  zoom: number;
-  timestamp: number;
-}
-
-// Initial Default Starter Circuit (Arduino Uno + Half Breadboard + 1 Resistor 220Ω + 1 Red LED + Wires)
-const DEFAULT_STARTER_COMPONENTS: CircuitComponent[] = [
-  {
-    id: 'uno_1',
-    type: 'arduino-uno',
-    name: 'Arduino Uno R3',
-    label: 'Arduino Uno R3',
-    x: 80,
-    y: 100,
-    rotation: 0,
-    customProps: {},
-  },
-  {
-    id: 'bb_1',
-    type: 'breadboard-half',
-    name: 'Half Breadboard',
-    label: 'Half Breadboard (400 Tie-Point)',
-    x: 480,
-    y: 100,
-    rotation: 0,
-    customProps: {},
-  },
-  {
-    id: 'res_1',
-    type: 'resistor',
-    name: 'Resistor 220Ω',
-    label: 'R1 (220Ω)',
-    x: 550,
-    y: 200,
-    rotation: 0,
-    customProps: { resistance: 220 },
-  },
-  {
-    id: 'led_1',
-    type: 'led',
-    name: 'LED 5mm',
-    label: 'LED1',
-    x: 650,
-    y: 200,
-    rotation: 0,
-    customProps: { ledColor: 'red', isLedOn: false },
-  },
-];
-
-const DEFAULT_STARTER_WIRES: Wire[] = [
-  {
-    id: 'wire_5v_rail',
-    fromComponentId: 'uno_1',
-    fromPinId: '5v',
-    toComponentId: 'bb_1',
-    toPinId: 'top-vcc-1',
-    color: '#ef4444', // Red 5V
-    routing: 'orthogonal',
-  },
-  {
-    id: 'wire_gnd_rail',
-    fromComponentId: 'uno_1',
-    fromPinId: 'gnd1',
-    toComponentId: 'bb_1',
-    toPinId: 'top-gnd-1',
-    color: '#0f172a', // Black GND
-    routing: 'orthogonal',
-  },
-  {
-    id: 'wire_d13_resistor',
-    fromComponentId: 'uno_1',
-    fromPinId: 'd13',
-    toComponentId: 'res_1',
-    toPinId: 'pin1',
-    color: '#38bdf8', // Blue D13
-    routing: 'orthogonal',
-  },
-];
-
-import { useCircuitFiles } from './hooks/useCircuitFiles';
+import { showToast } from './utils/alert';
 
 function CircuitAppContent() {
   const { user, isAdmin, token, logout, isLoading } = useAuth();
@@ -460,130 +372,7 @@ function CircuitAppContent() {
   const handleUpdateComponentPositions = useCallback(
     (updates: { id: string; x: number; y: number }[], isFinal = false) => {
       commit(
-        (prev) => {
-          const updateMap = new Map(updates.map((u) => [u.id, { x: u.x, y: u.y }]));
-          const deltaMap = new Map<string, { dx: number; dy: number }>();
-
-          const nextComponents = prev.components.map((c) => {
-            const target = updateMap.get(c.id);
-            if (!target) return c;
-            deltaMap.set(c.id, { dx: target.x - c.x, dy: target.y - c.y });
-            return { ...c, x: target.x, y: target.y };
-          });
-
-          // Resolve wire movement deltas (including connected parent wires for taps)
-          const wireDeltaMap = new Map<string, { dx: number; dy: number }>();
-
-          // Pass 1: Compute direct component deltas for wires
-          prev.wires.forEach((w) => {
-            const fromDelta = w.fromComponentId ? deltaMap.get(w.fromComponentId) : undefined;
-            const toDelta = w.toComponentId ? deltaMap.get(w.toComponentId) : undefined;
-            if (fromDelta && toDelta && Math.abs(fromDelta.dx - toDelta.dx) < 0.01 && Math.abs(fromDelta.dy - toDelta.dy) < 0.01) {
-              wireDeltaMap.set(w.id, fromDelta);
-            } else if (fromDelta && !toDelta && !w.toComponentId) {
-              wireDeltaMap.set(w.id, fromDelta);
-            } else if (toDelta && !fromDelta && !w.fromComponentId) {
-              wireDeltaMap.set(w.id, toDelta);
-            }
-          });
-
-          // Pass 2: Propagate deltas to tap wires whose parent wires are moving
-          for (let pass = 0; pass < 3; pass++) {
-            prev.wires.forEach((w) => {
-              if (wireDeltaMap.has(w.id)) return;
-              const parentDelta = (w.fromWireId ? wireDeltaMap.get(w.fromWireId) : undefined) ||
-                                  (w.toWireId ? wireDeltaMap.get(w.toWireId) : undefined);
-              const compDelta = (w.fromComponentId ? deltaMap.get(w.fromComponentId) : undefined) ||
-                                (w.toComponentId ? deltaMap.get(w.toComponentId) : undefined);
-
-              if (parentDelta && compDelta && Math.abs(parentDelta.dx - compDelta.dx) < 0.01 && Math.abs(parentDelta.dy - compDelta.dy) < 0.01) {
-                wireDeltaMap.set(w.id, parentDelta);
-              } else if (parentDelta && !w.fromComponentId && !w.toComponentId) {
-                wireDeltaMap.set(w.id, parentDelta);
-              }
-            });
-          }
-
-          // Wire waypoint & tap point translation:
-          const nextWires = prev.wires.map((w) => {
-            const fromDelta = w.fromComponentId
-              ? deltaMap.get(w.fromComponentId)
-              : (w.fromWireId ? wireDeltaMap.get(w.fromWireId) : undefined);
-
-            const toDelta = w.toComponentId
-              ? deltaMap.get(w.toComponentId)
-              : (w.toWireId ? wireDeltaMap.get(w.toWireId) : undefined);
-
-            if (!fromDelta && !toDelta) return w;
-
-            let updatedFromPoint = w.fromPoint ? { ...w.fromPoint } : undefined;
-            let updatedToPoint = w.toPoint ? { ...w.toPoint } : undefined;
-
-            if (fromDelta && updatedFromPoint) {
-              updatedFromPoint = { x: updatedFromPoint.x + fromDelta.dx, y: updatedFromPoint.y + fromDelta.dy };
-            }
-            if (toDelta && updatedToPoint) {
-              updatedToPoint = { x: updatedToPoint.x + toDelta.dx, y: updatedToPoint.y + toDelta.dy };
-            }
-
-            // If wire has no custom waypoints (auto-routed)
-            if (!w.waypoints || w.waypoints.length === 0) {
-              return {
-                ...w,
-                fromPoint: updatedFromPoint,
-                toPoint: updatedToPoint,
-              };
-            }
-
-            // If BOTH ends move together (group drag / multi-selection / breadboard drag), translate all waypoints 1:1
-            if (fromDelta && toDelta) {
-              const avgDx = (fromDelta.dx + toDelta.dx) / 2;
-              const avgDy = (fromDelta.dy + toDelta.dy) / 2;
-              return {
-                ...w,
-                fromPoint: updatedFromPoint,
-                toPoint: updatedToPoint,
-                waypoints: w.waypoints.map((p) => ({ x: p.x + avgDx, y: p.y + avgDy })),
-              };
-            }
-
-            // If only fromComponent/fromWire moved:
-            if (fromDelta && !toDelta) {
-              const newPts = w.waypoints.map((p) => ({ ...p }));
-              newPts[0] = { x: newPts[0]!.x + fromDelta.dx, y: newPts[0]!.y + fromDelta.dy };
-              return {
-                ...w,
-                fromPoint: updatedFromPoint,
-                toPoint: updatedToPoint,
-                waypoints: w.routing === 'orthogonal' ? cleanAndSimplifyWaypoints(newPts) : newPts,
-              };
-            }
-
-            // If only toComponent/toWire moved:
-            if (!fromDelta && toDelta) {
-              const newPts = w.waypoints.map((p) => ({ ...p }));
-              const lastIdx = newPts.length - 1;
-              newPts[lastIdx] = { x: newPts[lastIdx]!.x + toDelta.dx, y: newPts[lastIdx]!.y + toDelta.dy };
-              return {
-                ...w,
-                fromPoint: updatedFromPoint,
-                toPoint: updatedToPoint,
-                waypoints: w.routing === 'orthogonal' ? cleanAndSimplifyWaypoints(newPts) : newPts,
-              };
-            }
-
-            return {
-              ...w,
-              fromPoint: updatedFromPoint,
-              toPoint: updatedToPoint,
-            };
-          });
-
-          return {
-            components: nextComponents,
-            wires: nextWires,
-          };
-        },
+        (prev) => translateComponentsAndWires(prev.components, prev.wires, updates),
         !isFinal
       );
     },
@@ -862,96 +651,21 @@ function CircuitAppContent() {
     setPan({ x: 100, y: 80 });
   };
 
-  // Export as PNG Diagram
-  const handleExportPng = async () => {
-    try {
-      const node = document.querySelector('svg') as unknown as HTMLElement;
-      if (!node) return;
-
-      const dataUrl = await toPng(node, {
-        backgroundColor: '#020617',
-        pixelRatio: 2,
-      });
-
-      const link = document.createElement('a');
-      link.download = `${projectName.toLowerCase().replace(/\s+/g, '_')}.png`;
-      link.href = dataUrl;
-      link.click();
-      showToast('success', 'Diagram rangkaian (PNG) berhasil diunduh!');
-    } catch (err) {
-      console.error('Failed to export PNG:', err);
-      showError('Gagal Ekspor Gambar', 'Terjadi kesalahan saat mengekspor diagram rangkaian PNG.');
-    }
-  };
-
-  // Export JSON Project File
-  const handleExportJson = () => {
-    const projectData: CircuitProject = {
-      version: '1.0.0',
-      id: `proj_${Date.now()}`,
-      name: projectName,
-      components,
-      wires,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${projectName.toLowerCase().replace(/\s+/g, '_')}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    showToast('success', 'Berkas proyek (.json) berhasil diunduh!');
-  };
-
-  // Import JSON Project File
-  const handleImportJson = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string;
-        const parsed = JSON.parse(content);
-        if (parsed.components && parsed.wires) {
-          setProjectName(parsed.name || 'Proyek Diimpor');
-          commit({
-            components: parsed.components,
-            wires: parsed.wires,
-          });
-          setSelectedComponentIds([]);
-          setSelectedWireId(null);
-          showToast('success', `Proyek "${parsed.name || file.name}" berhasil dimuat!`);
-        } else {
-          showError('Format Tidak Valid', 'Format file proyek JSON tidak valid atau struktur tidak dikenali.');
-        }
-      } catch (err) {
-        showError('Gagal Membaca File', 'Tidak dapat memproses atau membaca file proyek JSON.');
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  // Clear Canvas
-  const handleClearCanvas = async () => {
-    const isConfirmed = await showConfirm({
-      title: 'Bersihkan Seluruh Kanvas?',
-      text: 'Semua kabel dan komponen yang ada di kanvas aktif akan dihapus.',
-      icon: 'warning',
-      confirmText: 'Ya, Bersihkan',
-      cancelText: 'Batal',
-      isDanger: true,
-    });
-
-    if (isConfirmed) {
-      commit({
-        components: [],
-        wires: [],
-      });
-      setSelectedComponentIds([]);
-      setSelectedWireId(null);
-      showToast('info', 'Kanvas telah dibersihkan.');
-    }
-  };
+  // Export, Import, and Clear handlers
+  const {
+    handleExportPng,
+    handleExportJson,
+    handleImportJson,
+    handleClearCanvas,
+  } = useProjectIO({
+    projectName,
+    components,
+    wires,
+    setProjectName,
+    commit,
+    setSelectedComponentIds,
+    setSelectedWireId,
+  });
 
   // 1. Loading state while verifying stored session token
   if (isLoading) {
