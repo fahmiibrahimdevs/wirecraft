@@ -17,32 +17,10 @@ export const ResistorSvgShape: React.FC<ResistorSvgShapeProps> = ({
   return (
     <g>
       {/* Embedded scalable vector metal-film resistor with 5 dynamic color bands */}
-      <svg
-        viewBox="0 0 42.917 9.71"
-        width={width}
-        height={height}
-        preserveAspectRatio="none"
-        overflow="visible"
-      >
+      <svg viewBox="0 0 42.917 9.71" width={width} height={height} preserveAspectRatio="none" overflow="visible">
         {/* Thick Solid Metallic Leads (Pins) */}
-        <line
-          strokeLinecap="round"
-          x1="1.192"
-          y1="4.855"
-          x2="41.725"
-          y2="4.855"
-          stroke="#1e293b"
-          strokeWidth="3.4"
-        />
-        <line
-          strokeLinecap="round"
-          x1="1.192"
-          y1="4.855"
-          x2="41.725"
-          y2="4.855"
-          stroke="#64748b"
-          strokeWidth="2.4"
-        />
+        <line strokeLinecap="round" x1="1.192" y1="4.855" x2="41.725" y2="4.855" stroke="#1e293b" strokeWidth="3.4" />
+        <line strokeLinecap="round" x1="1.192" y1="4.855" x2="41.725" y2="4.855" stroke="#64748b" strokeWidth="2.4" />
         {/* Terminal contact eyelets at lead tips */}
         <circle cx="1.192" cy="4.855" r="1.6" fill="#475569" stroke="#1e293b" strokeWidth="0.6" />
         <circle cx="41.725" cy="4.855" r="1.6" fill="#475569" stroke="#1e293b" strokeWidth="0.6" />

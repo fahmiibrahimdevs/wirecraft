@@ -273,75 +273,17 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
     if (isVertical) {
       return (
         <g key={key} className="pointer-events-none">
-          {/* Metal Ferrule Pin Tip */}
-          <rect
-            x={tipCenter.x - 2}
-            y={tipCenter.y - 2}
-            width={4}
-            height={4}
-            fill="#cbd5e1"
-            stroke="#64748b"
-            strokeWidth="0.5"
-            rx={0.5}
-          />
-          {/* Plastic Ferrule Insulating Boot */}
-          <rect
-            x={bootCenter.x - 3}
-            y={bootCenter.y - 3}
-            width={6}
-            height={6.5}
-            fill="#0284c7"
-            stroke="#0369a1"
-            strokeWidth="0.5"
-            rx={1}
-          />
-          {/* Highlight sheen */}
-          <line
-            x1={bootCenter.x - 1.5}
-            y1={bootCenter.y - 2.5}
-            x2={bootCenter.x - 1.5}
-            y2={bootCenter.y + 2.5}
-            stroke="#38bdf8"
-            strokeWidth="0.6"
-            opacity="0.8"
-          />
+          <rect x={tipCenter.x - 2} y={tipCenter.y - 2} width={4} height={4} fill="#cbd5e1" stroke="#64748b" strokeWidth="0.5" rx={0.5} />
+          <rect x={bootCenter.x - 3} y={bootCenter.y - 3} width={6} height={6.5} fill="#0284c7" stroke="#0369a1" strokeWidth="0.5" rx={1} />
+          <line x1={bootCenter.x - 1.5} y1={bootCenter.y - 2.5} x2={bootCenter.x - 1.5} y2={bootCenter.y + 2.5} stroke="#38bdf8" strokeWidth="0.6" opacity="0.8" />
         </g>
       );
     } else {
       return (
         <g key={key} className="pointer-events-none">
-          {/* Metal Ferrule Pin Tip */}
-          <rect
-            x={tipCenter.x - 2}
-            y={tipCenter.y - 2}
-            width={4}
-            height={4}
-            fill="#cbd5e1"
-            stroke="#64748b"
-            strokeWidth="0.5"
-            rx={0.5}
-          />
-          {/* Plastic Ferrule Insulating Boot */}
-          <rect
-            x={bootCenter.x - 3}
-            y={bootCenter.y - 3}
-            width={6.5}
-            height={6}
-            fill="#0284c7"
-            stroke="#0369a1"
-            strokeWidth="0.5"
-            rx={1}
-          />
-          {/* Highlight sheen */}
-          <line
-            x1={bootCenter.x - 2.5}
-            y1={bootCenter.y - 1.5}
-            x2={bootCenter.x + 2.5}
-            y2={bootCenter.y - 1.5}
-            stroke="#38bdf8"
-            strokeWidth="0.6"
-            opacity="0.8"
-          />
+          <rect x={tipCenter.x - 2} y={tipCenter.y - 2} width={4} height={4} fill="#cbd5e1" stroke="#64748b" strokeWidth="0.5" rx={0.5} />
+          <rect x={bootCenter.x - 3} y={bootCenter.y - 3} width={6.5} height={6} fill="#0284c7" stroke="#0369a1" strokeWidth="0.5" rx={1} />
+          <line x1={bootCenter.x - 2.5} y1={bootCenter.y - 1.5} x2={bootCenter.x + 2.5} y2={bootCenter.y - 1.5} stroke="#38bdf8" strokeWidth="0.6" opacity="0.8" />
         </g>
       );
     }
@@ -364,108 +306,23 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
     if (info.isVertical) {
       const rx = info.pos.x - tubeHeight / 2;
       const ry = info.pos.y - tubeWidth / 2;
-
       return (
         <g key={key} className="group/tube">
-          {/* White Heat-shrink Tube Box */}
-          <rect
-            x={rx}
-            y={ry}
-            width={tubeHeight}
-            height={tubeWidth}
-            rx={2}
-            ry={2}
-            fill="#ffffff"
-            stroke="#94a3b8"
-            strokeWidth="0.75"
-            className="shadow-sm transition-all group-hover/tube:stroke-sky-500 group-hover/tube:fill-slate-50"
-            style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.18))' }}
-          />
-          {/* Fine accent edges on sleeve borders */}
-          <line
-            x1={rx}
-            y1={ry + 2}
-            x2={rx + tubeHeight}
-            y2={ry + 2}
-            stroke="#e2e8f0"
-            strokeWidth="0.5"
-          />
-          <line
-            x1={rx}
-            y1={ry + tubeWidth - 2}
-            x2={rx + tubeHeight}
-            y2={ry + tubeWidth - 2}
-            stroke="#e2e8f0"
-            strokeWidth="0.5"
-          />
-          {/* Monospace Pin / Net Text (Rotated along tube) */}
-          <text
-            x={info.pos.x}
-            y={info.pos.y}
-            transform={`rotate(-90 ${info.pos.x} ${info.pos.y})`}
-            fill="#0f172a"
-            fontSize="7.5"
-            fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-            fontWeight="bold"
-            textAnchor="middle"
-            dominantBaseline="central"
-            className="select-none pointer-events-none tracking-tight"
-          >
-            {cleanText}
-          </text>
+          <rect x={rx} y={ry} width={tubeHeight} height={tubeWidth} rx={2} ry={2} fill="#ffffff" stroke="#94a3b8" strokeWidth="0.75" className="shadow-sm transition-all group-hover/tube:stroke-sky-500 group-hover/tube:fill-slate-50" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.18))' }} />
+          <line x1={rx} y1={ry + 2} x2={rx + tubeHeight} y2={ry + 2} stroke="#e2e8f0" strokeWidth="0.5" />
+          <line x1={rx} y1={ry + tubeWidth - 2} x2={rx + tubeHeight} y2={ry + tubeWidth - 2} stroke="#e2e8f0" strokeWidth="0.5" />
+          <text x={info.pos.x} y={info.pos.y} transform={`rotate(-90 ${info.pos.x} ${info.pos.y})`} fill="#0f172a" fontSize="7.5" fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" fontWeight="bold" textAnchor="middle" dominantBaseline="central" className="select-none pointer-events-none tracking-tight">{cleanText}</text>
         </g>
       );
     } else {
       const rx = info.pos.x - tubeWidth / 2;
       const ry = info.pos.y - tubeHeight / 2;
-
       return (
         <g key={key} className="group/tube">
-          {/* White Heat-shrink Tube Box */}
-          <rect
-            x={rx}
-            y={ry}
-            width={tubeWidth}
-            height={tubeHeight}
-            rx={2}
-            ry={2}
-            fill="#ffffff"
-            stroke="#94a3b8"
-            strokeWidth="0.75"
-            className="shadow-sm transition-all group-hover/tube:stroke-sky-500 group-hover/tube:fill-slate-50"
-            style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.18))' }}
-          />
-          {/* Fine accent edges on sleeve borders */}
-          <line
-            x1={rx + 2}
-            y1={ry}
-            x2={rx + 2}
-            y2={ry + tubeHeight}
-            stroke="#e2e8f0"
-            strokeWidth="0.5"
-          />
-          <line
-            x1={rx + tubeWidth - 2}
-            y1={ry}
-            x2={rx + tubeWidth - 2}
-            y2={ry + tubeHeight}
-            stroke="#e2e8f0"
-            strokeWidth="0.5"
-          />
-          {/* Monospace Pin / Net Text (Horizontal) */}
-          <text
-            x={info.pos.x}
-            y={info.pos.y}
-            fill="#0f172a"
-            fontSize="7.5"
-            fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-            fontWeight="bold"
-            textAnchor="middle"
-            dominantBaseline="central"
-            className="select-none pointer-events-none tracking-tight"
-          >
-            {cleanText}
-          </text>
+          <rect x={rx} y={ry} width={tubeWidth} height={tubeHeight} rx={2} ry={2} fill="#ffffff" stroke="#94a3b8" strokeWidth="0.75" className="shadow-sm transition-all group-hover/tube:stroke-sky-500 group-hover/tube:fill-slate-50" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.18))' }} />
+          <line x1={rx + 2} y1={ry} x2={rx + 2} y2={ry + tubeHeight} stroke="#e2e8f0" strokeWidth="0.5" />
+          <line x1={rx + tubeWidth - 2} y1={ry} x2={rx + tubeWidth - 2} y2={ry + tubeHeight} stroke="#e2e8f0" strokeWidth="0.5" />
+          <text x={info.pos.x} y={info.pos.y} fill="#0f172a" fontSize="7.5" fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" fontWeight="bold" textAnchor="middle" dominantBaseline="central" className="select-none pointer-events-none tracking-tight">{cleanText}</text>
         </g>
       );
     }
@@ -475,107 +332,48 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
     <g
       className="cursor-pointer group/wire"
       onClick={(e) => onSelect(wire, e)}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        if (onResetWaypoints) onResetWaypoints(wire.id);
-      }}
+      onDoubleClick={(e) => { e.stopPropagation(); onResetWaypoints?.(wire.id); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* 1. Selection Aura Glow */}
-      {isSelected && (
-        <path
-          d={pathD}
-          fill="none"
-          stroke="#38bdf8"
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.55"
-          className="pointer-events-none animate-pulse"
-        />
-      )}
+      {isSelected && <path d={pathD} fill="none" stroke="#38bdf8" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" opacity="0.55" className="pointer-events-none animate-pulse" />}
 
       {/* 2. Main Colored Wire - Clean, flat and crisp */}
-      <path
-        d={pathD}
-        fill="none"
-        stroke={wire.color}
-        strokeWidth="3.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={isSelected ? 'brightness-110' : 'group-hover/wire:brightness-110'}
-      />
+      <path d={pathD} fill="none" stroke={wire.color} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" className={isSelected ? 'brightness-110' : 'group-hover/wire:brightness-110'} />
 
       {/* 3. Terminal Dots & T-Junction Solder Dots (Only rendered at valid connections, NEVER stranded) */}
-      {(isStartPin || isStartTap || isStartJunction) && (
-        <circle
-          cx={pStart.x}
-          cy={pStart.y}
-          r={isStartTap || isStartJunction ? 3.8 : 3.4}
-          fill={wire.color}
-          className="pointer-events-none"
-        />
-      )}
-
-      {(isEndPin || isEndTap || isEndJunction) && (
-        <circle
-          cx={pEnd.x}
-          cy={pEnd.y}
-          r={isEndTap || isEndJunction ? 3.8 : 3.4}
-          fill={wire.color}
-          className="pointer-events-none"
-        />
-      )}
+      {(isStartPin || isStartTap || isStartJunction) && <circle cx={pStart.x} cy={pStart.y} r={isStartTap || isStartJunction ? 3.8 : 3.4} fill={wire.color} className="pointer-events-none" />}
+      {(isEndPin || isEndTap || isEndJunction) && <circle cx={pEnd.x} cy={pEnd.y} r={isEndTap || isEndJunction ? 3.8 : 3.4} fill={wire.color} className="pointer-events-none" />}
 
       {/* T-Junction Solder Dots on wire body */}
       {junctionPoints.map((jp, idx) => {
         const isStart = Math.hypot(jp.x - pStart.x, jp.y - pStart.y) < 2;
         const isEnd = Math.hypot(jp.x - pEnd.x, jp.y - pEnd.y) < 2;
         if (isStart || isEnd) return null;
-        return (
-          <circle
-            key={`jp-${idx}`}
-            cx={jp.x}
-            cy={jp.y}
-            r={3.8}
-            fill={wire.color}
-            className="pointer-events-none"
-          />
-        );
+        return <circle key={`jp-${idx}`} cx={jp.x} cy={jp.y} r={3.8} fill={wire.color} className="pointer-events-none" />;
       })}
 
       {/* 4. Cable Marking Tubes & Ferrule Boots (Industrial Sleeve Aesthetic) */}
       {showWireMarkers && (startHasFerrule || endHasFerrule || (hasAnyMarker && totalWireLength >= minSingleLength)) && (
         <g className="wire-marking-tubes pointer-events-auto">
-          {/* Ferrule Crimp Boots (at terminal connection points) */}
-          {startHasFerrule && waypoints.length >= 2 &&
-            renderFerruleBoot(waypoints[0]!, waypoints[1]!, Math.abs(waypoints[1]!.y - waypoints[0]!.y) >= Math.abs(waypoints[1]!.x - waypoints[0]!.x), `ferrule-start-${wire.id}`)}
+          {startHasFerrule && waypoints.length >= 2 && renderFerruleBoot(waypoints[0]!, waypoints[1]!, Math.abs(waypoints[1]!.y - waypoints[0]!.y) >= Math.abs(waypoints[1]!.x - waypoints[0]!.x), `ferrule-start-${wire.id}`)}
+          {endHasFerrule && waypoints.length >= 2 && renderFerruleBoot(waypoints[waypoints.length - 1]!, waypoints[waypoints.length - 2]!, Math.abs(waypoints[waypoints.length - 2]!.y - waypoints[waypoints.length - 1]!.y) >= Math.abs(waypoints[waypoints.length - 2]!.x - waypoints[waypoints.length - 1]!.x), `ferrule-end-${wire.id}`)}
 
-          {endHasFerrule && waypoints.length >= 2 &&
-            renderFerruleBoot(waypoints[waypoints.length - 1]!, waypoints[waypoints.length - 2]!, Math.abs(waypoints[waypoints.length - 2]!.y - waypoints[waypoints.length - 1]!.y) >= Math.abs(waypoints[waypoints.length - 2]!.x - waypoints[waypoints.length - 1]!.x), `ferrule-end-${wire.id}`)}
-
-          {/* Marking Tubes (White sleeves with pin/net text) */}
           {renderCenter && (() => {
             const centerInfo = getPointAndTangentAtDistance(waypoints, totalWireLength / 2);
-            return centerInfo && effectiveCenterLabel
-              ? renderMarkingTube(centerInfo, effectiveCenterLabel, `tube-center-${wire.id}`)
-              : null;
+            return centerInfo && effectiveCenterLabel ? renderMarkingTube(centerInfo, effectiveCenterLabel, `tube-center-${wire.id}`) : null;
           })()}
 
           {renderStart && (() => {
             const startInfo = getPointAndTangentAtDistance(waypoints, startDist);
-            return startInfo && effectiveStartLabel
-              ? renderMarkingTube(startInfo, effectiveStartLabel, `tube-start-${wire.id}`)
-              : null;
+            return startInfo && effectiveStartLabel ? renderMarkingTube(startInfo, effectiveStartLabel, `tube-start-${wire.id}`) : null;
           })()}
 
           {renderEnd && (() => {
             const pointsRev = [...waypoints].reverse();
             const endInfo = getPointAndTangentAtDistance(pointsRev, endDist);
-            return endInfo && effectiveEndLabel
-              ? renderMarkingTube(endInfo, effectiveEndLabel, `tube-end-${wire.id}`)
-              : null;
+            return endInfo && effectiveEndLabel ? renderMarkingTube(endInfo, effectiveEndLabel, `tube-end-${wire.id}`) : null;
           })()}
         </g>
       )}
@@ -585,28 +383,11 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
         const isHBus = waypoints.some((p, i) => {
           if (i === waypoints.length - 1) return false;
           const next = waypoints[i + 1]!;
-          return (
-            Math.abs(p.y - next.y) <= 2 &&
-            Math.abs(p.y - jp.y) <= 2 &&
-            jp.x >= Math.min(p.x, next.x) - 2 &&
-            jp.x <= Math.max(p.x, next.x) + 2
-          );
+          return Math.abs(p.y - next.y) <= 2 && Math.abs(p.y - jp.y) <= 2 && jp.x >= Math.min(p.x, next.x) - 2 && jp.x <= Math.max(p.x, next.x) + 2;
         });
-
         return (
           <g key={`jp-handle-${idx}`}>
-            <circle
-              cx={jp.x}
-              cy={jp.y}
-              r={14}
-              fill="transparent"
-              className={isHBus ? 'cursor-ew-resize' : 'cursor-ns-resize'}
-              onPointerDown={(e) => {
-                if (onStartJunctionDrag) {
-                  onStartJunctionDrag(wire, idx, jp, !isHBus, e);
-                }
-              }}
-            >
+            <circle cx={jp.x} cy={jp.y} r={14} fill="transparent" className={isHBus ? 'cursor-ew-resize' : 'cursor-ns-resize'} onPointerDown={(e) => onStartJunctionDrag?.(wire, idx, jp, !isHBus, e)}>
               <title>Geser Posisi Titik Sambungan (Junction)</title>
             </circle>
           </g>
@@ -616,30 +397,8 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
       {/* Hover / Selected Endpoint Rings */}
       {(isSelected || isHovered) && (
         <>
-          {(isStartPin || isStartTap || isStartJunction) && (
-            <circle
-              cx={pStart.x}
-              cy={pStart.y}
-              r={5.5}
-              fill="none"
-              stroke={isSelected ? '#38bdf8' : wire.color}
-              strokeWidth="1.5"
-              opacity={isSelected ? 1 : 0.75}
-              className="pointer-events-none"
-            />
-          )}
-          {(isEndPin || isEndTap || isEndJunction) && (
-            <circle
-              cx={pEnd.x}
-              cy={pEnd.y}
-              r={5.5}
-              fill="none"
-              stroke={isSelected ? '#38bdf8' : wire.color}
-              strokeWidth="1.5"
-              opacity={isSelected ? 1 : 0.75}
-              className="pointer-events-none"
-            />
-          )}
+          {(isStartPin || isStartTap || isStartJunction) && <circle cx={pStart.x} cy={pStart.y} r={5.5} fill="none" stroke={isSelected ? '#38bdf8' : wire.color} strokeWidth="1.5" opacity={isSelected ? 1 : 0.75} className="pointer-events-none" />}
+          {(isEndPin || isEndTap || isEndJunction) && <circle cx={pEnd.x} cy={pEnd.y} r={5.5} fill="none" stroke={isSelected ? '#38bdf8' : wire.color} strokeWidth="1.5" opacity={isSelected ? 1 : 0.75} className="pointer-events-none" />}
         </>
       )}
 
@@ -647,34 +406,12 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
       {onStartEndpointDrag && (
         <>
           {(isStartPin || isStartTap || isStartJunction) && (
-            <circle
-              cx={pStart.x}
-              cy={pStart.y}
-              r={12}
-              fill="transparent"
-              className="cursor-grab active:cursor-grabbing hover:scale-125"
-              onPointerDown={(e) => {
-                if (e.button !== 0) return;
-                e.stopPropagation();
-                onStartEndpointDrag(wire, 'start', e);
-              }}
-            >
+            <circle cx={pStart.x} cy={pStart.y} r={12} fill="transparent" className="cursor-grab active:cursor-grabbing hover:scale-125" onPointerDown={(e) => { if (e.button !== 0) return; e.stopPropagation(); onStartEndpointDrag(wire, 'start', e); }}>
               <title>Geser / Pindahkan Titik Sambungan (lepas di pin/kabel)</title>
             </circle>
           )}
           {(isEndPin || isEndTap || isEndJunction) && (
-            <circle
-              cx={pEnd.x}
-              cy={pEnd.y}
-              r={12}
-              fill="transparent"
-              className="cursor-grab active:cursor-grabbing hover:scale-125"
-              onPointerDown={(e) => {
-                if (e.button !== 0) return;
-                e.stopPropagation();
-                onStartEndpointDrag(wire, 'end', e);
-              }}
-            >
+            <circle cx={pEnd.x} cy={pEnd.y} r={12} fill="transparent" className="cursor-grab active:cursor-grabbing hover:scale-125" onPointerDown={(e) => { if (e.button !== 0) return; e.stopPropagation(); onStartEndpointDrag(wire, 'end', e); }}>
               <title>Geser / Pindahkan Titik Sambungan (lepas di pin/kabel)</title>
             </circle>
           )}
@@ -682,15 +419,7 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
       )}
 
       {/* 5. Non-orthogonal Invisible Hitbox */}
-      {wire.routing !== 'orthogonal' && (
-        <path
-          d={pathD}
-          fill="none"
-          stroke="transparent"
-          strokeWidth="18"
-          strokeLinecap="round"
-        />
-      )}
+      {wire.routing !== 'orthogonal' && <path d={pathD} fill="none" stroke="transparent" strokeWidth="18" strokeLinecap="round" />}
 
       {/* 6. Interactive Orthogonal Segment Drag Hitboxes (ERD Studio style) */}
       {wire.routing === 'orthogonal' &&
@@ -699,29 +428,9 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
           const nextP = waypoints[idx + 1]!;
           const isVertical = Math.abs(p.x - nextP.x) < 2;
           const isHorizontal = Math.abs(p.y - nextP.y) < 2;
-
           if (!isVertical && !isHorizontal) return null;
-
           const cursorClass = isVertical ? 'cursor-ew-resize' : 'cursor-ns-resize';
-
-          return (
-            <line
-              key={`seg-hitbox-${idx}`}
-              x1={p.x}
-              y1={p.y}
-              x2={nextP.x}
-              y2={nextP.y}
-              stroke="transparent"
-              strokeWidth={18}
-              strokeLinecap="round"
-              className={cursorClass}
-              onPointerDown={(e) => {
-                if (onStartSegmentDrag) {
-                  onStartSegmentDrag(wire, idx, isVertical, e);
-                }
-              }}
-            />
-          );
+          return <line key={`seg-hitbox-${idx}`} x1={p.x} y1={p.y} x2={nextP.x} y2={nextP.y} stroke="transparent" strokeWidth={18} strokeLinecap="round" className={cursorClass} onPointerDown={(e) => onStartSegmentDrag?.(wire, idx, isVertical, e)} />;
         })}
 
       {/* 7. Interactive Midpoint Split Handles (Only center points, zero corner clutter) */}
@@ -734,32 +443,11 @@ const WireSvgComponent: React.FC<WireSvgProps> = ({
             const midY = (p.y + nextP.y) / 2;
             const len = Math.hypot(nextP.x - p.x, nextP.y - p.y);
             const isVertical = Math.abs(p.x - nextP.x) < 2;
-
             if (len < 32) return null;
-
             return (
               <g key={`midpoint-${idx}`}>
-                <circle
-                  cx={midX}
-                  cy={midY}
-                  r={10}
-                  fill="transparent"
-                  className={isVertical ? 'cursor-ew-resize' : 'cursor-ns-resize'}
-                  onPointerDown={(e) => {
-                    if (onStartMidpointDrag) {
-                      onStartMidpointDrag(wire, idx, isVertical, e);
-                    }
-                  }}
-                />
-                <circle
-                  cx={midX}
-                  cy={midY}
-                  r={3.5}
-                  fill="#0284c7"
-                  stroke="#38bdf8"
-                  strokeWidth={1.5}
-                  className="pointer-events-none opacity-80 hover:opacity-100"
-                />
+                <circle cx={midX} cy={midY} r={10} fill="transparent" className={isVertical ? 'cursor-ew-resize' : 'cursor-ns-resize'} onPointerDown={(e) => onStartMidpointDrag?.(wire, idx, isVertical, e)} />
+                <circle cx={midX} cy={midY} r={3.5} fill="#0284c7" stroke="#38bdf8" strokeWidth={1.5} className="pointer-events-none opacity-80 hover:opacity-100" />
               </g>
             );
           })}

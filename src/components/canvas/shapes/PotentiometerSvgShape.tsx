@@ -20,28 +20,11 @@ export const PotentiometerSvgShape: React.FC<PotentiometerSvgShapeProps> = ({
   return (
     <g>
       {/* Photorealistic Potentiometer Body Asset */}
-      <image
-        href="/components/potentiometer_body.png"
-        x="0"
-        y="0"
-        width={width}
-        height={height}
-        preserveAspectRatio="none"
-      />
+      <image href="/components/potentiometer_body.png" x="0" y="0" width={width} height={height} preserveAspectRatio="none" />
 
       {/* Dynamic Rotating Knurled Dial Knob */}
-      <g
-        transform={`rotate(${angle}, ${knobCenterCanvasX}, ${knobCenterCanvasY})`}
-        style={{ transformOrigin: `${knobCenterCanvasX}px ${knobCenterCanvasY}px` }}
-      >
-        <image
-          href="/components/potentiometer_knob.png"
-          x={knobCenterCanvasX - knobSize / 2}
-          y={knobCenterCanvasY - knobSize / 2}
-          width={knobSize}
-          height={knobSize}
-          preserveAspectRatio="none"
-        />
+      <g transform={`rotate(${angle}, ${knobCenterCanvasX}, ${knobCenterCanvasY})`} style={{ transformOrigin: `${knobCenterCanvasX}px ${knobCenterCanvasY}px` }}>
+        <image href="/components/potentiometer_knob.png" x={knobCenterCanvasX - knobSize / 2} y={knobCenterCanvasY - knobSize / 2} width={knobSize} height={knobSize} preserveAspectRatio="none" />
       </g>
     </g>
   );

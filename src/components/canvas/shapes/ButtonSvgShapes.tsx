@@ -42,22 +42,8 @@ export const PushButton6mmShape: React.FC<PushButton6mmProps> = ({
       <circle cx="21" cy="28.5" r="9.5" fill={btnColor.dark} />
 
       {/* Button Cap with 3D Bevel & Press State */}
-      <circle
-        cx="21"
-        cy="28.5"
-        r={isPressed ? '7.5' : '8.5'}
-        fill={btnColor.base}
-        stroke={btnColor.border}
-        strokeWidth="1"
-      />
-      <ellipse
-        cx="21"
-        cy="25.5"
-        rx="4"
-        ry="1.8"
-        fill="#ffffff"
-        opacity={isPressed ? '0.15' : '0.35'}
-      />
+      <circle cx="21" cy="28.5" r={isPressed ? '7.5' : '8.5'} fill={btnColor.base} stroke={btnColor.border} strokeWidth="1" />
+      <ellipse cx="21" cy="25.5" rx="4" ry="1.8" fill="#ffffff" opacity={isPressed ? '0.15' : '0.35'} />
     </g>
   );
 };
@@ -110,22 +96,8 @@ export const PushButton12mmShape: React.FC<PushButton12mmProps> = ({
       <circle cx="36" cy="63.5" r="21.5" fill={btnColor.dark} />
 
       {/* Tactile Big Button Cap */}
-      <circle
-        cx="36"
-        cy="63.5"
-        r={isPressed ? '18' : '19.5'}
-        fill={btnColor.base}
-        stroke={btnColor.border}
-        strokeWidth="1.2"
-      />
-      <ellipse
-        cx="36"
-        cy="55.5"
-        rx="9"
-        ry="4"
-        fill="#ffffff"
-        opacity={isPressed ? '0.15' : '0.32'}
-      />
+      <circle cx="36" cy="63.5" r={isPressed ? '18' : '19.5'} fill={btnColor.base} stroke={btnColor.border} strokeWidth="1.2" />
+      <ellipse cx="36" cy="55.5" rx="9" ry="4" fill="#ffffff" opacity={isPressed ? '0.15' : '0.32'} />
     </g>
   );
 };

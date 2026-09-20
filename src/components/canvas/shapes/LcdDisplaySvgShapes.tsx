@@ -19,45 +19,12 @@ export const Lcd1602SvgShape: React.FC<Lcd1602ShapeProps> = ({
 
   return (
     <g>
-      <image
-        href={imageSrc}
-        x="0"
-        y="0"
-        width={width}
-        height={height}
-        preserveAspectRatio="none"
-      />
+      <image href={imageSrc} x="0" y="0" width={width} height={height} preserveAspectRatio="none" />
 
       {(textRow1 || textRow2) && (
         <g transform="translate(68, 82)">
-          {textRow1 && (
-            <text
-              x="0"
-              y="30"
-              fill="#162506"
-              fontSize="22"
-              fontFamily="monospace"
-              fontWeight="700"
-              letterSpacing="3.2px"
-              style={{ userSelect: 'none' }}
-            >
-              {textRow1.slice(0, 16).padEnd(16, ' ')}
-            </text>
-          )}
-          {textRow2 && (
-            <text
-              x="0"
-              y="58"
-              fill="#162506"
-              fontSize="22"
-              fontFamily="monospace"
-              fontWeight="700"
-              letterSpacing="3.2px"
-              style={{ userSelect: 'none' }}
-            >
-              {textRow2.slice(0, 16).padEnd(16, ' ')}
-            </text>
-          )}
+          {textRow1 && <text x="0" y="30" fill="#162506" fontSize="22" fontFamily="monospace" fontWeight="700" letterSpacing="3.2px" style={{ userSelect: 'none' }}>{textRow1.slice(0, 16).padEnd(16, ' ')}</text>}
+          {textRow2 && <text x="0" y="58" fill="#162506" fontSize="22" fontFamily="monospace" fontWeight="700" letterSpacing="3.2px" style={{ userSelect: 'none' }}>{textRow2.slice(0, 16).padEnd(16, ' ')}</text>}
         </g>
       )}
     </g>
@@ -88,73 +55,14 @@ export const Lcd2004SvgShape: React.FC<Lcd2004ShapeProps> = ({
 
   return (
     <g>
-      <image
-        href={imageSrc}
-        x="0"
-        y="0"
-        width={width}
-        height={height}
-        preserveAspectRatio="none"
-      />
+      <image href={imageSrc} x="0" y="0" width={width} height={height} preserveAspectRatio="none" />
 
       {hasText && (
         <g transform="translate(70, 80)">
-          {textRow1 && (
-            <text
-              x="0"
-              y="28"
-              fill="#162506"
-              fontSize="20"
-              fontFamily="monospace"
-              fontWeight="700"
-              letterSpacing="2.8px"
-              style={{ userSelect: 'none' }}
-            >
-              {textRow1.slice(0, 20).padEnd(20, ' ')}
-            </text>
-          )}
-          {textRow2 && (
-            <text
-              x="0"
-              y="56"
-              fill="#162506"
-              fontSize="20"
-              fontFamily="monospace"
-              fontWeight="700"
-              letterSpacing="2.8px"
-              style={{ userSelect: 'none' }}
-            >
-              {textRow2.slice(0, 20).padEnd(20, ' ')}
-            </text>
-          )}
-          {textRow3 && (
-            <text
-              x="0"
-              y="84"
-              fill="#162506"
-              fontSize="20"
-              fontFamily="monospace"
-              fontWeight="700"
-              letterSpacing="2.8px"
-              style={{ userSelect: 'none' }}
-            >
-              {textRow3.slice(0, 20).padEnd(20, ' ')}
-            </text>
-          )}
-          {textRow4 && (
-            <text
-              x="0"
-              y="112"
-              fill="#162506"
-              fontSize="20"
-              fontFamily="monospace"
-              fontWeight="700"
-              letterSpacing="2.8px"
-              style={{ userSelect: 'none' }}
-            >
-              {textRow4.slice(0, 20).padEnd(20, ' ')}
-            </text>
-          )}
+          {textRow1 && <text x="0" y="28" fill="#162506" fontSize="20" fontFamily="monospace" fontWeight="700" letterSpacing="2.8px" style={{ userSelect: 'none' }}>{textRow1.slice(0, 20).padEnd(20, ' ')}</text>}
+          {textRow2 && <text x="0" y="56" fill="#162506" fontSize="20" fontFamily="monospace" fontWeight="700" letterSpacing="2.8px" style={{ userSelect: 'none' }}>{textRow2.slice(0, 20).padEnd(20, ' ')}</text>}
+          {textRow3 && <text x="0" y="84" fill="#162506" fontSize="20" fontFamily="monospace" fontWeight="700" letterSpacing="2.8px" style={{ userSelect: 'none' }}>{textRow3.slice(0, 20).padEnd(20, ' ')}</text>}
+          {textRow4 && <text x="0" y="112" fill="#162506" fontSize="20" fontFamily="monospace" fontWeight="700" letterSpacing="2.8px" style={{ userSelect: 'none' }}>{textRow4.slice(0, 20).padEnd(20, ' ')}</text>}
         </g>
       )}
     </g>

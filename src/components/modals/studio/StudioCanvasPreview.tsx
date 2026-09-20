@@ -401,39 +401,16 @@ export const StudioCanvasPreview: React.FC<StudioCanvasPreviewProps> = ({
                     />
                   </g>
                 ) : breadboardType === 'mini' ? (
-                  <g
-                    transform={`translate(${breadboardOffset.x - 0.288}, ${breadboardOffset.y - 8.63})`}
-                  >
-                    <image
-                      href="/components/breadboard_mini.svg"
-                      x={0}
-                      y={0}
-                      width={306.56}
-                      height={238.27}
-                      preserveAspectRatio="none"
-                    />
+                  <g transform={`translate(${breadboardOffset.x - 0.288}, ${breadboardOffset.y - 8.63})`}>
+                    <image href="/components/breadboard_mini.svg" x={0} y={0} width={306.56} height={238.27} preserveAspectRatio="none" />
                   </g>
                 ) : (
                   <g opacity={0.4}>
                     {Array.from({ length: Math.max(22, Math.ceil(height / 17) + 8) }).map((_, r) => (
                       <React.Fragment key={`row-${r}`}>
-                        {Array.from({ length: Math.max(35, Math.ceil(width / 17) + 12) }).map(
-                          (__, c) => {
-                            const hx = c * 17.0 + breadboardOffset.x;
-                            const hy = r * 17.0 + breadboardOffset.y;
-                            return (
-                              <circle
-                                key={`bb-${r}-${c}`}
-                                cx={hx}
-                                cy={hy}
-                                r={2.2}
-                                fill="#38bdf8"
-                                stroke="#0284c7"
-                                strokeWidth={0.8}
-                              />
-                            );
-                          }
-                        )}
+                        {Array.from({ length: Math.max(35, Math.ceil(width / 17) + 12) }).map((__, c) => (
+                          <circle key={`bb-${r}-${c}`} cx={c * 17.0 + breadboardOffset.x} cy={r * 17.0 + breadboardOffset.y} r={2.2} fill="#38bdf8" stroke="#0284c7" strokeWidth={0.8} />
+                        ))}
                       </React.Fragment>
                     ))}
                   </g>
@@ -442,41 +419,11 @@ export const StudioCanvasPreview: React.FC<StudioCanvasPreviewProps> = ({
             )}
 
             {/* Component Border Box */}
-            <rect
-              x={imageOffset.x}
-              y={imageOffset.y}
-              width={width}
-              height={height}
-              fill="#0f172a"
-              fillOpacity={0.4}
-              stroke="#38bdf8"
-              strokeWidth={1.5}
-              strokeDasharray="4 4"
-              rx={4}
-              className={
-                toolMode === 'add-pin'
-                  ? 'cursor-crosshair'
-                  : 'cursor-grab active:cursor-grabbing hover:stroke-sky-400'
-              }
-              onMouseDown={handleImageMouseDown}
-            />
+            <rect x={imageOffset.x} y={imageOffset.y} width={width} height={height} fill="#0f172a" fillOpacity={0.4} stroke="#38bdf8" strokeWidth={1.5} strokeDasharray="4 4" rx={4} className={toolMode === 'add-pin' ? 'cursor-crosshair' : 'cursor-grab active:cursor-grabbing hover:stroke-sky-400'} onMouseDown={handleImageMouseDown} />
 
             {/* Component Image */}
             {imageDataUrl && (
-              <image
-                href={imageDataUrl}
-                x={imageOffset.x}
-                y={imageOffset.y}
-                width={width}
-                height={height}
-                preserveAspectRatio="none"
-                className={
-                  toolMode === 'add-pin'
-                    ? 'cursor-crosshair'
-                    : 'cursor-grab active:cursor-grabbing hover:opacity-95 transition-opacity duration-150'
-                }
-                onMouseDown={handleImageMouseDown}
-              />
+              <image href={imageDataUrl} x={imageOffset.x} y={imageOffset.y} width={width} height={height} preserveAspectRatio="none" className={toolMode === 'add-pin' ? 'cursor-crosshair' : 'cursor-grab active:cursor-grabbing hover:opacity-95 transition-opacity duration-150'} onMouseDown={handleImageMouseDown} />
             )}
 
             {/* Render Pins & Smart Elbow Callouts */}
@@ -517,154 +464,38 @@ export const StudioCanvasPreview: React.FC<StudioCanvasPreviewProps> = ({
                     }}
                   >
                     {/* Invisible Large Hit Area */}
-                    <circle
-                      cx={0}
-                      cy={0}
-                      r={14}
-                      fill="transparent"
-                      className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-                    />
+                    <circle cx={0} cy={0} r={14} fill="transparent" className={isDragging ? 'cursor-grabbing' : 'cursor-grab'} />
 
                     {/* Selected Glowing Ring */}
-                    {isSelected && (
-                      <circle
-                        cx={0}
-                        cy={0}
-                        r={10}
-                        fill="none"
-                        stroke="#38bdf8"
-                        strokeWidth={2}
-                        strokeDasharray="3 3"
-                        className="animate-spin"
-                        style={{ animationDuration: '4s' }}
-                      />
-                    )}
+                    {isSelected && <circle cx={0} cy={0} r={10} fill="none" stroke="#38bdf8" strokeWidth={2} strokeDasharray="3 3" className="animate-spin" style={{ animationDuration: '4s' }} />}
 
                     {/* Crosshair Precision Sniper Mode or Solid Pin */}
                     {isDragging ? (
                       <g pointerEvents="none">
-                        <circle
-                          cx={0}
-                          cy={0}
-                          r={12}
-                          fill="none"
-                          stroke="#38bdf8"
-                          strokeWidth={0.9}
-                          strokeDasharray="2 2"
-                          opacity={0.75}
-                        />
-                        <circle
-                          cx={0}
-                          cy={0}
-                          r={5.5}
-                          fill={typeDef.color}
-                          fillOpacity={0.2}
-                          stroke="#38bdf8"
-                          strokeWidth={1.5}
-                        />
-                        <line
-                          x1={-10}
-                          y1={0}
-                          x2={-2.2}
-                          y2={0}
-                          stroke="#38bdf8"
-                          strokeWidth={1.2}
-                          strokeLinecap="round"
-                        />
-                        <line
-                          x1={2.2}
-                          y1={0}
-                          x2={10}
-                          y2={0}
-                          stroke="#38bdf8"
-                          strokeWidth={1.2}
-                          strokeLinecap="round"
-                        />
-                        <line
-                          x1={0}
-                          y1={-10}
-                          x2={0}
-                          y2={-2.2}
-                          stroke="#38bdf8"
-                          strokeWidth={1.2}
-                          strokeLinecap="round"
-                        />
-                        <line
-                          x1={0}
-                          y1={2.2}
-                          x2={0}
-                          y2={10}
-                          stroke="#38bdf8"
-                          strokeWidth={1.2}
-                          strokeLinecap="round"
-                        />
+                        <circle cx={0} cy={0} r={12} fill="none" stroke="#38bdf8" strokeWidth={0.9} strokeDasharray="2 2" opacity={0.75} />
+                        <circle cx={0} cy={0} r={5.5} fill={typeDef.color} fillOpacity={0.2} stroke="#38bdf8" strokeWidth={1.5} />
+                        <line x1={-10} y1={0} x2={-2.2} y2={0} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
+                        <line x1={2.2} y1={0} x2={10} y2={0} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
+                        <line x1={0} y1={-10} x2={0} y2={-2.2} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
+                        <line x1={0} y1={2.2} x2={0} y2={10} stroke="#38bdf8" strokeWidth={1.2} strokeLinecap="round" />
                         <circle cx={0} cy={0} r={2.0} fill="none" stroke="#ffffff" strokeWidth={1} />
                         <circle cx={0} cy={0} r={0.4} fill="#ffffff" opacity={0.9} />
                       </g>
                     ) : (
                       <>
-                        <circle
-                          cx={0}
-                          cy={0}
-                          r={5.5}
-                          fill={typeDef.color}
-                          stroke="#ffffff"
-                          strokeWidth={1.8}
-                          className="cursor-grab"
-                        />
+                        <circle cx={0} cy={0} r={5.5} fill={typeDef.color} stroke="#ffffff" strokeWidth={1.8} className="cursor-grab" />
                         <circle cx={0} cy={0} r={1.8} fill="#ffffff" pointerEvents="none" />
                       </>
                     )}
 
                     {/* Smart Directional Elbow Callout Annotation */}
                     {shouldShowLabel && (
-                      <g
-                        pointerEvents="none"
-                        className="transition-all duration-150"
-                        style={{
-                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.65))',
-                          opacity: isDragging ? 0.5 : 1,
-                        }}
-                      >
-                        <path
-                          d={`M ${callout.p0.x} ${callout.p0.y} L ${callout.p1.x} ${callout.p1.y} L ${callout.p2.x} ${callout.p2.y}`}
-                          fill="none"
-                          stroke={badgeColor}
-                          strokeWidth={strokeW}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          opacity={0.95}
-                        />
+                      <g pointerEvents="none" className="transition-all duration-150" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.65))', opacity: isDragging ? 0.5 : 1 }}>
+                        <path d={`M ${callout.p0.x} ${callout.p0.y} L ${callout.p1.x} ${callout.p1.y} L ${callout.p2.x} ${callout.p2.y}`} fill="none" stroke={badgeColor} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round" opacity={0.95} />
                         <circle cx={callout.p0.x} cy={callout.p0.y} r={1.6} fill={badgeColor} />
-                        <rect
-                          x={callout.badgeX - callout.badgeW / 2}
-                          y={callout.badgeY - callout.badgeH / 2}
-                          width={callout.badgeW}
-                          height={callout.badgeH}
-                          rx={3.5}
-                          fill="#020617"
-                          fillOpacity={0.96}
-                          stroke={badgeColor}
-                          strokeWidth={strokeW}
-                        />
-                        <circle
-                          cx={callout.badgeX - callout.badgeW / 2 + 5.5}
-                          cy={callout.badgeY}
-                          r={2}
-                          fill={typeDef.color}
-                        />
-                        <text
-                          x={callout.badgeX + 3}
-                          y={callout.badgeY + 3.2}
-                          fill="#f8fafc"
-                          fontSize={8.5}
-                          fontWeight="bold"
-                          textAnchor="middle"
-                          fontFamily="monospace"
-                          letterSpacing="0.02em"
-                        >
-                          {pin.name}
-                        </text>
+                        <rect x={callout.badgeX - callout.badgeW / 2} y={callout.badgeY - callout.badgeH / 2} width={callout.badgeW} height={callout.badgeH} rx={3.5} fill="#020617" fillOpacity={0.96} stroke={badgeColor} strokeWidth={strokeW} />
+                        <circle cx={callout.badgeX - callout.badgeW / 2 + 5.5} cy={callout.badgeY} r={2} fill={typeDef.color} />
+                        <text x={callout.badgeX + 3} y={callout.badgeY + 3.2} fill="#f8fafc" fontSize={8.5} fontWeight="bold" textAnchor="middle" fontFamily="monospace" letterSpacing="0.02em">{pin.name}</text>
                       </g>
                     )}
                   </g>
