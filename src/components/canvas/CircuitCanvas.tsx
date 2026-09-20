@@ -24,7 +24,7 @@ import { ComponentSvg } from './ComponentSvg';
 import { WireSvg } from './WireSvg';
 import { CanvasFloatingTooltips } from './CanvasFloatingTooltips';
 import { ContextMenuState } from '../menu/ContextMenu';
-import { detectAvailableBusConnections, generateBusWires } from '../../utils/autoBusRouter';
+import { detectMultiComponentConnections, generateBusWires } from '../../utils/autoBusRouter';
 import { useCanvasGestures } from '../../hooks/useCanvasGestures';
 import { useComponentDrag } from '../../hooks/useComponentDrag';
 import { useWireGestures } from '../../hooks/useWireGestures';
@@ -169,13 +169,12 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     return resolveCircuitNetSignals(components, wires, allDefs, getPinCoords);
   }, [components, wires, allDefs, getPinCoords]);
 
-  // Detect available smart auto-wiring protocol buses between 2 selected components
+  // Detect available smart auto-wiring protocol buses between selected components
   const detectedBusOptions = useMemo(() => {
-    if (selectedComponentIds.length !== 2) return [];
-    const compA = components.find((c) => c.id === selectedComponentIds[0]);
-    const compB = components.find((c) => c.id === selectedComponentIds[1]);
-    if (!compA || !compB) return [];
-    return detectAvailableBusConnections(compA, compB, allDefs, wires);
+    if (selectedComponentIds.length < 2) return [];
+    const selectedComps = components.filter((c) => selectedComponentIds.includes(c.id));
+    if (selectedComps.length < 2) return [];
+    return detectMultiComponentConnections(selectedComps, allDefs, wires);
   }, [selectedComponentIds, components, allDefs, wires]);
 
   // Layer & depth-sorted components for realistic circuit rendering

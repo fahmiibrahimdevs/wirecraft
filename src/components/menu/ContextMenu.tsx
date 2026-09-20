@@ -25,7 +25,7 @@ import {
 import { CircuitComponent, Wire, WireRouting, ComponentType, WireMarkerPosition } from '../../types/circuit';
 import { WIRE_COLORS, COMPONENT_DEFINITIONS } from '../../constants/components';
 import { getAllComponentDefinitions } from '../../utils/customComponents';
-import { detectAvailableBusConnections, generateBusWires } from '../../utils/autoBusRouter';
+import { detectMultiComponentConnections, generateBusWires } from '../../utils/autoBusRouter';
 
 export interface ContextMenuState {
   isOpen: boolean;
@@ -100,14 +100,13 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     ? [menuState.targetComponent.id]
     : [];
 
-  // Detect available smart auto-wiring protocol buses if exactly 2 components are selected
+  // Detect available smart auto-wiring protocol buses if 2 or more components are selected
   const detectedBusOptions = React.useMemo(() => {
-    if (!menuState.isOpen || selectedIds.length !== 2 || !allComponents) return [];
-    const compA = allComponents.find((c) => c.id === selectedIds[0]);
-    const compB = allComponents.find((c) => c.id === selectedIds[1]);
-    if (!compA || !compB) return [];
+    if (!menuState.isOpen || selectedIds.length < 2 || !allComponents) return [];
+    const selectedComps = allComponents.filter((c) => selectedIds.includes(c.id));
+    if (selectedComps.length < 2) return [];
     const allDefs = getAllComponentDefinitions();
-    return detectAvailableBusConnections(compA, compB, allDefs, allWires || []);
+    return detectMultiComponentConnections(selectedComps, allDefs, allWires || []);
   }, [menuState.isOpen, selectedIds, allComponents, allWires]);
 
   // Close when clicking outside or pressing Escape

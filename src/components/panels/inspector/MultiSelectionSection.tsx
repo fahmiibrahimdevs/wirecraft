@@ -1,7 +1,7 @@
 import React from 'react';
 import { CircuitComponent, Wire } from '../../../types/circuit';
 import { getAllComponentDefinitions } from '../../../utils/customComponents';
-import { detectAvailableBusConnections, generateBusWires } from '../../../utils/autoBusRouter';
+import { detectMultiComponentConnections, generateBusWires } from '../../../utils/autoBusRouter';
 import { Layers, Lock, Unlock, Copy, Trash2, Zap, RotateCw } from 'lucide-react';
 
 interface MultiSelectionSectionProps {
@@ -29,11 +29,22 @@ export const MultiSelectionSection: React.FC<MultiSelectionSectionProps> = ({
   const allLocked = selectedComps.length > 0 && selectedComps.every((c) => c.locked);
 
   const allDefs = getAllComponentDefinitions();
-  const isPair = selectedComps.length === 2;
-  const detectedBuses =
-    isPair && selectedComps[0] && selectedComps[1]
-      ? detectAvailableBusConnections(selectedComps[0], selectedComps[1], allDefs, allWires)
-      : [];
+  const detectedBuses = selectedComps.length >= 2 ? detectMultiComponentConnections(selectedComps, allDefs, allWires) : [];
+  const totalWiresCount = detectedBuses.reduce((acc, b) => acc + b.connections.length, 0);
+
+  const handleConnectAll = () => {
+    if (!onAddMultipleWires) return;
+    let currentWires = [...allWires];
+    const created: Omit<Wire, 'id'>[] = [];
+    detectedBuses.forEach((bus) => {
+      const nw = generateBusWires(bus, currentWires, 'orthogonal');
+      nw.forEach((w) => {
+        created.push(w);
+        currentWires.push({ ...w, id: `temp_${Math.random()}` } as Wire);
+      });
+    });
+    if (created.length > 0) onAddMultipleWires(created);
+  };
 
   return (
     <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl animate-fade-in transition-colors duration-200">
@@ -56,14 +67,23 @@ export const MultiSelectionSection: React.FC<MultiSelectionSectionProps> = ({
           <div className="text-[11px] text-slate-500 dark:text-slate-400">Anda dapat menggeser, menduplikasi, mengunci, atau memutar grup komponen ini secara serentak.</div>
         </div>
 
-        {/* Smart Bus Auto-Wiring Section (Active when 2 compatible components are selected) */}
+        {/* Smart Bus Auto-Wiring Section */}
         {detectedBuses.length > 0 && (
           <div className="bg-gradient-to-b from-sky-500/10 to-transparent dark:from-sky-500/15 border border-sky-500/30 rounded-xl p-3.5 space-y-3 shadow-xs animate-fade-in">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-700 dark:text-sky-300">
-              <Zap className="w-4 h-4 text-sky-500 animate-pulse" />
-              <span>Koneksi Bus Cerdas (Auto-Wiring)</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-700 dark:text-sky-300">
+                <Zap className="w-4 h-4 text-sky-500 animate-pulse" />
+                <span>Koneksi Cerdas (Auto-Wiring)</span>
+              </div>
+              {detectedBuses.length > 1 && (
+                <button onClick={handleConnectAll} className="text-[10px] bg-sky-500 hover:bg-sky-600 text-white font-semibold px-2 py-0.5 rounded shadow-xs cursor-pointer transition-all">
+                  ⚡ Sambung Semua ({totalWiresCount})
+                </button>
+              )}
             </div>
-            <div className="text-[11px] text-slate-600 dark:text-slate-400">Terdeteksi antarmuka yang kompatibel antara <b>{selectedComps[0]?.label}</b> dan <b>{selectedComps[1]?.label}</b>:</div>
+            <div className="text-[11px] text-slate-600 dark:text-slate-400">
+              {selectedComps.length === 2 ? (<>Terdeteksi antarmuka yang kompatibel antara <b>{selectedComps[0]?.label}</b> dan <b>{selectedComps[1]?.label}</b>:</>) : (<>Terdeteksi <b>{detectedBuses.length} koneksi antarmuka</b> pada {selectedComps.length} komponen terpilih:</>)}
+            </div>
 
             <div className="space-y-2.5">
               {detectedBuses.map((bus) => (
