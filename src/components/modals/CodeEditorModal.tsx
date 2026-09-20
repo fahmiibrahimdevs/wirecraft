@@ -81,7 +81,7 @@ void loop() {
       const unoPin = isFrom ? w.fromPinId : w.toPinId;
       const targetCompId = isFrom ? w.toComponentId : w.fromComponentId;
       const targetComp = components.find((c) => c.id === targetCompId);
-      if (!targetComp) return;
+      if (!targetComp || !unoPin) return;
 
       const pinUpper = unoPin.toUpperCase();
 

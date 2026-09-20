@@ -82,6 +82,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     });
 
     wires.forEach((w) => {
+      if (w.fromPoint) {
+        minX = Math.min(minX, w.fromPoint.x);
+        minY = Math.min(minY, w.fromPoint.y);
+        maxX = Math.max(maxX, w.fromPoint.x);
+        maxY = Math.max(maxY, w.fromPoint.y);
+      }
+      if (w.toPoint) {
+        minX = Math.min(minX, w.toPoint.x);
+        minY = Math.min(minY, w.toPoint.y);
+        maxX = Math.max(maxX, w.toPoint.x);
+        maxY = Math.max(maxY, w.toPoint.y);
+      }
       if (w.waypoints) {
         w.waypoints.forEach((pt) => {
           minX = Math.min(minX, pt.x);

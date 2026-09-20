@@ -11,12 +11,14 @@ import {
 } from './types/circuit';
 import { COMPONENT_DEFINITIONS } from './constants/components';
 import { getAllComponentDefinitions } from './utils/customComponents';
+import { cleanAndSimplifyWaypoints } from './utils/orthogonalRouter';
 import { useCircuitHistory, HistoryState } from './hooks/useCircuitHistory';
 import { TopBar } from './components/navigation/TopBar';
 import { ComponentLibrary } from './components/panels/ComponentLibrary';
 import { CircuitCanvas } from './components/canvas/CircuitCanvas';
 import { PropertiesInspector } from './components/panels/PropertiesInspector';
 import { BomModal } from './components/modals/BomModal';
+import { WiringTableModal } from './components/modals/WiringTableModal';
 import { PresetsModal } from './components/modals/PresetsModal';
 import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
 import { UserManagementModal } from './components/modals/UserManagementModal';
@@ -169,6 +171,7 @@ function CircuitAppContent() {
   const [currentWireColor, setCurrentWireColor] = useState(activeFile?.currentWireColor || '#38bdf8');
   const [wireRouting, setWireRouting] = useState<WireRouting>(activeFile?.wireRouting || 'orthogonal');
   const [snapGrid, setSnapGrid] = useState(true);
+  const [showWireMarkers, setShowWireMarkers] = useState<boolean>(activeFile?.showWireMarkers ?? true);
   const [zoom, setZoom] = useState(activeFile?.zoom || 1);
   const [pan, setPan] = useState<WirePoint>(activeFile?.pan || { x: 80, y: 50 });
 
@@ -192,6 +195,7 @@ function CircuitAppContent() {
         wires,
         wireRouting,
         currentWireColor,
+        showWireMarkers,
         pan,
         zoom,
         name: projectName,
@@ -205,6 +209,7 @@ function CircuitAppContent() {
       wires,
       wireRouting,
       currentWireColor,
+      showWireMarkers,
       pan,
       zoom,
       projectName,
@@ -224,6 +229,7 @@ function CircuitAppContent() {
       });
       if (activeFile.wireRouting) setWireRouting(activeFile.wireRouting);
       if (activeFile.currentWireColor) setCurrentWireColor(activeFile.currentWireColor);
+      if (activeFile.showWireMarkers !== undefined) setShowWireMarkers(activeFile.showWireMarkers);
       if (activeFile.pan) setPan(activeFile.pan);
       if (activeFile.zoom) setZoom(activeFile.zoom);
       setSelectedComponentIds([]);
@@ -239,6 +245,7 @@ function CircuitAppContent() {
         wires,
         wireRouting,
         currentWireColor,
+        showWireMarkers,
         pan,
         zoom,
         name: projectName,
@@ -252,6 +259,7 @@ function CircuitAppContent() {
       wires,
       wireRouting,
       currentWireColor,
+      showWireMarkers,
       pan,
       zoom,
       projectName,
@@ -274,13 +282,13 @@ function CircuitAppContent() {
           wires,
           wireRouting,
           currentWireColor,
+          showWireMarkers,
           pan,
           zoom,
           name: projectName,
         });
         setSaveStatus('saved');
       } catch (err) {
-        console.error('Failed to auto-save circuit file:', err);
         setSaveStatus('saved');
       }
     }, 600);
@@ -293,11 +301,12 @@ function CircuitAppContent() {
   }, [
     components,
     wires,
-    projectName,
     wireRouting,
     currentWireColor,
+    showWireMarkers,
     pan,
     zoom,
+    projectName,
     updateActiveFileContent,
   ]);
 
@@ -316,6 +325,7 @@ function CircuitAppContent() {
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
   const [isBomModalOpen, setIsBomModalOpen] = useState(false);
+  const [isWiringTableOpen, setIsWiringTableOpen] = useState(false);
   const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
@@ -331,6 +341,9 @@ function CircuitAppContent() {
     worldY: 0,
     targetType: 'canvas',
   });
+
+  // Wire Branching request from context menu
+  const [startBranchWireRequest, setStartBranchWireRequest] = useState<{ wire: Wire; point: WirePoint; timestamp: number } | null>(null);
 
   // 1. Lock / Unlock Components
   const handleToggleLock = useCallback(
@@ -425,13 +438,30 @@ function CircuitAppContent() {
       const targetIds = idsToDelete && idsToDelete.length > 0 ? idsToDelete : selectedComponentIds;
       if (targetIds.length === 0) return;
 
-      commit((prev) => ({
-        ...prev,
-        components: prev.components.filter((c) => !targetIds.includes(c.id)),
-        wires: prev.wires.filter(
-          (w) => !targetIds.includes(w.fromComponentId) && !targetIds.includes(w.toComponentId)
-        ),
-      }));
+      commit((prev) => {
+        const deletedCompIds = new Set(targetIds);
+        const remainingComps = prev.components.filter((c) => !deletedCompIds.has(c.id));
+
+        let remainingWires = prev.wires.filter(
+          (w) =>
+            !(w.fromComponentId && deletedCompIds.has(w.fromComponentId)) &&
+            !(w.toComponentId && deletedCompIds.has(w.toComponentId))
+        );
+
+        // Also clean up any wires that were connected to now-deleted wires
+        const existingWireIds = new Set(remainingWires.map((w) => w.id));
+        remainingWires = remainingWires.filter((w) => {
+          if (w.fromWireId && !existingWireIds.has(w.fromWireId)) return false;
+          if (w.toWireId && !existingWireIds.has(w.toWireId)) return false;
+          return true;
+        });
+
+        return {
+          ...prev,
+          components: remainingComps,
+          wires: remainingWires,
+        };
+      });
 
       setSelectedComponentIds([]);
     },
@@ -453,39 +483,112 @@ function CircuitAppContent() {
             return { ...c, x: target.x, y: target.y };
           });
 
-          // Wire waypoint translation:
-          // If BOTH ends of a wire move together (group move), translate all waypoints by (dx, dy)
-          // so the wire route stays completely intact with zero deformation!
-          const nextWires = prev.wires.map((w) => {
-            if (!w.waypoints || w.waypoints.length === 0) return w;
-            const fromDelta = deltaMap.get(w.fromComponentId);
-            const toDelta = deltaMap.get(w.toComponentId);
+          // Resolve wire movement deltas (including connected parent wires for taps)
+          const wireDeltaMap = new Map<string, { dx: number; dy: number }>();
 
+          // Pass 1: Compute direct component deltas for wires
+          prev.wires.forEach((w) => {
+            const fromDelta = w.fromComponentId ? deltaMap.get(w.fromComponentId) : undefined;
+            const toDelta = w.toComponentId ? deltaMap.get(w.toComponentId) : undefined;
+            if (fromDelta && toDelta && Math.abs(fromDelta.dx - toDelta.dx) < 0.01 && Math.abs(fromDelta.dy - toDelta.dy) < 0.01) {
+              wireDeltaMap.set(w.id, fromDelta);
+            } else if (fromDelta && !toDelta && !w.toComponentId) {
+              wireDeltaMap.set(w.id, fromDelta);
+            } else if (toDelta && !fromDelta && !w.fromComponentId) {
+              wireDeltaMap.set(w.id, toDelta);
+            }
+          });
+
+          // Pass 2: Propagate deltas to tap wires whose parent wires are moving
+          for (let pass = 0; pass < 3; pass++) {
+            prev.wires.forEach((w) => {
+              if (wireDeltaMap.has(w.id)) return;
+              const parentDelta = (w.fromWireId ? wireDeltaMap.get(w.fromWireId) : undefined) ||
+                                  (w.toWireId ? wireDeltaMap.get(w.toWireId) : undefined);
+              const compDelta = (w.fromComponentId ? deltaMap.get(w.fromComponentId) : undefined) ||
+                                (w.toComponentId ? deltaMap.get(w.toComponentId) : undefined);
+
+              if (parentDelta && compDelta && Math.abs(parentDelta.dx - compDelta.dx) < 0.01 && Math.abs(parentDelta.dy - compDelta.dy) < 0.01) {
+                wireDeltaMap.set(w.id, parentDelta);
+              } else if (parentDelta && !w.fromComponentId && !w.toComponentId) {
+                wireDeltaMap.set(w.id, parentDelta);
+              }
+            });
+          }
+
+          // Wire waypoint & tap point translation:
+          const nextWires = prev.wires.map((w) => {
+            const fromDelta = w.fromComponentId
+              ? deltaMap.get(w.fromComponentId)
+              : (w.fromWireId ? wireDeltaMap.get(w.fromWireId) : undefined);
+
+            const toDelta = w.toComponentId
+              ? deltaMap.get(w.toComponentId)
+              : (w.toWireId ? wireDeltaMap.get(w.toWireId) : undefined);
+
+            if (!fromDelta && !toDelta) return w;
+
+            let updatedFromPoint = w.fromPoint ? { ...w.fromPoint } : undefined;
+            let updatedToPoint = w.toPoint ? { ...w.toPoint } : undefined;
+
+            if (fromDelta && updatedFromPoint) {
+              updatedFromPoint = { x: updatedFromPoint.x + fromDelta.dx, y: updatedFromPoint.y + fromDelta.dy };
+            }
+            if (toDelta && updatedToPoint) {
+              updatedToPoint = { x: updatedToPoint.x + toDelta.dx, y: updatedToPoint.y + toDelta.dy };
+            }
+
+            // If wire has no custom waypoints (auto-routed)
+            if (!w.waypoints || w.waypoints.length === 0) {
+              return {
+                ...w,
+                fromPoint: updatedFromPoint,
+                toPoint: updatedToPoint,
+              };
+            }
+
+            // If BOTH ends move together (group drag / multi-selection / breadboard drag), translate all waypoints 1:1
             if (fromDelta && toDelta) {
               const avgDx = (fromDelta.dx + toDelta.dx) / 2;
               const avgDy = (fromDelta.dy + toDelta.dy) / 2;
               return {
                 ...w,
+                fromPoint: updatedFromPoint,
+                toPoint: updatedToPoint,
                 waypoints: w.waypoints.map((p) => ({ x: p.x + avgDx, y: p.y + avgDy })),
               };
-            } else if (fromDelta && !toDelta) {
+            }
+
+            // If only fromComponent/fromWire moved:
+            if (fromDelta && !toDelta) {
+              const newPts = w.waypoints.map((p) => ({ ...p }));
+              newPts[0] = { x: newPts[0]!.x + fromDelta.dx, y: newPts[0]!.y + fromDelta.dy };
               return {
                 ...w,
-                waypoints: w.waypoints.map((p, idx) => {
-                  const weight = 1 - (idx + 1) / (w.waypoints!.length + 1);
-                  return { x: p.x + fromDelta.dx * weight, y: p.y + fromDelta.dy * weight };
-                }),
-              };
-            } else if (!fromDelta && toDelta) {
-              return {
-                ...w,
-                waypoints: w.waypoints.map((p, idx) => {
-                  const weight = (idx + 1) / (w.waypoints!.length + 1);
-                  return { x: p.x + toDelta.dx * weight, y: p.y + toDelta.dy * weight };
-                }),
+                fromPoint: updatedFromPoint,
+                toPoint: updatedToPoint,
+                waypoints: w.routing === 'orthogonal' ? cleanAndSimplifyWaypoints(newPts) : newPts,
               };
             }
-            return w;
+
+            // If only toComponent/toWire moved:
+            if (!fromDelta && toDelta) {
+              const newPts = w.waypoints.map((p) => ({ ...p }));
+              const lastIdx = newPts.length - 1;
+              newPts[lastIdx] = { x: newPts[lastIdx]!.x + toDelta.dx, y: newPts[lastIdx]!.y + toDelta.dy };
+              return {
+                ...w,
+                fromPoint: updatedFromPoint,
+                toPoint: updatedToPoint,
+                waypoints: w.routing === 'orthogonal' ? cleanAndSimplifyWaypoints(newPts) : newPts,
+              };
+            }
+
+            return {
+              ...w,
+              fromPoint: updatedFromPoint,
+              toPoint: updatedToPoint,
+            };
           });
 
           return {
@@ -656,6 +759,20 @@ function CircuitAppContent() {
         return;
       }
 
+      // Toggle Wire Marking Tubes (M)
+      if (
+        !isCmdOrCtrl &&
+        !e.altKey &&
+        (e.key === 'm' || e.key === 'M') &&
+        !isStudioOpen &&
+        !isBomModalOpen &&
+        !isPresetsModalOpen
+      ) {
+        e.preventDefault();
+        setShowWireMarkers((prev) => !prev);
+        return;
+      }
+
       // Rotate selected component(s) on canvas (R / Space)
       if (
         !isCmdOrCtrl &&
@@ -735,6 +852,21 @@ function CircuitAppContent() {
     setSelectedComponentIds([]);
   };
 
+  // Add Multiple Wires (Batch Atomic Addition for Auto-Routing)
+  const handleAddMultipleWires = useCallback((wiresData: Omit<Wire, 'id'>[]) => {
+    if (!wiresData || wiresData.length === 0) return;
+    const newWires: Wire[] = wiresData.map((wd, i) => ({
+      ...wd,
+      id: `wire_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`,
+    }));
+
+    commit((prev) => ({
+      ...prev,
+      wires: [...prev.wires, ...newWires],
+    }));
+    setSelectedWireId(null);
+  }, [commit]);
+
   // Update Wire
   const handleUpdateWire = (id: string, updates: Partial<Wire>) => {
     commit((prev) => ({
@@ -745,18 +877,80 @@ function CircuitAppContent() {
 
   // Delete Wire
   const handleDeleteWire = (id: string) => {
-    commit((prev) => ({
-      ...prev,
-      wires: prev.wires.filter((w) => w.id !== id),
-    }));
+    commit((prev) => {
+      const remainingWires = prev.wires
+        .filter((w) => w.id !== id)
+        .map((w) => {
+          let updated = { ...w };
+          if (w.fromWireId === id) {
+            updated = { ...updated, fromWireId: undefined, fromPoint: undefined };
+          }
+          if (w.toWireId === id) {
+            updated = { ...updated, toWireId: undefined, toPoint: undefined };
+          }
+          return updated;
+        })
+        .filter((w) => {
+          const hasStart = Boolean((w.fromComponentId && w.fromPinId) || w.fromWireId);
+          const hasEnd = Boolean((w.toComponentId && w.toPinId) || w.toWireId);
+          return hasStart && hasEnd;
+        });
+
+      return {
+        ...prev,
+        wires: remainingWires,
+      };
+    });
     if (selectedWireId === id) setSelectedWireId(null);
   };
 
   // Update Wire Waypoints
-  const handleUpdateWireWaypoints = (id: string, waypoints: WirePoint[]) => {
+  const handleUpdateWireWaypoints = (
+    id: string,
+    waypoints: WirePoint[],
+    fromPoint?: WirePoint,
+    toPoint?: WirePoint
+  ) => {
     commit((prev) => ({
       ...prev,
-      wires: prev.wires.map((w) => (w.id === id ? { ...w, waypoints } : w)),
+      wires: prev.wires.map((w) =>
+        w.id === id
+          ? {
+              ...w,
+              waypoints: cleanAndSimplifyWaypoints(waypoints),
+              ...(fromPoint !== undefined ? { fromPoint } : {}),
+              ...(toPoint !== undefined ? { toPoint } : {}),
+            }
+          : w
+      ),
+    }));
+  };
+
+  // Update Multiple Wire Waypoints in a single atomic commit
+  const handleUpdateMultiWireWaypoints = (
+    updates: {
+      id: string;
+      waypoints: WirePoint[];
+      fromPoint?: WirePoint;
+      toPoint?: WirePoint;
+    }[]
+  ) => {
+    if (updates.length === 0) return;
+    const updateMap = new Map(updates.map((u) => [u.id, u]));
+    commit((prev) => ({
+      ...prev,
+      wires: prev.wires.map((w) => {
+        const u = updateMap.get(w.id);
+        if (u) {
+          return {
+            ...w,
+            waypoints: cleanAndSimplifyWaypoints(u.waypoints),
+            ...(u.fromPoint !== undefined ? { fromPoint: u.fromPoint } : {}),
+            ...(u.toPoint !== undefined ? { toPoint: u.toPoint } : {}),
+          };
+        }
+        return w;
+      }),
     }));
   };
 
@@ -937,8 +1131,11 @@ function CircuitAppContent() {
         }}
         snapGrid={snapGrid}
         onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
+        showWireMarkers={showWireMarkers}
+        onToggleWireMarkers={() => setShowWireMarkers((prev) => !prev)}
         onOpenPresets={() => setIsPresetsModalOpen(true)}
         onOpenBom={() => setIsBomModalOpen(true)}
+        onOpenWiringTable={() => setIsWiringTableOpen(true)}
         onOpenStudio={
           isAdmin
             ? () => {
@@ -1016,12 +1213,16 @@ function CircuitAppContent() {
           onSelectWireColor={setCurrentWireColor}
           wireRouting={wireRouting}
           snapGrid={snapGrid}
+          showWireMarkers={showWireMarkers}
           onSelectComponents={setSelectedComponentIds}
           onSelectWire={setSelectedWireId}
           onUpdateComponentPositions={handleUpdateComponentPositions}
           onAddWire={handleAddWire}
+          onAddMultipleWires={handleAddMultipleWires}
+          onUpdateWire={handleUpdateWire}
           onDeleteSelected={handleDeleteSelected}
           onUpdateWireWaypoints={handleUpdateWireWaypoints}
+          onUpdateMultiWireWaypoints={handleUpdateMultiWireWaypoints}
           onResetWireWaypoints={handleResetWireWaypoints}
           zoom={zoom}
           pan={pan}
@@ -1031,6 +1232,7 @@ function CircuitAppContent() {
           onCursorMove={(pos) => {
             lastCursorWorldPosRef.current = pos;
           }}
+          startBranchWireRequest={startBranchWireRequest}
         />
 
         {/* Right Properties Inspector Drawer */}
@@ -1043,8 +1245,10 @@ function CircuitAppContent() {
           snapGrid={snapGrid}
           onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
           onCenterCanvas={handleCenterCanvas}
+          onOpenWiringTable={() => setIsWiringTableOpen(true)}
           onUpdateComponent={handleUpdateComponent}
           onUpdateWire={handleUpdateWire}
+          onAddMultipleWires={handleAddMultipleWires}
           onDeleteComponent={(id) => handleDeleteComponents([id])}
           onDuplicateComponent={(id) => handleDuplicateComponents([id])}
           onToggleLock={handleToggleLock}
@@ -1064,6 +1268,10 @@ function CircuitAppContent() {
           onDuplicate={handleDuplicateComponents}
           onRotate={handleRotateComponents}
           onDeleteComponents={handleDeleteComponents}
+          allComponents={components}
+          allWires={wires}
+          wireRouting={wireRouting}
+          onAddMultipleWires={handleAddMultipleWires}
           onEditInStudio={
             isAdmin
               ? (def) => {
@@ -1074,7 +1282,11 @@ function CircuitAppContent() {
           }
           onUpdateWireColor={(wireId, color) => handleUpdateWire(wireId, { color })}
           onUpdateWireRouting={(wireId, routing) => handleUpdateWire(wireId, { routing })}
+          onUpdateWire={handleUpdateWire}
           onDeleteWire={handleDeleteWire}
+          onStartBranchWire={(wire, worldPos) => {
+            setStartBranchWireRequest({ wire, point: worldPos, timestamp: Date.now() });
+          }}
           onQuickAddComponent={handleAddComponent}
           onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
           snapGrid={snapGrid}
@@ -1093,6 +1305,27 @@ function CircuitAppContent() {
         onClose={() => setIsBomModalOpen(false)}
         components={components}
         wires={wires}
+      />
+
+      {/* Hardware Wiring Table Modal */}
+      <WiringTableModal
+        isOpen={isWiringTableOpen}
+        onClose={() => setIsWiringTableOpen(false)}
+        components={components}
+        wires={wires}
+        allDefs={getAllComponentDefinitions()}
+        onHighlightComponent={(compId) => {
+          if (compId) {
+            setSelectedComponentIds([compId]);
+            setSelectedWireId(null);
+          }
+        }}
+        onHighlightWire={(wireId) => {
+          if (wireId) {
+            setSelectedWireId(wireId);
+            setSelectedComponentIds([]);
+          }
+        }}
       />
 
       {/* Presets Modal */}

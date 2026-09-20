@@ -12,6 +12,7 @@ import { showToast, showError } from '../utils/alert';
 
 const STORAGE_FILES_KEY = 'wirecraft_circuit_files_v1';
 const LEGACY_STORAGE_KEY = 'wirecraft_saved_project_v1';
+const LAST_ACTIVE_FILE_KEY = 'wirecraft_last_active_file_id';
 
 // Default starter components for a fresh project
 const DEFAULT_STARTER_COMPONENTS: CircuitComponent[] = [
@@ -97,6 +98,10 @@ function getInitialFileSystem(): CircuitFileSystem {
         parsed.files.length > 0 &&
         Array.isArray(parsed.folders)
       ) {
+        const lastActiveId = localStorage.getItem(LAST_ACTIVE_FILE_KEY);
+        if (lastActiveId && parsed.files.some((f) => f.id === lastActiveId)) {
+          parsed.activeFileId = lastActiveId;
+        }
         return parsed;
       }
     }
@@ -259,11 +264,18 @@ export function useCircuitFiles(authToken?: string | null) {
             const cloudFolders = data.fileSystem.folders || [];
 
             if (cloudFiles.length > 0 || cloudFolders.length > 0) {
-              setFileSystem((prev) => ({
-                activeFileId: cloudFiles[0]?.id || prev.activeFileId,
-                folders: cloudFolders,
-                files: cloudFiles,
-              }));
+              setFileSystem((prev) => {
+                const savedActiveId = localStorage.getItem(LAST_ACTIVE_FILE_KEY) || prev.activeFileId;
+                const validActiveId = cloudFiles.some((f: any) => f.id === savedActiveId)
+                  ? savedActiveId
+                  : (cloudFiles[0]?.id || prev.activeFileId);
+
+                return {
+                  activeFileId: validActiveId,
+                  folders: cloudFolders,
+                  files: cloudFiles,
+                };
+              });
               setCloudSyncStatus('synced');
               return;
             } else {
@@ -302,6 +314,9 @@ export function useCircuitFiles(authToken?: string | null) {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_FILES_KEY, JSON.stringify(fileSystem));
+      if (fileSystem.activeFileId) {
+        localStorage.setItem(LAST_ACTIVE_FILE_KEY, fileSystem.activeFileId);
+      }
     } catch (err) {
       console.error('Failed to save file system to localStorage:', err);
     }
@@ -605,6 +620,9 @@ export function useCircuitFiles(authToken?: string | null) {
 
   // 11. Select Active File
   const selectFile = useCallback((fileId: string) => {
+    try {
+      localStorage.setItem(LAST_ACTIVE_FILE_KEY, fileId);
+    } catch {}
     setFileSystem((prev) => {
       if (prev.activeFileId === fileId) return prev;
       return {
@@ -621,6 +639,7 @@ export function useCircuitFiles(authToken?: string | null) {
       wires?: Wire[];
       wireRouting?: WireRouting;
       currentWireColor?: string;
+      showWireMarkers?: boolean;
       pan?: WirePoint;
       zoom?: number;
       name?: string;
@@ -635,6 +654,7 @@ export function useCircuitFiles(authToken?: string | null) {
             wires: content.wires ?? f.wires,
             wireRouting: content.wireRouting ?? f.wireRouting,
             currentWireColor: content.currentWireColor ?? f.currentWireColor,
+            showWireMarkers: content.showWireMarkers ?? f.showWireMarkers,
             pan: content.pan ?? f.pan,
             zoom: content.zoom ?? f.zoom,
             name: content.name ? `${content.name.replace(/\.wire$/, '')}.wire` : f.name,

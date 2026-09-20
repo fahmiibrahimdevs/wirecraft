@@ -143,12 +143,12 @@ export const BomModal: React.FC<BomModalProps> = ({
         <div className="flex-1 overflow-y-auto p-4">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase">
-                <th className="py-2 px-3">No</th>
-                <th className="py-2 px-3">Komponen</th>
-                <th className="py-2 px-3">Nilai / Spek</th>
-                <th className="py-2 px-3">Label</th>
-                <th className="py-2 px-3 text-right">Qty</th>
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <th className="py-2.5 px-3 w-12">No</th>
+                <th className="py-2.5 px-3">Komponen</th>
+                <th className="py-2.5 px-3">Nilai / Spek</th>
+                <th className="py-2.5 px-3">Label</th>
+                <th className="py-2.5 px-3 text-right">Qty</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
@@ -161,13 +161,13 @@ export const BomModal: React.FC<BomModalProps> = ({
               ) : (
                 partsList.map((part, index) => (
                   <tr key={index} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-slate-400 dark:text-slate-500">{index + 1}</td>
+                    <td className="py-2.5 px-3 text-slate-400 dark:text-slate-500 font-medium">{index + 1}</td>
                     <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200">{part.name}</td>
-                    <td className="py-2.5 px-3 font-mono text-sky-600 dark:text-sky-400">{part.specs}</td>
-                    <td className="py-2.5 px-3 font-mono text-slate-500 dark:text-slate-400 text-[11px]">
+                    <td className="py-2.5 px-3 text-sky-600 dark:text-sky-400 font-medium">{part.specs}</td>
+                    <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 text-xs">
                       {part.labels.join(', ')}
                     </td>
-                    <td className="py-2.5 px-3 font-mono font-semibold text-slate-900 dark:text-slate-100 text-right">
+                    <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-slate-100 text-right">
                       {part.qty}
                     </td>
                   </tr>
@@ -179,7 +179,7 @@ export const BomModal: React.FC<BomModalProps> = ({
 
         {/* Footer Actions */}
         <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 flex items-center justify-between">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             Total Item Part: {components.length}
           </span>
           <div className="flex items-center gap-2">

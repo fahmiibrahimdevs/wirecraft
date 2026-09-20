@@ -856,43 +856,43 @@
         },
         {
           "id": "pin_2",
-          "name": "D8",
+          "name": "D8 (CS)",
           "x": 79.1,
           "y": 10,
-          "type": "digital",
-          "description": "General Purpose Digital Input/Output (D8)"
+          "type": "spi",
+          "description": "GPIO15 / SPI CS / HCS / Boot (D8)"
         },
         {
           "id": "pin_3",
-          "name": "Pin 3",
+          "name": "D7 (MOSI)",
           "x": 96.1,
           "y": 10,
-          "type": "digital",
-          "description": "Pin 3"
+          "type": "spi",
+          "description": "GPIO13 / SPI MOSI / HMOSI (D7)"
         },
         {
           "id": "pin_4",
-          "name": "Pin 4",
+          "name": "D6 (MISO)",
           "x": 113.1,
           "y": 10,
-          "type": "digital",
-          "description": "Pin 4"
+          "type": "spi",
+          "description": "GPIO12 / SPI MISO / HMISO (D6)"
         },
         {
           "id": "pin_5",
-          "name": "Pin 5",
+          "name": "D5 (SCK)",
           "x": 130.1,
           "y": 10,
-          "type": "digital",
-          "description": "Pin 5"
+          "type": "spi",
+          "description": "GPIO14 / SPI SCK / HSCLK (D5)"
         },
         {
           "id": "pin_6",
-          "name": "Pin 6",
+          "name": "D0",
           "x": 147.1,
           "y": 10,
           "type": "digital",
-          "description": "Pin 6"
+          "description": "GPIO16 / Wake-up Deep Sleep (D0)"
         },
         {
           "id": "pin_7",

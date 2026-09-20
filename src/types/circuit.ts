@@ -93,16 +93,25 @@ export interface WirePoint {
 }
 
 export type WireRouting = 'orthogonal' | 'bezier' | 'straight';
+export type WireMarkerPosition = 'auto' | 'start' | 'end' | 'both' | 'center' | 'none';
 
 export interface Wire {
   id: string;
-  fromComponentId: string;
-  fromPinId: string;
-  toComponentId: string;
-  toPinId: string;
+  fromComponentId?: string;
+  fromPinId?: string;
+  fromWireId?: string;
+  fromPoint?: WirePoint;
+
+  toComponentId?: string;
+  toPinId?: string;
+  toWireId?: string;
+  toPoint?: WirePoint;
+
   color: string;
   routing: WireRouting;
   waypoints?: WirePoint[];
+  label?: string;
+  markerPosition?: WireMarkerPosition;
 }
 
 export interface ComponentDefinition {
@@ -141,6 +150,7 @@ export interface CircuitFile {
   wires: Wire[];
   wireRouting?: WireRouting;
   currentWireColor?: string;
+  showWireMarkers?: boolean;
   pan?: WirePoint;
   zoom?: number;
   createdAt: number;

@@ -1,8 +1,9 @@
 import React from 'react';
-import { CircuitComponent, Wire, WireRouting } from '../../types/circuit';
+import { CircuitComponent, Wire, WireRouting, WireMarkerPosition } from '../../types/circuit';
 import { COMPONENT_DEFINITIONS, WIRE_COLORS } from '../../constants/components';
 import { getAllComponentDefinitions } from '../../utils/customComponents';
-import { formatResistance, getResistor5BandColors } from '../../utils/geometry';
+import { formatResistance, getResistor5BandColors, getCleanPinName } from '../../utils/geometry';
+import { detectAvailableBusConnections, generateBusWires } from '../../utils/autoBusRouter';
 import {
   RotateCw,
   Trash2,
@@ -12,16 +13,14 @@ import {
   Layers,
   Sparkles,
   Link,
-  CheckCircle2,
   Copy,
   Lock,
   Unlock,
   Maximize2,
   Cpu,
-  ShieldCheck,
-  AlertTriangle,
-  AlertCircle,
   Zap,
+  Tag,
+  Table,
 } from 'lucide-react';
 
 interface PropertiesInspectorProps {
@@ -33,6 +32,7 @@ interface PropertiesInspectorProps {
   snapGrid: boolean;
   onToggleSnapGrid: () => void;
   onCenterCanvas?: () => void;
+  onOpenWiringTable?: () => void;
   onUpdateComponent: (id: string, updates: Partial<CircuitComponent>) => void;
   onDeleteComponent: (id: string) => void;
   onDuplicateComponent?: (id: string) => void;
@@ -41,6 +41,7 @@ interface PropertiesInspectorProps {
   onDuplicateComponents?: (ids: string[]) => void;
   onDeleteComponents?: (ids: string[]) => void;
   onUpdateWire: (id: string, updates: Partial<Wire>) => void;
+  onAddMultipleWires?: (wires: Omit<Wire, 'id'>[]) => void;
   onDeleteWire: (id: string) => void;
   isOpen: boolean;
   onToggleOpen: () => void;
@@ -208,6 +209,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   snapGrid,
   onToggleSnapGrid,
   onCenterCanvas,
+  onOpenWiringTable,
   onUpdateComponent,
   onDeleteComponent,
   onDuplicateComponent,
@@ -216,6 +218,7 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   onDuplicateComponents,
   onDeleteComponents,
   onUpdateWire,
+  onAddMultipleWires,
   onDeleteWire,
   isOpen,
 }) => {
@@ -225,6 +228,12 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   if (selectedComponentIds.length > 1) {
     const selectedComps = allComponents.filter((c) => selectedComponentIds.includes(c.id));
     const allLocked = selectedComps.length > 0 && selectedComps.every((c) => c.locked);
+
+    const allDefs = getAllComponentDefinitions();
+    const isPair = selectedComps.length === 2;
+    const detectedBuses = isPair && selectedComps[0] && selectedComps[1]
+      ? detectAvailableBusConnections(selectedComps[0], selectedComps[1], allDefs, allWires)
+      : [];
 
     return (
       <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl animate-fade-in transition-colors duration-200">
@@ -278,6 +287,66 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
               Anda dapat menggeser, menduplikasi, mengunci, atau memutar grup komponen ini secara serentak.
             </div>
           </div>
+
+          {/* Smart Bus Auto-Wiring Section (Active when 2 compatible components are selected) */}
+          {detectedBuses.length > 0 && (
+            <div className="bg-gradient-to-b from-sky-500/10 to-transparent dark:from-sky-500/15 border border-sky-500/30 rounded-xl p-3.5 space-y-3 shadow-xs animate-fade-in">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-700 dark:text-sky-300">
+                <Zap className="w-4 h-4 text-sky-500 animate-pulse" />
+                <span>Koneksi Bus Cerdas (Auto-Wiring)</span>
+              </div>
+              <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                Terdeteksi antarmuka yang kompatibel antara <b>{selectedComps[0]?.label}</b> dan <b>{selectedComps[1]?.label}</b>:
+              </div>
+
+              <div className="space-y-2.5">
+                {detectedBuses.map((bus) => (
+                  <div
+                    key={bus.id}
+                    className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                        {bus.name}
+                      </span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium border ${bus.badgeColor}`}>
+                        {bus.busType.toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                      {bus.description}
+                    </div>
+
+                    {/* Signal badges list */}
+                    <div className="flex flex-wrap gap-1 pt-0.5">
+                      {bus.connections.map((c, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+                          <span>{c.signalName}</span>
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Connect button */}
+                    <button
+                      onClick={() => {
+                        const newWires = generateBusWires(bus, allWires, 'orthogonal');
+                        if (onAddMultipleWires) onAddMultipleWires(newWires);
+                      }}
+                      className="w-full mt-1.5 py-1.5 px-3 bg-sky-500 hover:bg-sky-600 active:scale-98 text-white rounded-md text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                      <span>Sambungkan {bus.connections.length} Kabel</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Group Actions */}
           <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2.5">
@@ -869,14 +938,149 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             <div className="text-xs text-slate-600 dark:text-slate-400">Jalur Sambungan:</div>
             <div className="flex items-center gap-2 text-xs font-mono">
               <span className="text-sky-600 dark:text-sky-400 bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">
-                {fromComp?.label || 'Comp'}:{selectedWire.fromPinId}
+                {fromComp?.label || 'Comp'}:{selectedWire.fromPinId || 'Pin'}
               </span>
               <span className="text-slate-400 dark:text-slate-500">⇄</span>
               <span className="text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">
-                {toComp?.label || 'Comp'}:{selectedWire.toPinId}
+                {toComp?.label || 'Comp'}:{selectedWire.toPinId || 'Pin'}
               </span>
             </div>
           </div>
+
+          {/* Wire / Net Marking Tube Config & Label */}
+          {(() => {
+            const allDefs = getAllComponentDefinitions();
+            const fromDef = fromComp ? (allDefs[fromComp.type] || COMPONENT_DEFINITIONS[fromComp.type]) : undefined;
+            const toDef = toComp ? (allDefs[toComp.type] || COMPONENT_DEFINITIONS[toComp.type]) : undefined;
+            const fromPin = fromDef && selectedWire.fromPinId ? fromDef.pins.find((p) => p.id === selectedWire.fromPinId) : undefined;
+            const toPin = toDef && selectedWire.toPinId ? toDef.pins.find((p) => p.id === selectedWire.toPinId) : undefined;
+            const autoFrom = getCleanPinName(fromPin?.name, selectedWire.fromPinId);
+            const autoTo = getCleanPinName(toPin?.name, selectedWire.toPinId);
+            const defaultAutoLabel = autoFrom || autoTo || 'WIRE';
+
+            const currentPos: WireMarkerPosition = selectedWire.markerPosition || (selectedWire.label !== undefined ? (selectedWire.label ? 'both' : 'none') : 'auto');
+            const hasCustomConfig = selectedWire.label !== undefined || selectedWire.markerPosition !== undefined;
+
+            const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+              const val = e.target.value;
+              if (val.trim() === '') {
+                // Auto-delete / hide marking tube when text is cleared!
+                onUpdateWire(selectedWire.id, { label: '', markerPosition: 'none' });
+              } else {
+                onUpdateWire(selectedWire.id, {
+                  label: val.toUpperCase(),
+                  markerPosition: selectedWire.markerPosition === 'none' ? 'auto' : selectedWire.markerPosition,
+                });
+              }
+            };
+
+            const handlePosSelect = (pos: WireMarkerPosition) => {
+              if (pos === 'none') {
+                onUpdateWire(selectedWire.id, { markerPosition: 'none', label: '' });
+              } else if (pos === 'auto') {
+                onUpdateWire(selectedWire.id, { markerPosition: 'auto', label: undefined });
+              } else {
+                onUpdateWire(selectedWire.id, {
+                  markerPosition: pos,
+                  label: selectedWire.label === '' ? undefined : selectedWire.label,
+                });
+              }
+            };
+
+            const quickSuggestions = Array.from(new Set([autoFrom, autoTo, 'GND', '5V', '3.3V', 'VIN'])).filter(Boolean);
+
+            return (
+              <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    <Tag className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
+                    <span>Marking Tube (Penanda Kabel)</span>
+                  </div>
+                  {hasCustomConfig && (
+                    <button
+                      onClick={() => onUpdateWire(selectedWire.id, { label: undefined, markerPosition: undefined })}
+                      className="text-[10px] text-sky-600 dark:text-sky-400 hover:underline cursor-pointer font-medium"
+                      title="Kembalikan ke mode otomatis bawaan"
+                    >
+                      Reset Otomatis
+                    </button>
+                  )}
+                </div>
+
+                {/* Position Selector */}
+                <div className="space-y-1.5">
+                  <div className="text-[11px] font-medium text-slate-600 dark:text-slate-400">Posisi Penanda:</div>
+                  <div className="grid grid-cols-3 gap-1 text-[10px]">
+                    {[
+                      { key: 'auto', label: '⚡ Auto' },
+                      { key: 'start', label: '📍 Awal' },
+                      { key: 'end', label: '📍 Akhir' },
+                      { key: 'both', label: '⇄ Keduanya' },
+                      { key: 'center', label: '• Tengah' },
+                      { key: 'none', label: '🚫 Mati / Polos' },
+                    ].map((p) => (
+                      <button
+                        key={p.key}
+                        onClick={() => handlePosSelect(p.key as WireMarkerPosition)}
+                        className={`py-1 px-1.5 rounded-md border text-center transition-all cursor-pointer font-medium ${
+                          currentPos === p.key
+                            ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/40 font-semibold shadow-xs'
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Text Label Input */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                    <span>Teks Label:</span>
+                    {selectedWire.label === '' && (
+                      <span className="text-[10px] text-rose-500 font-mono font-medium">(Dihapus / Nonaktif)</span>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    value={selectedWire.label ?? ''}
+                    onChange={handleTextChange}
+                    placeholder={currentPos === 'none' ? 'Kabel polos (ketik untuk aktifkan)' : `Otomatis: ${defaultAutoLabel}`}
+                    maxLength={12}
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-200 font-mono uppercase outline-none focus:border-sky-500/80 shadow-xs"
+                  />
+                </div>
+
+                {/* Quick Recommendation Chips */}
+                {quickSuggestions.length > 0 && currentPos !== 'none' && (
+                  <div className="space-y-1">
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500">Rekomendasi Cepat:</div>
+                    <div className="flex flex-wrap gap-1">
+                      {quickSuggestions.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() =>
+                            onUpdateWire(selectedWire.id, {
+                              label: s,
+                              markerPosition: selectedWire.markerPosition === 'none' ? 'auto' : selectedWire.markerPosition,
+                            })
+                          }
+                          className="text-[10px] font-mono px-2 py-0.5 rounded bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-sky-500 hover:text-sky-600 dark:hover:text-sky-400 cursor-pointer transition-colors"
+                        >
+                          +{s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                  💡 Kosongkan teks atau pilih <b>Mati / Polos</b> untuk langsung menghapus penanda kabel.
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Color Selector */}
           <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2.5">
@@ -933,94 +1137,6 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
   }
 
   // 3. Default Summary Panel when nothing is selected
-  const allDefs = getAllComponentDefinitions();
-
-  // Smart Circuit Health Check / Diagnostics
-  const circuitDiagnostics: { type: 'error' | 'warning'; title: string; detail: string }[] = [];
-
-  // 1. Direct Short Circuit Detection (Power directly connected to Ground)
-  for (const wire of allWires) {
-    const fromComp = allComponents.find((c) => c.id === wire.fromComponentId);
-    const toComp = allComponents.find((c) => c.id === wire.toComponentId);
-    if (!fromComp || !toComp) continue;
-
-    const fromDef = allDefs[fromComp.type] || COMPONENT_DEFINITIONS[fromComp.type];
-    const toDef = allDefs[toComp.type] || COMPONENT_DEFINITIONS[toComp.type];
-    const fromPin = fromDef?.pins.find((p) => p.id === wire.fromPinId);
-    const toPin = toDef?.pins.find((p) => p.id === wire.toPinId);
-
-    const isPower = (p?: { type?: string; name?: string }) =>
-      p?.type === 'power' ||
-      ['5v', '3v3', '3.3v', 'vcc', 'vin', '+'].includes((p?.name || '').toLowerCase());
-    const isGround = (p?: { type?: string; name?: string }) =>
-      p?.type === 'ground' ||
-      ['gnd', 'g', '-', 'ground'].includes((p?.name || '').toLowerCase());
-
-    if ((isPower(fromPin) && isGround(toPin)) || (isGround(fromPin) && isPower(toPin))) {
-      circuitDiagnostics.push({
-        type: 'error',
-        title: 'Potensi Korsleting (Short Circuit)',
-        detail: `${fromComp.label} (${fromPin?.name}) terhubung langsung ke Ground di ${toComp.label} (${toPin?.name}).`,
-      });
-    }
-  }
-
-  // 2. Floating Power / Ground Detection for active modules & sensors
-  const passiveTypes = [
-    'breadboard-half',
-    'breadboard-mini',
-    'breadboard-full',
-    'resistor',
-    'push-button',
-    'push-button-6mm',
-    'push-button-12mm',
-    'fitting-lamp',
-    'steker-switch',
-  ];
-  const activeComps = allComponents.filter((c) => !passiveTypes.includes(c.type));
-
-  for (const comp of activeComps) {
-    const def = allDefs[comp.type] || COMPONENT_DEFINITIONS[comp.type];
-    if (!def) continue;
-
-    const powerPins = def.pins.filter(
-      (p) => p.type === 'power' || ['vcc', '5v', '3v3', 'vin'].includes(p.name.toLowerCase())
-    );
-    const gndPins = def.pins.filter(
-      (p) => p.type === 'ground' || ['gnd', 'g'].includes(p.name.toLowerCase())
-    );
-
-    const compWires = allWires.filter(
-      (w) => w.fromComponentId === comp.id || w.toComponentId === comp.id
-    );
-
-    const isPinConnected = (pinId: string) =>
-      compWires.some(
-        (w) =>
-          (w.fromComponentId === comp.id && w.fromPinId === pinId) ||
-          (w.toComponentId === comp.id && w.toPinId === pinId)
-      );
-
-    const hasPowerConnected = powerPins.length === 0 || powerPins.some((p) => isPinConnected(p.id));
-    const hasGndConnected = gndPins.length === 0 || gndPins.some((p) => isPinConnected(p.id));
-
-    if (powerPins.length > 0 && !hasPowerConnected) {
-      circuitDiagnostics.push({
-        type: 'warning',
-        title: 'Catu Daya Belum Terhubung',
-        detail: `${comp.label} (${comp.name}) belum terhubung ke jalur VCC/Daya.`,
-      });
-    }
-
-    if (gndPins.length > 0 && !hasGndConnected) {
-      circuitDiagnostics.push({
-        type: 'warning',
-        title: 'Ground Belum Terhubung',
-        detail: `${comp.label} (${comp.name}) belum terhubung ke jalur GND/Ground.`,
-      });
-    }
-  }
-
   return (
     <aside className="fixed top-14 bottom-0 right-0 z-30 w-84 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl transition-colors duration-200">
       <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
@@ -1050,6 +1166,35 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
           </div>
         </div>
 
+        {/* Hardware Wiring Table Button */}
+        {onOpenWiringTable && (
+          <button
+            onClick={onOpenWiringTable}
+            className="w-full flex items-center justify-between p-3.5 bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-emerald-500/10 hover:from-sky-500/20 hover:via-indigo-500/20 hover:to-emerald-500/20 border border-sky-500/30 dark:border-sky-500/40 rounded-xl text-left transition-all shadow-sm cursor-pointer group hover:border-sky-400"
+            title="Buka Pemetaan Pin & Tabel Wiring Hardware"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform border border-sky-500/30">
+                <Table className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                  Tabel Wiring Hardware
+                  <span className="text-[9px] bg-sky-500 text-white font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                    Baru
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug truncate">
+                  Mapping pin MCU, level shifter & CSV
+                </div>
+              </div>
+            </div>
+            <span className="text-xs text-sky-600 dark:text-sky-400 font-bold group-hover:translate-x-1 transition-transform shrink-0 ml-2">
+              &rarr;
+            </span>
+          </button>
+        )}
+
         {/* Action: Center Canvas View */}
         {onCenterCanvas && (
           <button
@@ -1061,61 +1206,6 @@ export const PropertiesInspector: React.FC<PropertiesInspectorProps> = ({
             <span className="whitespace-nowrap">Pusatkan Semua Komponen (Fit View)</span>
           </button>
         )}
-
-        {/* Circuit Diagnostics / Health Check */}
-        <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
-              <ShieldCheck className="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" />
-              <span className="whitespace-nowrap">Diagnosa Sirkuit</span>
-            </div>
-            <span
-              className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border shrink-0 whitespace-nowrap ${
-                circuitDiagnostics.some((i) => i.type === 'error')
-                  ? 'bg-rose-500/15 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border-rose-500/30'
-                  : circuitDiagnostics.length > 0
-                  ? 'bg-amber-500/15 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border-amber-500/30'
-                  : 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/30'
-              }`}
-            >
-              {circuitDiagnostics.some((i) => i.type === 'error')
-                ? 'Bahaya Korsleting'
-                : circuitDiagnostics.length > 0
-                ? `${circuitDiagnostics.length} Peringatan`
-                : 'Sirkuit Sehat'}
-            </span>
-          </div>
-
-          {circuitDiagnostics.length === 0 ? (
-            <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-500/20 rounded-lg p-2.5 text-[11px] text-emerald-700 dark:text-emerald-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
-              <span>Semua modul aktif terhubung dan tidak terdeteksi korsleting.</span>
-            </div>
-          ) : (
-            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-              {circuitDiagnostics.map((issue, idx) => (
-                <div
-                  key={idx}
-                  className={`p-2.5 rounded-lg border text-[11px] flex items-start gap-2 ${
-                    issue.type === 'error'
-                      ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-500/30 text-rose-800 dark:text-rose-200'
-                      : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-500/25 text-amber-800 dark:text-amber-200'
-                  }`}
-                >
-                  {issue.type === 'error' ? (
-                    <AlertCircle className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-[11px] leading-tight">{issue.title}</div>
-                    <div className="text-[10px] opacity-80 mt-0.5 leading-snug">{issue.detail}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* Canvas Options */}
         <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-3">

@@ -19,10 +19,13 @@ import {
   CircleDot,
   Radio,
   Sliders,
+  Tag,
+  Zap,
 } from 'lucide-react';
-import { CircuitComponent, Wire, WireRouting, ComponentType } from '../../types/circuit';
+import { CircuitComponent, Wire, WireRouting, ComponentType, WireMarkerPosition } from '../../types/circuit';
 import { WIRE_COLORS, COMPONENT_DEFINITIONS } from '../../constants/components';
 import { getAllComponentDefinitions } from '../../utils/customComponents';
+import { detectAvailableBusConnections, generateBusWires } from '../../utils/autoBusRouter';
 
 export interface ContextMenuState {
   isOpen: boolean;
@@ -45,10 +48,16 @@ interface ContextMenuProps {
   onRotate: (ids: string[]) => void;
   onDeleteComponents: (ids: string[]) => void;
   onEditInStudio?: (def: any) => void;
+  allComponents?: CircuitComponent[];
+  allWires?: Wire[];
+  wireRouting?: WireRouting;
+  onAddMultipleWires?: (wires: Omit<Wire, 'id'>[]) => void;
   // Wire Actions
   onUpdateWireColor: (wireId: string, color: string) => void;
   onUpdateWireRouting: (wireId: string, routing: WireRouting) => void;
+  onUpdateWire?: (wireId: string, updates: Partial<Wire>) => void;
   onDeleteWire: (wireId: string) => void;
+  onStartBranchWire?: (wire: Wire, worldPos: { x: number; y: number }) => void;
   // Canvas Actions
   onQuickAddComponent: (type: ComponentType, worldPos?: { x: number; y: number }) => void;
   onToggleSnapGrid: () => void;
@@ -66,9 +75,15 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onRotate,
   onDeleteComponents,
   onEditInStudio,
+  allComponents,
+  allWires,
+  wireRouting = 'orthogonal',
+  onAddMultipleWires,
   onUpdateWireColor,
   onUpdateWireRouting,
+  onUpdateWire,
   onDeleteWire,
+  onStartBranchWire,
   onQuickAddComponent,
   onToggleSnapGrid,
   snapGrid,
@@ -78,6 +93,22 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [activeSubmenu, setActiveSubmenu] = React.useState<'add' | 'color' | 'routing' | null>(null);
+
+  const selectedIds = menuState.selectedComponentIds && menuState.selectedComponentIds.length > 0
+    ? menuState.selectedComponentIds
+    : menuState.targetComponent
+    ? [menuState.targetComponent.id]
+    : [];
+
+  // Detect available smart auto-wiring protocol buses if exactly 2 components are selected
+  const detectedBusOptions = React.useMemo(() => {
+    if (!menuState.isOpen || selectedIds.length !== 2 || !allComponents) return [];
+    const compA = allComponents.find((c) => c.id === selectedIds[0]);
+    const compB = allComponents.find((c) => c.id === selectedIds[1]);
+    if (!compA || !compB) return [];
+    const allDefs = getAllComponentDefinitions();
+    return detectAvailableBusConnections(compA, compB, allDefs, allWires || []);
+  }, [menuState.isOpen, selectedIds, allComponents, allWires]);
 
   // Close when clicking outside or pressing Escape
   useEffect(() => {
@@ -110,12 +141,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   const menuHeight = 320;
   const posX = Math.min(menuState.x, window.innerWidth - menuWidth - 10);
   const posY = Math.min(menuState.y, window.innerHeight - menuHeight - 10);
-
-  const selectedIds = menuState.selectedComponentIds && menuState.selectedComponentIds.length > 0
-    ? menuState.selectedComponentIds
-    : menuState.targetComponent
-    ? [menuState.targetComponent.id]
-    : [];
 
   const isLocked = menuState.targetComponent?.locked ?? false;
 
@@ -153,6 +178,35 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               </span>
             )}
           </div>
+
+          {/* Smart Auto-Wiring Section when 2 components are selected */}
+          {detectedBusOptions.length > 0 && (
+            <div className="py-1 border-b border-slate-200 dark:border-slate-800/80">
+              <div className="px-3 py-1 text-[10px] font-semibold tracking-wider text-sky-600 dark:text-sky-400 uppercase flex items-center gap-1.5">
+                <Zap className="w-3 h-3 text-sky-500 animate-pulse" /> Auto-Wiring Bus
+              </div>
+              {detectedBusOptions.map((bus) => (
+                <button
+                  key={bus.id}
+                  onClick={() => {
+                    if (onAddMultipleWires) {
+                      const newWires = generateBusWires(bus, allWires || [], wireRouting);
+                      onAddMultipleWires(newWires);
+                    }
+                    onClose();
+                  }}
+                  className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors cursor-pointer"
+                  title={bus.description}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    <Zap className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                    <span className="font-medium text-[11px] truncate">{bus.name}</span>
+                  </span>
+                  <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold shrink-0 ml-1">⚡ Sambung</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="py-1">
             {/* Lock / Unlock */}
@@ -245,6 +299,22 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           </div>
 
           <div className="py-1">
+            {/* Cabang Kabel (Branch Wire Tap) */}
+            {onStartBranchWire && (
+              <button
+                onClick={() => {
+                  onStartBranchWire(menuState.targetWire!, { x: menuState.worldX, y: menuState.worldY });
+                  onClose();
+                }}
+                className="w-full px-3 py-1.5 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-300 text-left transition-colors border-b border-slate-200 dark:border-slate-800/80 mb-1"
+              >
+                <span className="flex items-center gap-2">
+                  <CircleDot className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                  <span className="font-semibold">Cabang Kabel Dari Sini</span>
+                </span>
+              </button>
+            )}
+
             {/* Fast Color Palette Grid */}
             <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800/80">
               <div className="text-[10px] text-slate-500 dark:text-slate-400 mb-1.5 flex items-center gap-1">
@@ -294,6 +364,59 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 {menuState.targetWire!.routing === r && <Check className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />}
               </button>
             ))}
+
+            {/* Marking Tube Quick Controls */}
+            {onUpdateWire && (
+              <div className="border-t border-slate-200 dark:border-slate-800/80 pt-1.5 pb-1">
+                <div className="px-3 py-1 text-[10px] text-slate-500 dark:text-slate-400 font-medium flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Tag className="w-3 h-3 text-sky-500" />
+                    <span>Marking Tube:</span>
+                  </span>
+                  {menuState.targetWire!.markerPosition === 'none' || menuState.targetWire!.label === '' ? (
+                    <span className="text-[9px] text-rose-500 font-mono">Mati</span>
+                  ) : (
+                    <span className="text-[9px] text-sky-600 font-mono capitalize">
+                      {menuState.targetWire!.markerPosition || 'Auto'}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-1 px-2.5 py-1 text-[10px]">
+                  {[
+                    { pos: 'auto', label: '⚡ Auto' },
+                    { pos: 'start', label: '📍 Awal' },
+                    { pos: 'end', label: '📍 Akhir' },
+                    { pos: 'both', label: '⇄ Kedua' },
+                    { pos: 'center', label: '• Tengah' },
+                    { pos: 'none', label: '🚫 Hapus' },
+                  ].map((p) => (
+                    <button
+                      key={p.pos}
+                      onClick={() => {
+                        if (p.pos === 'none') {
+                          onUpdateWire(menuState.targetWire!.id, { markerPosition: 'none', label: '' });
+                        } else if (p.pos === 'auto') {
+                          onUpdateWire(menuState.targetWire!.id, { markerPosition: 'auto', label: undefined });
+                        } else {
+                          onUpdateWire(menuState.targetWire!.id, {
+                            markerPosition: p.pos as WireMarkerPosition,
+                            label: menuState.targetWire!.label === '' ? undefined : menuState.targetWire!.label,
+                          });
+                        }
+                        onClose();
+                      }}
+                      className={`py-1 px-1 rounded text-center transition-colors cursor-pointer ${
+                        (menuState.targetWire!.markerPosition || 'auto') === p.pos
+                          ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-semibold'
+                          : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Delete Wire */}
             <button
