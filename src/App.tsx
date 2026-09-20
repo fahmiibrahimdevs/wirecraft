@@ -12,17 +12,14 @@ import {
 import { COMPONENT_DEFINITIONS } from './constants/components';
 import { getAllComponentDefinitions } from './utils/customComponents';
 import { cleanAndSimplifyWaypoints } from './utils/orthogonalRouter';
-import { useCircuitHistory, HistoryState } from './hooks/useCircuitHistory';
+import { useCircuitHistory } from './hooks/useCircuitHistory';
+import { useAppModals } from './hooks/useAppModals';
+import { useCanvasHotkeys } from './hooks/useCanvasHotkeys';
 import { TopBar } from './components/navigation/TopBar';
 import { ComponentLibrary } from './components/panels/ComponentLibrary';
 import { CircuitCanvas } from './components/canvas/CircuitCanvas';
 import { PropertiesInspector } from './components/panels/PropertiesInspector';
-import { BomModal } from './components/modals/BomModal';
-import { WiringTableModal } from './components/modals/WiringTableModal';
-import { PresetsModal } from './components/modals/PresetsModal';
-import { ComponentStudioModal } from './components/modals/ComponentStudioModal';
-import { UserManagementModal } from './components/modals/UserManagementModal';
-import { ExportModal } from './components/modals/ExportModal';
+import { AppModalsContainer } from './components/modals/AppModalsContainer';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthModal } from './components/modals/AuthModal';
@@ -121,7 +118,6 @@ import { useCircuitFiles } from './hooks/useCircuitFiles';
 
 function CircuitAppContent() {
   const { user, isAdmin, token, logout, isLoading } = useAuth();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const {
     fileSystem,
@@ -321,16 +317,8 @@ function CircuitAppContent() {
     [activeFile, renameFile]
   );
 
-  // Drawers & Modals
-  const [isLibraryOpen, setIsLibraryOpen] = useState(true);
-  const [isInspectorOpen, setIsInspectorOpen] = useState(true);
-  const [isBomModalOpen, setIsBomModalOpen] = useState(false);
-  const [isWiringTableOpen, setIsWiringTableOpen] = useState(false);
-  const [isPresetsModalOpen, setIsPresetsModalOpen] = useState(false);
-  const [isStudioOpen, setIsStudioOpen] = useState(false);
-  const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [studioEditDef, setStudioEditDef] = useState<ComponentDefinition | null>(null);
+  // Drawers & Modals state management
+  const modals = useAppModals();
 
   // Context Menu state
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
@@ -671,7 +659,7 @@ function CircuitAppContent() {
     const bboxWidth = maxX - minX + padding * 2;
     const bboxHeight = maxY - minY + padding * 2;
 
-    const availWidth = window.innerWidth - (isInspectorOpen ? 320 : 0) - 70;
+    const availWidth = window.innerWidth - (modals.isInspectorOpen ? 320 : 0) - 70;
     const availHeight = window.innerHeight - 60;
 
     const scaleX = availWidth / Math.max(bboxWidth, 100);
@@ -688,7 +676,7 @@ function CircuitAppContent() {
 
     setZoom(Number(newZoom.toFixed(2)));
     setPan(newPan);
-  }, [components, isInspectorOpen]);
+  }, [components, modals.isInspectorOpen]);
 
   // 7. Select All Components (Ctrl+A)
   const handleSelectAll = useCallback(() => {
@@ -696,139 +684,59 @@ function CircuitAppContent() {
     setSelectedWireId(null);
   }, [components]);
 
-  // Global Keyboard Shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (['input', 'textarea', 'select'].includes((e.target as HTMLElement)?.tagName.toLowerCase())) {
-        return;
-      }
+  // Delete Wire
+  const handleDeleteWire = useCallback((id: string) => {
+    commit((prev) => {
+      const remainingWires = prev.wires
+        .filter((w) => w.id !== id)
+        .map((w) => {
+          let updated = { ...w };
+          if (w.fromWireId === id) {
+            updated = { ...updated, fromWireId: undefined, fromPoint: undefined };
+          }
+          if (w.toWireId === id) {
+            updated = { ...updated, toWireId: undefined, toPoint: undefined };
+          }
+          return updated;
+        })
+        .filter((w) => {
+          const hasStart = Boolean((w.fromComponentId && w.fromPinId) || w.fromWireId);
+          const hasEnd = Boolean((w.toComponentId && w.toPinId) || w.toWireId);
+          return hasStart && hasEnd;
+        });
 
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-      const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+      return {
+        ...prev,
+        wires: remainingWires,
+      };
+    });
+    setSelectedWireId((curr) => (curr === id ? null : curr));
+  }, [commit]);
 
-      // Undo / Redo
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        if (e.shiftKey) {
-          redo();
-        } else {
-          undo();
-        }
-        return;
-      } else if (isCmdOrCtrl && e.key.toLowerCase() === 'y') {
-        e.preventDefault();
-        redo();
-        return;
-      }
-
-      // Select All (Ctrl+A / Cmd+A)
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'a') {
-        if (!isStudioOpen && !isBomModalOpen && !isPresetsModalOpen) {
-          e.preventDefault();
-          handleSelectAll();
-        }
-        return;
-      }
-
-      // Direct Duplicate Component (Ctrl+D / Cmd+D)
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'd') {
-        if (
-          selectedComponentIds.length > 0 &&
-          !isStudioOpen &&
-          !isBomModalOpen &&
-          !isPresetsModalOpen
-        ) {
-          e.preventDefault();
-          handleDuplicateComponents();
-        }
-        return;
-      }
-
-      // Lock / Unlock Component (L)
-      if (
-        !isCmdOrCtrl &&
-        !e.altKey &&
-        (e.key === 'l' || e.key === 'L') &&
-        selectedComponentIds.length > 0 &&
-        !isStudioOpen &&
-        !isBomModalOpen &&
-        !isPresetsModalOpen
-      ) {
-        e.preventDefault();
-        handleToggleLock(selectedComponentIds);
-        return;
-      }
-
-      // Toggle Wire Marking Tubes (M)
-      if (
-        !isCmdOrCtrl &&
-        !e.altKey &&
-        (e.key === 'm' || e.key === 'M') &&
-        !isStudioOpen &&
-        !isBomModalOpen &&
-        !isPresetsModalOpen
-      ) {
-        e.preventDefault();
-        setShowWireMarkers((prev) => !prev);
-        return;
-      }
-
-      // Rotate selected component(s) on canvas (R / Space)
-      if (
-        !isCmdOrCtrl &&
-        !e.altKey &&
-        (e.key === 'r' || e.key === 'R' || e.key === ' ' || e.code === 'Space')
-      ) {
-        if (
-          selectedComponentIds.length > 0 &&
-          !isStudioOpen &&
-          !isBomModalOpen &&
-          !isPresetsModalOpen
-        ) {
-          e.preventDefault();
-          handleRotateComponents();
-        }
-        return;
-      }
-
-      // Delete (Delete / Backspace)
-      if (
-        (e.key === 'Delete' || e.key === 'Backspace') &&
-        !isStudioOpen &&
-        !isBomModalOpen &&
-        !isPresetsModalOpen
-      ) {
-        if (selectedComponentIds.length > 0) {
-          e.preventDefault();
-          handleDeleteComponents();
-        } else if (selectedWireId) {
-          e.preventDefault();
-          commit((prev) => ({
-            ...prev,
-            wires: prev.wires.filter((w) => w.id !== selectedWireId),
-          }));
-          setSelectedWireId(null);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [
-    undo,
-    redo,
-    commit,
+  // Global Keyboard Shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+A, Ctrl+D, L, M, R/Space, Delete/Backspace)
+  useCanvasHotkeys({
+    isModalOpen:
+      modals.isAuthModalOpen ||
+      modals.isBomModalOpen ||
+      modals.isWiringTableOpen ||
+      modals.isPresetsModalOpen ||
+      modals.isStudioOpen ||
+      modals.isUserManagementOpen ||
+      modals.isExportModalOpen,
+    canUndo,
+    canRedo,
+    onUndo: undo,
+    onRedo: redo,
     selectedComponentIds,
     selectedWireId,
-    isStudioOpen,
-    isBomModalOpen,
-    isPresetsModalOpen,
-    handleDuplicateComponents,
-    handleToggleLock,
-    handleRotateComponents,
-    handleDeleteComponents,
-    handleSelectAll,
-  ]);
+    onSelectAll: handleSelectAll,
+    onDuplicateComponents: handleDuplicateComponents,
+    onToggleLock: handleToggleLock,
+    onRotateComponents: handleRotateComponents,
+    onDeleteComponents: handleDeleteComponents,
+    onDeleteWire: handleDeleteWire,
+    onToggleWireMarkers: () => setShowWireMarkers((prev) => !prev),
+  });
 
   // Update Component Custom Props
   const handleUpdateComponent = (id: string, updates: Partial<CircuitComponent>) => {
@@ -873,35 +781,6 @@ function CircuitAppContent() {
       ...prev,
       wires: prev.wires.map((w) => (w.id === id ? { ...w, ...updates } : w)),
     }));
-  };
-
-  // Delete Wire
-  const handleDeleteWire = (id: string) => {
-    commit((prev) => {
-      const remainingWires = prev.wires
-        .filter((w) => w.id !== id)
-        .map((w) => {
-          let updated = { ...w };
-          if (w.fromWireId === id) {
-            updated = { ...updated, fromWireId: undefined, fromPoint: undefined };
-          }
-          if (w.toWireId === id) {
-            updated = { ...updated, toWireId: undefined, toPoint: undefined };
-          }
-          return updated;
-        })
-        .filter((w) => {
-          const hasStart = Boolean((w.fromComponentId && w.fromPinId) || w.fromWireId);
-          const hasEnd = Boolean((w.toComponentId && w.toPinId) || w.toWireId);
-          return hasStart && hasEnd;
-        });
-
-      return {
-        ...prev,
-        wires: remainingWires,
-      };
-    });
-    if (selectedWireId === id) setSelectedWireId(null);
   };
 
   // Update Wire Waypoints
@@ -1133,32 +1012,27 @@ function CircuitAppContent() {
         onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
         showWireMarkers={showWireMarkers}
         onToggleWireMarkers={() => setShowWireMarkers((prev) => !prev)}
-        onOpenPresets={() => setIsPresetsModalOpen(true)}
-        onOpenBom={() => setIsBomModalOpen(true)}
-        onOpenWiringTable={() => setIsWiringTableOpen(true)}
+        onOpenPresets={modals.openPresetsModal}
+        onOpenBom={modals.openBomModal}
+        onOpenWiringTable={modals.openWiringTable}
         onOpenStudio={
           isAdmin
-            ? () => {
-                setStudioEditDef(null);
-                setIsStudioOpen(true);
-              }
+            ? () => modals.openStudio(null)
             : undefined
         }
         onOpenUserManagement={
           isAdmin
-            ? () => {
-                setIsUserManagementOpen(true);
-              }
+            ? modals.openUserManagement
             : undefined
         }
-        onOpenExportModal={() => setIsExportModalOpen(true)}
+        onOpenExportModal={modals.openExportModal}
         onExportPng={handleExportPng}
         onExportJson={handleExportJson}
         onImportJson={handleImportJson}
         onClearCanvas={handleClearCanvas}
         user={user}
         isAdmin={isAdmin}
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenAuthModal={modals.openAuthModal}
         onLogout={() => {
           logout();
           showToast('info', 'Anda telah keluar dari workspace.');
@@ -1174,15 +1048,12 @@ function CircuitAppContent() {
       <div className="flex-1 relative w-full h-[calc(100vh-3.5rem)] overflow-hidden">
         {/* Left Drawer (Katalog Komponen & File Explorer) */}
         <ComponentLibrary
-          isOpen={isLibraryOpen}
-          onToggle={() => setIsLibraryOpen((prev) => !prev)}
+          isOpen={modals.isLibraryOpen}
+          onToggle={modals.toggleLibrary}
           onAddComponent={handleAddComponent}
           onOpenStudio={
             isAdmin
-              ? (def?: ComponentDefinition) => {
-                  setStudioEditDef(def || null);
-                  setIsStudioOpen(true);
-                }
+              ? (def?: ComponentDefinition) => modals.openStudio(def || null)
               : undefined
           }
           fileSystem={fileSystem}
@@ -1245,7 +1116,7 @@ function CircuitAppContent() {
           snapGrid={snapGrid}
           onToggleSnapGrid={() => setSnapGrid((prev) => !prev)}
           onCenterCanvas={handleCenterCanvas}
-          onOpenWiringTable={() => setIsWiringTableOpen(true)}
+          onOpenWiringTable={modals.openWiringTable}
           onUpdateComponent={handleUpdateComponent}
           onUpdateWire={handleUpdateWire}
           onAddMultipleWires={handleAddMultipleWires}
@@ -1256,8 +1127,8 @@ function CircuitAppContent() {
           onDuplicateComponents={handleDuplicateComponents}
           onDeleteComponents={handleDeleteComponents}
           onDeleteWire={handleDeleteWire}
-          isOpen={isInspectorOpen}
-          onToggleOpen={() => setIsInspectorOpen((prev) => !prev)}
+          isOpen={modals.isInspectorOpen}
+          onToggleOpen={modals.toggleInspector}
         />
 
         {/* Right-Click Context Menu */}
@@ -1274,10 +1145,7 @@ function CircuitAppContent() {
           onAddMultipleWires={handleAddMultipleWires}
           onEditInStudio={
             isAdmin
-              ? (def) => {
-                  setStudioEditDef(def || null);
-                  setIsStudioOpen(true);
-                }
+              ? (def) => modals.openStudio(def || null)
               : undefined
           }
           onUpdateWireColor={(wireId, color) => handleUpdateWire(wireId, { color })}
@@ -1299,21 +1167,16 @@ function CircuitAppContent() {
         />
       </div>
 
-      {/* BOM (Bill of Materials) Modal */}
-      <BomModal
-        isOpen={isBomModalOpen}
-        onClose={() => setIsBomModalOpen(false)}
-        components={components}
-        wires={wires}
-      />
-
-      {/* Hardware Wiring Table Modal */}
-      <WiringTableModal
-        isOpen={isWiringTableOpen}
-        onClose={() => setIsWiringTableOpen(false)}
+      {/* Application Modals Container */}
+      <AppModalsContainer
+        modals={modals}
         components={components}
         wires={wires}
         allDefs={getAllComponentDefinitions()}
+        projectName={projectName}
+        isAdmin={isAdmin}
+        onLoadPreset={handleLoadPreset}
+        onAddComponent={handleAddComponent}
         onHighlightComponent={(compId) => {
           if (compId) {
             setSelectedComponentIds([compId]);
@@ -1326,51 +1189,6 @@ function CircuitAppContent() {
             setSelectedComponentIds([]);
           }
         }}
-      />
-
-      {/* Presets Modal */}
-      <PresetsModal
-        isOpen={isPresetsModalOpen}
-        onClose={() => setIsPresetsModalOpen(false)}
-        onLoadPreset={handleLoadPreset}
-      />
-
-      {/* Component Studio (Admin Mode) Modal */}
-      {isAdmin && (
-        <ComponentStudioModal
-          isOpen={isStudioOpen}
-          onClose={() => {
-            setIsStudioOpen(false);
-            setStudioEditDef(null);
-          }}
-          initialDefinition={studioEditDef}
-          onComponentSaved={(typeId) => {
-            handleAddComponent(typeId);
-          }}
-        />
-      )}
-
-      {/* User Management (Admin Mode) Modal */}
-      {isAdmin && (
-        <UserManagementModal
-          isOpen={isUserManagementOpen}
-          onClose={() => setIsUserManagementOpen(false)}
-        />
-      )}
-
-      {/* HD Schema & Diagram Export Modal */}
-      <ExportModal
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        projectName={projectName}
-        components={components}
-        wires={wires}
-      />
-
-      {/* Auth Modal (Login / Register) */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
       />
     </div>
   );
