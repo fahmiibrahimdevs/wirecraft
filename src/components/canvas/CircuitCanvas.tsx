@@ -15,6 +15,7 @@ import {
   getPinDirection,
   PinDirection,
   resolveCircuitNetSignals,
+  getSmartWireSnapPoint,
 } from '../../utils/geometry';
 import {
   sortWiresForRendering,
@@ -468,9 +469,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           const resolved = resolvedWiresMap.get(w.id);
           if (!resolved || resolved.waypoints.length < 2) return;
 
-          const closest = (window as any).WireCraftGeometry
-            ? (window as any).WireCraftGeometry.getSmartWireSnapPoint(worldPos, resolved.waypoints, refPoint, snapGrid)
-            : undefined;
+          const closest = getSmartWireSnapPoint(worldPos, resolved.waypoints, refPoint, snapGrid);
 
           if (closest && closest.distance < minWireDist) {
             minWireDist = closest.distance;
@@ -660,10 +659,18 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
                   <g className="pointer-events-none">
                     <path d={pathD} fill="none" stroke={previewColor} strokeWidth="3.2" strokeLinecap="round" strokeDasharray="6 4" className="animate-pulse pointer-events-none" />
                     <circle cx={start.x} cy={start.y} r={dw.fromWireId ? 3.8 : 3.4} fill={previewColor} className="pointer-events-none" />
-                    <circle cx={dw.currentPoint.x} cy={dw.currentPoint.y} r={wireGestures.hoveredWireSnap ? 3.8 : 3.4} fill={previewColor} className="pointer-events-none" />
+                    <circle cx={dw.currentPoint.x} cy={dw.currentPoint.y} r={wireGestures.hoveredWireSnap ? 4.5 : 3.4} fill={previewColor} className="pointer-events-none" />
                   </g>
                 );
               })()}
+
+            {/* Magnetic Wire Junction Snap Target Ring */}
+            {wireGestures.hoveredWireSnap && (
+              <g className="pointer-events-none animate-fade-in">
+                <circle cx={wireGestures.hoveredWireSnap.point.x} cy={wireGestures.hoveredWireSnap.point.y} r={9} fill="none" stroke="#38bdf8" strokeWidth="2" opacity="0.6" className="animate-ping" />
+                <circle cx={wireGestures.hoveredWireSnap.point.x} cy={wireGestures.hoveredWireSnap.point.y} r={6} fill="#38bdf8" stroke="#ffffff" strokeWidth="1.5" />
+              </g>
+            )}
 
             {/* Interactive Endpoint Drag Preview Dot */}
             {wireGestures.draggingEndpoint && (
