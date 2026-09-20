@@ -1,6 +1,7 @@
 import { CircuitComponent, ComponentDefinition, Wire } from '../types/circuit';
 import { COMPONENT_DEFINITIONS } from '../constants/components';
-import { isHostComponent, extractPinTokens } from './autoBusRouter';
+import { extractPinTokens } from './autoBusRouter';
+import { getPinWorldPosition } from './geometry';
 
 export interface WiringTableRow {
   id: string; // unique row id
@@ -27,6 +28,78 @@ export interface McuWiringGroup {
   mcuTitle: string;
   mcuSubtitle: string;
   rows: WiringTableRow[];
+}
+
+/**
+ * Accurately check if a component is a genuine Microcontroller / Programmable Board
+ * (Excludes power supplies, buck/boost converters, battery modules, sensors, relays)
+ */
+export function isMicrocontroller(comp: CircuitComponent, allDefs?: Record<string, ComponentDefinition>): boolean {
+  if (!comp) return false;
+  const def = allDefs?.[comp.type] || COMPONENT_DEFINITIONS[comp.type];
+  if (def?.category === 'microcontrollers') return true;
+
+  const t = comp.type.toLowerCase();
+  const n = (comp.name || '').toLowerCase();
+  const l = (comp.label || '').toLowerCase();
+
+  // Strict Exclusions
+  if (
+    t.includes('buck') ||
+    t.includes('boost') ||
+    t.includes('lm2596') ||
+    t.includes('xl4015') ||
+    t.includes('mt3608') ||
+    t.includes('tp4056') ||
+    t.includes('battery') ||
+    t.includes('psu') ||
+    t.includes('power') ||
+    t.includes('supply') ||
+    t.includes('steker') ||
+    t.includes('fitting') ||
+    t.includes('lamp') ||
+    t.includes('converter') ||
+    t.includes('shifter') ||
+    t.includes('sensor') ||
+    t.includes('display') ||
+    t.includes('relay') ||
+    t.includes('breadboard') ||
+    n.includes('step-down') ||
+    n.includes('step-up') ||
+    n.includes('buck') ||
+    n.includes('boost') ||
+    n.includes('power supply') ||
+    n.includes('baterai') ||
+    l.includes('buck') ||
+    l.includes('psu')
+  ) {
+    return false;
+  }
+
+  return (
+    t.startsWith('arduino') ||
+    t.startsWith('esp32') ||
+    t.startsWith('nodemcu') ||
+    t.startsWith('wemos') ||
+    t.startsWith('pico') ||
+    t.startsWith('raspberry') ||
+    t.startsWith('stm32') ||
+    t.startsWith('teensy') ||
+    t.startsWith('attiny') ||
+    n.includes('arduino') ||
+    n.includes('esp32') ||
+    n.includes('esp8266') ||
+    n.includes('nodemcu') ||
+    n.includes('wemos') ||
+    n.includes('pico') ||
+    n.includes('stm32') ||
+    l.includes('arduino') ||
+    l.includes('esp32') ||
+    l.includes('esp8266') ||
+    l.includes('nodemcu') ||
+    l.includes('wemos') ||
+    l.includes('pico')
+  );
 }
 
 /**
@@ -137,7 +210,9 @@ export function inferInterfaceType(
   const pMcu = mcuPinName.toLowerCase();
   const pTgt = targetPinName.toLowerCase();
   const tType = targetComp.type.toLowerCase();
-  const tName = (targetComp.name || targetComp.label || '').toLowerCase();
+  const tName = (targetComp.name || '').toLowerCase();
+  const tLabel = (targetComp.label || '').toLowerCase();
+  const tAll = `${tType} ${tName} ${tLabel}`;
 
   // 1. Power & Ground Rails (Check first)
   if (
@@ -149,7 +224,10 @@ export function inferInterfaceType(
     pTgt.includes('vcc') ||
     pTgt.includes('5v') ||
     pTgt.includes('3v3') ||
-    pTgt.includes('vin')
+    pTgt.includes('vin') ||
+    pTgt.includes('vout+') ||
+    pTgt.includes('bat+') ||
+    pTgt.includes('pos')
   ) {
     return 'Power Rail';
   }
@@ -160,81 +238,27 @@ export function inferInterfaceType(
     pTgt.includes('ground') ||
     pTgt.includes('vss') ||
     pTgt.includes('cathode') ||
-    pTgt.includes('katoda')
+    pTgt.includes('katoda') ||
+    pTgt.includes('vout-') ||
+    pTgt.includes('bat-') ||
+    pTgt.includes('neg') ||
+    pTgt.includes('pe') ||
+    pTgt.includes('arde')
   ) {
     return 'Ground Rail';
   }
 
-  // 2. I2C Interface
+  // 2. Target Component is an Actuator / Output (LED, Relay, Buzzer, Solenoid, Lamp)
+  // Even if connected to D7 (MOSI) or D6 (MISO) or D1 (SCL) or D2 (SDA), it is a DIGITAL OUTPUT!
   if (
-    pMcu.includes('sda') ||
-    pMcu.includes('scl') ||
-    pTgt.includes('sda') ||
-    pTgt.includes('scl') ||
-    tType.includes('i2c') ||
-    tType.includes('ds3231') ||
-    tType.includes('ads1115') ||
-    tName.includes('i2c') ||
-    tName.includes('oled')
-  ) {
-    return 'I2C';
-  }
-
-  // 3. SPI Interface
-  if (
-    pMcu.includes('mosi') ||
-    pMcu.includes('miso') ||
-    pMcu.includes('sck') ||
-    pTgt.includes('mosi') ||
-    pTgt.includes('miso') ||
-    pTgt.includes('sck') ||
-    tType.includes('rc522') ||
-    tType.includes('sdcard') ||
-    tType.includes('spi')
-  ) {
-    return 'SPI';
-  }
-
-  // 4. UART Interface
-  if (
-    pMcu.includes('tx') ||
-    pMcu.includes('rx') ||
-    pTgt.includes('tx') ||
-    pTgt.includes('rx') ||
-    tType.includes('sim800') ||
-    tType.includes('dfplayer') ||
-    tType.includes('bluetooth') ||
-    tType.includes('gps')
-  ) {
-    return 'UART';
-  }
-
-  // 5. One-Wire Sensor (e.g. DS18B20)
-  if (tType.includes('ds18b20') || tName.includes('ds18b20') || tName.includes('one wire')) {
-    return 'One Wire';
-  }
-
-  // 6. Interrupt (e.g. Flow Sensor YF-S201, Rotary Encoder, Hall Effect)
-  if (tType.includes('flow') || tName.includes('flow') || tName.includes('encoder') || tName.includes('interrupt')) {
-    return 'Interrupt';
-  }
-
-  // 7. Ultrasonic Sensor (TRIG=Output, ECHO=Input)
-  if (tType.includes('ultrasonic') || tType.includes('jsn-sr04t') || tType.includes('hc-sr04')) {
-    if (pTgt.includes('trig')) return 'Digital Output';
-    if (pTgt.includes('echo')) return 'Digital Input';
-    return 'Digital I/O';
-  }
-
-  // 8. Actuators / Outputs (Relay, LED, Buzzer, Solenoid, Motor)
-  if (
-    tType.includes('relay') ||
-    tType.includes('led') ||
-    tType.includes('buzzer') ||
-    tType.includes('solenoid') ||
-    tName.includes('relay') ||
-    tName.includes('led') ||
-    tName.includes('pompa')
+    tAll.includes('led') ||
+    tAll.includes('relay') ||
+    tAll.includes('buzzer') ||
+    tAll.includes('solenoid') ||
+    tAll.includes('pompa') ||
+    tAll.includes('lamp') ||
+    pTgt.includes('anode') ||
+    pTgt.includes('anoda')
   ) {
     if (
       pMcu.includes('d3') ||
@@ -244,45 +268,145 @@ export function inferInterfaceType(
       pMcu.includes('d10') ||
       pMcu.includes('d11')
     ) {
-      if (tType.includes('led') || tType.includes('buzzer')) {
+      if (tAll.includes('led') || tAll.includes('buzzer')) {
         return 'PWM / Output';
       }
     }
     return 'Digital Output';
   }
 
-  // 9. Servo
-  if (tType.includes('servo') || tName.includes('servo')) {
+  // 3. Servo (PWM Output)
+  if (tAll.includes('servo')) {
     return 'PWM Output';
   }
 
-  // 10. Digital Inputs (Push Button, PIR Motion, IR Obstacle, Vibration)
+  // 4. Digital Inputs (Button, Switch, PIR, Touch, Obstacle, Vibration, Tilt, Flame)
   if (
-    tType.includes('button') ||
-    tType.includes('pir') ||
-    tType.includes('obstacle') ||
-    tType.includes('vibration') ||
-    tType.includes('touch') ||
-    pTgt.includes('out') ||
-    pTgt.includes('do')
+    tAll.includes('button') ||
+    tAll.includes('switch') ||
+    tAll.includes('pir') ||
+    tAll.includes('touch') ||
+    tAll.includes('ttp223') ||
+    tAll.includes('obstacle') ||
+    tAll.includes('vibration') ||
+    tAll.includes('tilt') ||
+    tAll.includes('flame')
   ) {
     return 'Digital Input';
   }
 
-  // 11. Analog Inputs (Potentiometer, LDR, Soil, TDS, PH4502C, PT100, CT)
+  // 5. Analog Inputs (Potentiometer, LDR, Soil, TDS, PH4502C, PT100, CT Coil, Gas MQ)
   if (
     pMcu.startsWith('a') ||
-    tType.includes('potentiometer') ||
-    tType.includes('ldr') ||
-    tType.includes('soil') ||
-    tType.includes('tds') ||
-    tType.includes('ph4502c') ||
-    tType.includes('pt100') ||
-    tType.includes('ct-coil') ||
-    tType.includes('analog')
+    tAll.includes('potentiometer') ||
+    tAll.includes('potensio') ||
+    tAll.includes('ldr') ||
+    tAll.includes('soil') ||
+    tAll.includes('tds') ||
+    tAll.includes('ph4502c') ||
+    tAll.includes('pt100') ||
+    tAll.includes('ct-coil') ||
+    tAll.includes('mq-') ||
+    tAll.includes('mq2') ||
+    tAll.includes('mq135') ||
+    tAll.includes('mq7') ||
+    tAll.includes('sound-sensor')
   ) {
     return 'Analog Input';
   }
+
+  // 6. One-Wire Sensor (DS18B20, DHT11, DHT22)
+  if (
+    tAll.includes('ds18b20') ||
+    tAll.includes('dht11') ||
+    tAll.includes('dht22') ||
+    tAll.includes('dht') ||
+    tAll.includes('one wire') ||
+    tAll.includes('1-wire')
+  ) {
+    return 'One Wire';
+  }
+
+  // 7. Ultrasonic Sensor (TRIG=Output, ECHO=Input)
+  if (tAll.includes('ultrasonic') || tAll.includes('jsn-sr04t') || tAll.includes('hc-sr04') || tAll.includes('sr04')) {
+    if (pTgt.includes('trig')) return 'Digital Output';
+    if (pTgt.includes('echo')) return 'Digital Input';
+    return 'Digital I/O';
+  }
+
+  // 8. Interrupt Device (Flow Sensor YF-S201, Rotary Encoder, Hall Effect)
+  if (tAll.includes('flow') || tAll.includes('yf-s201') || tAll.includes('encoder') || tAll.includes('hall')) {
+    return 'Interrupt';
+  }
+
+  // 9. I2C Interface (OLED, RTC DS3231, LCD I2C PCF8574, ADS1115, BMP280, GY-521)
+  if (
+    tAll.includes('i2c') ||
+    tAll.includes('ds3231') ||
+    tAll.includes('oled') ||
+    tAll.includes('ssd1306') ||
+    tAll.includes('ads1115') ||
+    tAll.includes('pcf8574') ||
+    tAll.includes('mpu6050') ||
+    tAll.includes('bmp280') ||
+    tAll.includes('bme280') ||
+    tAll.includes('sht31') ||
+    tAll.includes('bh1750') ||
+    pTgt.includes('sda') ||
+    pTgt.includes('scl')
+  ) {
+    return 'I2C';
+  }
+
+  // 10. SPI Interface (RFID RC522, SD Card Module, MAX31865, MAX6675, ST7735, ILI9341, NRF24L01)
+  if (
+    tAll.includes('rc522') ||
+    tAll.includes('rfid') ||
+    tAll.includes('sdcard') ||
+    tAll.includes('sd-card') ||
+    tAll.includes('max31865') ||
+    tAll.includes('max6675') ||
+    tAll.includes('nrf24') ||
+    tAll.includes('st7735') ||
+    tAll.includes('ili9341') ||
+    tAll.includes('tft') ||
+    tAll.includes('spi') ||
+    pTgt.includes('mosi') ||
+    pTgt.includes('miso') ||
+    pTgt.includes('sck') ||
+    pTgt.includes('cs') ||
+    pTgt.includes('ss')
+  ) {
+    return 'SPI';
+  }
+
+  // 11. UART Interface (SIM800L, GPS, Bluetooth, ESP-01, DFPlayer, PZEM-004T, Nextion)
+  if (
+    tAll.includes('sim800') ||
+    tAll.includes('gps') ||
+    tAll.includes('neo-6m') ||
+    tAll.includes('bluetooth') ||
+    tAll.includes('hc-05') ||
+    tAll.includes('hc-06') ||
+    tAll.includes('dfplayer') ||
+    tAll.includes('pzem') ||
+    tAll.includes('nextion') ||
+    tAll.includes('uart') ||
+    pTgt.includes('tx') ||
+    pTgt.includes('rx')
+  ) {
+    return 'UART';
+  }
+
+  // 12. TM1637 Display
+  if (tAll.includes('tm1637')) {
+    return 'Digital I/O';
+  }
+
+  // 13. Fallbacks
+  if (pTgt.includes('out') || pTgt.includes('do')) return 'Digital Input';
+  if (pTgt.includes('in') || pTgt.includes('din')) return 'Digital Output';
+  if (pMcu.startsWith('a') || pTgt.includes('ao') || pTgt.includes('analog')) return 'Analog Input';
 
   return 'Digital I/O';
 }
@@ -297,6 +421,14 @@ export function formatComponentName(comp: CircuitComponent, pinName: string, def
 
   // If pin has specific signal name like SDA, SCL, TRIG, ECHO, MOSI, TX, RX, append it nicely
   const lowerPin = pinName.toLowerCase();
+  const lowerComp = `${comp.type} ${comp.name || ''} ${comp.label || ''}`.toLowerCase();
+
+  // Power terminals
+  if (lowerPin.includes('vout+') || lowerPin === 'vout+' || lowerPin.includes('vout_pos')) return `${baseName} VOUT+`;
+  if (lowerPin.includes('vout-') || lowerPin === 'vout-' || lowerPin.includes('vout_neg')) return `${baseName} VOUT-`;
+  if (lowerPin.includes('vin+') || lowerPin === 'vin+' || lowerPin.includes('vin_pos')) return `${baseName} VIN+`;
+  if (lowerPin.includes('vin-') || lowerPin === 'vin-' || lowerPin.includes('vin_neg')) return `${baseName} VIN-`;
+
   if (lowerPin.includes('vcc') || lowerPin.includes('5v') || lowerPin.includes('3v3')) return `${baseName} VCC`;
   if (lowerPin.includes('gnd') || lowerPin.includes('ground')) return `${baseName} GND`;
   if (lowerPin.includes('cathode') || lowerPin.includes('katoda')) return `${baseName} Cathode`;
@@ -313,6 +445,10 @@ export function formatComponentName(comp: CircuitComponent, pinName: string, def
   if (lowerPin.includes('tx')) return `${baseName} TX`;
   if (lowerPin.includes('rx')) return `${baseName} RX`;
   if (lowerPin.includes('data')) return `${baseName} DATA`;
+  
+  if (lowerComp.includes('relay') && (lowerPin.includes('in') || lowerPin.includes('pwm') || lowerPin.includes('sig'))) {
+    return `${baseName} IN`;
+  }
   if (lowerPin.includes('signal') || lowerPin.includes('pwm')) return `${baseName} PWM`;
   if (lowerPin.includes('in1') || lowerPin.includes('in2') || lowerPin.includes('in')) return `${baseName} IN`;
 
@@ -322,8 +458,6 @@ export function formatComponentName(comp: CircuitComponent, pinName: string, def
 
   return baseName;
 }
-
-import { getPinWorldPosition } from './geometry';
 
 /**
  * Trace End-to-End net connections starting from an MCU pin,
@@ -335,8 +469,8 @@ export function generateMcuWiringGroups(
   wires: Wire[],
   allDefs: Record<string, ComponentDefinition>
 ): McuWiringGroup[] {
-  // 1. Identify all Microcontrollers (Hosts)
-  const mcuComponents = components.filter((c) => isHostComponent(c));
+  // 1. Identify all genuine Microcontrollers (Hosts)
+  const mcuComponents = components.filter((c) => isMicrocontroller(c, allDefs));
   if (mcuComponents.length === 0) return [];
 
   // 2. Build Electrical Net Disjoint-Set (Union-Find)
@@ -504,13 +638,26 @@ export function generateMcuWiringGroups(
           ];
     }
 
-    // B. Level Converter (BSS138, 4-Ch / 8-Ch) Pass-Through
-    if (
-      connComp.type.includes('level-converter') ||
-      connComp.type.includes('converter') ||
-      connComp.name?.toLowerCase().includes('converter') ||
-      connComp.label?.toLowerCase().includes('bss138')
-    ) {
+    // B. Level Converter (BSS138, 4-Ch / 8-Ch Logic Level Shifter) Pass-Through
+    const isLevelShifter =
+      (connComp.type.includes('level-shifter') ||
+        connComp.type.includes('logic-level') ||
+        connComp.type.includes('bss138') ||
+        connComp.type.includes('txs0108') ||
+        (connComp.type.includes('level') && connComp.type.includes('converter')) ||
+        (connComp.name?.toLowerCase().includes('level') && connComp.name?.toLowerCase().includes('shifter')) ||
+        (connComp.name?.toLowerCase().includes('level') && connComp.name?.toLowerCase().includes('converter'))) &&
+      !connComp.type.includes('buck') &&
+      !connComp.type.includes('boost') &&
+      !connComp.type.includes('step') &&
+      !connComp.type.includes('power') &&
+      !connComp.name?.toLowerCase().includes('buck') &&
+      !connComp.name?.toLowerCase().includes('boost') &&
+      !connComp.name?.toLowerCase().includes('step-down') &&
+      !connComp.name?.toLowerCase().includes('step-up') &&
+      !connComp.name?.toLowerCase().includes('power');
+
+    if (isLevelShifter) {
       const converterModule = connComp.label || connComp.name || 'BSS138';
       const pinLv = connPin.name || connPin.id || 'LV';
       const lvIndexMatch = (connPin.id || connPin.name || '').match(/\d+/);
@@ -633,7 +780,14 @@ export function generateMcuWiringGroups(
           }
           if (!rowNote) {
             const lowerTgt = targetPinName.toLowerCase();
-            if (lowerTgt.includes('sda')) rowNote = 'sda';
+            const lowerComp = `${target.targetComp.type} ${target.targetComp.name || ''} ${target.targetComp.label || ''}`.toLowerCase();
+
+            if (lowerComp.includes('buck') || lowerComp.includes('lm2596') || lowerComp.includes('xl4015')) {
+              if (lowerTgt.includes('vout+') || lowerTgt === 'vout+') rowNote = '5V Power Input';
+              else if (lowerTgt.includes('vout-') || lowerTgt === 'vout-') rowNote = 'Common Ground (GND)';
+            } else if (target.targetPin.description && target.targetPin.description.length < 30) {
+              rowNote = target.targetPin.description;
+            } else if (lowerTgt.includes('sda')) rowNote = 'sda';
             else if (lowerTgt.includes('scl')) rowNote = 'scl';
             else if (lowerTgt.includes('miso')) rowNote = 'miso';
             else if (lowerTgt.includes('mosi')) rowNote = 'mosi';
@@ -641,6 +795,8 @@ export function generateMcuWiringGroups(
             else if (lowerTgt.includes('cs') || lowerTgt.includes('ss')) rowNote = 'cs';
             else if (lowerTgt.includes('trig')) rowNote = 'trig';
             else if (lowerTgt.includes('echo')) rowNote = 'echo';
+            else if (interfaceType === 'Power Rail') rowNote = '5V (DC+)';
+            else if (interfaceType === 'Ground Rail') rowNote = 'Ground (GND)';
           }
 
           rows.push({
@@ -685,7 +841,8 @@ export function generateMcuWiringGroups(
     rows.sort((a, b) => {
       const pA = priorityOrder[a.interfaceType] ?? 99;
       const pB = priorityOrder[b.interfaceType] ?? 99;
-      return pA - pB;
+      if (pA !== pB) return pA - pB;
+      return a.componentName.localeCompare(b.componentName);
     });
 
     // Re-number sequentially
