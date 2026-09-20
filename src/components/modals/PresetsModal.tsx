@@ -384,11 +384,7 @@ const PRESET_CIRCUITS: PresetItem[] = [
   },
 ];
 
-export const PresetsModal: React.FC<PresetsModalProps> = ({
-  isOpen,
-  onClose,
-  onLoadPreset,
-}) => {
+export const PresetsModal: React.FC<PresetsModalProps> = ({ isOpen, onClose, onLoadPreset }) => {
   if (!isOpen) return null;
 
   return (
@@ -397,22 +393,13 @@ export const PresetsModal: React.FC<PresetsModalProps> = ({
         {/* Header */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400">
-              <Sparkles className="w-4 h-4" />
-            </div>
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400"><Sparkles className="w-4 h-4" /></div>
             <div>
               <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Contoh Template Sirkuit</h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Pilih rangkaian siap pakai untuk langsung dicoba dan dieksplorasi di kanvas.
-              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Pilih rangkaian siap pakai untuk langsung dicoba dan dieksplorasi di kanvas.</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"><X className="w-5 h-5" /></button>
         </div>
 
         {/* Preset Cards List */}
@@ -421,41 +408,22 @@ export const PresetsModal: React.FC<PresetsModalProps> = ({
             const Icon = preset.icon;
 
             return (
-              <div
-                key={preset.id}
-                onClick={() => {
-                  onLoadPreset(preset.components, preset.wires);
-                  onClose();
-                }}
-                className="group bg-slate-50 hover:bg-slate-100 dark:bg-slate-950/70 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 hover:border-sky-500/80 hover:ring-1 hover:ring-sky-500/30 rounded-xl p-4 cursor-pointer transition-all duration-200 flex items-center justify-between shadow-sm"
-              >
+              <div key={preset.id} onClick={() => { onLoadPreset(preset.components, preset.wires); onClose(); }} className="group bg-slate-50 hover:bg-slate-100 dark:bg-slate-950/70 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 hover:border-sky-500/80 hover:ring-1 hover:ring-sky-500/30 rounded-xl p-4 cursor-pointer transition-all duration-200 flex items-center justify-between shadow-sm">
                 <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-sky-600 dark:text-sky-400 group-hover:scale-105 transition-transform shrink-0">
-                    <Icon className="w-5 h-5" />
-                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-sky-600 dark:text-sky-400 group-hover:scale-105 transition-transform shrink-0"><Icon className="w-5 h-5" /></div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-100 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">
-                        {preset.title}
-                      </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/10 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/20 dark:border-sky-500/30">
-                        {preset.badge}
-                      </span>
+                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-100 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">{preset.title}</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/10 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/20 dark:border-sky-500/30">{preset.badge}</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      {preset.description}
-                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{preset.description}</p>
                     <div className="flex items-center gap-3 mt-2 text-[10px] font-mono text-slate-400 dark:text-slate-500">
-                      <span>{preset.components.length} Komponen</span>
-                      <span>•</span>
-                      <span>{preset.wires.length} Kabel</span>
+                      <span>{preset.components.length} Komponen</span><span>•</span><span>{preset.wires.length} Kabel</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400 group-hover:border-sky-300 dark:group-hover:border-sky-500/30 transition-all shrink-0 ml-4">
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </div>
+                <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400 group-hover:border-sky-300 dark:group-hover:border-sky-500/30 transition-all shrink-0 ml-4"><ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></div>
               </div>
             );
           })}

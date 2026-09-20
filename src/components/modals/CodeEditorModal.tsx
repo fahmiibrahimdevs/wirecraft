@@ -10,12 +10,7 @@ interface CodeEditorModalProps {
   wires: Wire[];
 }
 
-export const CodeEditorModal: React.FC<CodeEditorModalProps> = ({
-  isOpen,
-  onClose,
-  components,
-  wires,
-}) => {
+export const CodeEditorModal: React.FC<CodeEditorModalProps> = ({ isOpen, onClose, components, wires }) => {
   const [code, setCode] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -47,9 +42,7 @@ void loop() {
     }
 
     // Detect pins connected to Arduino
-    const connectedToUno = wires.filter(
-      (w) => w.fromComponentId === uno.id || w.toComponentId === uno.id
-    );
+    const connectedToUno = wires.filter((w) => w.fromComponentId === uno.id || w.toComponentId === uno.id);
 
     let pinDeclarations: string[] = [];
     let setupLines: string[] = [];
@@ -251,63 +244,24 @@ void loop() {
     if (hasKeypad) {
       includeLines.push('#include <Keypad.h>');
       if (is4x4) {
-        pinDeclarations.push(`const byte ROWS = 4;
-const byte COLS = 4;
-char keys[ROWS][COLS] = {
-  {'1', '2', '3', 'A'},
-  {'4', '5', '6', 'B'},
-  {'7', '8', '9', 'C'},
-  {'*', '0', '#', 'D'}
-};
-byte rowPins[ROWS] = {9, 8, 7, 6}; // Hubungkan ke R1, R2, R3, R4
-byte colPins[COLS] = {5, 4, 3, 2}; // Hubungkan ke C1, C2, C3, C4
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);`);
+        pinDeclarations.push(`const byte ROWS = 4;\nconst byte COLS = 4;\nchar keys[ROWS][COLS] = {\n  {'1', '2', '3', 'A'},\n  {'4', '5', '6', 'B'},\n  {'7', '8', '9', 'C'},\n  {'*', '0', '#', 'D'}\n};\nbyte rowPins[ROWS] = {9, 8, 7, 6}; // Hubungkan ke R1, R2, R3, R4\nbyte colPins[COLS] = {5, 4, 3, 2}; // Hubungkan ke C1, C2, C3, C4\nKeypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);`);
       } else {
-        pinDeclarations.push(`const byte ROWS = 4;
-const byte COLS = 3;
-char keys[ROWS][COLS] = {
-  {'1', '2', '3'},
-  {'4', '5', '6'},
-  {'7', '8', '9'},
-  {'*', '0', '#'}
-};
-byte rowPins[ROWS] = {8, 7, 6, 5}; // Hubungkan ke R1, R2, R3, R4
-byte colPins[COLS] = {4, 3, 2};    // Hubungkan ke C1, C2, C3
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);`);
+        pinDeclarations.push(`const byte ROWS = 4;\nconst byte COLS = 3;\nchar keys[ROWS][COLS] = {\n  {'1', '2', '3'},\n  {'4', '5', '6'},\n  {'7', '8', '9'},\n  {'*', '0', '#'}\n};\nbyte rowPins[ROWS] = {8, 7, 6, 5}; // Hubungkan ke R1, R2, R3, R4\nbyte colPins[COLS] = {4, 3, 2};    // Hubungkan ke C1, C2, C3\nKeypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);`);
       }
-      loopLines.push(`  // Membaca Tombol Keypad
-  char key = keypad.getKey();
-  if (key) {
-    Serial.print("Tombol Ditekan: ");
-    Serial.println(key);
-  }`);
+      loopLines.push(`  // Membaca Tombol Keypad\n  char key = keypad.getKey();\n  if (key) {\n    Serial.print("Tombol Ditekan: ");\n    Serial.println(key);\n  }`);
     }
 
     if (hasSoilMoisture) {
       pinDeclarations.push('const int SOIL_ANALOG_PIN = A0;  // Pin Analog Soil Moisture\nconst int SOIL_DIGITAL_PIN = 7; // Pin Digital Soil Moisture (Threshold LM393)');
       setupLines.push('  pinMode(SOIL_DIGITAL_PIN, INPUT);');
-      loopLines.push(`  // Membaca Nilai Kelembaban Tanah FC-28
-  int soilMoistureValue = analogRead(SOIL_ANALOG_PIN);
-  int soilDigitalState = digitalRead(SOIL_DIGITAL_PIN);
-
-  Serial.print("Kelembaban (Analog 0-1023): ");
-  Serial.print(soilMoistureValue);
-  Serial.print(" | Status Digital: ");
-  Serial.println(soilDigitalState == LOW ? "Basah (Lembab)" : "Kering");
-
-  delay(1000);`);
+      loopLines.push(`  // Membaca Nilai Kelembaban Tanah FC-28\n  int soilMoistureValue = analogRead(SOIL_ANALOG_PIN);\n  int soilDigitalState = digitalRead(SOIL_DIGITAL_PIN);\n  Serial.print("Kelembaban (Analog 0-1023): ");\n  Serial.print(soilMoistureValue);\n  Serial.print(" | Status Digital: ");\n  Serial.println(soilDigitalState == LOW ? "Basah (Lembab)" : "Kering");\n  delay(1000);`);
     }
 
     if (hasMax31865) {
       includeLines.push('#include <Adafruit_MAX31865.h>');
       pinDeclarations.push('// Modul MAX31865 RTD PT100/PT1000 (Hardware SPI: CS=10)\n// Rref = 430.0 ohm (PT100) atau 4300.0 ohm (PT1000)\nAdafruit_MAX31865 maxRtd = Adafruit_MAX31865(10);\n#define RREF      430.0\n#define RNOMINAL  100.0');
       setupLines.push('  maxRtd.begin(MAX31865_3WIRE); // Gunakan MAX31865_2WIRE, MAX31865_3WIRE, atau MAX31865_4WIRE');
-      loopLines.push(`  // Membaca Suhu Presisi RTD PT100
-  float rtdTemp = maxRtd.temperature(RNOMINAL, RREF);
-  Serial.print("Suhu RTD: ");
-  Serial.print(rtdTemp);
-  Serial.println(" *C");
-  delay(1000);`);
+      loopLines.push(`  // Membaca Suhu Presisi RTD PT100\n  float rtdTemp = maxRtd.temperature(RNOMINAL, RREF);\n  Serial.print("Suhu RTD: ");\n  Serial.print(rtdTemp);\n  Serial.println(" *C");\n  delay(1000);`);
     }
 
     if (hasAds1115) {
@@ -315,60 +269,31 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);`);
       includeLines.push('#include <Adafruit_ADS1X15.h>');
       pinDeclarations.push('Adafruit_ADS1115 ads; // Inisialisasi ADS1115 ADC (I2C Addr: 0x48)');
       setupLines.push('  if (!ads.begin()) {\n    Serial.println("Gagal menemukan modul ADS1115!");\n  }');
-      loopLines.push(`  // Membaca ADC 16-Bit ADS1115 (Channel A0 - A3)
-  int16_t adc0 = ads.readADC_SingleEnded(0);
-  float volts0 = ads.computeVolts(adc0);
-  Serial.print("ADS1115 A0: "); Serial.print(adc0);
-  Serial.print(" ("); Serial.print(volts0, 4); Serial.println(" V)");
-  delay(500);`);
+      loopLines.push(`  // Membaca ADC 16-Bit ADS1115 (Channel A0 - A3)\n  int16_t adc0 = ads.readADC_SingleEnded(0);\n  float volts0 = ads.computeVolts(adc0);\n  Serial.print("ADS1115 A0: "); Serial.print(adc0);\n  Serial.print(" ("); Serial.print(volts0, 4); Serial.println(" V)");\n  delay(500);`);
     }
 
     if (hasLdr) {
       pinDeclarations.push('const int LDR_ANALOG_PIN = A0;  // Pin Analog LDR (AO)\nconst int LDR_DIGITAL_PIN = 7;  // Pin Digital LDR (DO)');
       setupLines.push('  pinMode(LDR_DIGITAL_PIN, INPUT);');
-      loopLines.push(`  // Membaca Sensor Cahaya LDR
-  int ldrAnalog = analogRead(LDR_ANALOG_PIN);
-  int ldrState = digitalRead(LDR_DIGITAL_PIN);
-  Serial.print("Intensitas Cahaya LDR: ");
-  Serial.print(ldrAnalog);
-  Serial.print(" | Status Digital: ");
-  Serial.println(ldrState == LOW ? "Terang" : "Gelap");
-  delay(1000);`);
+      loopLines.push(`  // Membaca Sensor Cahaya LDR\n  int ldrAnalog = analogRead(LDR_ANALOG_PIN);\n  int ldrState = digitalRead(LDR_DIGITAL_PIN);\n  Serial.print("Intensitas Cahaya LDR: ");\n  Serial.print(ldrAnalog);\n  Serial.print(" | Status Digital: ");\n  Serial.println(ldrState == LOW ? "Terang" : "Gelap");\n  delay(1000);`);
     }
 
     if (hasIrObstacle) {
       pinDeclarations.push('const int IR_OBSTACLE_PIN = 4; // Pin Output Sensor IR Obstacle (OUT)');
       setupLines.push('  pinMode(IR_OBSTACLE_PIN, INPUT);');
-      loopLines.push(`  // Deteksi Rintangan IR Obstacle (Active LOW)
-  int obstacleState = digitalRead(IR_OBSTACLE_PIN);
-  if (obstacleState == LOW) {
-    Serial.println("Rintangan Terdeteksi!");
-  } else {
-    Serial.println("Jalur Bersih (Tidak ada rintangan)");
-  }
-  delay(500);`);
+      loopLines.push(`  // Deteksi Rintangan IR Obstacle (Active LOW)\n  int obstacleState = digitalRead(IR_OBSTACLE_PIN);\n  if (obstacleState == LOW) {\n    Serial.println("Rintangan Terdeteksi!");\n  } else {\n    Serial.println("Jalur Bersih (Tidak ada rintangan)");\n  }\n  delay(500);`);
     }
 
     if (hasTouch) {
       pinDeclarations.push('const int TOUCH_PIN = 3; // Pin Output Sensor Sentuh TTP223 (SIG/IO)');
       setupLines.push('  pinMode(TOUCH_PIN, INPUT);');
-      loopLines.push(`  // Deteksi Sentuhan TTP223 (Active HIGH)
-  int touchState = digitalRead(TOUCH_PIN);
-  if (touchState == HIGH) {
-    Serial.println("Tombol Sentuh Ditekan! (Touch Active)");
-  }
-  delay(200);`);
+      loopLines.push(`  // Deteksi Sentuhan TTP223 (Active HIGH)\n  int touchState = digitalRead(TOUCH_PIN);\n  if (touchState == HIGH) {\n    Serial.println("Tombol Sentuh Ditekan! (Touch Active)");\n  }\n  delay(200);`);
     }
 
     if (hasVibration) {
       pinDeclarations.push('const int VIBRATION_PIN = 2; // Pin Digital SW-420 (DO)');
       setupLines.push('  pinMode(VIBRATION_PIN, INPUT);');
-      loopLines.push(`  // Deteksi Getaran Sensor SW-420
-  int vibrationState = digitalRead(VIBRATION_PIN);
-  if (vibrationState == HIGH) {
-    Serial.println("Getaran Terdeteksi!");
-  }
-  delay(200);`);
+      loopLines.push(`  // Deteksi Getaran Sensor SW-420\n  int vibrationState = digitalRead(VIBRATION_PIN);\n  if (vibrationState == HIGH) {\n    Serial.println("Getaran Terdeteksi!");\n  }\n  delay(200);`);
     }
 
     // Default if no specific peripheral mapped
@@ -376,24 +301,7 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);`);
       loopLines.push('  // Baca sensor atau jalankan aktuator di sini\n  delay(100);');
     }
 
-    const fullCode = `/*
- * Kode Otomatis Dibuat oleh Wirecraft
- * Target Board: ${uno.name}
- * Tanggal: ${new Date().toLocaleDateString('id-ID')}
- */
-
-${includeLines.length > 0 ? includeLines.join('\n') + '\n\n' : ''}${
-      pinDeclarations.length > 0 ? pinDeclarations.join('\n') + '\n\n' : ''
-}void setup() {
-  Serial.begin(9600);
-  Serial.println("Sistem Sirkuit Dimulai...");
-${setupLines.join('\n')}
-}
-
-void loop() {
-${loopLines.join('\n\n')}
-}
-`;
+    const fullCode = `/*\n * Kode Otomatis Dibuat oleh Wirecraft\n * Target Board: ${uno.name}\n * Tanggal: ${new Date().toLocaleDateString('id-ID')}\n */\n\n${includeLines.length > 0 ? includeLines.join('\n') + '\n\n' : ''}${pinDeclarations.length > 0 ? pinDeclarations.join('\n') + '\n\n' : ''}void setup() {\n  Serial.begin(9600);\n  Serial.println("Sistem Sirkuit Dimulai...");\n${setupLines.join('\n')}\n}\n\nvoid loop() {\n${loopLines.join('\n\n')}\n}\n`;
     setCode(fullCode);
   }, [isOpen, components, wires]);
 
@@ -421,59 +329,26 @@ ${loopLines.join('\n\n')}
         {/* Header */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/90">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400">
-              <Code2 className="w-4 h-4" />
-            </div>
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400"><Code2 className="w-4 h-4" /></div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                Arduino Code IDE
-                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">
-                  Auto Generated
-                </span>
-              </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Sketsa C++ Arduino terkonfigurasi otomatis sesuai kabel dan pin pada kanvas.
-              </p>
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">Arduino Code IDE<span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">Auto Generated</span></h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Sketsa C++ Arduino terkonfigurasi otomatis sesuai kabel dan pin pada kanvas.</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"><X className="w-5 h-5" /></button>
         </div>
 
         {/* Code Content */}
         <div className="flex-1 p-4 bg-slate-900 dark:bg-slate-950 overflow-hidden flex flex-col">
-          <textarea
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            spellCheck={false}
-            className="flex-1 w-full bg-transparent font-mono text-xs text-sky-300 leading-relaxed resize-none outline-none selection:bg-sky-500/30 overflow-y-auto"
-          />
+          <textarea value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false} className="flex-1 w-full bg-transparent font-mono text-xs text-sky-300 leading-relaxed resize-none outline-none selection:bg-sky-500/30 overflow-y-auto" />
         </div>
 
         {/* Footer Actions */}
         <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 flex items-center justify-between">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-            Bahasa: Arduino C++ (.ino)
-          </span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">Bahasa: Arduino C++ (.ino)</span>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? 'Tersalin!' : 'Salin Kode'}
-            </button>
-            <button
-              onClick={handleDownloadIno}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-md"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Download .ino
-            </button>
+            <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer">{copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}{copied ? 'Tersalin!' : 'Salin Kode'}</button>
+            <button onClick={handleDownloadIno} className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-md"><Download className="w-3.5 h-3.5" />Download .ino</button>
           </div>
         </div>
       </div>
